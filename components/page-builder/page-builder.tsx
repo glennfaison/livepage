@@ -12,8 +12,9 @@ import type {
   ComponentProps,
   DesignComponent,
   ComponentAttributes,
+  ComponentInfo,
 } from "@/components/design-components/types"
-import { getComponentData } from "@/components/design-components/design-components"
+import { getComponentInfo } from "@/components/design-components"
 import type { ReactNode } from "react"
 import { generateId, intersperseAndAppend } from "@/lib/utils"
 
@@ -35,8 +36,6 @@ const Divider = ({
     onAddComponent(type, index)
     setPopoverOpen(false)
   }
-
-  //if (!isVisible && !popoverOpen) return null
 
   return (
     <div
@@ -70,53 +69,36 @@ const Divider = ({
   )
 }
 
-// Page component (legacy type for compatibility)
-export type PageComponent = {
-  id: string
-  type: ComponentType
-  content?: string
-  src?: string
-  alt?: string
-  children?: PageComponent[]
-}
-
 // Helper function to create a new design component
-export function createDesignComponent<T extends ComponentType>(
-  type: T,
+export function createDesignComponent<Tag extends ComponentType>(
+  tag: Tag,
   id: string,
-  overrideProps?: Partial<ComponentAttributes<T>>,
-): DesignComponent<T> {
-  const data = getComponentData(type)
+  overrideProps?: Partial<ComponentAttributes<Tag>>,
+): DesignComponent<Tag> {
+  const data = getComponentInfo(tag)
   return {
     id,
-    tag: type,
-    attributes: { ...data.defaultProps, ...overrideProps } as ComponentAttributes<T>,
+    tag: tag,
+    attributes: { ...data.defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
     children: [],
     settingsFields: data.settingsFields,
   }
 }
 
-export const componentData: { [Key in ComponentType]: DesignComponent<Key> } = {
-  heading1: getComponentData("heading1"),
-  heading2: getComponentData("heading2"),
-  heading3: getComponentData("heading3"),
-  paragraph: getComponentData("paragraph"),
-  span: getComponentData("span"),
-  button: getComponentData("button"),
-  image: getComponentData("image"),
-  row: getComponentData("row"),
-  column: getComponentData("column"),
+const componentInfo: { [Key in ComponentType]: ComponentInfo<Key> } = {
+  header1: getComponentInfo("header1"),
+  header2: getComponentInfo("header2"),
+  header3: getComponentInfo("header3"),
+  paragraph: getComponentInfo("paragraph"),
+  span: getComponentInfo("span"),
+  button: getComponentInfo("button"),
+  image: getComponentInfo("image"),
+  row: getComponentInfo("row"),
+  column: getComponentInfo("column"),
 }
 
-// Forward declaration for ComponentSelector
-let ComponentSelector: React.ComponentType<{
-  onSelect: (type: ComponentType) => void
-  parentId?: string
-  closePopover?: () => void
-}>
-
 // Component selector popup
-const ComponentSelectorComponent = ({
+const ComponentSelector = ({
   onSelect,
   parentId,
   closePopover,
@@ -128,7 +110,7 @@ const ComponentSelectorComponent = ({
   const [searchTerm, setSearchTerm] = React.useState("")
 
   const filteredComponents = React.useMemo(() => {
-    const components = Object.values(componentData)
+    const components = Object.values(componentInfo)
     if (!searchTerm.trim()) return components
 
     const search = searchTerm.toLowerCase()
@@ -164,10 +146,10 @@ const ComponentSelectorComponent = ({
         {filteredComponents.length > 0 ? (
           filteredComponents.map((component) => (
             <ComponentSelectorButton
-              key={component.type}
-              icon={component.icon}
+              key={component.tag}
+              icon={component.Icon}
               label={component.label}
-              onClick={() => handleSelect(component.type)}
+              onClick={() => handleSelect(component.tag)}
             />
           ))
         ) : (
@@ -177,9 +159,6 @@ const ComponentSelectorComponent = ({
     </div>
   )
 }
-
-// Set the ComponentSelector
-ComponentSelector = ComponentSelectorComponent
 
 // Component selector button
 const ComponentSelectorButton = ({
@@ -241,7 +220,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
   const [isOpen, setIsOpen] = React.useState(false)
   const popoverRef = React.useRef<HTMLDivElement>(null)
 
-  const componentData = getComponentData(component.type || component.tag)
+  const componentData = getComponentInfo(component.type || component.tag)
 
   React.useEffect(() => {
     if (isOpen) {
@@ -303,6 +282,8 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
     }
   }, [isDragging, dragOffset])
 
+  const settingsFields = React.useMemo(() => Object.values(componentData.settingsFields), [componentData.settingsFields])
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -330,7 +311,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
             onMouseDown={handleMouseDown}
           >
             <h4 className="font-medium leading-none">
-              {(component.type || component.tag).charAt(0).toUpperCase() + (component.type || component.tag).slice(1)}{" "}
+              {component.label}{" "}
               Settings
             </h4>
             <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -338,38 +319,16 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
 
           <div className="p-4 space-y-4">
             <div className="space-y-4">
-              {componentData.settingsFields.includes("content") && (
-                <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
+              {settingsFields.map((field) => (
+                <div className="space-y-2" key={field.id}>
+                  <Label htmlFor={field.id}>{field.label}</Label>
                   <Input
-                    id="content"
-                    value={formData.content || ""}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, content: e.target.value }))}
+                    id={field.id}
+                    value={formData[field.id] || ""}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, [field.id]: e.target.value }))}
                   />
                 </div>
-              )}
-
-              {componentData.settingsFields.includes("src") && (
-                <div className="space-y-2">
-                  <Label htmlFor="src">Image URL</Label>
-                  <Input
-                    id="src"
-                    value={formData.src || ""}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, src: e.target.value }))}
-                  />
-                </div>
-              )}
-
-              {componentData.settingsFields.includes("alt") && (
-                <div className="space-y-2">
-                  <Label htmlFor="alt">Alt Text</Label>
-                  <Input
-                    id="alt"
-                    value={formData.alt || ""}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, alt: e.target.value }))}
-                  />
-                </div>
-              )}
+              ))}
             </div>
 
             <div className="flex gap-2">
@@ -387,40 +346,16 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
   )
 }
 
+type TODO = any
+
 //#region Wrapper Components
 
-// Generic Design Component Wrapper
-export const GenericDesignComponentWrapper = ({
-  component,
-  selectedComponent,
-  previewMode,
-  setSelectedComponent,
-  updateComponent,
-  removeComponent,
-  addComponent,
-  duplicateComponent,
-}: ComponentProps) => {
-  const isSelected = selectedComponent === component.id
-  const componentType = component.type || component.tag
-
-  const componentProps = {
-    className: cn(
-      "relative border border-transparent transition-all",
-      isSelected && !previewMode && "border-primary",
-      !previewMode && "hover:border-gray-300",
-    ),
-    onClick: (e: React.MouseEvent) => {
-      if (!previewMode) {
-        e.stopPropagation()
-        setSelectedComponent(component.id)
-      }
-    },
-  }
-
-  const componentControls = !previewMode && isSelected && (
+function ComponentWrapperControls({ tag, component, updateComponent, duplicateComponent, removeComponent }: TODO) {
+  return (
     <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
       <span className="text-xs font-medium px-2 flex items-center">
-        {componentType.charAt(0).toUpperCase() + componentType.slice(1)}
+        {component.label}
+        {/* {componentType.charAt(0).toUpperCase() + componentType.slice(1)} */}
       </span>
       <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props)}>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
@@ -454,22 +389,59 @@ export const GenericDesignComponentWrapper = ({
       </Button>
     </div>
   )
+}
 
-  const componentData = getComponentData(componentType)
+// Generic Design Component Wrapper
+export const GenericDesignComponentWrapper = ({
+  component,
+  selectedComponent,
+  previewMode,
+  setSelectedComponent,
+  updateComponent,
+  removeComponent,
+  addComponent,
+  duplicateComponent,
+}: TODO) => {
+  const isSelected = selectedComponent === component.id
+  const componentType = component.type || component.tag
+
+  const componentProps = {
+    className: cn(
+      "relative border border-transparent transition-all",
+      isSelected && !previewMode && "border-primary",
+      !previewMode && "hover:border-gray-300",
+    ),
+    onClick: (e: React.MouseEvent) => {
+      if (!previewMode) {
+        e.stopPropagation()
+        setSelectedComponent(component.id)
+      }
+    },
+  }
+
+  const componentControls = !previewMode && isSelected && ComponentWrapperControls({
+    tag: componentType,
+    component,
+    updateComponent,
+    duplicateComponent,
+    removeComponent
+  })
+
+  const componentData = getComponentInfo(componentType)
 
   return (
     <div {...componentProps}>
       {componentControls}
-      {componentData.renderComponent({
-        component,
-        selectedComponent,
-        previewMode,
+      {componentData.Component({
+        componentId: component.id,
+        componentAttributes: component.attributes,
+        pageBuilderMode: previewMode ? "preview" : "edit",
         setSelectedComponent,
         updateComponent,
+        selectedComponent,
         removeComponent,
         addComponent,
         duplicateComponent,
-        componentProps,
         componentControls,
       })}
     </div>
@@ -486,7 +458,7 @@ export const RowWrapper = ({
   removeComponent,
   addComponent,
   duplicateComponent,
-}: ComponentProps) => {
+}: TODO) => {
   const isSelected = selectedComponent === component.id
   const [visibleDividers, setVisibleDividers] = React.useState<Set<number>>(new Set())
   const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -505,47 +477,19 @@ export const RowWrapper = ({
     },
   }
 
-  const componentControls = !previewMode && isSelected && (
-    <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
-      <span className="text-xs font-medium px-2 flex items-center">Row</span>
-      <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props)}>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-          <Settings className="h-4 w-4" />
-        </Button>
-      </SettingsPopover>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation()
-          duplicateComponent?.(component.id)
-        }}
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation()
-          removeComponent(component.id)
-        }}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="icon" className="h-6 w-6 cursor-move">
-        <Move className="h-4 w-4" />
-      </Button>
-    </div>
-  )
+  const componentControls = !previewMode && isSelected && ComponentWrapperControls({
+    tag: "row",
+    component,
+    updateComponent,
+    duplicateComponent,
+    removeComponent
+  })
 
   // Handle adding component at specific index
   const handleAddAtIndex = (type: ComponentType, dividerIndex: number) => {
     const childIndex = Math.floor(dividerIndex / 2)
     const newComponent = createDesignComponent(type, generateId())
-    addComponent(newComponent.tag, component.id, childIndex)
+    addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
   }
 
   const showDivider = (index: number) => {
@@ -591,14 +535,14 @@ export const RowWrapper = ({
 
   const hasChildren = !!component.children
 
-  const componentData = getComponentData(component.tag)
-  const RowComponent = componentData.renderComponent;
+  const componentData = getComponentInfo(component.tag)
+  const RowComponent = componentData.Component;
 
   return (
     <div {...componentProps}>
       {componentControls}
 
-      <RowComponent>
+      <RowComponent componentId={component.id} componentAttributes={component.attributes}>
         {hasChildren
           ? !previewMode
             ? // Edit mode with dividers
@@ -654,7 +598,7 @@ export const RowWrapper = ({
           : // Empty state - show centered add button
             !previewMode && (
               <div className="flex items-center justify-center h-full text-muted-foreground flex-1">
-                <ComponentPopover onSelect={(type) => addComponent(type, component.id, 0)}>
+                <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
                   <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
                     <Plus className="h-6 w-6" />
                     <span className="sr-only">Add component</span>
@@ -677,7 +621,7 @@ export const ColumnWrapper = ({
   removeComponent,
   addComponent,
   duplicateComponent,
-}: ComponentProps) => {
+}: TODO) => {
   const isSelected = selectedComponent === component.id
   const [visibleDividers, setVisibleDividers] = React.useState<Set<number>>(new Set())
   const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -696,47 +640,19 @@ export const ColumnWrapper = ({
     },
   }
 
-  const componentControls = !previewMode && isSelected && (
-    <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
-      <span className="text-xs font-medium px-2 flex items-center">Column</span>
-      <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props)}>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-          <Settings className="h-4 w-4" />
-        </Button>
-      </SettingsPopover>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation()
-          duplicateComponent?.(component.id)
-        }}
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation()
-          removeComponent(component.id)
-        }}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="icon" className="h-6 w-6 cursor-move">
-        <Move className="h-4 w-4" />
-      </Button>
-    </div>
-  )
+  const componentControls = !previewMode && isSelected && ComponentWrapperControls({
+    tag: "column",
+    component,
+    updateComponent,
+    duplicateComponent,
+    removeComponent
+  })
 
   // Handle adding component at specific index
   const handleAddAtIndex = (type: ComponentType, dividerIndex: number) => {
     const childIndex = Math.floor(dividerIndex / 2)
     const newComponent = createDesignComponent(type, generateId())
-    addComponent(newComponent.tag, component.id, childIndex)
+    addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
   }
 
   const showDivider = (index: number) => {
@@ -782,14 +698,14 @@ export const ColumnWrapper = ({
 
   const hasChildren = !!component.children
 
-  const componentData = getComponentData(component.tag)
-  const ColumnComponent = componentData.renderComponent;
+  const componentData = getComponentInfo(component.tag)
+  const ColumnComponent = componentData.Component;
 
   return (
     <div {...componentProps}>
       {componentControls}
 
-      <ColumnComponent>
+      <ColumnComponent componentId={component.id} componentAttributes={component.attributes}>
         {hasChildren
           ? !previewMode
             ? // Edit mode with dividers
@@ -845,7 +761,7 @@ export const ColumnWrapper = ({
           : // Empty state - show centered add button
             !previewMode && (
               <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-                <ComponentPopover onSelect={(type) => addComponent(type, component.id, 0)}>
+                <ComponentPopover onSelect={(type) => addComponent({type, parentId: component.id, index: 0})}>
                   <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
                     <Plus className="h-6 w-6" />
                     <span className="sr-only">Add component</span>
@@ -861,14 +777,14 @@ export const ColumnWrapper = ({
 //#endregion
 
 // Get wrapper component function
-export function getWrapperComponent<T extends ComponentType>(type: T): React.ComponentType<ComponentProps> {
+export function getWrapperComponent<Tag extends ComponentType>(type: Tag) {
   switch (type) {
     case "row":
-      return RowWrapper as React.ComponentType<ComponentProps>
+      return RowWrapper;
     case "column":
-      return ColumnWrapper as React.ComponentType<ComponentProps>
+      return ColumnWrapper;
     default:
-      return GenericDesignComponentWrapper as React.ComponentType<ComponentProps>
+      return GenericDesignComponentWrapper;
   }
 }
 
@@ -880,12 +796,12 @@ export function renderDesignComponent(
   setSelectedComponent: (id: string | null) => void,
   updateComponent: (id: string, props: any) => void,
   removeComponent: (id: string) => void,
-  addComponent: (type: ComponentType, parentId?: string, position?: "prepend" | "append") => void,
+  addComponent: ({ type, parentId, index }: { type: ComponentType, parentId?: string, index?: number }) => void,
   duplicateComponent?: (id: string) => void,
   componentProps?: any,
   componentControls?: ReactNode,
 ): ReactNode {
-  const componentType = component.tag || component.type
+  const componentType = component.tag
   const WrapperComponent = getWrapperComponent(componentType)
 
   return (
@@ -901,89 +817,5 @@ export function renderDesignComponent(
       componentProps={componentProps}
       componentControls={componentControls}
     />
-  )
-}
-
-// Component renderer
-export const renderComponent = (
-  component: PageComponent,
-  selectedComponent: string | null,
-  previewMode: boolean,
-  setSelectedComponent: (id: string | null) => void,
-  updateComponent: (id: string, props: any) => void,
-  removeComponent: (id: string) => void,
-  addComponent: (type: ComponentType, parentId?: string, position?: "prepend" | "append") => void,
-  duplicateComponent?: (id: string) => void,
-): React.ReactNode => {
-  const isSelected = selectedComponent === component.id
-
-  const componentProps = {
-    className: cn(
-      "relative border border-transparent transition-all",
-      isSelected && !previewMode && "border-primary",
-      !previewMode && "hover:border-gray-300",
-    ),
-    onClick: (e: React.MouseEvent) => {
-      if (!previewMode) {
-        e.stopPropagation()
-        setSelectedComponent(component.id)
-      }
-    },
-  }
-
-  const componentControls = !previewMode && isSelected && (
-    <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
-      <span className="text-xs font-medium px-2 flex items-center">
-        {component.type.charAt(0).toUpperCase() + component.type.slice(1)}
-      </span>
-      <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props)}>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-          <Settings className="h-4 w-4" />
-        </Button>
-      </SettingsPopover>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation()
-          duplicateComponent?.(component.id)
-        }}
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6"
-        onClick={(e) => {
-          e.stopPropagation()
-          removeComponent(component.id)
-        }}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="icon" className="h-6 w-6 cursor-move">
-        <Move className="h-4 w-4" />
-      </Button>
-    </div>
-  )
-
-  return (
-    <div {...componentProps}>
-      {componentControls}
-      {renderDesignComponent(
-        component,
-        selectedComponent,
-        previewMode,
-        setSelectedComponent,
-        updateComponent,
-        removeComponent,
-        addComponent,
-        duplicateComponent,
-        componentProps,
-        componentControls,
-      )}
-    </div>
   )
 }

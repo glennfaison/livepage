@@ -1,4 +1,5 @@
 import { AlignVerticalSpaceBetween } from "lucide-react"
+import { ComponentType } from "./types"
 
 export type ComponentAttributes = {
 }
@@ -15,18 +16,18 @@ export type ComponentProps = {
 export const defaultAttributes: ComponentAttributes = {
 }
 
-export const tag = "column" as const
+export const tag: ComponentType = "column" as const
 
-export const Label = "Column"
+export const label = "Column"
 
 export const keywords = ["column", "col", "container", "layout", "vertical"]
 
 export const settingsFields = {
 }
 
-export const Icon = () => <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
+export const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
-export const Component = ({ children, componentId, componentAttributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
+export const Component = ({ children, componentId, componentAttributes, }: ComponentProps) => {
 	return (
 		<div className="p-4 border border-dashed border-gray-300 min-h-[50px] flex flex-col gap-2 justify-center" {...componentAttributes}>
 			{children}

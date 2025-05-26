@@ -1,4 +1,5 @@
 import { Type } from "lucide-react"
+import { ComponentType } from "./types"
 
 export type ComponentAttributes = {
 	content: string
@@ -28,9 +29,9 @@ export const defaultAttributes: ComponentAttributes = {
 	+ "iaculis mi, sit amet euismod justo posuere sit amet.",
 }
 
-export const tag = "paragraph" as const
+export const tag: ComponentType = "paragraph" as const
 
-export const Label = "Paragraph"
+export const label = "Paragraph"
 
 export const keywords = ["p", "text", "content", "paragraph", "body"]
 
@@ -43,7 +44,7 @@ export const settingsFields = {
 	},
 }
 
-export const Icon = () => <Type className="h-4 w-4" />
+export const Icon = <Type className="h-4 w-4" />
 
 export const Component = ({ componentId, componentAttributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
 	const { content, ...restAttributes } = componentAttributes

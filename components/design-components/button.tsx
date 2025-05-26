@@ -1,5 +1,6 @@
 import { MousePointerClick } from "lucide-react"
 import { Button } from "../ui/button"
+import { ComponentType } from "./types"
 
 export type ComponentAttributes = {
 	content: string
@@ -17,9 +18,9 @@ export const defaultAttributes: ComponentAttributes = {
 	content: "Button",
 }
 
-export const tag = "button" as const
+export const tag: ComponentType = "button" as const
 
-export const Label = "Button"
+export const label = "Button"
 
 export const keywords = ["button", "click", "action", "btn"]
 
@@ -32,7 +33,7 @@ export const settingsFields = {
 	},
 }
 
-export const Icon = () => <MousePointerClick className="h-4 w-4" />
+export const Icon = <MousePointerClick className="h-4 w-4" />
 
 export const Component = ({ componentId, componentAttributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
 	const { content, ...restAttributes } = componentAttributes

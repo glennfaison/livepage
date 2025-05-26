@@ -1,4 +1,5 @@
 import { ImageIcon } from "lucide-react"
+import { ComponentType } from "./types"
 
 export type ComponentAttributes = {
 	src?: string
@@ -24,9 +25,9 @@ export const defaultAttributes: ComponentAttributes = {
 	fallbackSrc: "/placeholder.svg",
 }
 
-export const tag = "image" as const
+export const tag: ComponentType = "image" as const
 
-export const Label = "Image"
+export const label = "Image"
 
 export const keywords = ["image", "picture", "photo", "graphic", "media"]
 
@@ -63,7 +64,7 @@ export const settingsFields = {
 	},
 }
 
-export const Icon = () => <ImageIcon className="h-4 w-4" />
+export const Icon = <ImageIcon className="h-4 w-4" />
 
 export const Component = ({ componentId, componentAttributes, pageBuilderMode, setSelectedComponent }: ComponentProps) => {
 	const { src, fallbackSrc, ...restAttributes } = componentAttributes

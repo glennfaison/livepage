@@ -1,39 +1,32 @@
 import type { ReactNode } from "react"
 
-const componentTypes = [ "row", "column", "span", "paragraph", "heading1", "heading2", "heading3", "button", "image" ] as const;
+import type { ComponentAttributes as Header1Attributes } from "./header1";
+import type { ComponentAttributes as Header2Attributes } from "./header2";
+import type { ComponentAttributes as Header3Attributes } from "./header3";
+import type { ComponentAttributes as ParagraphAttributes } from "./paragraph";
+import type { ComponentAttributes as SpanAttributes } from "./span";
+import type { ComponentAttributes as ButtonAttributes } from "./button";
+import type { ComponentAttributes as ImageAttributes } from "./image";
+import type { ComponentAttributes as RowAttributes } from "./row";
+import type { ComponentAttributes as ColumnAttributes } from "./column";
+
+const componentTypes = ['header1', 'header2', 'header3', 'paragraph', 'span', 'button', 'image', 'row', 'column'] as const
 
 // Component types
 export type ComponentType = typeof componentTypes[number];
 
 // Generic component attributes based on component type
-export type ComponentAttributes<Tag extends ComponentType> =Tag extends "heading1" | "heading2" | "heading3"
-  ? {
-      content: string
-    }
-  : Tag extends "paragraph"
-    ? {
-        content: string
-      }
-    : Tag extends "span"
-      ? {
-          content: string
-        }
-      : Tag extends "button"
-        ? {
-            content: string
-          }
-        : Tag extends "image"
-          ? {
-              src: string
-              alt: string
-            }
-          : Tag extends "row"
-            ? {
-                columns: number
-              }
-            : Tag extends "column"
-              ? {}
-              : never
+export type ComponentAttributes<Tag extends ComponentType> =
+  Tag extends "header1" ? Header1Attributes
+  : Tag extends "header2" ? Header2Attributes
+  : Tag extends "header3" ? Header3Attributes
+  : Tag extends "paragraph" ? ParagraphAttributes
+  : Tag extends "span" ? SpanAttributes
+  : Tag extends "button" ? ButtonAttributes
+  : Tag extends "image" ? ImageAttributes
+  : Tag extends "row" ? RowAttributes
+  : Tag extends "column" ? ColumnAttributes
+  : never
 
 // Design component structure
 export type DesignComponent<Tag extends ComponentType> = {
@@ -54,26 +47,24 @@ export interface Page {
 }
 
 // Component props type for renderComponent function
-export type ComponentProps = {
-  component: any
-  selectedComponent: string | null
-  previewMode: boolean
+export type ComponentProps<Tag extends ComponentType> = {
+  componentId: string
+  pageBuilderMode: "edit" | "preview"
   setSelectedComponent: (id: string | null) => void
   updateComponent: (id: string, props: any) => void
   removeComponent: (id: string) => void
-  addComponent: (type: ComponentType, parentId?: string, position?: "prepend" | "append") => void
+  addComponent: (args: { tag: ComponentType, parentId?: string, index?: number }) => void
   duplicateComponent?: (id: string) => void
-  componentProps?: any
-  componentControls?: ReactNode
+  componentAttributes: ComponentAttributes<Tag>
 }
 
 // Component data interface
-export interface ComponentData<Tag extends ComponentType> {
+export interface ComponentInfo<Tag extends ComponentType> {
   tag: Tag
   label: string
-  icon: ReactNode
   keywords: string[]
-  defaultProps: ComponentAttributes<Tag>
-  settingsFields: string[]
-  renderComponent: (params: ComponentProps) => React.JSX.Element
+  defaultAttributes: ComponentAttributes<Tag>
+  settingsFields: Record<string, object>
+  Icon: ReactNode
+  Component: (props: ComponentProps<Tag>) => React.JSX.Element
 }

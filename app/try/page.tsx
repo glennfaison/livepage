@@ -169,7 +169,7 @@ export default function BuilderPage() {
                 <Button
                   variant="outline"
                   className="gap-2 px-4 py-2"
-                  onClick={() => addComponent("row", undefined, currentPage.components.length)}
+                  onClick={() => addComponent({ type: "row", parentId: undefined, index: currentPage.components.length })}
                 >
                   <AlignVerticalSpaceBetween className="h-5 w-5" />
                   <span>Add Row</span>

@@ -233,11 +233,11 @@ const renderComponentsToHTML = (components: any[]): string => {
   return components
     .map((component) => {
       switch (component.type) {
-        case "heading1":
+        case "header1":
           return `<h1>${component.content}</h1>`
-        case "heading2":
+        case "header2":
           return `<h2>${component.content}</h2>`
-        case "heading3":
+        case "header3":
           return `<h3>${component.content}</h3>`
         case "paragraph":
           return `<p>${component.content}</p>`
@@ -281,7 +281,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Add component
   const addComponent = useCallback(
-    (type: ComponentType, parentId?: string, index = 0) => {
+    ({ type, parentId, index = 0 }: { type: ComponentType, parentId?: string, index?: number }) => {
       const newComponent = createDesignComponent(type, generateId())
 
       dispatch({

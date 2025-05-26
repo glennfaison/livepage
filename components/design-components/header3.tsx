@@ -1,4 +1,5 @@
 import { Heading } from "lucide-react"
+import { ComponentType } from "./types"
 
 export type ComponentAttributes = {
 	content: string
@@ -16,9 +17,9 @@ export const defaultAttributes: ComponentAttributes = {
 	content: "Header 3",
 }
 
-export const tag = "header3" as const
+export const tag: ComponentType = "header3" as const
 
-export const Label = "Header 3"
+export const label = "Header 3"
 
 export const keywords = ["h3", "title", "subtitle", "subheading", "header", "heading", "small"]
 
@@ -31,13 +32,13 @@ export const settingsFields = {
 	},
 }
 
-export const Icon = () => <Heading className="h-4 w-4" />
+export const Icon = <Heading className="h-4 w-4" />
 
 export const Component = ({ componentId, componentAttributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
 	const { content, ...restAttributes } = componentAttributes
 	return (
 		<h3
-			className="text-4xl font-bold py-2"
+			className="text-2xl font-bold py-2"
 			contentEditable={pageBuilderMode === "edit"}
 			suppressContentEditableWarning
 			onBlur={(e) => updateComponent(componentId, { content: e.currentTarget.textContent || "" })}
