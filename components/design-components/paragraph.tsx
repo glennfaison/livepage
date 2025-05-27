@@ -38,7 +38,7 @@ export const keywords = ["p", "text", "content", "paragraph", "body"]
 export const settingsFields = {
 	content: {
 		id: "content",
-		type: "text",
+		type: "textarea",
 		label: "Content",
 		placeholder: "Enter paragraph text",
 	},

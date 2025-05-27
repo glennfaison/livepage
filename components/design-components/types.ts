@@ -28,13 +28,21 @@ export type ComponentAttributes<Tag extends ComponentType> =
   : Tag extends "column" ? ColumnAttributes
   : never
 
+export type SettingsField = {
+  id: string
+  label: string
+  type: "text" | "number" | "boolean"
+  placeholder?: string
+  options?: string[] // For select fields
+}
+
 // Design component structure
 export type DesignComponent<Tag extends ComponentType> = {
   id: string
   tag: Tag
   attributes: ComponentAttributes<Tag>
   children: DesignComponent<ComponentType>[]
-  settingsFields?: Record<string, object>
+  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField>
 }
 
 // Page structure
@@ -43,7 +51,7 @@ export interface Page {
   title: string
   attributes: Record<string, any>
   components: DesignComponent<ComponentType>[]
-  settingsFields: Record<string, object>
+  settingsFields: Record<string, SettingsField>
 }
 
 // Component props type for renderComponent function
@@ -64,7 +72,7 @@ export interface ComponentInfo<Tag extends ComponentType> {
   label: string
   keywords: string[]
   defaultAttributes: ComponentAttributes<Tag>
-  settingsFields: Record<string, object>
+  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField>
   Icon: ReactNode
   Component: (props: ComponentProps<Tag>) => React.JSX.Element
 }
