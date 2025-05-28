@@ -1,23 +1,24 @@
+"use client"
+
 import { cn } from "@/lib/utils"
-import { Label } from "@radix-ui/react-label"
-import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover"
+import { Label } from "@/components/ui/label"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { GripVertical } from "lucide-react"
 import React from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { getComponentInfo } from "../design-components"
-import { ComponentType, SettingsField } from "../design-components/types"
-
+import type { ComponentAttributes, ComponentType, DesignComponent, SettingsField } from "../design-components/types"
 
 // Settings Popover Component
-export interface SettingsPopoverProps {
-  component: any
+export interface SettingsPopoverProps<Tag extends ComponentType> {
+  component: DesignComponent<Tag>
   onSave: (props: any) => void
   children: React.ReactNode
 }
 
-export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onSave, children }) => {
-  const [formData, setFormData] = React.useState<any>({ ...component.attributes })
+export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = ({ component, onSave, children }) => {
+  const [formData, setFormData] = React.useState<Partial<ComponentAttributes<ComponentType>>>({ ...component.attributes })
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 })
@@ -25,7 +26,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
   const [isOpen, setIsOpen] = React.useState(false)
   const popoverRef = React.useRef<HTMLDivElement>(null)
 
-  const componentData = getComponentInfo(component.tag as ComponentType)
+  const componentData = getComponentInfo(component.tag)
 
   const handleSave = () => {
     onSave(formData)
@@ -33,11 +34,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
   }
 
   const handleDiscard = () => {
-    setFormData({
-      content: "",
-      src: component.src || "",
-      alt: component.alt || "",
-    })
+    setFormData({ ...component.attributes })
     setIsOpen(false)
   }
 
@@ -77,22 +74,26 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
     }
   }, [isDragging, dragOffset])
 
-  const settingsFields = React.useMemo(() => Object.values(componentData.settingsFields), [componentData.settingsFields]) as SettingsField[]
+  const settingsFields = React.useMemo(
+    () => Object.values(componentData.settingsFields),
+    [componentData.settingsFields],
+  ) as SettingsField[]
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className={cn("w-80", isPositioned && "fixed z-50", isDragging && "cursor-grabbing")}
+        className={cn("w-80 z-50", isPositioned && "fixed", isDragging && "cursor-grabbing")}
         side="bottom"
         align="end"
+        sideOffset={8}
         style={
           isPositioned
             ? {
-              left: `${position.x}px`,
-              top: `${position.y}px`,
-              position: "fixed",
-            }
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                position: "fixed",
+              }
             : undefined
         }
       >
@@ -105,10 +106,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
             )}
             onMouseDown={handleMouseDown}
           >
-            <h4 className="font-medium leading-none">
-              {component.label}{" "}
-              Settings
-            </h4>
+            <h4 className="font-medium leading-none">{componentData.label} Settings</h4>
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
 
@@ -117,11 +115,23 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({ component, onS
               {settingsFields.map((field) => (
                 <div className="space-y-2" key={field.id}>
                   <Label htmlFor={field.id}>{field.label}</Label>
-                  <Input type={field.type}
-                    id={field.id}
-                    defaultValue={formData[field.id] || ""}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, [field.id]: e.target.value }))}
-                  />
+                  {field.type === "textarea" ? (
+                    <textarea
+                      id={field.id}
+                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder={field.placeholder}
+                      defaultValue={(formData as any)[field.id] || ""}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, [field.id]: e.target.value }))}
+                    />
+                  ) : (
+                    <Input
+                      type={field.type}
+                      id={field.id}
+                      placeholder={field.placeholder}
+                      defaultValue={(formData as any)[field.id] || ""}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, [field.id]: e.target.value }))}
+                    />
+                  )}
                 </div>
               ))}
             </div>

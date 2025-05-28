@@ -3,16 +3,16 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Label } from "@/components/ui/label"
-import { Settings, Trash2, Move, Copy, GripVertical, Search, Plus } from "lucide-react"
+import { Settings, Trash2, Move, Copy, Search, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import React from "react"
 import type {
   ComponentType,
-  ComponentProps,
   DesignComponent,
   ComponentAttributes,
   ComponentInfo,
+  ComponentWrapperProps,
+  ComponentControlsProps,
 } from "@/components/design-components/types"
 import { getComponentInfo } from "@/components/design-components"
 import type { ReactNode } from "react"
@@ -32,6 +32,7 @@ const Divider = ({
   isVisible: boolean
 }) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
+  isVisible = isVisible || popoverOpen
 
   const handleAddComponent = (type: ComponentType) => {
     onAddComponent(type, index)
@@ -42,10 +43,10 @@ const Divider = ({
     <div
       className={cn(
         "relative flex items-center justify-center transition-all duration-200 group",
-        "cursor-pointer z-10 bg-gray-300 hover:bg-gray-400",
-        orientation === "horizontal" ? "flex-row" : "flex-col",
-        orientation === "horizontal" ? "h-px w-full hover:h-2" : "w-px hover:w-2",
-        isVisible && (orientation === "horizontal" ? "h-1 bg-gray-400" : "w-1 bg-gray-400"),
+        "cursor-pointer bg-transparent hover:bg-gray-400",
+        isVisible ? "bg-gray-400": "invisible",
+        orientation === "horizontal" ? "flex-row h-px w-full hover:h-2" : "flex-col w-px hover:w-2",
+        isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
       )}
     >
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -53,7 +54,7 @@ const Divider = ({
           <Button
             variant="ghost"
             size="icon"
-            className={cn("absolute bg-background border shadow-sm transition-opacity z-20", "h-6 w-6 rounded-full")}
+            className={cn("absolute bg-background border shadow-sm transition-opacity z-20 h-6 w-6 rounded-full")}
             onClick={(e) => {
               e.stopPropagation()
               setPopoverOpen(true)
@@ -101,7 +102,6 @@ const componentInfo: { [Key in ComponentType]: ComponentInfo<Key> } = {
 // Component selector popup
 const ComponentSelector = ({
   onSelect,
-  parentId,
   closePopover,
 }: {
   onSelect: (type: ComponentType) => void
@@ -205,19 +205,16 @@ export const ComponentPopover = ({
   )
 }
 
-type TODO = any
-
 //#region Wrapper Components
 
-function ComponentWrapperControls({ tag, component, updateComponent, duplicateComponent, removeComponent }: TODO) {
-  const _componentInfo = componentInfo[tag as ComponentType]
+function ComponentControls<Tag extends ComponentType>({ component, updateComponent, duplicateComponent, removeComponent }: ComponentControlsProps<Tag>) {
+  const _componentInfo = componentInfo[component.tag as ComponentType]
   const { label } = _componentInfo
 
   return (
     <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
       <span className="text-xs font-medium px-2 flex items-center">
         {label}
-        {/* {componentType.charAt(0).toUpperCase() + componentType.slice(1)} */}
       </span>
       <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props)}>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
@@ -256,48 +253,42 @@ function ComponentWrapperControls({ tag, component, updateComponent, duplicateCo
 // Generic Design Component Wrapper
 export const GenericDesignComponentWrapper = ({
   component,
-  selectedComponent,
-  previewMode,
+  selectedComponentId,
   setSelectedComponent,
   updateComponent,
   removeComponent,
   addComponent,
   duplicateComponent,
-}: TODO) => {
-  const isSelected = selectedComponent === component.id
+}: ComponentWrapperProps<Exclude<ComponentType, "row" | "column">>) => {
   const componentType = component.tag
-
+  const showControls = selectedComponentId === component.id
   const componentProps = {
     className: cn(
       "relative border border-transparent transition-all",
-      isSelected && !previewMode && "border-primary",
-      !previewMode && "hover:border-gray-300",
+      showControls && "border-primary",
+      "hover:border-gray-300",
     ),
     onClick: (e: React.MouseEvent) => {
-      if (!previewMode) {
-        e.stopPropagation()
-        setSelectedComponent(component.id)
-      }
+      e.stopPropagation()
+      setSelectedComponent(component.id)
     },
   }
 
-  const componentControls = !previewMode && isSelected && ComponentWrapperControls({
-    tag: componentType,
+  const componentControls = selectedComponentId === component.id && ComponentControls({
     component,
     updateComponent,
     duplicateComponent,
-    removeComponent
+    removeComponent,
   })
 
-  const componentData = getComponentInfo(componentType)
+  const componentData = React.useMemo(() => getComponentInfo(componentType), [componentType])
 
   return (
     <div {...componentProps}>
       {componentControls}
       {componentData.Component({
         componentId: component.id,
-        componentAttributes: component.attributes,
-        pageBuilderMode: previewMode ? "preview" : "edit",
+        attributes: component.attributes,
         setSelectedComponent,
         updateComponent,
         removeComponent,
@@ -311,38 +302,35 @@ export const GenericDesignComponentWrapper = ({
 // Row Wrapper Component
 export const RowWrapper = ({
   component,
-  selectedComponent,
-  previewMode,
+  selectedComponentId,
+  pageBuilderMode,
   setSelectedComponent,
   updateComponent,
   removeComponent,
   addComponent,
   duplicateComponent,
-}: TODO) => {
-  const isSelected = selectedComponent === component.id
+}: ComponentWrapperProps<"row">) => {
   const [visibleDividers, setVisibleDividers] = React.useState<Set<number>>(new Set())
   const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const showControls = selectedComponentId === component.id
 
   const componentProps = {
     className: cn(
       "relative border border-transparent transition-all group",
-      isSelected && !previewMode && "border-primary",
-      !previewMode && "hover:border-gray-300",
+      showControls && "border-primary",
+      "hover:border-gray-300",
     ),
     onClick: (e: React.MouseEvent) => {
-      if (!previewMode) {
-        e.stopPropagation()
-        setSelectedComponent(component.id)
-      }
+      e.stopPropagation()
+      setSelectedComponent(component.id)
     },
   }
 
-  const componentControls = !previewMode && isSelected && ComponentWrapperControls({
-    tag: "row",
+  const componentControls = showControls && ComponentControls({
     component,
     updateComponent,
     duplicateComponent,
-    removeComponent
+    removeComponent,
   })
 
   // Handle adding component at specific index
@@ -371,8 +359,6 @@ export const RowWrapper = ({
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
-    if (previewMode) return
-
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const width = rect.width
@@ -394,78 +380,62 @@ export const RowWrapper = ({
   }
 
   const hasChildren = !!component.children
-
   const componentData = getComponentInfo(component.tag)
-  const RowComponent = componentData.Component;
+  const RowComponent = componentData.Component
+
+  const children = component.children.map(<Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
+    <div
+      key={child.id}
+      className="flex-1 relative"
+      onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
+      onMouseLeave={() => handleChildMouseLeave(childIndex)}
+    >
+      {renderDesignComponent({
+        component: child,
+        selectedComponentId,
+        pageBuilderMode,
+        setSelectedComponent,
+        updateComponent,
+        removeComponent,
+        addComponent,
+        duplicateComponent
+      })}
+    </div>
+  ))
 
   return (
     <div {...componentProps}>
       {componentControls}
 
-      <RowComponent componentId={component.id} componentAttributes={component.attributes}>
-        {hasChildren
-          ? !previewMode
-            ? // Edit mode with dividers
-            intersperseAndAppend(
-              component.children.map((child: any, childIndex: number) => (
-                <div
-                  key={child.id}
-                  className="flex-1 relative"
-                  onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
-                  onMouseLeave={() => handleChildMouseLeave(childIndex)}
-                >
-                  {renderDesignComponent(
-                    child,
-                    selectedComponent,
-                    previewMode,
-                    setSelectedComponent,
-                    updateComponent,
-                    removeComponent,
-                    addComponent,
-                    duplicateComponent,
-                  )}
-                </div>
-              )),
-              null,
-            ).map((item, index) =>
-              item === null ? (
-                <Divider
-                  key={`divider-${index}`}
-                  orientation="vertical"
-                  onAddComponent={handleAddAtIndex}
-                  index={index}
-                  isVisible={visibleDividers.has(index)}
-                />
-              ) : (
-                <React.Fragment key={index}>{item}</React.Fragment>
-              ),
-            )
-            : // Preview mode without dividers
-            component.children.map((child: any) => (
-              <div key={child.id} className="flex-1">
-                {renderDesignComponent(
-                  child,
-                  selectedComponent,
-                  previewMode,
-                  setSelectedComponent,
-                  updateComponent,
-                  removeComponent,
-                  addComponent,
-                  duplicateComponent,
-                )}
-              </div>
-            ))
-          : // Empty state - show centered add button
-          !previewMode && (
-            <div className="flex items-center justify-center h-full text-muted-foreground flex-1">
-              <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
-                <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
-                  <Plus className="h-6 w-6" />
-                  <span className="sr-only">Add component</span>
-                </Button>
-              </ComponentPopover>
-            </div>
-          )}
+      <RowComponent
+        componentId={component.id}
+        attributes={component.attributes}
+        setSelectedComponent={setSelectedComponent}
+        updateComponent={updateComponent}
+        removeComponent={removeComponent}
+        addComponent={addComponent}
+        duplicateComponent={duplicateComponent}
+      >
+        {hasChildren ? intersperseAndAppend(children, null).map((item, index) =>
+          item === null ? (
+            <Divider
+              key={`divider-${index}`}
+              orientation="vertical"
+              onAddComponent={handleAddAtIndex}
+              index={index}
+              isVisible={visibleDividers.has(index)}
+            />
+          ) : <React.Fragment key={index}>{item}</React.Fragment>
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground flex-1">
+            <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
+              <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
+                <Plus className="h-6 w-6" />
+                <span className="sr-only">Add component</span>
+              </Button>
+            </ComponentPopover>
+          </div>
+        )}
       </RowComponent>
     </div>
   )
@@ -474,38 +444,35 @@ export const RowWrapper = ({
 // Column Wrapper Component
 export const ColumnWrapper = ({
   component,
-  selectedComponent,
-  previewMode,
+  selectedComponentId,
+  pageBuilderMode,
   setSelectedComponent,
   updateComponent,
   removeComponent,
   addComponent,
   duplicateComponent,
-}: TODO) => {
-  const isSelected = selectedComponent === component.id
+}: ComponentWrapperProps<"column">) => {
   const [visibleDividers, setVisibleDividers] = React.useState<Set<number>>(new Set())
   const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const showControls = selectedComponentId === component.id
 
   const componentProps = {
     className: cn(
       "relative border border-transparent transition-all",
-      isSelected && !previewMode && "border-primary",
-      !previewMode && "hover:border-gray-300",
+      showControls && "border-primary",
+      "hover:border-gray-300",
     ),
     onClick: (e: React.MouseEvent) => {
-      if (!previewMode) {
-        e.stopPropagation()
-        setSelectedComponent(component.id)
-      }
+      e.stopPropagation()
+      setSelectedComponent(component.id)
     },
   }
 
-  const componentControls = !previewMode && isSelected && ComponentWrapperControls({
-    tag: "column",
+  const componentControls = showControls && ComponentControls({
     component,
     updateComponent,
     duplicateComponent,
-    removeComponent
+    removeComponent,
   })
 
   // Handle adding component at specific index
@@ -534,8 +501,6 @@ export const ColumnWrapper = ({
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
-    if (previewMode) return
-
     const rect = e.currentTarget.getBoundingClientRect()
     const y = e.clientY - rect.top
     const height = rect.height
@@ -559,76 +524,59 @@ export const ColumnWrapper = ({
   const hasChildren = !!component.children
 
   const componentData = getComponentInfo(component.tag)
-  const ColumnComponent = componentData.Component;
+  const ColumnComponent = componentData.Component
 
+  const children = component.children.map(<Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
+    <div
+      key={child.id}
+      className="relative"
+      onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
+      onMouseLeave={() => handleChildMouseLeave(childIndex)}
+    >
+      {renderDesignComponent({
+        component: child,
+        selectedComponentId,
+        pageBuilderMode,
+        setSelectedComponent,
+        updateComponent,
+        removeComponent,
+        addComponent,
+        duplicateComponent,
+      })}
+    </div>
+  ))
   return (
     <div {...componentProps}>
       {componentControls}
 
-      <ColumnComponent componentId={component.id} componentAttributes={component.attributes}>
-        {hasChildren
-          ? !previewMode
-            ? // Edit mode with dividers
-            intersperseAndAppend(
-              component.children.map((child: any, childIndex: number) => (
-                <div
-                  key={child.id}
-                  className="relative"
-                  onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
-                  onMouseLeave={() => handleChildMouseLeave(childIndex)}
-                >
-                  {renderDesignComponent(
-                    child,
-                    selectedComponent,
-                    previewMode,
-                    setSelectedComponent,
-                    updateComponent,
-                    removeComponent,
-                    addComponent,
-                    duplicateComponent,
-                  )}
-                </div>
-              )),
-              null,
-            ).map((item, index) =>
-              item === null ? (
-                <Divider
-                  key={`divider-${index}`}
-                  orientation="horizontal"
-                  onAddComponent={handleAddAtIndex}
-                  index={index}
-                  isVisible={visibleDividers.has(index)}
-                />
-              ) : (
-                <React.Fragment key={index}>{item}</React.Fragment>
-              ),
-            )
-            : // Preview mode without dividers
-            component.children.map((child: any) => (
-              <div key={child.id}>
-                {renderDesignComponent(
-                  child,
-                  selectedComponent,
-                  previewMode,
-                  setSelectedComponent,
-                  updateComponent,
-                  removeComponent,
-                  addComponent,
-                  duplicateComponent,
-                )}
-              </div>
-            ))
-          : // Empty state - show centered add button
-          !previewMode && (
-            <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-              <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
-                <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
-                  <Plus className="h-6 w-6" />
-                  <span className="sr-only">Add component</span>
-                </Button>
-              </ComponentPopover>
-            </div>
-          )}
+      <ColumnComponent
+        componentId={component.id}
+        attributes={component.attributes}
+        setSelectedComponent={setSelectedComponent}
+        updateComponent={updateComponent}
+        removeComponent={removeComponent}
+        addComponent={addComponent}
+        duplicateComponent={duplicateComponent}
+      >
+        {hasChildren ? intersperseAndAppend(children, null,).map((item, index) =>
+          item === null ? (
+            <Divider
+              key={`divider-${index}`}
+              orientation="horizontal"
+              onAddComponent={handleAddAtIndex}
+              index={index}
+              isVisible={visibleDividers.has(index)}
+            />) : <React.Fragment key={index}>{item}</React.Fragment>
+        ) : (
+          <div className="flex items-center justify-center h-full w-full text-muted-foreground">
+            <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
+              <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
+                <Plus className="h-6 w-6" />
+                <span className="sr-only">Add component</span>
+              </Button>
+            </ComponentPopover>
+          </div>
+        )}
       </ColumnComponent>
     </div>
   )
@@ -636,46 +584,64 @@ export const ColumnWrapper = ({
 
 //#endregion
 
-// Get wrapper component function
-export function getWrapperComponent<Tag extends ComponentType>(type: Tag) {
-  switch (type) {
+export function getWrapperComponent<Tag extends ComponentType>(tag: Tag): React.FC<ComponentWrapperProps<Tag>> {
+  switch (tag) {
     case "row":
-      return RowWrapper;
+      return RowWrapper as React.FC<ComponentWrapperProps<Tag>>
     case "column":
-      return ColumnWrapper;
+      return ColumnWrapper as React.FC<ComponentWrapperProps<Tag>>
     default:
-      return GenericDesignComponentWrapper;
+      return GenericDesignComponentWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
   }
 }
 
 // Helper function to render a design component
-export function renderDesignComponent(
-  component: any, // Legacy component structure
-  selectedComponent: string | null,
-  previewMode: boolean,
-  setSelectedComponent: (id: string | null) => void,
-  updateComponent: (id: string, props: any) => void,
-  removeComponent: (id: string) => void,
-  addComponent: ({ type, parentId, index }: { type: ComponentType, parentId?: string, index?: number }) => void,
-  duplicateComponent?: (id: string) => void,
-  componentProps?: any,
-  componentControls?: ReactNode,
-): ReactNode {
-  const componentType = component.tag
-  const WrapperComponent = getWrapperComponent(componentType)
+export function renderDesignComponent<Tag extends ComponentType>({
+  pageBuilderMode,
+  component,
+  selectedComponentId,
+  setSelectedComponent,
+  updateComponent,
+  removeComponent,
+  addComponent,
+  duplicateComponent,
+}: ComponentWrapperProps<Tag>): ReactNode {
+  const WrapperComponent = getWrapperComponent(component.tag)
+  const Component = componentInfo[component.tag].Component
+  const props = {
+    pageBuilderMode,
+    component,
+    selectedComponentId,
+    setSelectedComponent,
+    updateComponent,
+    removeComponent,
+    addComponent,
+    duplicateComponent,
+  }
+
+  const childrenToRender = component.children.map((child) => (
+    <React.Fragment key={child.id}>
+      {renderDesignComponent({ ...props, component: child, } as ComponentWrapperProps<typeof child.tag>)}
+    </React.Fragment>
+  ))
 
   return (
-    <WrapperComponent
-      component={component}
-      selectedComponent={selectedComponent}
-      previewMode={previewMode}
-      setSelectedComponent={setSelectedComponent}
-      updateComponent={updateComponent}
-      removeComponent={removeComponent}
-      addComponent={addComponent}
-      duplicateComponent={duplicateComponent}
-      componentProps={componentProps}
-      componentControls={componentControls}
-    />
+    pageBuilderMode === "edit" ? (
+      <WrapperComponent {...props as ComponentWrapperProps<Tag>} >
+        {childrenToRender}
+      </WrapperComponent>
+    ) : (
+      <Component
+        componentId={component.id}
+        attributes={component.attributes}
+        setSelectedComponent={setSelectedComponent}
+        updateComponent={updateComponent}
+        removeComponent={removeComponent}
+        addComponent={addComponent}
+        duplicateComponent={duplicateComponent}
+      >
+        {childrenToRender}
+      </Component>
+    )
   )
 }

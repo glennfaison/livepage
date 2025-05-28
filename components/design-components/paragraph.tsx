@@ -7,7 +7,7 @@ export type ComponentAttributes = {
 
 export type ComponentProps = {
 	componentId: string
-	componentAttributes: ComponentAttributes
+	attributes: ComponentAttributes
 	pageBuilderMode: "edit" | "preview"
 	setSelectedComponent: (componentId: string) => void
 	updateComponent: (componentId: string, updates: Partial<ComponentAttributes>) => void
@@ -46,8 +46,8 @@ export const settingsFields = {
 
 export const Icon = <Type className="h-4 w-4" />
 
-export const Component = ({ componentId, componentAttributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
-	const { content, ...restAttributes } = componentAttributes
+export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
+	const { content, ...restAttributes } = attributes
 	return (
 		<p
 			className="py-2"

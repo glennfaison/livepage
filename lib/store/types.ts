@@ -1,4 +1,4 @@
-import type { ComponentType, DesignComponent, Page } from "@/components/design-components/types"
+import type { ComponentAttributes, ComponentType, DesignComponent, Page } from "@/components/design-components/types"
 
 // History entry
 export interface HistoryEntry {
@@ -12,7 +12,7 @@ export interface HistoryEntry {
 export interface AppState {
   pages: Page[]
   activePage: string
-  selectedComponent: string | null
+  selectedComponentId: string | null
   previewMode: boolean
   toolbarMinimized: boolean
   showToolbar: boolean
@@ -32,7 +32,7 @@ export type AppAction =
       type: "ADD_COMPONENT"
       payload: { pageId: string; component: DesignComponent<ComponentType>; parentId?: string; index?: number }
     }
-  | { type: "UPDATE_COMPONENT"; payload: { pageId: string; componentId: string; updates: any } }
+  | { type: "UPDATE_COMPONENT"; payload: { pageId: string; componentId: string; updates: Partial<ComponentAttributes<ComponentType>> } }
   | { type: "REMOVE_COMPONENT"; payload: { pageId: string; componentId: string } }
   | {
       type: "DUPLICATE_COMPONENT"

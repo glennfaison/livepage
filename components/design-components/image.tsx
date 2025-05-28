@@ -1,5 +1,7 @@
+"use client"
+
 import { ImageIcon } from "lucide-react"
-import { ComponentType } from "./types"
+import type { ComponentType } from "./types"
 
 export type ComponentAttributes = {
 	src?: string
@@ -11,7 +13,7 @@ export type ComponentAttributes = {
 
 export type ComponentProps = {
 	componentId: string
-	componentAttributes: ComponentAttributes
+	attributes: ComponentAttributes
 	pageBuilderMode: "edit" | "preview"
 	setSelectedComponent: (componentId: string) => void
 	updateComponent: (componentId: string, updates: Partial<ComponentAttributes>) => void
@@ -20,9 +22,9 @@ export type ComponentProps = {
 export const defaultAttributes: ComponentAttributes = {
 	src: "",
 	alt: "Image Description",
-	width: "auto",
+	width: "100%",
 	height: "auto",
-	fallbackSrc: "/placeholder.svg",
+	fallbackSrc: "/placeholder.svg?height=200&width=300",
 }
 
 export const tag: ComponentType = "image" as const
@@ -66,11 +68,17 @@ export const settingsFields = {
 
 export const Icon = <ImageIcon className="h-4 w-4" />
 
-export const Component = ({ componentId, componentAttributes, pageBuilderMode, setSelectedComponent }: ComponentProps) => {
-	const { src, fallbackSrc, ...restAttributes } = componentAttributes
+export const Component = ({
+	componentId,
+	attributes,
+	pageBuilderMode,
+	setSelectedComponent,
+}: ComponentProps) => {
+	const { src, alt, fallbackSrc, ...restAttributes } = attributes
 	return (
 		<img
 			src={src || fallbackSrc}
+			alt={alt}
 			className="max-w-full h-auto"
 			onClick={(e) => {
 				if (pageBuilderMode === "edit") {

@@ -6,19 +6,20 @@ import { Button } from "@/components/ui/button"
 import { Save, X, GripVertical, Settings, Maximize, Minimize, History, RotateCw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { HistoryPopover, type HistoryEntry } from "@/components/page-builder/history-popover"
+import { PageBuilderMode } from "../design-components/types"
 
 interface PageCraftToolbarProps {
   toolbarMinimized: boolean
+  pageBuilderMode: PageBuilderMode
+  history: HistoryEntry[]
+  currentHistoryIndex: number
+  historyPreviewIndex: number | null
   setToolbarMinimized: (minimized: boolean) => void
   savePage: () => void
   handleDiscard: () => void
-  previewMode: boolean
-  history: HistoryEntry[]
-  currentHistoryIndex: number
   onSelectHistory: (index: number) => void
   onAcceptHistory: () => void
   onDiscardHistory: () => void
-  historyPreviewIndex: number | null
 }
 
 export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
@@ -26,7 +27,7 @@ export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
   setToolbarMinimized,
   savePage,
   handleDiscard,
-  previewMode,
+  pageBuilderMode,
   history,
   currentHistoryIndex,
   onSelectHistory,
@@ -98,7 +99,7 @@ export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
     }
   }, [isDragging, dragOffset])
 
-  if (previewMode) return null
+  if (pageBuilderMode === "preview" as PageBuilderMode) return null
 
   return (
     <div

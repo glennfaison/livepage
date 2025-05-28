@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input"
 import { renderDesignComponent } from "@/components/page-builder/page-builder"
 import { PageCraftToolbar } from "@/components/page-builder/pagecraft-toolbar"
 import { useAppState, usePageOperations, useComponentOperations, useHistoryOperations } from "@/lib/store/hooks"
+import { ComponentWrapperProps, PageBuilderMode } from "@/components/design-components/types"
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
+  const pageBuilderMode = (state.previewMode ? "preview" : "edit") as PageBuilderMode
   const { savePageMutation, loadPageMutation, exportPageMutation } = usePageOperations()
   const { addComponent, updateComponent, removeComponent, duplicateComponent } = useComponentOperations(dispatch, state)
   const { handleSelectHistory, handleHistoryAccept, handleHistoryDiscard, handleDiscard } = useHistoryOperations(
@@ -95,9 +97,9 @@ export default function BuilderPage() {
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => dispatch({ type: "SET_PREVIEW_MODE", payload: !state.previewMode })}
+              onClick={() => dispatch({ type: "SET_PREVIEW_MODE", payload: pageBuilderMode === "edit" })}
             >
-              {state.previewMode ? "Edit Mode" : "Preview Mode"}
+              {pageBuilderMode === "edit" ? "Edit Mode" : "Preview Mode"}
             </Button>
           </div>
         </div>
@@ -151,25 +153,27 @@ export default function BuilderPage() {
           >
             {currentPage.components.map((component) => (
               <React.Fragment key={component.id}>
-                {renderDesignComponent(
+                {renderDesignComponent({
+                  pageBuilderMode,
                   component,
-                  state.selectedComponent,
-                  state.previewMode,
-                  (id) => dispatch({ type: "SET_SELECTED_COMPONENT", payload: id }),
+                  selectedComponentId: state.selectedComponentId,
+                  setSelectedComponent: (id) => dispatch({ type: "SET_SELECTED_COMPONENT", payload: id }),
                   updateComponent,
                   removeComponent,
                   addComponent,
                   duplicateComponent,
-                )}
+                } as ComponentWrapperProps<typeof component.tag>)}
               </React.Fragment>
             ))}
 
-            {!state.previewMode && (
+            {pageBuilderMode === "edit" && (
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-md p-4">
                 <Button
                   variant="outline"
                   className="gap-2 px-4 py-2"
-                  onClick={() => addComponent({ type: "row", parentId: undefined, index: currentPage.components.length })}
+                  onClick={() =>
+                    addComponent({ type: "row", parentId: undefined, index: currentPage.components.length })
+                  }
                 >
                   <AlignVerticalSpaceBetween className="h-5 w-5" />
                   <span>Add Row</span>
@@ -185,7 +189,7 @@ export default function BuilderPage() {
         setToolbarMinimized={(minimized) => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: minimized })}
         savePage={savePage}
         handleDiscard={handleDiscard}
-        previewMode={state.previewMode}
+        pageBuilderMode={pageBuilderMode}
         history={state.history}
         currentHistoryIndex={state.currentHistoryIndex}
         onSelectHistory={handleSelectHistory}
@@ -194,7 +198,7 @@ export default function BuilderPage() {
         historyPreviewIndex={state.historyPreviewIndex}
       />
 
-      {!state.showToolbar && !state.previewMode && (
+      {!state.showToolbar && pageBuilderMode === "edit" && (
         <Button
           variant="outline"
           size="sm"

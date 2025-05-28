@@ -1,18 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Check, X, RotateCcw, GripVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-export interface HistoryEntry {
-  id: string
-  action: string
-  timestamp: Date
-  pageState: any
-}
+import type { HistoryEntry } from "@/lib/store/types"
 
 interface HistoryPopoverProps {
   isOpen: boolean
@@ -78,14 +72,14 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
     }
   }
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       setPosition({
         x: e.clientX - dragOffset.x,
         y: e.clientY - dragOffset.y,
       })
     }
-  }
+  }, [dragOffset.x, dragOffset.y, isDragging])
 
   const handleMouseUp = () => {
     setIsDragging(false)
@@ -100,7 +94,7 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
         document.removeEventListener("mouseup", handleMouseUp)
       }
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, dragOffset, handleMouseMove])
 
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
@@ -111,10 +105,10 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
         style={
           isPositioned
             ? {
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-                position: "fixed",
-              }
+              left: `${position.x}px`,
+              top: `${position.y}px`,
+              position: "fixed",
+            }
             : undefined
         }
       >

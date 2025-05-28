@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
 import { appReducer, initialState } from "./reducer"
 import type { AppState, AppAction } from "./types"
-import type { ComponentType, DesignComponent, Page } from "@/components/design-components/types"
+import type { ComponentAttributes, ComponentType, DesignComponent, Page } from "@/components/design-components/types"
 import { createDesignComponent } from "@/components/page-builder/page-builder"
 import { generateId } from "@/lib/utils"
 import { toast } from "@/components/ui/use-toast"
@@ -75,7 +75,7 @@ export function usePageOperations() {
             const loadedPage = JSON.parse(content) as Page
             resolve(loadedPage)
           } catch (error) {
-            reject(new Error("Invalid file format"))
+            reject(new Error(`Invalid file format ${error}`))
           }
         }
         reader.onerror = () => reject(new Error("Failed to read file"))
@@ -100,18 +100,6 @@ export function usePageOperations() {
   // Export page mutation
   const exportPageMutation = useMutation({
     mutationFn: async (page: Page) => {
-      // Convert DesignComponents to legacy format for HTML export
-      const convertToLegacyFormat = (components: DesignComponent<ComponentType>[]): any[] => {
-        return components.map((component) => ({
-          id: component.id,
-          type: component.tag,
-          ...component.attributes,
-          children: component.children ? convertToLegacyFormat(component.children) : undefined,
-        }))
-      }
-
-      const legacyComponents = convertToLegacyFormat(page.components)
-
       // Basic HTML template
       const htmlTemplate = `
       <!DOCTYPE html>
@@ -188,7 +176,7 @@ export function usePageOperations() {
         </style>
       </head>
       <body>
-        ${renderComponentsToHTML(legacyComponents)}
+        ${renderComponentsToHTML(page.components)}
       </body>
       </html>
       `
@@ -228,33 +216,32 @@ export function usePageOperations() {
   }
 }
 
-// Helper function to render components to HTML (moved from page-builder.tsx)
-const renderComponentsToHTML = (components: any[]): string => {
-  return components
-    .map((component) => {
-      switch (component.type) {
-        case "header1":
-          return `<h1>${component.content}</h1>`
-        case "header2":
-          return `<h2>${component.content}</h2>`
-        case "header3":
-          return `<h3>${component.content}</h3>`
-        case "paragraph":
-          return `<p>${component.content}</p>`
-        case "span":
-          return `<span>${component.content}</span>`
-        case "image":
-          return `<img src="${component.src}" alt="${component.alt || ""}" />`
-        case "button":
-          return `<button>${component.content}</button>`
-        case "row":
-          return `<div class="row">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
-        case "column":
-          return `<div class="column">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
-        default:
-          return ""
-      }
-    })
+const renderComponentsToHTML = <Tag extends ComponentType>(components: DesignComponent<Tag>[]): string => {
+  return components.map((component) => {
+    const attributes = component.attributes
+    switch (component.tag) {
+      case "header1":
+        return `<h1>${attributes.content}</h1>`
+      case "header2":
+        return `<h2>${attributes.content}</h2>`
+      case "header3":
+        return `<h3>${attributes.content}</h3>`
+      case "paragraph":
+        return `<p>${attributes.content}</p>`
+      case "span":
+        return `<span>${attributes.content}</span>`
+      case "image":
+        return `<img src="${attributes.src}" alt="${attributes.alt || ""}" />`
+      case "button":
+        return `<button>${attributes.content}</button>`
+      case "row":
+        return `<div class="row">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
+      case "column":
+        return `<div class="column">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
+      default:
+        return ""
+    }
+  })
     .join("\n")
 }
 
@@ -315,7 +302,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Update component
   const updateComponent = useCallback(
-    (id: string, updates: any) => {
+    <Tag extends ComponentType>(id: string, updates: Partial<ComponentAttributes<Tag>>) => {
       dispatch({
         type: "UPDATE_COMPONENT",
         payload: {
@@ -389,8 +376,8 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
       if (!componentToDuplicate) return
 
       // Deep clone the component with new IDs
-      const cloneComponent = (comp: DesignComponent<ComponentType>): DesignComponent<ComponentType> => {
-        const cloned: DesignComponent<ComponentType> = {
+      const cloneComponent = <Tag extends ComponentType>(comp: DesignComponent<Tag>): DesignComponent<Tag> => {
+        const cloned: DesignComponent<Tag> = {
           ...comp,
           id: generateId(),
           children: comp.children ? comp.children.map(cloneComponent) : [],

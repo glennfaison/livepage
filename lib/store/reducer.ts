@@ -1,5 +1,5 @@
 import type { AppState, AppAction, HistoryEntry } from "./types"
-import type { ComponentType, DesignComponent } from "@/components/design-components/types"
+import type { ComponentAttributes, ComponentType, DesignComponent } from "@/components/design-components/types"
 
 // Helper function to add component to parent
 const addComponentToParent = (
@@ -32,7 +32,7 @@ const addComponentToParent = (
 const updateComponentInArray = (
   components: DesignComponent<ComponentType>[],
   id: string,
-  updates: any,
+  updates: Partial<ComponentAttributes<ComponentType>>,
 ): DesignComponent<ComponentType>[] => {
   return components.map((component) => {
     if (component.id === id) {
@@ -107,7 +107,7 @@ export const initialState: AppState = {
     },
   ],
   activePage: "page-1",
-  selectedComponent: null,
+  selectedComponentId: null,
   previewMode: false,
   toolbarMinimized: false,
   showToolbar: true,
@@ -164,7 +164,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             }
           }
         }),
-        selectedComponent: component.id,
+        selectedComponentId: component.id,
       }
     }
 
@@ -195,7 +195,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
               }
             : page,
         ),
-        selectedComponent: state.selectedComponent === componentId ? null : state.selectedComponent,
+        selectedComponentId: state.selectedComponentId === componentId ? null : state.selectedComponentId,
       }
     }
 
@@ -211,14 +211,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
               }
             : page,
         ),
-        selectedComponent: duplicatedComponent.id,
+        selectedComponentId: duplicatedComponent.id,
       }
     }
 
     case "SET_SELECTED_COMPONENT":
       return {
         ...state,
-        selectedComponent: action.payload,
+        selectedComponentId: action.payload,
       }
 
     case "SET_PREVIEW_MODE":
