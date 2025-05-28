@@ -44,7 +44,7 @@ const Divider = ({
       className={cn(
         "relative flex items-center justify-center transition-all duration-200 group",
         "cursor-pointer bg-transparent hover:bg-gray-400",
-        isVisible ? "bg-gray-400": "invisible",
+        isVisible ? "bg-gray-400" : "invisible",
         orientation === "horizontal" ? "flex-row h-px w-full hover:h-2" : "flex-col w-px hover:w-2",
         isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
       )}
@@ -299,6 +299,90 @@ export const GenericDesignComponentWrapper = ({
   )
 }
 
+const useDividerVisibility = () => {
+  const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(new Set())
+  const [visibleHorizontalDividers, setVisibleHorizontalDividers] = React.useState<Set<number>>(new Set())
+  const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  const showVerticalDivider = (index: number) => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+    setVisibleVerticalDividers((prev) => new Set(prev).add(index))
+  }
+
+  const showHorizontalDivider = (index: number) => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+    setVisibleHorizontalDividers((prev) => new Set(prev).add(index))
+  }
+
+  const hideVerticalDivider = (index: number) => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setVisibleVerticalDividers((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(index)
+        return newSet
+      })
+    }, 300)
+  }
+
+  const hideHorizontalDivider = (index: number) => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setVisibleHorizontalDividers((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(index)
+        return newSet
+      })
+    }, 300)
+  }
+
+  const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const width = rect.width
+    const y = e.clientY - rect.top
+    const height = rect.height
+
+    if (x < width * 0.3) {
+      const leftDividerIndex = childIndex * 2
+      showVerticalDivider(leftDividerIndex)
+    } else if (x > width * 0.7) {
+      const rightDividerIndex = (childIndex + 1) * 2
+      showVerticalDivider(rightDividerIndex)
+    }
+
+    if (y < height * 0.3) {
+      const topDividerIndex = childIndex * 2
+      showHorizontalDivider(topDividerIndex)
+    } else if (y > height * 0.7) {
+      const bottomDividerIndex = (childIndex + 1) * 2
+      showHorizontalDivider(bottomDividerIndex)
+    }
+  }
+
+  const handleChildMouseLeave = (childIndex: number) => {
+    const leftDividerIndex = childIndex * 2
+    const rightDividerIndex = childIndex * 2
+    const topDividerIndex = childIndex * 2
+    const bottomDividerIndex = childIndex * 2
+    hideVerticalDivider(leftDividerIndex)
+    hideVerticalDivider(rightDividerIndex)
+    hideHorizontalDivider(topDividerIndex)
+    hideHorizontalDivider(bottomDividerIndex)
+  }
+
+  return {
+    visibleVerticalDividers,
+    visibleHorizontalDividers,
+    handleChildMouseMove,
+    handleChildMouseLeave,
+  }
+}
+
 // Row Wrapper Component
 export const RowWrapper = ({
   component,
@@ -310,8 +394,7 @@ export const RowWrapper = ({
   addComponent,
   duplicateComponent,
 }: ComponentWrapperProps<"row">) => {
-  const [visibleDividers, setVisibleDividers] = React.useState<Set<number>>(new Set())
-  const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const { visibleVerticalDividers: visibleDividers, handleChildMouseMove, handleChildMouseLeave } = useDividerVisibility()
   const showControls = selectedComponentId === component.id
 
   const componentProps = {
@@ -340,44 +423,6 @@ export const RowWrapper = ({
     addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
   }
 
-  const showDivider = (index: number) => {
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current)
-      hideTimeoutRef.current = null
-    }
-    setVisibleDividers((prev) => new Set(prev).add(index))
-  }
-
-  const hideDivider = (index: number) => {
-    hideTimeoutRef.current = setTimeout(() => {
-      setVisibleDividers((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(index)
-        return newSet
-      })
-    }, 300)
-  }
-
-  const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const width = rect.width
-
-    if (x < width * 0.3) {
-      const leftDividerIndex = childIndex * 2
-      showDivider(leftDividerIndex)
-    } else if (x > width * 0.7) {
-      const rightDividerIndex = (childIndex + 1) * 2
-      showDivider(rightDividerIndex)
-    }
-  }
-
-  const handleChildMouseLeave = (childIndex: number) => {
-    const leftDividerIndex = childIndex * 2
-    const rightDividerIndex = childIndex * 2
-    hideDivider(leftDividerIndex)
-    hideDivider(rightDividerIndex)
-  }
 
   const hasChildren = !!component.children
   const componentData = getComponentInfo(component.tag)
@@ -452,8 +497,7 @@ export const ColumnWrapper = ({
   addComponent,
   duplicateComponent,
 }: ComponentWrapperProps<"column">) => {
-  const [visibleDividers, setVisibleDividers] = React.useState<Set<number>>(new Set())
-  const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const { visibleHorizontalDividers: visibleDividers, handleChildMouseMove, handleChildMouseLeave } = useDividerVisibility()
   const showControls = selectedComponentId === component.id
 
   const componentProps = {
@@ -480,45 +524,6 @@ export const ColumnWrapper = ({
     const childIndex = Math.floor(dividerIndex / 2)
     const newComponent = createDesignComponent(type, generateId())
     addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
-  }
-
-  const showDivider = (index: number) => {
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current)
-      hideTimeoutRef.current = null
-    }
-    setVisibleDividers((prev) => new Set(prev).add(index))
-  }
-
-  const hideDivider = (index: number) => {
-    hideTimeoutRef.current = setTimeout(() => {
-      setVisibleDividers((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(index)
-        return newSet
-      })
-    }, 500)
-  }
-
-  const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const y = e.clientY - rect.top
-    const height = rect.height
-
-    if (y < height * 0.3) {
-      const topDividerIndex = childIndex * 2
-      showDivider(topDividerIndex)
-    } else if (y > height * 0.7) {
-      const bottomDividerIndex = (childIndex + 1) * 2
-      showDivider(bottomDividerIndex)
-    }
-  }
-
-  const handleChildMouseLeave = (childIndex: number) => {
-    const topDividerIndex = childIndex * 2
-    const bottomDividerIndex = childIndex * 2
-    hideDivider(topDividerIndex)
-    hideDivider(bottomDividerIndex)
   }
 
   const hasChildren = !!component.children
