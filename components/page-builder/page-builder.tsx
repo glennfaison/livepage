@@ -302,42 +302,43 @@ export const GenericDesignComponentWrapper = ({
 const useDividerVisibility = () => {
   const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(new Set())
   const [visibleHorizontalDividers, setVisibleHorizontalDividers] = React.useState<Set<number>>(new Set())
-  const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const hideTimeoutRef = React.useRef<Record<string, NodeJS.Timeout>>({})
+  const visibilityTimeoutMS = 300
 
   const showVerticalDivider = (index: number) => {
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current)
-      hideTimeoutRef.current = null
+    if (hideTimeoutRef.current[`v${index}`]) {
+      clearTimeout(hideTimeoutRef.current[`v${index}`])
+      delete hideTimeoutRef.current[`v${index}`]
     }
     setVisibleVerticalDividers((prev) => new Set(prev).add(index))
   }
 
   const showHorizontalDivider = (index: number) => {
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current)
-      hideTimeoutRef.current = null
+    if (hideTimeoutRef.current[`h${index}`]) {
+      clearTimeout(hideTimeoutRef.current[`h${index}`])
+      delete hideTimeoutRef.current[`h${index}`]
     }
     setVisibleHorizontalDividers((prev) => new Set(prev).add(index))
   }
 
   const hideVerticalDivider = (index: number) => {
-    hideTimeoutRef.current = setTimeout(() => {
+    hideTimeoutRef.current[`v${index}`] = setTimeout(() => {
       setVisibleVerticalDividers((prev) => {
         const newSet = new Set(prev)
         newSet.delete(index)
         return newSet
       })
-    }, 300)
+    }, visibilityTimeoutMS)
   }
 
   const hideHorizontalDivider = (index: number) => {
-    hideTimeoutRef.current = setTimeout(() => {
+    hideTimeoutRef.current[`h${index}`] = setTimeout(() => {
       setVisibleHorizontalDividers((prev) => {
         const newSet = new Set(prev)
         newSet.delete(index)
         return newSet
       })
-    }, 300)
+    }, visibilityTimeoutMS)
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
@@ -365,10 +366,10 @@ const useDividerVisibility = () => {
   }
 
   const handleChildMouseLeave = (childIndex: number) => {
-    const leftDividerIndex = childIndex * 2
-    const rightDividerIndex = childIndex * 2
-    const topDividerIndex = childIndex * 2
-    const bottomDividerIndex = childIndex * 2
+    const leftDividerIndex = 2 * childIndex
+    const rightDividerIndex = 2 * childIndex + 2
+    const topDividerIndex = 2 * childIndex
+    const bottomDividerIndex = 2 * childIndex + 2
     hideVerticalDivider(leftDividerIndex)
     hideVerticalDivider(rightDividerIndex)
     hideHorizontalDivider(topDividerIndex)
