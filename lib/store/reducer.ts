@@ -103,7 +103,6 @@ export const initialState: AppState = {
       title: "Home Page",
       attributes: {},
       components: [],
-      settingsFields: {},
     },
   ],
   activePage: "page-1",

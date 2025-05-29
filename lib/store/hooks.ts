@@ -11,7 +11,6 @@ import { createDesignComponent } from "@/components/page-builder/page-builder"
 import { generateId } from "@/lib/utils"
 import { toast } from "@/components/ui/use-toast"
 
-// Custom hook for app state management
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
 
@@ -32,7 +31,6 @@ export function useAppState() {
   return { state, dispatch }
 }
 
-// Custom hook for page operations
 export function usePageOperations() {
   // Save page mutation
   const savePageMutation = useMutation({
@@ -216,36 +214,51 @@ export function usePageOperations() {
   }
 }
 
-const renderComponentsToHTML = <Tag extends ComponentType>(components: DesignComponent<Tag>[]): string => {
+const renderComponentsToHTML = (components: DesignComponent<ComponentType>[]): string => {
   return components.map((component) => {
     const attributes = component.attributes
     switch (component.tag) {
-      case "header1":
-        return `<h1>${attributes.content}</h1>`
-      case "header2":
-        return `<h2>${attributes.content}</h2>`
-      case "header3":
-        return `<h3>${attributes.content}</h3>`
-      case "paragraph":
-        return `<p>${attributes.content}</p>`
-      case "span":
-        return `<span>${attributes.content}</span>`
-      case "image":
-        return `<img src="${attributes.src}" alt="${attributes.alt || ""}" />`
-      case "button":
-        return `<button>${attributes.content}</button>`
+      case "header1": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<h1>${(attributes as CastType).content}</h1>`
+      }
+      case "header2": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<h2>${(attributes as CastType).content}</h2>`
+      }
+      case "header3": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<h3>${(attributes as CastType).content}</h3>`
+      }
+      case "paragraph": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<p>${(attributes as CastType).content}</p>`
+      }
+      case "span": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<span>${(attributes as CastType).content}</span>`
+      }
+      case "image": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<img src="${(attributes as CastType).src}" alt="${(attributes as CastType).alt || ""}" />`
+      }
+      case "button": {
+        type CastType = ComponentAttributes<typeof component.tag>
+        return `<button>${(attributes as CastType).content}</button>`
+      }
       case "row":
         return `<div class="row">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
       case "column":
         return `<div class="column">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
       default:
+        const _: never = component.tag
+        console.log("Unexpected tag:", _)
         return ""
     }
   })
     .join("\n")
 }
 
-// Custom hook for component operations
 export function useComponentOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
   // Find a component by ID (including nested components)
   const findComponentById = useCallback(
@@ -424,7 +437,6 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   }
 }
 
-// Custom hook for history operations
 export function useHistoryOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
   // Handle history selection
   const handleSelectHistory = useCallback(

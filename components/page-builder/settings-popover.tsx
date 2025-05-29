@@ -77,7 +77,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = <T
   const settingsFields = React.useMemo(
     () => Object.values(componentData.settingsFields),
     [componentData.settingsFields],
-  ) as SettingsField[]
+  ) as SettingsField<Tag>[]
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -113,22 +113,22 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = <T
           <div className="p-4 space-y-4">
             <div className="space-y-4">
               {settingsFields.map((field) => (
-                <div className="space-y-2" key={field.id}>
-                  <Label htmlFor={field.id}>{field.label}</Label>
+                <div className="space-y-2" key={field.id as string}>
+                  <Label htmlFor={field.id as string}>{field.label}</Label>
                   {field.type === "textarea" ? (
                     <textarea
-                      id={field.id}
+                      id={field.id as string}
                       className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder={field.placeholder}
-                      defaultValue={formData[field.id] || ""}
+                      defaultValue={formData[field.id] as string || ""}
                       onChange={(e) => setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))}
                     />
                   ) : (
                     <Input
                       type={field.type}
-                      id={field.id}
+                      id={field.id as string}
                       placeholder={field.placeholder}
-                      defaultValue={formData[field.id] || ""}
+                      defaultValue={formData[field.id] as string || ""}
                       onChange={(e) => setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))}
                     />
                   )}

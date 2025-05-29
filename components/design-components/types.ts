@@ -46,8 +46,8 @@ export type ComponentAttributes<Tag extends ComponentType> = Tag extends "header
 
 export type PageBuilderMode = "edit" | "view"
 
-export type SettingsField = {
-  id: string
+export type SettingsField<Tag extends ComponentType> = {
+  id: keyof ComponentAttributes<Tag>
   label: string
   type: "text" | "number" | "boolean" | "textarea"
   placeholder?: string
@@ -58,18 +58,17 @@ export type SettingsField = {
 export type DesignComponent<Tag extends ComponentType> = {
   id: string
   tag: Tag
-  attributes: ComponentAttributes<Tag>
   children: DesignComponent<ComponentType>[]
-  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField>
+  attributes: ComponentAttributes<Tag>
+  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
 }
 
 // Page structure
 export interface Page {
   id: string
   title: string
-  attributes: Record<string, string>
   components: DesignComponent<ComponentType>[]
-  settingsFields: Record<string, SettingsField>
+  attributes: Record<string, string>
 }
 
 export type ComponentActionProps<Tag extends ComponentType> = {
@@ -103,7 +102,7 @@ export interface ComponentInfo<Tag extends ComponentType> {
   label: string
   keywords: string[]
   defaultAttributes: ComponentAttributes<Tag>
-  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField>
+  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
   Icon: ReactNode
   Component: (props: ComponentProps<Tag>) => React.JSX.Element
 }
