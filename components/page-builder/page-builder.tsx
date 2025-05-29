@@ -43,7 +43,7 @@ const Divider = ({
     <div
       className={cn(
         "relative flex items-center justify-center transition-all duration-200 group",
-        "cursor-pointer bg-transparent hover:bg-gray-400",
+        "cursor-pointer bg-transparent hover:bg-gray-400 hover:visible",
         isVisible ? "bg-gray-400" : "invisible",
         orientation === "horizontal" ? "flex-row h-px w-full hover:h-2" : "flex-col w-px hover:w-2",
         isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
@@ -216,7 +216,7 @@ function ComponentControls<Tag extends ComponentType>({ component, updateCompone
       <span className="text-xs font-medium px-2 flex items-center">
         {label}
       </span>
-      <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props)}>
+      <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props as ComponentAttributes<Tag>)}>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
           <Settings className="h-4 w-4" />
         </Button>
@@ -425,7 +425,7 @@ export const RowWrapper = ({
   }
 
 
-  const hasChildren = !!component.children
+  const hasChildren = !!component.children.length
   const componentData = getComponentInfo(component.tag)
   const RowComponent = componentData.Component
 
@@ -475,8 +475,8 @@ export const RowWrapper = ({
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground flex-1">
             <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
-              <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
-                <Plus className="h-6 w-6" />
+              <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
+                <Plus className="h-3 w-3" />
                 <span className="sr-only">Add component</span>
               </Button>
             </ComponentPopover>
@@ -527,7 +527,7 @@ export const ColumnWrapper = ({
     addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
   }
 
-  const hasChildren = !!component.children
+  const hasChildren = !!component.children.length
 
   const componentData = getComponentInfo(component.tag)
   const ColumnComponent = componentData.Component
@@ -576,8 +576,8 @@ export const ColumnWrapper = ({
         ) : (
           <div className="flex items-center justify-center h-full w-full text-muted-foreground">
             <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
-              <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
-                <Plus className="h-6 w-6" />
+              <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
+                <Plus className="h-3 w-3" />
                 <span className="sr-only">Add component</span>
               </Button>
             </ComponentPopover>

@@ -10,6 +10,9 @@ export const generateId = () => `component-${Math.random().toString(36).substr(2
 
 // Helper function to intersperse and append items
 export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {
+  if (originalArray.length === 0) {
+    return [];
+  }
   const result: (T | U)[] = originalArray.flatMap((element) => [itemToInsert, element])
   result.push(itemToInsert)
   return result

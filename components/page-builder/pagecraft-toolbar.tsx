@@ -1,11 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Save, X, GripVertical, Settings, Maximize, Minimize, History, RotateCw } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { HistoryPopover, type HistoryEntry } from "@/components/page-builder/history-popover"
+import { HistoryPopover } from "@/components/page-builder/history-popover"
+import type { HistoryEntry } from "@/lib/store/types"
 import { PageBuilderMode } from "../design-components/types"
 
 interface PageCraftToolbarProps {
@@ -71,18 +72,18 @@ export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
     setIsDragging(true)
   }
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging && toolbarRef.current) {
-      const toolbarRect = toolbarRef.current.getBoundingClientRect()
-      const toolbarCenterX = toolbarRect.left + toolbarRect.width / 2
-      const toolbarCenterY = toolbarRect.top + toolbarRect.height / 2
+      // const toolbarRect = toolbarRef.current.getBoundingClientRect()
+      // const toolbarCenterX = toolbarRect.left + toolbarRect.width / 2
+      // const toolbarCenterY = toolbarRect.top + toolbarRect.height / 2
 
       setPosition({
         x: e.clientX - dragOffset.x,
         y: e.clientY - dragOffset.y,
       })
     }
-  }
+  },[isDragging, dragOffset.x, dragOffset.y])
 
   const handleMouseUp = () => {
     setIsDragging(false)
@@ -97,7 +98,7 @@ export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
         document.removeEventListener("mouseup", handleMouseUp)
       }
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, dragOffset, handleMouseMove])
 
   if (pageBuilderMode === "preview" as PageBuilderMode) return null
 

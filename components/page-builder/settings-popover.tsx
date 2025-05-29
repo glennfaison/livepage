@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { GripVertical } from "lucide-react"
-import React from "react"
+import React, { useCallback } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { getComponentInfo } from "../design-components"
@@ -13,12 +13,12 @@ import type { ComponentAttributes, ComponentType, DesignComponent, SettingsField
 // Settings Popover Component
 export interface SettingsPopoverProps<Tag extends ComponentType> {
   component: DesignComponent<Tag>
-  onSave: (props: any) => void
+  onSave: (updates: ComponentAttributes<Tag>) => void
   children: React.ReactNode
 }
 
-export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = ({ component, onSave, children }) => {
-  const [formData, setFormData] = React.useState<Partial<ComponentAttributes<ComponentType>>>({ ...component.attributes })
+export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = <Tag extends ComponentType>({ component, onSave, children }: SettingsPopoverProps<Tag>) => {
+  const [formData, setFormData] = React.useState<ComponentAttributes<Tag>>({ ...component.attributes })
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 })
@@ -50,14 +50,14 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = ({
     }
   }
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       setPosition({
         x: e.clientX - dragOffset.x,
         y: e.clientY - dragOffset.y,
       })
     }
-  }
+  }, [isDragging, dragOffset.x, dragOffset.y])
 
   const handleMouseUp = () => {
     setIsDragging(false)
@@ -72,7 +72,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = ({
         document.removeEventListener("mouseup", handleMouseUp)
       }
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, dragOffset, handleMouseMove])
 
   const settingsFields = React.useMemo(
     () => Object.values(componentData.settingsFields),
@@ -120,16 +120,16 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = ({
                       id={field.id}
                       className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder={field.placeholder}
-                      defaultValue={(formData as any)[field.id] || ""}
-                      onChange={(e) => setFormData((prev: any) => ({ ...prev, [field.id]: e.target.value }))}
+                      defaultValue={formData[field.id] || ""}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))}
                     />
                   ) : (
                     <Input
                       type={field.type}
                       id={field.id}
                       placeholder={field.placeholder}
-                      defaultValue={(formData as any)[field.id] || ""}
-                      onChange={(e) => setFormData((prev: any) => ({ ...prev, [field.id]: e.target.value }))}
+                      defaultValue={formData[field.id] || ""}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, [field.id]: e.target.value }))}
                     />
                   )}
                 </div>
