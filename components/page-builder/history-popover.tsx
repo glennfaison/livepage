@@ -100,7 +100,7 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className={cn("w-80 p-0", isPositioned && "fixed z-50", isDragging && "cursor-grabbing")}
+        className={cn("w-60 p-0", isPositioned && "fixed z-50", isDragging && "cursor-grabbing")}
         align="start"
         style={
           isPositioned
