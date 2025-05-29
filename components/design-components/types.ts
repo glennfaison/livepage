@@ -71,12 +71,13 @@ export interface Page {
   attributes: Record<string, string>
 }
 
-export type ComponentActionProps<Tag extends ComponentType> = {
+export type ComponentOperations<Tag extends ComponentType> = {
   setSelectedComponent: (componentId: string) => void
   updateComponent: (componentId: string, updates: Partial<ComponentAttributes<Tag>>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
   addComponent: (args: { type: ComponentType; parentId?: string; index?: number }) => void
+  replaceComponent: (oldComponentId: string, newComponentTag: ComponentType) => void
 }
 
 // Component props type for renderComponent function
@@ -84,7 +85,7 @@ export type ComponentProps<Tag extends ComponentType> = {
   componentId: string
   attributes: ComponentAttributes<Tag>
   children?: React.ReactNode
-} & ComponentActionProps<Tag>
+} & ComponentOperations<Tag>
 
 export type ComponentWrapperProps<Tag extends ComponentType> = {
   pageBuilderMode: PageBuilderMode
@@ -94,7 +95,7 @@ export type ComponentWrapperProps<Tag extends ComponentType> = {
 
 export type ComponentControlsProps<Tag extends ComponentType> = {
   component: DesignComponent<Tag>
-} & Omit<ComponentActionProps<Tag>, "addComponent" | "setSelectedComponent">
+} & Omit<ComponentOperations<Tag>, "addComponent" | "setSelectedComponent">
 
 // Component data interface - updated to match actual exports
 export interface ComponentInfo<Tag extends ComponentType> {

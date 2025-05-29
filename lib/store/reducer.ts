@@ -53,6 +53,28 @@ const updateComponentInArray = (
   })
 }
 
+// Helper function to replace component in array
+const replaceComponentInArray = (
+  components: DesignComponent<ComponentType>[],
+  oldComponentId: string,
+  newComponent: DesignComponent<ComponentType>,
+): DesignComponent<ComponentType>[] => {
+  return components.map((component) => {
+    if (component.id === oldComponentId) {
+      return newComponent
+    }
+
+    if (component.children) {
+      return {
+        ...component,
+        children: replaceComponentInArray(component.children, oldComponentId, newComponent),
+      }
+    }
+
+    return component
+  })
+}
+
 // Helper function to remove component from array
 const removeComponentFromArray = (
   components: DesignComponent<ComponentType>[],
@@ -174,9 +196,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         pages: state.pages.map((page) =>
           page.id === pageId
             ? {
-                ...page,
-                components: updateComponentInArray(page.components, componentId, updates),
-              }
+              ...page,
+              components: updateComponentInArray(page.components, componentId, updates),
+            }
             : page,
         ),
       }
@@ -189,9 +211,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         pages: state.pages.map((page) =>
           page.id === pageId
             ? {
-                ...page,
-                components: removeComponentFromArray(page.components, componentId),
-              }
+              ...page,
+              components: removeComponentFromArray(page.components, componentId),
+            }
             : page,
         ),
         selectedComponentId: state.selectedComponentId === componentId ? null : state.selectedComponentId,
@@ -205,12 +227,28 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         pages: state.pages.map((page) =>
           page.id === pageId
             ? {
-                ...page,
-                components: addDuplicateToParent(page.components, componentId, duplicatedComponent),
-              }
+              ...page,
+              components: addDuplicateToParent(page.components, componentId, duplicatedComponent),
+            }
             : page,
         ),
         selectedComponentId: duplicatedComponent.id,
+      }
+    }
+
+    case "REPLACE_COMPONENT": {
+      const { pageId, oldComponentId, newComponent } = action.payload
+      return {
+        ...state,
+        pages: state.pages.map((page) =>
+          page.id === pageId
+            ? {
+              ...page,
+              components: replaceComponentInArray(page.components, oldComponentId, newComponent),
+            }
+            : page,
+        ),
+        selectedComponentId: newComponent.id,
       }
     }
 

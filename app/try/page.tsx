@@ -14,7 +14,7 @@ export default function BuilderPage() {
   const { state, dispatch } = useAppState()
   const pageBuilderMode = (state.previewMode ? "preview" : "edit") as PageBuilderMode
   const { savePageMutation, loadPageMutation, exportPageMutation } = usePageOperations()
-  const { addComponent, updateComponent, removeComponent, duplicateComponent } = useComponentOperations(dispatch, state)
+  const { addComponent, updateComponent, removeComponent, duplicateComponent, replaceComponent } = useComponentOperations(dispatch, state)
   const { handleSelectHistory, handleHistoryAccept, handleHistoryDiscard, handleDiscard } = useHistoryOperations(
     dispatch,
     state,
@@ -162,6 +162,7 @@ export default function BuilderPage() {
                   removeComponent,
                   addComponent,
                   duplicateComponent,
+                  replaceComponent,
                 } as ComponentWrapperProps<typeof component.tag>)}
               </React.Fragment>
             ))}

@@ -1,9 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Settings, Trash2, Move, Copy, Search, Plus } from "lucide-react"
+import { Settings, Trash2, Move, Copy, Plus, Replace } from "lucide-react"
 import { cn } from "@/lib/utils"
 import React from "react"
 import type {
@@ -18,6 +16,7 @@ import { getComponentInfo } from "@/components/design-components"
 import type { ReactNode } from "react"
 import { generateId, intersperseAndAppend } from "@/lib/utils"
 import { SettingsPopover } from "./settings-popover"
+import { ComponentSelectorPopover } from "./component-selector-popover"
 
 // Divider component for adding elements between existing ones
 const Divider = ({
@@ -49,24 +48,19 @@ const Divider = ({
         isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
       )}
     >
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("absolute bg-background border shadow-sm transition-opacity z-20 h-6 w-6 rounded-full")}
-            onClick={(e) => {
-              e.stopPropagation()
-              setPopoverOpen(true)
-            }}
-          >
-            <Plus className="h-3 w-3" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <ComponentSelector onSelect={handleAddComponent} closePopover={() => setPopoverOpen(false)} />
-        </PopoverContent>
-      </Popover>
+      <ComponentSelectorPopover onSelect={handleAddComponent} componentInfo={componentInfo}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn("absolute bg-background border shadow-sm transition-opacity z-20 h-6 w-6 rounded-full")}
+          onClick={(e) => {
+            e.stopPropagation()
+            setPopoverOpen(true)
+          }}
+        >
+          <Plus className="h-3 w-3" />
+        </Button>
+      </ComponentSelectorPopover>
     </div>
   )
 }
@@ -79,7 +73,7 @@ export function createDesignComponent<Tag extends ComponentType>(
 ): DesignComponent<Tag> {
   const data = getComponentInfo(tag)
   return {
-    id,
+    id: `${tag}-${id}`,
     tag: tag,
     attributes: { ...data.defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
     children: [],
@@ -99,128 +93,65 @@ const componentInfo: { [Key in ComponentType]: ComponentInfo<Key> } = {
   column: getComponentInfo("column"),
 }
 
-// Component selector popup
-const ComponentSelector = ({
-  onSelect,
-  closePopover,
-}: {
-  onSelect: (type: ComponentType) => void
-  parentId?: string
-  closePopover?: () => void
-}) => {
-  const [searchTerm, setSearchTerm] = React.useState("")
-
-  const filteredComponents = React.useMemo(() => {
-    const components = Object.values(componentInfo)
-    if (!searchTerm.trim()) return components
-
-    const search = searchTerm.toLowerCase()
-    return components.filter(
-      (component) =>
-        component.label.toLowerCase().includes(search) ||
-        component.keywords.some((keyword) => keyword.includes(search)),
-    )
-  }, [searchTerm])
-
-  const handleSelect = (type: ComponentType) => {
-    onSelect(type)
-    if (closePopover) {
-      closePopover()
-    }
-  }
-
-  return (
-    <div className="w-80">
-      {/* Search Bar */}
-      <div className="relative mb-3 p-2 border-b">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search components..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 h-8"
-        />
-      </div>
-
-      {/* Components Grid */}
-      <div className="grid grid-cols-3 gap-2 p-2 max-h-64 overflow-y-auto">
-        {filteredComponents.length > 0 ? (
-          filteredComponents.map((component) => (
-            <ComponentSelectorButton
-              key={component.tag}
-              icon={component.Icon}
-              label={component.label}
-              onClick={() => handleSelect(component.tag)}
-            />
-          ))
-        ) : (
-          <div className="col-span-3 text-center py-4 text-muted-foreground text-sm">No components found</div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Component selector button
-const ComponentSelectorButton = ({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-}) => {
-  return (
-    <Button variant="outline" size="sm" className="flex flex-col items-center h-auto py-2 gap-1" onClick={onClick}>
-      <div className="p-1 bg-muted rounded-md">{icon}</div>
-      <span className="text-xs">{label}</span>
-    </Button>
-  )
-}
-
-// Component popup with auto-close
-export const ComponentPopover = ({
+// Replace With Popover
+export const ReplaceWithPopover = ({
   children,
-  onSelect,
-  parentId,
+  currentComponent,
+  onReplace,
 }: {
   children: React.ReactNode
-  onSelect: (type: ComponentType) => void
-  parentId?: string
+  currentComponent: DesignComponent<ComponentType>
+  onReplace: (newType: ComponentType) => void
 }) => {
-  const [open, setOpen] = React.useState(false)
+  const _componentInfo = { ...componentInfo }
+  delete _componentInfo[currentComponent.tag]
 
-  const closePopover = () => {
-    setOpen(false)
+  const handleReplace = (newType: ComponentType) => {
+    onReplace(newType)
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <ComponentSelector onSelect={onSelect} parentId={parentId} closePopover={closePopover} />
-      </PopoverContent>
-    </Popover>
+    <ComponentSelectorPopover
+      componentInfo={_componentInfo}
+      onSelect={handleReplace}
+    >
+      {children}
+    </ComponentSelectorPopover>
   )
 }
 
 //#region Wrapper Components
 
-function ComponentControls<Tag extends ComponentType>({ component, updateComponent, duplicateComponent, removeComponent }: ComponentControlsProps<Tag>) {
+function ComponentControls<Tag extends ComponentType>({
+  component,
+  updateComponent,
+  duplicateComponent,
+  removeComponent,
+  replaceComponent,
+}: ComponentControlsProps<Tag>) {
   const _componentInfo = componentInfo[component.tag as ComponentType]
   const { label } = _componentInfo
 
+  const handleReplace = (newType: ComponentType) => {
+    replaceComponent(component.id, newType);
+  }
+
   return (
     <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
-      <span className="text-xs font-medium px-2 flex items-center">
-        {label}
-      </span>
-      <SettingsPopover component={component} onSave={(props) => updateComponent(component.id, props as ComponentAttributes<Tag>)}>
+      <span className="text-xs font-medium px-2 flex items-center">{label}</span>
+      <SettingsPopover
+        component={component}
+        onSave={(props) => updateComponent(component.id, props as ComponentAttributes<Tag>)}
+      >
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
           <Settings className="h-4 w-4" />
         </Button>
       </SettingsPopover>
+      <ReplaceWithPopover currentComponent={component} onReplace={handleReplace}>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
+          <Replace className="h-4 w-4" />
+        </Button>
+      </ReplaceWithPopover>
       <Button
         variant="ghost"
         size="icon"
@@ -259,6 +190,7 @@ export const GenericDesignComponentWrapper = ({
   removeComponent,
   addComponent,
   duplicateComponent,
+  replaceComponent,
 }: ComponentWrapperProps<Exclude<ComponentType, "row" | "column">>) => {
   const componentType = component.tag
   const showControls = selectedComponentId === component.id
@@ -274,12 +206,15 @@ export const GenericDesignComponentWrapper = ({
     },
   }
 
-  const componentControls = selectedComponentId === component.id && ComponentControls({
-    component,
-    updateComponent,
-    duplicateComponent,
-    removeComponent,
-  })
+  const componentControls =
+    selectedComponentId === component.id &&
+    ComponentControls({
+      component,
+      updateComponent,
+      duplicateComponent,
+      removeComponent,
+      replaceComponent,
+    })
 
   const componentData = React.useMemo(() => getComponentInfo(componentType), [componentType])
 
@@ -294,6 +229,7 @@ export const GenericDesignComponentWrapper = ({
         removeComponent,
         addComponent,
         duplicateComponent,
+        replaceComponent,
       })}
     </div>
   )
@@ -394,8 +330,13 @@ export const RowWrapper = ({
   removeComponent,
   addComponent,
   duplicateComponent,
+  replaceComponent,
 }: ComponentWrapperProps<"row">) => {
-  const { visibleVerticalDividers: visibleDividers, handleChildMouseMove, handleChildMouseLeave } = useDividerVisibility()
+  const {
+    visibleVerticalDividers: visibleDividers,
+    handleChildMouseMove,
+    handleChildMouseLeave,
+  } = useDividerVisibility()
   const showControls = selectedComponentId === component.id
 
   const componentProps = {
@@ -410,12 +351,15 @@ export const RowWrapper = ({
     },
   }
 
-  const componentControls = showControls && ComponentControls({
-    component,
-    updateComponent,
-    duplicateComponent,
-    removeComponent,
-  })
+  const componentControls =
+    showControls &&
+    ComponentControls({
+      component,
+      updateComponent,
+      duplicateComponent,
+      removeComponent,
+      replaceComponent,
+    })
 
   // Handle adding component at specific index
   const handleAddAtIndex = (type: ComponentType, dividerIndex: number) => {
@@ -424,30 +368,32 @@ export const RowWrapper = ({
     addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
   }
 
-
   const hasChildren = !!component.children.length
   const componentData = getComponentInfo(component.tag)
   const RowComponent = componentData.Component
 
-  const children = component.children.map(<Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
-    <div
-      key={child.id}
-      className="flex-1 relative"
-      onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
-      onMouseLeave={() => handleChildMouseLeave(childIndex)}
-    >
-      {renderDesignComponent({
-        component: child,
-        selectedComponentId,
-        pageBuilderMode,
-        setSelectedComponent,
-        updateComponent,
-        removeComponent,
-        addComponent,
-        duplicateComponent
-      })}
-    </div>
-  ))
+  const children = component.children.map(
+    <Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
+      <div
+        key={child.id}
+        className="flex-1 relative"
+        onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
+        onMouseLeave={() => handleChildMouseLeave(childIndex)}
+      >
+        {renderDesignComponent({
+          component: child,
+          selectedComponentId,
+          pageBuilderMode,
+          setSelectedComponent,
+          updateComponent,
+          removeComponent,
+          addComponent,
+          duplicateComponent,
+          replaceComponent,
+        })}
+      </div>
+    ),
+  )
 
   return (
     <div {...componentProps}>
@@ -461,25 +407,30 @@ export const RowWrapper = ({
         removeComponent={removeComponent}
         addComponent={addComponent}
         duplicateComponent={duplicateComponent}
+        replaceComponent={replaceComponent}
       >
-        {hasChildren ? intersperseAndAppend(children, null).map((item, index) =>
-          item === null ? (
-            <Divider
-              key={`divider-${index}`}
-              orientation="vertical"
-              onAddComponent={handleAddAtIndex}
-              index={index}
-              isVisible={visibleDividers.has(index)}
-            />
-          ) : <React.Fragment key={index}>{item}</React.Fragment>
+        {hasChildren ? (
+          intersperseAndAppend(children, null).map((item, index) =>
+            item === null ? (
+              <Divider
+                key={`divider-${index}`}
+                orientation="vertical"
+                onAddComponent={handleAddAtIndex}
+                index={index}
+                isVisible={visibleDividers.has(index)}
+              />
+            ) : (
+              <React.Fragment key={index}>{item}</React.Fragment>
+            ),
+          )
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground flex-1">
-            <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
+            <ComponentSelectorPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })} componentInfo={componentInfo}>
               <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
                 <Plus className="h-3 w-3" />
                 <span className="sr-only">Add component</span>
               </Button>
-            </ComponentPopover>
+            </ComponentSelectorPopover>
           </div>
         )}
       </RowComponent>
@@ -497,8 +448,13 @@ export const ColumnWrapper = ({
   removeComponent,
   addComponent,
   duplicateComponent,
+  replaceComponent,
 }: ComponentWrapperProps<"column">) => {
-  const { visibleHorizontalDividers: visibleDividers, handleChildMouseMove, handleChildMouseLeave } = useDividerVisibility()
+  const {
+    visibleHorizontalDividers: visibleDividers,
+    handleChildMouseMove,
+    handleChildMouseLeave,
+  } = useDividerVisibility()
   const showControls = selectedComponentId === component.id
 
   const componentProps = {
@@ -513,12 +469,15 @@ export const ColumnWrapper = ({
     },
   }
 
-  const componentControls = showControls && ComponentControls({
-    component,
-    updateComponent,
-    duplicateComponent,
-    removeComponent,
-  })
+  const componentControls =
+    showControls &&
+    ComponentControls({
+      component,
+      updateComponent,
+      duplicateComponent,
+      removeComponent,
+      replaceComponent,
+    })
 
   // Handle adding component at specific index
   const handleAddAtIndex = (type: ComponentType, dividerIndex: number) => {
@@ -532,25 +491,28 @@ export const ColumnWrapper = ({
   const componentData = getComponentInfo(component.tag)
   const ColumnComponent = componentData.Component
 
-  const children = component.children.map(<Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
-    <div
-      key={child.id}
-      className="relative"
-      onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
-      onMouseLeave={() => handleChildMouseLeave(childIndex)}
-    >
-      {renderDesignComponent({
-        component: child,
-        selectedComponentId,
-        pageBuilderMode,
-        setSelectedComponent,
-        updateComponent,
-        removeComponent,
-        addComponent,
-        duplicateComponent,
-      })}
-    </div>
-  ))
+  const children = component.children.map(
+    <Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
+      <div
+        key={child.id}
+        className="relative"
+        onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
+        onMouseLeave={() => handleChildMouseLeave(childIndex)}
+      >
+        {renderDesignComponent({
+          component: child,
+          selectedComponentId,
+          pageBuilderMode,
+          setSelectedComponent,
+          updateComponent,
+          removeComponent,
+          addComponent,
+          duplicateComponent,
+          replaceComponent,
+        })}
+      </div>
+    ),
+  )
   return (
     <div {...componentProps}>
       {componentControls}
@@ -563,24 +525,30 @@ export const ColumnWrapper = ({
         removeComponent={removeComponent}
         addComponent={addComponent}
         duplicateComponent={duplicateComponent}
+        replaceComponent={replaceComponent}
       >
-        {hasChildren ? intersperseAndAppend(children, null,).map((item, index) =>
-          item === null ? (
-            <Divider
-              key={`divider-${index}`}
-              orientation="horizontal"
-              onAddComponent={handleAddAtIndex}
-              index={index}
-              isVisible={visibleDividers.has(index)}
-            />) : <React.Fragment key={index}>{item}</React.Fragment>
+        {hasChildren ? (
+          intersperseAndAppend(children, null).map((item, index) =>
+            item === null ? (
+              <Divider
+                key={`divider-${index}`}
+                orientation="horizontal"
+                onAddComponent={handleAddAtIndex}
+                index={index}
+                isVisible={visibleDividers.has(index)}
+              />
+            ) : (
+              <React.Fragment key={index}>{item}</React.Fragment>
+            ),
+          )
         ) : (
           <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-            <ComponentPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })}>
+            <ComponentSelectorPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })} componentInfo={componentInfo}>
               <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
                 <Plus className="h-3 w-3" />
                 <span className="sr-only">Add component</span>
               </Button>
-            </ComponentPopover>
+            </ComponentSelectorPopover>
           </div>
         )}
       </ColumnComponent>
@@ -611,6 +579,7 @@ export function renderDesignComponent<Tag extends ComponentType>({
   removeComponent,
   addComponent,
   duplicateComponent,
+  replaceComponent
 }: ComponentWrapperProps<Tag>): ReactNode {
   const WrapperComponent = getWrapperComponent(component.tag)
   const Component = componentInfo[component.tag].Component
@@ -623,31 +592,29 @@ export function renderDesignComponent<Tag extends ComponentType>({
     removeComponent,
     addComponent,
     duplicateComponent,
+    replaceComponent,
   }
 
   const childrenToRender = component.children.map((child) => (
     <React.Fragment key={child.id}>
-      {renderDesignComponent({ ...props, component: child, } as ComponentWrapperProps<typeof child.tag>)}
+      {renderDesignComponent({ ...props, component: child } as ComponentWrapperProps<typeof child.tag>)}
     </React.Fragment>
   ))
 
-  return (
-    pageBuilderMode === "edit" ? (
-      <WrapperComponent {...props as ComponentWrapperProps<Tag>} >
-        {childrenToRender}
-      </WrapperComponent>
-    ) : (
-      <Component
-        componentId={component.id}
-        attributes={component.attributes}
-        setSelectedComponent={setSelectedComponent}
-        updateComponent={updateComponent}
-        removeComponent={removeComponent}
-        addComponent={addComponent}
-        duplicateComponent={duplicateComponent}
-      >
-        {childrenToRender}
-      </Component>
-    )
+  return pageBuilderMode === "edit" ? (
+    <WrapperComponent {...(props as ComponentWrapperProps<Tag>)}>{childrenToRender}</WrapperComponent>
+  ) : (
+    <Component
+      componentId={component.id}
+      attributes={component.attributes}
+      setSelectedComponent={setSelectedComponent}
+      updateComponent={updateComponent}
+      removeComponent={removeComponent}
+      addComponent={addComponent}
+      duplicateComponent={duplicateComponent}
+      replaceComponent={replaceComponent}
+    >
+      {childrenToRender}
+    </Component>
   )
 }

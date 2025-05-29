@@ -7,7 +7,7 @@ import { Save, X, GripVertical, Settings, Maximize, Minimize, History, RotateCw 
 import { cn } from "@/lib/utils"
 import { HistoryPopover } from "@/components/page-builder/history-popover"
 import type { HistoryEntry } from "@/lib/store/types"
-import { PageBuilderMode } from "../design-components/types"
+import type { PageBuilderMode } from "../design-components/types"
 
 interface PageCraftToolbarProps {
   toolbarMinimized: boolean
@@ -19,7 +19,7 @@ interface PageCraftToolbarProps {
   savePage: () => void
   handleDiscard: () => void
   onSelectHistory: (index: number) => void
-  onAcceptHistory: () => void
+  onAcceptHistory: (index: number) => void
   onDiscardHistory: () => void
 }
 
@@ -72,18 +72,21 @@ export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
     setIsDragging(true)
   }
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging && toolbarRef.current) {
-      // const toolbarRect = toolbarRef.current.getBoundingClientRect()
-      // const toolbarCenterX = toolbarRect.left + toolbarRect.width / 2
-      // const toolbarCenterY = toolbarRect.top + toolbarRect.height / 2
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging && toolbarRef.current) {
+        // const toolbarRect = toolbarRef.current.getBoundingClientRect()
+        // const toolbarCenterX = toolbarRect.left + toolbarRect.width / 2
+        // const toolbarCenterY = toolbarRect.top + toolbarRect.height / 2
 
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y,
-      })
-    }
-  },[isDragging, dragOffset.x, dragOffset.y])
+        setPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y,
+        })
+      }
+    },
+    [isDragging, dragOffset.x, dragOffset.y],
+  )
 
   const handleMouseUp = () => {
     setIsDragging(false)

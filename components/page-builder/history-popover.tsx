@@ -14,7 +14,7 @@ interface HistoryPopoverProps {
   history: HistoryEntry[]
   currentHistoryIndex: number
   onSelectHistory: (index: number) => void
-  onAccept: () => void
+  onAccept: (index: number) => void
   onDiscard: () => void
   previewIndex: number | null
   children: React.ReactNode
@@ -26,7 +26,7 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
   history,
   currentHistoryIndex,
   onSelectHistory,
-  onAccept,
+  // onAccept,
   onDiscard,
   previewIndex,
   children,
@@ -187,7 +187,7 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
             <Button
               variant="ghost"
               className="flex-1 rounded-none rounded-br-lg bg-foreground hover:bg-foreground/90 text-background h-12"
-              onClick={onAccept}
+              // onClick={() => onAccept(index)}
             >
               <Check className="h-4 w-4 mr-2" />
               Accept

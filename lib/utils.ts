@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Generate a unique ID for components
-export const generateId = () => `component-${Math.random().toString(36).substr(2, 9)}`
+export const generateId = () => `${Math.random().toString(36).substring(2, 9)}`
 
 // Helper function to intersperse and append items
 export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {

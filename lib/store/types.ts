@@ -29,15 +29,16 @@ export type AppAction =
   | { type: "UPDATE_PAGE"; payload: { id: string; updates: Partial<Page> } }
   | { type: "SET_ACTIVE_PAGE"; payload: string }
   | {
-      type: "ADD_COMPONENT"
-      payload: { pageId: string; component: DesignComponent<ComponentType>; parentId?: string; index?: number }
-    }
+    type: "ADD_COMPONENT"
+    payload: { pageId: string; component: DesignComponent<ComponentType>; parentId?: string; index?: number }
+  }
   | { type: "UPDATE_COMPONENT"; payload: { pageId: string; componentId: string; updates: Partial<ComponentAttributes<ComponentType>> } }
   | { type: "REMOVE_COMPONENT"; payload: { pageId: string; componentId: string } }
   | {
-      type: "DUPLICATE_COMPONENT"
-      payload: { pageId: string; componentId: string; duplicatedComponent: DesignComponent<ComponentType> }
-    }
+    type: "DUPLICATE_COMPONENT"
+    payload: { pageId: string; componentId: string; duplicatedComponent: DesignComponent<ComponentType> }
+  }
+  | { type: "REPLACE_COMPONENT", payload: { pageId: string, oldComponentId: string, newComponent: DesignComponent<ComponentType> } }
   | { type: "SET_SELECTED_COMPONENT"; payload: string | null }
   | { type: "SET_PREVIEW_MODE"; payload: boolean }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }

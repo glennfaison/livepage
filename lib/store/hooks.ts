@@ -428,12 +428,45 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     [dispatch, state.activePage, state.pages, findComponentById],
   )
 
+  const replaceComponent = useCallback(
+    (oldComponentId: string, newComponentTag: ComponentType) => {
+      const newComponent = createDesignComponent(newComponentTag, generateId())
+
+      dispatch({
+        type: "REPLACE_COMPONENT",
+        payload: {
+          pageId: state.activePage,
+          oldComponentId,
+          newComponent: newComponent,
+        },
+      })
+
+      // Add to history after state update
+      setTimeout(() => {
+        dispatch({
+          type: "ADD_TO_HISTORY",
+          payload: {
+            action: `Replaced component ${oldComponentId} with ${newComponentTag}`,
+            pageState: state.pages,
+          },
+        })
+      }, 0)
+
+      toast({
+        title: "Component replaced",
+        description: `Replaced component ${oldComponentId} with ${newComponentTag}.`,
+      })
+    },
+    [dispatch, state.activePage, state.pages]
+  )
+
   return {
     addComponent,
     updateComponent,
     removeComponent,
     duplicateComponent,
     findComponentById,
+    replaceComponent,
   }
 }
 
