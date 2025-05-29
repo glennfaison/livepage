@@ -83,7 +83,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = <T
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className={cn("w-80 z-50", isPositioned && "fixed", isDragging && "cursor-grabbing")}
+        className={cn("w-80 z-50 p-0", isPositioned && "fixed", isDragging && "cursor-grabbing")}
         side="bottom"
         align="end"
         sideOffset={8}
