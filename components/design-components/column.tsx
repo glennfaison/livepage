@@ -36,4 +36,4 @@ export const Component = ({ children, componentId, attributes, }: ComponentProps
 			{children}
 		</div>
 	);
-};
+}

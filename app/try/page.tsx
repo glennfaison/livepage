@@ -1,33 +1,43 @@
 "use client"
 
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Layers, Home, Save, Upload, Download, Plus, AlignVerticalSpaceBetween } from "lucide-react"
+import { Layers, Home, Upload, Download, Plus, AlignVerticalSpaceBetween, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { renderDesignComponent } from "@/components/page-builder/page-builder"
 import { PageCraftToolbar } from "@/components/page-builder/pagecraft-toolbar"
 import { useAppState, usePageOperations, useComponentOperations, useHistoryOperations } from "@/lib/store/hooks"
-import { ComponentWrapperProps, PageBuilderMode } from "@/components/design-components/types"
+import type { ComponentWrapperProps, PageBuilderMode } from "@/components/design-components/types"
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
   const pageBuilderMode = (state.previewMode ? "preview" : "edit") as PageBuilderMode
   const { savePageMutation, loadPageMutation, exportPageMutation } = usePageOperations()
-  const { addComponent, updateComponent, removeComponent, duplicateComponent, replaceComponent } = useComponentOperations(dispatch, state)
+  const { addComponent, updateComponent, removeComponent, duplicateComponent, replaceComponent } =
+    useComponentOperations(dispatch, state)
   const { handleSelectHistory, handleHistoryAccept, handleHistoryDiscard, handleDiscard } = useHistoryOperations(
     dispatch,
     state,
   )
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [saveDropdownOpen, setSaveDropdownOpen] = useState(false)
 
   // Get the current active page
   const currentPage = state.pages.find((page) => page.id === state.activePage) || state.pages[0]
 
-  // Save the current page as a file
-  const savePage = () => {
+  // Save the current page as JSON file
+  const saveAsJSON = () => {
     savePageMutation.mutate(currentPage)
+    setSaveDropdownOpen(false)
+  }
+
+  // Export the page as HTML file
+  const saveAsHTML = () => {
+    exportPageMutation.mutate(currentPage)
+    setSaveDropdownOpen(false)
   }
 
   // Load a page from a file
@@ -72,13 +82,8 @@ export default function BuilderPage() {
     }
   }
 
-  // Export the page as HTML/CSS/JS
-  const exportPage = () => {
-    exportPageMutation.mutate(currentPage)
-  }
-
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col min-h-screen">
       <header className="border-b">
         <div className="container flex items-center justify-between py-4 mx-auto">
           <div className="flex items-center gap-2">
@@ -120,28 +125,29 @@ export default function BuilderPage() {
               placeholder="Page Title"
             />
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={savePage}
-                disabled={savePageMutation.isPending}
-              >
-                <Save className="h-4 w-4" /> {savePageMutation.isPending ? "Saving..." : "Save"}
-              </Button>
               <Button variant="outline" size="sm" className="gap-2" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="h-4 w-4" /> Load
               </Button>
               <input type="file" ref={fileInputRef} onChange={loadPage} accept=".json" className="hidden" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={exportPage}
-                disabled={exportPageMutation.isPending}
-              >
-                <Download className="h-4 w-4" /> {exportPageMutation.isPending ? "Exporting..." : "Export"}
-              </Button>
+
+              <DropdownMenu open={saveDropdownOpen} onOpenChange={setSaveDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" /> Save
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={saveAsJSON} disabled={savePageMutation.isPending}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {savePageMutation.isPending ? "Saving..." : "Download as JSON"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={saveAsHTML} disabled={exportPageMutation.isPending}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {exportPageMutation.isPending ? "Exporting..." : "Download as HTML"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -188,7 +194,7 @@ export default function BuilderPage() {
       <PageCraftToolbar
         toolbarMinimized={state.toolbarMinimized}
         setToolbarMinimized={(minimized) => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: minimized })}
-        savePage={savePage}
+        savePage={saveAsJSON}
         handleDiscard={handleDiscard}
         pageBuilderMode={pageBuilderMode}
         history={state.history}
