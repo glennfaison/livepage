@@ -92,7 +92,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("toggles preview mode when Edit Mode button is clicked", async () => {
-    const { useAppState } = require("@/lib/store/hooks")
+    const { useAppState } = jest.requireMock("@/lib/store/hooks")
     const mockDispatch = jest.fn()
     ;(useAppState as jest.Mock).mockReturnValue({
       state: {
@@ -121,7 +121,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("updates page title when input changes", async () => {
-    const { useAppState } = require("@/lib/store/hooks")
+    const { useAppState } = jest.requireMock("@/lib/store/hooks")
     const mockDispatch = jest.fn()
     ;(useAppState as jest.Mock).mockReturnValue({
       state: {
@@ -165,7 +165,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("triggers save as JSON when Download as JSON is clicked", async () => {
-    const { usePageOperations } = require("@/lib/store/hooks")
+    const { usePageOperations } = jest.requireMock("@/lib/store/hooks")
     const mockSavePageAsJsonMutation = { mutate: jest.fn(), isPending: false }
     ;(usePageOperations as jest.Mock).mockReturnValue({
       savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
@@ -186,7 +186,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("triggers export as HTML when Download as HTML is clicked", async () => {
-    const { usePageOperations } = require("@/lib/store/hooks")
+    const { usePageOperations } = jest.requireMock("@/lib/store/hooks")
     const mockSavePageAsHtmlMutation = { mutate: jest.fn(), isPending: false }
     ;(usePageOperations as jest.Mock).mockReturnValue({
       savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
@@ -207,7 +207,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("adds a row component when Add Row button is clicked", async () => {
-    const { useComponentOperations } = require("@/lib/store/hooks")
+    const { useComponentOperations } = jest.requireMock("@/lib/store/hooks")
     const mockAddComponent = jest.fn()
     ;(useComponentOperations as jest.Mock).mockReturnValue({
       addComponent: mockAddComponent,
