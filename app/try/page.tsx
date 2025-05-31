@@ -14,7 +14,7 @@ import type { ComponentWrapperProps, PageBuilderMode } from "@/components/design
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
   const pageBuilderMode = (state.previewMode ? "preview" : "edit") as PageBuilderMode
-  const { savePageMutation, loadPageMutation, exportPageMutation } = usePageOperations()
+  const { savePageAsJsonMutation, loadPageMutation, savePageAsHtmlMutation, savePageAsShortcodeMutation } = usePageOperations()
   const { addComponent, updateComponent, removeComponent, duplicateComponent, replaceComponent } =
     useComponentOperations(dispatch, state)
   const { handleSelectHistory, handleHistoryAccept, handleHistoryDiscard, handleDiscard } = useHistoryOperations(
@@ -28,15 +28,18 @@ export default function BuilderPage() {
   // Get the current active page
   const currentPage = state.pages.find((page) => page.id === state.activePage) || state.pages[0]
 
-  // Save the current page as JSON file
   const saveAsJSON = () => {
-    savePageMutation.mutate(currentPage)
+    savePageAsJsonMutation.mutate(currentPage)
     setSaveDropdownOpen(false)
   }
 
-  // Export the page as HTML file
+  const saveAsShortcode = () => {
+    savePageAsShortcodeMutation.mutate(currentPage)
+    setSaveDropdownOpen(false)
+  }
+
   const saveAsHTML = () => {
-    exportPageMutation.mutate(currentPage)
+    savePageAsHtmlMutation.mutate(currentPage)
     setSaveDropdownOpen(false)
   }
 
@@ -138,13 +141,17 @@ export default function BuilderPage() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={saveAsJSON} disabled={savePageMutation.isPending}>
+                  <DropdownMenuItem onClick={saveAsShortcode} disabled={savePageAsShortcodeMutation.isPending}>
                     <Download className="h-4 w-4 mr-2" />
-                    {savePageMutation.isPending ? "Saving..." : "Download as JSON"}
+                    {savePageAsShortcodeMutation.isPending ? "Exporting..." : "Download as Shortcode"}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={saveAsHTML} disabled={exportPageMutation.isPending}>
+                  <DropdownMenuItem onClick={saveAsJSON} disabled={savePageAsJsonMutation.isPending}>
                     <Download className="h-4 w-4 mr-2" />
-                    {exportPageMutation.isPending ? "Exporting..." : "Download as HTML"}
+                    {savePageAsJsonMutation.isPending ? "Saving..." : "Download as JSON"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={saveAsHTML} disabled={savePageAsHtmlMutation.isPending}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download as HTML"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
