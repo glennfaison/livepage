@@ -68,7 +68,8 @@ export function usePageOperations() {
     mutationFn: async (page: Page) => {
       const _attributes = page.attributes
       _attributes.title = page.title
-      const _page = { ...page, children: page.components, attributes: _attributes, tag: 'page' }
+      const _children = JSON.parse(JSON.stringify(page.components))
+      const _page = { children: _children, attributes: _attributes, tag: 'page' }
       const data = stringify([_page])
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
