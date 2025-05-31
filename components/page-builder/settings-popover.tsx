@@ -75,7 +75,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = <T
               Settings
             </button>
             <button
-              name="connect-tab-trigger"
+              data-testid="connect-tab-trigger"
               className={cn(
                 "flex-1 px-4 py-2 text-sm font-medium transition-colors",
                 activeTab === "connect"
