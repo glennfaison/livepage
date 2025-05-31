@@ -183,6 +183,7 @@ function ComponentControls<Tag extends ComponentType>({
 
 // Generic Design Component Wrapper
 export const GenericDesignComponentWrapper = ({
+  pageBuilderMode,
   component,
   selectedComponentId,
   setSelectedComponent,
@@ -222,6 +223,7 @@ export const GenericDesignComponentWrapper = ({
     <div {...componentProps}>
       {componentControls}
       {componentData.Component({
+        pageBuilderMode,
         componentId: component.id,
         attributes: component.attributes,
         setSelectedComponent,
@@ -400,6 +402,7 @@ export const RowWrapper = ({
       {componentControls}
 
       <RowComponent
+        pageBuilderMode={pageBuilderMode}
         componentId={component.id}
         attributes={component.attributes}
         setSelectedComponent={setSelectedComponent}
@@ -518,6 +521,7 @@ export const ColumnWrapper = ({
       {componentControls}
 
       <ColumnComponent
+        pageBuilderMode={pageBuilderMode}
         componentId={component.id}
         attributes={component.attributes}
         setSelectedComponent={setSelectedComponent}
@@ -605,6 +609,7 @@ export function renderDesignComponent<Tag extends ComponentType>({
     <WrapperComponent {...(props as ComponentWrapperProps<Tag>)}>{childrenToRender}</WrapperComponent>
   ) : (
     <Component
+      pageBuilderMode={pageBuilderMode}
       componentId={component.id}
       attributes={component.attributes}
       setSelectedComponent={setSelectedComponent}

@@ -6,7 +6,7 @@ import { ArrowRight, Layers, Download, Code } from "lucide-react"
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b">
+      <header className="border-b px-2">
         <div className="container flex items-center justify-between py-4 mx-auto">
           <div className="flex items-center gap-2">
             <Layers className="h-6 w-6 text-primary" />

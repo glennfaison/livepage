@@ -82,13 +82,13 @@ export type ComponentOperations<Tag extends ComponentType> = {
 
 // Component props type for renderComponent function
 export type ComponentProps<Tag extends ComponentType> = {
+  pageBuilderMode: PageBuilderMode
   componentId: string
   attributes: ComponentAttributes<Tag>
   children?: React.ReactNode
 } & ComponentOperations<Tag>
 
 export type ComponentWrapperProps<Tag extends ComponentType> = {
-  pageBuilderMode: PageBuilderMode
   component: DesignComponent<Tag>
   selectedComponentId: string | null
 } & Omit<ComponentProps<Tag>, "componentId" | "attributes">
