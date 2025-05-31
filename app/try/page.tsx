@@ -84,7 +84,7 @@ export default function BuilderPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b">
+      <header className="border-b px-2">
         <div className="container flex items-center justify-between py-4 mx-auto">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export default function BuilderPage() {
         <div className="container py-4 border-b mx-auto">
           <div className="flex justify-between items-center">
             <Input
-              value={currentPage.title}
+              defaultValue={currentPage.title}
               onChange={(e) => {
                 dispatch({
                   type: "UPDATE_PAGE",
