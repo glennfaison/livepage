@@ -1,5 +1,5 @@
 import { parse, stringify } from "../../../lib/shortcode-parser/parser";
-import { shortcodeSamples, parsedShortcodeElementSamples } from "./samples";
+import { shortcodeSamples, parsedShortcodeElementSamples } from "./data";
 
 describe("parse", () => {
 	shortcodeSamples.forEach((sample, idx) => {

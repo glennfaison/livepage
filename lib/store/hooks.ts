@@ -10,6 +10,7 @@ import type { ComponentAttributes, ComponentType, DesignComponent, Page } from "
 import { createDesignComponent } from "@/components/page-builder/page-builder"
 import { generateId } from "@/lib/utils"
 import { toast } from "@/components/ui/use-toast"
+import { stringify } from "../shortcode-parser/parser"
 
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -32,10 +33,10 @@ export function useAppState() {
 }
 
 export function usePageOperations() {
-  // Save page mutation
-  const savePageMutation = useMutation({
+  // Save page as JSON mutation
+  const savePageAsJsonMutation = useMutation({
     mutationFn: async (page: Page) => {
-      const data = JSON.stringify(page, null, 2)
+      const data = JSON.stringify(page, null)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -62,41 +63,41 @@ export function usePageOperations() {
     },
   })
 
-  // Load page mutation
-  const loadPageMutation = useMutation({
-    mutationFn: async (file: File): Promise<Page> => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          try {
-            const content = e.target?.result as string
-            const loadedPage = JSON.parse(content) as Page
-            resolve(loadedPage)
-          } catch (error) {
-            reject(new Error(`Invalid file format ${error}`))
-          }
-        }
-        reader.onerror = () => reject(new Error("Failed to read file"))
-        reader.readAsText(file)
-      })
+  // Save page as Shortcode mutation
+  const savePageAsShortcodeMutation = useMutation({
+    mutationFn: async (page: Page) => {
+      const _attributes = page.attributes
+      _attributes.title = page.title
+      const _page = { ...page, children: page.components, attributes: _attributes, tag: 'page' }
+      const data = stringify([_page])
+      const blob = new Blob([data], { type: "text/plain" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${page.title.toLowerCase().replace(/\s+/g, "-")}.txt`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      return page
     },
-    onSuccess: (loadedPage) => {
+    onSuccess: () => {
       toast({
-        title: "Page loaded",
-        description: `${loadedPage.title} has been loaded successfully.`,
+        title: "Page saved",
+        description: "Your page has been saved as a Shortcode file.",
       })
     },
     onError: () => {
       toast({
-        title: "Error loading page",
-        description: "The file format is invalid.",
+        title: "Error saving page",
+        description: "Failed to save the page.",
         variant: "destructive",
       })
     },
   })
 
-  // Export page mutation
-  const exportPageMutation = useMutation({
+  // Save page as HTML mutation
+  const savePageAsHtmlMutation = useMutation({
     mutationFn: async (page: Page) => {
       // Basic HTML template
       const htmlTemplate = `
@@ -207,10 +208,44 @@ export function usePageOperations() {
     },
   })
 
+  // Load page mutation
+  const loadPageMutation = useMutation({
+    mutationFn: async (file: File): Promise<Page> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          try {
+            const content = e.target?.result as string
+            const loadedPage = JSON.parse(content) as Page
+            resolve(loadedPage)
+          } catch (error) {
+            reject(new Error(`Invalid file format ${error}`))
+          }
+        }
+        reader.onerror = () => reject(new Error("Failed to read file"))
+        reader.readAsText(file)
+      })
+    },
+    onSuccess: (loadedPage) => {
+      toast({
+        title: "Page loaded",
+        description: `${loadedPage.title} has been loaded successfully.`,
+      })
+    },
+    onError: () => {
+      toast({
+        title: "Error loading page",
+        description: "The file format is invalid.",
+        variant: "destructive",
+      })
+    },
+  })
+
   return {
-    savePageMutation,
+    savePageAsShortcodeMutation,
+    savePageAsJsonMutation,
+    savePageAsHtmlMutation,
     loadPageMutation,
-    exportPageMutation,
   }
 }
 

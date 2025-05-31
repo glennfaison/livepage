@@ -46,9 +46,10 @@ jest.mock("@/lib/store/hooks", () => {
       dispatch: jest.fn(),
     })),
     usePageOperations: jest.fn(() => ({
-      savePageMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
       loadPageMutation: { mutate: jest.fn(), isPending: false },
-      exportPageMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
     })),
     useComponentOperations: jest.fn(() => ({
       addComponent: jest.fn(),
@@ -165,11 +166,12 @@ describe("BuilderPage Integration", () => {
 
   it("triggers save as JSON when Download as JSON is clicked", async () => {
     const { usePageOperations } = require("@/lib/store/hooks")
-    const mockSavePageMutation = { mutate: jest.fn(), isPending: false }
+    const mockSavePageAsJsonMutation = { mutate: jest.fn(), isPending: false }
     ;(usePageOperations as jest.Mock).mockReturnValue({
-      savePageMutation: mockSavePageMutation,
+      savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsJsonMutation: mockSavePageAsJsonMutation,
       loadPageMutation: { mutate: jest.fn(), isPending: false },
-      exportPageMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
     })
 
     render(<BuilderPage />)
@@ -180,16 +182,17 @@ describe("BuilderPage Integration", () => {
     const jsonOption = await screen.findByText("Download as JSON")
     await userEvent.click(jsonOption)
 
-    expect(mockSavePageMutation.mutate).toHaveBeenCalled()
+    expect(mockSavePageAsJsonMutation.mutate).toHaveBeenCalled()
   })
 
   it("triggers export as HTML when Download as HTML is clicked", async () => {
     const { usePageOperations } = require("@/lib/store/hooks")
-    const mockExportPageMutation = { mutate: jest.fn(), isPending: false }
+    const mockSavePageAsHtmlMutation = { mutate: jest.fn(), isPending: false }
     ;(usePageOperations as jest.Mock).mockReturnValue({
-      savePageMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+      savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
       loadPageMutation: { mutate: jest.fn(), isPending: false },
-      exportPageMutation: mockExportPageMutation,
+      savePageAsHtmlMutation: mockSavePageAsHtmlMutation,
     })
 
     render(<BuilderPage />)
@@ -200,7 +203,7 @@ describe("BuilderPage Integration", () => {
     const htmlOption = await screen.findByText("Download as HTML")
     await userEvent.click(htmlOption)
 
-    expect(mockExportPageMutation.mutate).toHaveBeenCalled()
+    expect(mockSavePageAsHtmlMutation.mutate).toHaveBeenCalled()
   })
 
   it("adds a row component when Add Row button is clicked", async () => {
