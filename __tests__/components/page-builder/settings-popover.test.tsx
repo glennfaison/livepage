@@ -1,58 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { SettingsPopover } from "@/components/page-builder/settings-popover"
-import { getComponentInfo } from "@/components/design-components"
 import { Button } from "@/components/ui/button"
-
-// Mock the component info
-jest.mock("@/components/design-components", () => ({
-  getComponentInfo: jest.fn(),
-}))
+import { createDesignComponent, getComponentInfo } from "@/features/design-components"
 
 describe("SettingsPopover", () => {
-  const mockComponent = {
-    id: "test-component-id",
-    tag: "header1" as const,
-    attributes: {
-      content: "Test Header",
-    },
-    children: [],
-    settingsFields: {
-      content: {
-        id: "content",
-        type: "text",
-        label: "Content",
-        placeholder: "Enter header text",
-      },
-    },
-  }
-
-  const mockComponentInfo = {
-    tag: "header1",
-    label: "Header 1",
-    defaultAttributes: {
-      content: "Default Header",
-    },
-    settingsFields: {
-      content: {
-        id: "content",
-        type: "text",
-        label: "Content",
-        placeholder: "Enter header text",
-      },
-    },
-  }
-
   const mockOnSave = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(getComponentInfo as jest.Mock).mockReturnValue(mockComponentInfo)
   })
 
   it("renders the trigger element", () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -61,8 +23,9 @@ describe("SettingsPopover", () => {
   })
 
   it("opens the popover when trigger is clicked", async () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -75,8 +38,10 @@ describe("SettingsPopover", () => {
   })
 
   it("displays settings fields with current values", async () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
+    const defaultContent = getComponentInfo(designComponentData.tag).defaultAttributes.content
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -86,13 +51,14 @@ describe("SettingsPopover", () => {
     await waitFor(() => {
       const contentInput = screen.getByLabelText("Content")
       expect(contentInput).toBeInTheDocument()
-      expect(contentInput).toHaveValue("Test Header")
+      expect(contentInput).toHaveValue(defaultContent)
     })
   })
 
   it("switches between settings and connect tabs", async () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -115,8 +81,9 @@ describe("SettingsPopover", () => {
   })
 
   it("calls onSave with updated values when Save button is clicked", async () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -135,8 +102,10 @@ describe("SettingsPopover", () => {
   })
 
   it("resets to default values when field is cleared and saved", async () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
+    const defaultContent = getComponentInfo(designComponentData.tag).defaultAttributes.content
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -149,13 +118,15 @@ describe("SettingsPopover", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save" }))
 
     expect(mockOnSave).toHaveBeenCalledWith({
-      content: "Default Header",
+      content: defaultContent,
     })
   })
 
   it("discards changes when Discard button is clicked", async () => {
+    const designComponentData = createDesignComponent('header1', 'header1-2345')
+    const defaultContent = getComponentInfo(designComponentData.tag).defaultAttributes.content
     render(
-      <SettingsPopover component={mockComponent} onSave={mockOnSave}>
+      <SettingsPopover component={designComponentData} onSave={mockOnSave}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
     )
@@ -175,7 +146,7 @@ describe("SettingsPopover", () => {
 
     await waitFor(() => {
       const newContentInput = screen.getByLabelText("Content")
-      expect(newContentInput).toHaveValue("Test Header")
+      expect(newContentInput).toHaveValue(defaultContent)
     })
   })
 })

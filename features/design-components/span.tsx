@@ -1,23 +1,15 @@
 import { Type } from "lucide-react"
-import { ComponentType } from "./types"
+import { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
 	content: string
-}
-
-export type ComponentProps = {
-	componentId: string
-	attributes: ComponentAttributes
-	pageBuilderMode: "edit" | "preview"
-	setSelectedComponent: (componentId: string) => void
-	updateComponent: (componentId: string, updates: Partial<ComponentAttributes>) => void
 }
 
 export const defaultAttributes: ComponentAttributes = {
 	content: "Inline text.",
 }
 
-export const tag: ComponentType = "span" as const
+export const tag: ComponentTag = "span" as const
 
 export const label = "Inline Text"
 
@@ -34,7 +26,7 @@ export const settingsFields = {
 
 export const Icon = <Type className="h-4 w-4" />
 
-export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
+export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps<typeof tag>) => {
 	const { content, ...restAttributes } = attributes
 	return (
 		<span

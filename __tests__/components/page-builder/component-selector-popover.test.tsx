@@ -2,56 +2,15 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
-import { getComponentInfo } from "@/components/design-components"
 import { Button } from "@/components/ui/button"
-import { ComponentInfo, ComponentType } from "@/components/design-components/types"
-
-// Mock the component info
-jest.mock("@/components/design-components", () => ({
-  getComponentInfo: jest.fn(),
-}))
+import { componentTagList } from "@/features/design-components"
 
 describe("ComponentSelectorPopover", () => {
-  const mockComponentInfo: { [Key in ComponentType]: ComponentInfo<Key> } = {
-    header1: {
-      tag: "header1",
-      label: "Header 1",
-      keywords: ["h1", "title", "header"],
-      Icon: <span data-testid="header1-icon">H1</span>,
-      defaultAttributes: { content: "" },
-      Component: () => <div />,
-      settingsFields: { content: { id: "content", label: "", type: "text" }}
-    },
-    paragraph: {
-      tag: "paragraph",
-      label: "Paragraph",
-      keywords: ["p", "text", "paragraph"],
-      Icon: <span data-testid="paragraph-icon">P</span>,
-      defaultAttributes: { content: "" },
-      Component: () => <div />,
-      settingsFields: { content: { id: "content", label: "", type: "text" }}
-    },
-    button: {
-      tag: "button",
-      label: "Button",
-      keywords: ["button", "click"],
-      Icon: <span data-testid="button-icon">Btn</span>,
-      defaultAttributes: { content: "" },
-      Component: () => <div />,
-      settingsFields: { content: { id: "content", label: "", type: "text" }}
-    },
-  }
-
   const mockOnSelect = jest.fn()
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-    ;(getComponentInfo as jest.Mock).mockImplementation((type) => mockComponentInfo[type as ComponentType])
-  })
 
   it("renders the trigger element", () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentInfo={mockComponentInfo}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -61,7 +20,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("opens the popover when trigger is clicked", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentInfo={mockComponentInfo}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -75,7 +34,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("displays all components in the grid", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentInfo={mockComponentInfo}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -91,7 +50,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("filters components based on search term", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentInfo={mockComponentInfo}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -110,7 +69,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("calls onSelect when a component is clicked", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentInfo={mockComponentInfo}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -123,7 +82,7 @@ describe("ComponentSelectorPopover", () => {
 
   it('shows "No components found" when search has no results', async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentInfo={mockComponentInfo}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )

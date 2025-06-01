@@ -1,7 +1,7 @@
 // import { render, screen } from "@/__tests__/utils/test-utils"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import * as Header1 from "@/components/design-components/header1"
+import * as Header1 from "@/features/design-components/header1"
 import "@testing-library/jest-dom"
 
 describe("Header1 Component", () => {

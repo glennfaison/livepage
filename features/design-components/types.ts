@@ -12,7 +12,7 @@ import type { ComponentAttributes as RowAttributes } from "./row"
 import type { ComponentAttributes as ColumnAttributes } from "./column"
 
 // Component types
-export type ComponentType =
+export type ComponentTag =
   | "header1"
   | "header2"
   | "header3"
@@ -24,7 +24,7 @@ export type ComponentType =
   | "column"
 
 // Generic component attributes based on component type
-export type ComponentAttributes<Tag extends ComponentType> = Tag extends "header1"
+export type ComponentAttributes<Tag extends ComponentTag> = Tag extends "header1"
   ? Header1Attributes
   : Tag extends "header2"
   ? Header2Attributes
@@ -46,7 +46,7 @@ export type ComponentAttributes<Tag extends ComponentType> = Tag extends "header
 
 export type PageBuilderMode = "edit" | "view"
 
-export type SettingsField<Tag extends ComponentType> = {
+export type SettingsField<Tag extends ComponentTag> = {
   id: keyof ComponentAttributes<Tag>
   label: string
   type: "text" | "number" | "boolean" | "textarea"
@@ -55,10 +55,10 @@ export type SettingsField<Tag extends ComponentType> = {
 }
 
 // Design component structure
-export type DesignComponent<Tag extends ComponentType> = {
+export type DesignComponent<Tag extends ComponentTag> = {
   id: string
   tag: Tag
-  children: DesignComponent<ComponentType>[]
+  children: DesignComponent<ComponentTag>[]
   attributes: ComponentAttributes<Tag>
   settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
 }
@@ -67,38 +67,38 @@ export type DesignComponent<Tag extends ComponentType> = {
 export interface Page {
   id: string
   title: string
-  components: DesignComponent<ComponentType>[]
+  components: DesignComponent<ComponentTag>[]
   attributes: Record<string, string>
 }
 
-export type ComponentOperations<Tag extends ComponentType> = {
+export type ComponentOperations<Tag extends ComponentTag> = {
   setSelectedComponent: (componentId: string) => void
   updateComponent: (componentId: string, updates: Partial<ComponentAttributes<Tag>>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
-  addComponent: (args: { type: ComponentType; parentId?: string; index?: number }) => void
-  replaceComponent: (oldComponentId: string, newComponentTag: ComponentType) => void
+  addComponent: (args: { type: ComponentTag; parentId?: string; index?: number }) => void
+  replaceComponent: (oldComponentId: string, newComponentTag: ComponentTag) => void
 }
 
 // Component props type for renderComponent function
-export type ComponentProps<Tag extends ComponentType> = {
+export type ComponentProps<Tag extends ComponentTag> = {
   pageBuilderMode: PageBuilderMode
   componentId: string
   attributes: ComponentAttributes<Tag>
   children?: React.ReactNode
 } & ComponentOperations<Tag>
 
-export type ComponentWrapperProps<Tag extends ComponentType> = {
+export type ComponentWrapperProps<Tag extends ComponentTag> = {
   component: DesignComponent<Tag>
   selectedComponentId: string | null
 } & Omit<ComponentProps<Tag>, "componentId" | "attributes">
 
-export type ComponentControlsProps<Tag extends ComponentType> = {
+export type ComponentControlsProps<Tag extends ComponentTag> = {
   component: DesignComponent<Tag>
 } & Omit<ComponentOperations<Tag>, "addComponent" | "setSelectedComponent">
 
 // Component data interface - updated to match actual exports
-export interface ComponentInfo<Tag extends ComponentType> {
+export interface ComponentInfo<Tag extends ComponentTag> {
   tag: Tag
   label: string
   keywords: string[]

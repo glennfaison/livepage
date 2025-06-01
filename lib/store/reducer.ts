@@ -1,13 +1,13 @@
 import type { AppState, AppAction, HistoryEntry } from "./types"
-import type { ComponentAttributes, ComponentType, DesignComponent } from "@/components/design-components/types"
+import type { ComponentAttributes, ComponentTag, DesignComponent } from "@/features/design-components/types"
 
 // Helper function to add component to parent
 const addComponentToParent = (
-  components: DesignComponent<ComponentType>[],
+  components: DesignComponent<ComponentTag>[],
   parentId: string,
-  newComponent: DesignComponent<ComponentType>,
+  newComponent: DesignComponent<ComponentTag>,
   index: number,
-): DesignComponent<ComponentType>[] => {
+): DesignComponent<ComponentTag>[] => {
   return components.map((component) => {
     if (component.id === parentId) {
       const currentChildren = component.children || []
@@ -30,10 +30,10 @@ const addComponentToParent = (
 
 // Helper function to update component in array
 const updateComponentInArray = (
-  components: DesignComponent<ComponentType>[],
+  components: DesignComponent<ComponentTag>[],
   id: string,
-  updates: Partial<ComponentAttributes<ComponentType>>,
-): DesignComponent<ComponentType>[] => {
+  updates: Partial<ComponentAttributes<ComponentTag>>,
+): DesignComponent<ComponentTag>[] => {
   return components.map((component) => {
     if (component.id === id) {
       return {
@@ -55,10 +55,10 @@ const updateComponentInArray = (
 
 // Helper function to replace component in array
 const replaceComponentInArray = (
-  components: DesignComponent<ComponentType>[],
+  components: DesignComponent<ComponentTag>[],
   oldComponentId: string,
-  newComponent: DesignComponent<ComponentType>,
-): DesignComponent<ComponentType>[] => {
+  newComponent: DesignComponent<ComponentTag>,
+): DesignComponent<ComponentTag>[] => {
   return components.map((component) => {
     if (component.id === oldComponentId) {
       return newComponent
@@ -77,9 +77,9 @@ const replaceComponentInArray = (
 
 // Helper function to remove component from array
 const removeComponentFromArray = (
-  components: DesignComponent<ComponentType>[],
+  components: DesignComponent<ComponentTag>[],
   id: string,
-): DesignComponent<ComponentType>[] => {
+): DesignComponent<ComponentTag>[] => {
   return components
     .filter((component) => component.id !== id)
     .map((component) => {
@@ -95,11 +95,11 @@ const removeComponentFromArray = (
 
 // Helper function to add duplicate component
 const addDuplicateToParent = (
-  components: DesignComponent<ComponentType>[],
+  components: DesignComponent<ComponentTag>[],
   targetId: string,
-  duplicatedComponent: DesignComponent<ComponentType>,
-): DesignComponent<ComponentType>[] => {
-  const result: DesignComponent<ComponentType>[] = []
+  duplicatedComponent: DesignComponent<ComponentTag>,
+): DesignComponent<ComponentTag>[] => {
+  const result: DesignComponent<ComponentTag>[] = []
 
   for (const component of components) {
     result.push(component)

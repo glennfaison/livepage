@@ -4,19 +4,19 @@ import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import React from "react"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
-import { getComponentInfo } from "../design-components"
-import type { ComponentAttributes, ComponentType, DesignComponent, SettingsField } from "../design-components/types"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { getComponentInfo } from "@/features/design-components"
+import type { ComponentAttributes, ComponentTag, DesignComponent, SettingsField } from "../../features/design-components/types"
 
 // Settings Popover Component
-export interface SettingsPopoverProps<Tag extends ComponentType> {
+export interface SettingsPopoverProps<Tag extends ComponentTag> {
   component: DesignComponent<Tag>
   onSave: (updates: ComponentAttributes<Tag>) => void
   children: React.ReactNode
 }
 
-export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentType>> = <Tag extends ComponentType>({
+export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Tag extends ComponentTag>({
   component,
   onSave,
   children,

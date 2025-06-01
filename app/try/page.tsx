@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { renderDesignComponent } from "@/components/page-builder/page-builder"
 import { PageCraftToolbar } from "@/components/page-builder/pagecraft-toolbar"
 import { useAppState, usePageOperations, useComponentOperations, useHistoryOperations } from "@/lib/store/hooks"
-import type { ComponentWrapperProps, PageBuilderMode } from "@/components/design-components/types"
+import type { ComponentWrapperProps, PageBuilderMode } from "@/features/design-components/types"
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()

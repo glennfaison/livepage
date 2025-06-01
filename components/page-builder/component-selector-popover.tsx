@@ -1,26 +1,27 @@
 import { Search } from "lucide-react"
 import React from "react"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
-import { ComponentInfo, ComponentType } from "../design-components/types"
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import type { ComponentTag } from "@/features/design-components/types"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { getComponentInfo } from "@/features/design-components"
 
 // Component selector popover
 export const ComponentSelectorPopover = ({
 	onSelect,
 	children,
-	componentInfo,
+	componentTagList,
 }: {
-	onSelect: (type: ComponentType) => void
+	onSelect: (type: ComponentTag) => void
 	parentId?: string
 	children: React.ReactNode
-	componentInfo: { [Key in ComponentType]: ComponentInfo<Key> }
+	componentTagList: ComponentTag[]
 }) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
   const [open, setOpen] = React.useState(false)
 
 	const filteredComponents = React.useMemo(() => {
-		const components = Object.values(componentInfo)
+		const components = componentTagList.map((componentTag) => getComponentInfo(componentTag))
 		if (!searchTerm.trim()) return components
 
 		const search = searchTerm.toLowerCase()
@@ -29,9 +30,9 @@ export const ComponentSelectorPopover = ({
 				component.label.toLowerCase().includes(search) ||
 				component.keywords.some((keyword) => keyword.includes(search)),
 		)
-	}, [searchTerm, componentInfo])
+	}, [searchTerm, componentTagList])
 
-	const handleSelect = (type: ComponentType) => {
+	const handleSelect = (type: ComponentTag) => {
 		onSelect(type)
 		if (closePopover) {
 			closePopover()

@@ -5,14 +5,13 @@ import { Settings, Trash2, Move, Copy, Plus, Replace } from "lucide-react"
 import { cn } from "@/lib/utils"
 import React from "react"
 import type {
-  ComponentType,
+  ComponentTag,
   DesignComponent,
   ComponentAttributes,
-  ComponentInfo,
   ComponentWrapperProps,
   ComponentControlsProps,
-} from "@/components/design-components/types"
-import { getComponentInfo } from "@/components/design-components"
+} from "@/features/design-components/types"
+import { componentTagList, createDesignComponent, getComponentInfo } from "@/features/design-components"
 import type { ReactNode } from "react"
 import { generateId, intersperseAndAppend } from "@/lib/utils"
 import { SettingsPopover } from "./settings-popover"
@@ -26,14 +25,14 @@ const Divider = ({
   isVisible,
 }: {
   orientation: "horizontal" | "vertical"
-  onAddComponent: (type: ComponentType, index: number) => void
+  onAddComponent: (type: ComponentTag, index: number) => void
   index: number
   isVisible: boolean
 }) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   isVisible = isVisible || popoverOpen
 
-  const handleAddComponent = (type: ComponentType) => {
+  const handleAddComponent = (type: ComponentTag) => {
     onAddComponent(type, index)
     setPopoverOpen(false)
   }
@@ -48,7 +47,7 @@ const Divider = ({
         isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
       )}
     >
-      <ComponentSelectorPopover onSelect={handleAddComponent} componentInfo={componentInfo}>
+      <ComponentSelectorPopover onSelect={handleAddComponent} componentTagList={componentTagList}>
         <Button
           variant="ghost"
           size="icon"
@@ -65,34 +64,6 @@ const Divider = ({
   )
 }
 
-// Helper function to create a new design component
-export function createDesignComponent<Tag extends ComponentType>(
-  tag: Tag,
-  id: string,
-  overrideProps?: Partial<ComponentAttributes<Tag>>,
-): DesignComponent<Tag> {
-  const data = getComponentInfo(tag)
-  return {
-    id: `${tag}-${id}`,
-    tag: tag,
-    attributes: { ...data.defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
-    children: [],
-    settingsFields: data.settingsFields,
-  }
-}
-
-const componentInfo: { [Key in ComponentType]: ComponentInfo<Key> } = {
-  header1: getComponentInfo("header1"),
-  header2: getComponentInfo("header2"),
-  header3: getComponentInfo("header3"),
-  paragraph: getComponentInfo("paragraph"),
-  span: getComponentInfo("span"),
-  button: getComponentInfo("button"),
-  image: getComponentInfo("image"),
-  row: getComponentInfo("row"),
-  column: getComponentInfo("column"),
-}
-
 // Replace With Popover
 export const ReplaceWithPopover = ({
   children,
@@ -100,19 +71,18 @@ export const ReplaceWithPopover = ({
   onReplace,
 }: {
   children: React.ReactNode
-  currentComponent: DesignComponent<ComponentType>
-  onReplace: (newType: ComponentType) => void
+  currentComponent: DesignComponent<ComponentTag>
+  onReplace: (newType: ComponentTag) => void
 }) => {
-  const _componentInfo = { ...componentInfo }
-  delete _componentInfo[currentComponent.tag]
+  const tagList = componentTagList.filter((tag) => tag !== currentComponent.tag)
 
-  const handleReplace = (newType: ComponentType) => {
+  const handleReplace = (newType: ComponentTag) => {
     onReplace(newType)
   }
 
   return (
     <ComponentSelectorPopover
-      componentInfo={_componentInfo}
+      componentTagList={tagList}
       onSelect={handleReplace}
     >
       {children}
@@ -122,17 +92,16 @@ export const ReplaceWithPopover = ({
 
 //#region Wrapper Components
 
-function ComponentControls<Tag extends ComponentType>({
+function ComponentControls<Tag extends ComponentTag>({
   component,
   updateComponent,
   duplicateComponent,
   removeComponent,
   replaceComponent,
 }: ComponentControlsProps<Tag>) {
-  const _componentInfo = componentInfo[component.tag as ComponentType]
-  const { label } = _componentInfo
+  const { label } = getComponentInfo(component.tag)
 
-  const handleReplace = (newType: ComponentType) => {
+  const handleReplace = (newType: ComponentTag) => {
     replaceComponent(component.id, newType);
   }
 
@@ -192,7 +161,7 @@ export const GenericDesignComponentWrapper = ({
   addComponent,
   duplicateComponent,
   replaceComponent,
-}: ComponentWrapperProps<Exclude<ComponentType, "row" | "column">>) => {
+}: ComponentWrapperProps<Exclude<ComponentTag, "row" | "column">>) => {
   const componentType = component.tag
   const showControls = selectedComponentId === component.id
   const componentProps = {
@@ -364,7 +333,7 @@ export const RowWrapper = ({
     })
 
   // Handle adding component at specific index
-  const handleAddAtIndex = (type: ComponentType, dividerIndex: number) => {
+  const handleAddAtIndex = (type: ComponentTag, dividerIndex: number) => {
     const childIndex = Math.floor(dividerIndex / 2)
     const newComponent = createDesignComponent(type, generateId())
     addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
@@ -375,7 +344,7 @@ export const RowWrapper = ({
   const RowComponent = componentData.Component
 
   const children = component.children.map(
-    <Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
+    <Tag extends ComponentTag>(child: DesignComponent<Tag>, childIndex: number) => (
       <div
         key={child.id}
         className="flex-1 relative"
@@ -428,7 +397,7 @@ export const RowWrapper = ({
           )
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground flex-1">
-            <ComponentSelectorPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })} componentInfo={componentInfo}>
+            <ComponentSelectorPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })} componentTagList={componentTagList}>
               <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
                 <Plus className="h-3 w-3" />
                 <span className="sr-only">Add component</span>
@@ -483,7 +452,7 @@ export const ColumnWrapper = ({
     })
 
   // Handle adding component at specific index
-  const handleAddAtIndex = (type: ComponentType, dividerIndex: number) => {
+  const handleAddAtIndex = (type: ComponentTag, dividerIndex: number) => {
     const childIndex = Math.floor(dividerIndex / 2)
     const newComponent = createDesignComponent(type, generateId())
     addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
@@ -495,7 +464,7 @@ export const ColumnWrapper = ({
   const ColumnComponent = componentData.Component
 
   const children = component.children.map(
-    <Tag extends ComponentType>(child: DesignComponent<Tag>, childIndex: number) => (
+    <Tag extends ComponentTag>(child: DesignComponent<Tag>, childIndex: number) => (
       <div
         key={child.id}
         className="relative"
@@ -547,7 +516,7 @@ export const ColumnWrapper = ({
           )
         ) : (
           <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-            <ComponentSelectorPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })} componentInfo={componentInfo}>
+            <ComponentSelectorPopover onSelect={(type) => addComponent({ type, parentId: component.id, index: 0 })} componentTagList={componentTagList}>
               <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
                 <Plus className="h-3 w-3" />
                 <span className="sr-only">Add component</span>
@@ -562,7 +531,7 @@ export const ColumnWrapper = ({
 
 //#endregion
 
-export function getWrapperComponent<Tag extends ComponentType>(tag: Tag): React.FC<ComponentWrapperProps<Tag>> {
+export function getWrapperComponent<Tag extends ComponentTag>(tag: Tag): React.FC<ComponentWrapperProps<Tag>> {
   switch (tag) {
     case "row":
       return RowWrapper as React.FC<ComponentWrapperProps<Tag>>
@@ -574,7 +543,7 @@ export function getWrapperComponent<Tag extends ComponentType>(tag: Tag): React.
 }
 
 // Helper function to render a design component
-export function renderDesignComponent<Tag extends ComponentType>({
+export function renderDesignComponent<Tag extends ComponentTag>({
   pageBuilderMode,
   component,
   selectedComponentId,
@@ -586,7 +555,7 @@ export function renderDesignComponent<Tag extends ComponentType>({
   replaceComponent
 }: ComponentWrapperProps<Tag>): ReactNode {
   const WrapperComponent = getWrapperComponent(component.tag)
-  const Component = componentInfo[component.tag].Component
+  const Component = getComponentInfo(component.tag).Component
   const props = {
     pageBuilderMode,
     component,
@@ -606,7 +575,7 @@ export function renderDesignComponent<Tag extends ComponentType>({
   ))
 
   return pageBuilderMode === "edit" ? (
-    <WrapperComponent {...(props as ComponentWrapperProps<Tag>)}>{childrenToRender}</WrapperComponent>
+    <WrapperComponent {...props}>{childrenToRender}</WrapperComponent>
   ) : (
     <Component
       pageBuilderMode={pageBuilderMode}

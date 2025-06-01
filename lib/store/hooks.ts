@@ -6,11 +6,11 @@ import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
 import { appReducer, initialState } from "./reducer"
 import type { AppState, AppAction } from "./types"
-import type { ComponentAttributes, ComponentType, DesignComponent, Page } from "@/components/design-components/types"
-import { createDesignComponent } from "@/components/page-builder/page-builder"
+import type { ComponentAttributes, ComponentTag, DesignComponent, Page } from "@/features/design-components/types"
 import { generateId } from "@/lib/utils"
 import { toast } from "@/components/ui/use-toast"
 import { stringify } from "../shortcode-parser/parser"
+import { createDesignComponent } from "@/features/design-components"
 
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -250,7 +250,7 @@ export function usePageOperations() {
   }
 }
 
-const renderComponentsToHTML = (components: DesignComponent<ComponentType>[]): string => {
+const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): string => {
   return components.map((component) => {
     const attributes = component.attributes
     switch (component.tag) {
@@ -298,7 +298,7 @@ const renderComponentsToHTML = (components: DesignComponent<ComponentType>[]): s
 export function useComponentOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
   // Find a component by ID (including nested components)
   const findComponentById = useCallback(
-    (components: DesignComponent<ComponentType>[], id: string): DesignComponent<ComponentType> | null => {
+    (components: DesignComponent<ComponentTag>[], id: string): DesignComponent<ComponentTag> | null => {
       for (const component of components) {
         if (component.id === id) {
           return component
@@ -317,7 +317,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Add component
   const addComponent = useCallback(
-    ({ type, parentId, index = 0 }: { type: ComponentType, parentId?: string, index?: number }) => {
+    ({ type, parentId, index = 0 }: { type: ComponentTag, parentId?: string, index?: number }) => {
       const newComponent = createDesignComponent(type, generateId())
 
       dispatch({
@@ -351,7 +351,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Update component
   const updateComponent = useCallback(
-    <Tag extends ComponentType>(id: string, updates: Partial<ComponentAttributes<Tag>>) => {
+    <Tag extends ComponentTag>(id: string, updates: Partial<ComponentAttributes<Tag>>) => {
       dispatch({
         type: "UPDATE_COMPONENT",
         payload: {
@@ -425,7 +425,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
       if (!componentToDuplicate) return
 
       // Deep clone the component with new IDs
-      const cloneComponent = <Tag extends ComponentType>(comp: DesignComponent<Tag>): DesignComponent<Tag> => {
+      const cloneComponent = <Tag extends ComponentTag>(comp: DesignComponent<Tag>): DesignComponent<Tag> => {
         const cloned: DesignComponent<Tag> = {
           ...comp,
           id: generateId(),
@@ -465,7 +465,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   )
 
   const replaceComponent = useCallback(
-    (oldComponentId: string, newComponentTag: ComponentType) => {
+    (oldComponentId: string, newComponentTag: ComponentTag) => {
       const newComponent = createDesignComponent(newComponentTag, generateId())
 
       dispatch({

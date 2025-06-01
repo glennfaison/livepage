@@ -1,23 +1,15 @@
 import { Heading } from "lucide-react"
-import { ComponentType } from "./types"
+import { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
 	content: string
-}
-
-export type ComponentProps = {
-	componentId: string
-	attributes: ComponentAttributes
-	pageBuilderMode: "edit" | "preview"
-	setSelectedComponent: (componentId: string) => void
-	updateComponent: (componentId: string, updates: Partial<ComponentAttributes>) => void
 }
 
 export const defaultAttributes: ComponentAttributes = {
 	content: "Header 2",
 }
 
-export const tag: ComponentType = "header2" as const
+export const tag: ComponentTag = "header2" as const
 
 export const label = "Header 2"
 
@@ -34,7 +26,7 @@ export const settingsFields = {
 
 export const Icon = <Heading className="h-4 w-4" />
 
-export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps) => {
+export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps<typeof tag>) => {
 	const { content, ...restAttributes } = attributes
 	return (
 		<h2

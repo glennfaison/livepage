@@ -1,6 +1,6 @@
+import { createDesignComponent } from "@/features/design-components"
 import { appReducer, initialState } from "@/lib/store/reducer"
 import type { AppState, AppAction } from "@/lib/store/types"
-import { createDesignComponent } from "@/components/page-builder/page-builder"
 import { generateId } from "@/lib/utils"
 
 describe("App Reducer", () => {

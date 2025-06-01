@@ -7,7 +7,7 @@ import { Save, X, GripVertical, Settings, Maximize, Minimize, History, RotateCw 
 import { cn } from "@/lib/utils"
 import { HistoryPopover } from "@/components/page-builder/history-popover"
 import type { HistoryEntry } from "@/lib/store/types"
-import type { PageBuilderMode } from "../design-components/types"
+import type { PageBuilderMode } from "@/features/design-components/types"
 
 interface PageCraftToolbarProps {
   toolbarMinimized: boolean

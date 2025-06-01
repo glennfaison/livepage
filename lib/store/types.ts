@@ -1,4 +1,4 @@
-import type { ComponentAttributes, ComponentType, DesignComponent, Page } from "@/components/design-components/types"
+import type { ComponentAttributes, ComponentTag, DesignComponent, Page } from "@/features/design-components/types"
 
 // History entry
 export interface HistoryEntry {
@@ -30,15 +30,15 @@ export type AppAction =
   | { type: "SET_ACTIVE_PAGE"; payload: string }
   | {
     type: "ADD_COMPONENT"
-    payload: { pageId: string; component: DesignComponent<ComponentType>; parentId?: string; index?: number }
+    payload: { pageId: string; component: DesignComponent<ComponentTag>; parentId?: string; index?: number }
   }
-  | { type: "UPDATE_COMPONENT"; payload: { pageId: string; componentId: string; updates: Partial<ComponentAttributes<ComponentType>> } }
+  | { type: "UPDATE_COMPONENT"; payload: { pageId: string; componentId: string; updates: Partial<ComponentAttributes<ComponentTag>> } }
   | { type: "REMOVE_COMPONENT"; payload: { pageId: string; componentId: string } }
   | {
     type: "DUPLICATE_COMPONENT"
-    payload: { pageId: string; componentId: string; duplicatedComponent: DesignComponent<ComponentType> }
+    payload: { pageId: string; componentId: string; duplicatedComponent: DesignComponent<ComponentTag> }
   }
-  | { type: "REPLACE_COMPONENT", payload: { pageId: string, oldComponentId: string, newComponent: DesignComponent<ComponentType> } }
+  | { type: "REPLACE_COMPONENT", payload: { pageId: string, oldComponentId: string, newComponent: DesignComponent<ComponentTag> } }
   | { type: "SET_SELECTED_COMPONENT"; payload: string | null }
   | { type: "SET_PREVIEW_MODE"; payload: boolean }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }

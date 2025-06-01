@@ -1,8 +1,8 @@
-import type { ComponentType } from "@/components/design-components/types"
+import type { ComponentTag } from "@/features/design-components/types"
 
 describe("Design Component Types", () => {
   it("should have all expected component types", () => {
-    const expectedTypes: ComponentType[] = [
+    const expectedTypes: ComponentTag[] = [
       "header1",
       "header2",
       "header3",
@@ -15,7 +15,7 @@ describe("Design Component Types", () => {
     ]
 
     // Create a type that would cause a compile error if ComponentType doesn't include all expected types
-    type ExpectedTypesSubsetOfComponentType = Exclude<(typeof expectedTypes)[number], ComponentType> extends never
+    type ExpectedTypesSubsetOfComponentType = Exclude<(typeof expectedTypes)[number], ComponentTag> extends never
       ? true
       : false
     const _typeCheck: ExpectedTypesSubsetOfComponentType = true
@@ -23,7 +23,7 @@ describe("Design Component Types", () => {
     // This is just to verify at runtime that our expected types match the actual types
     expectedTypes.forEach((type) => {
       // This would throw a TypeScript error if the type wasn't in ComponentType
-      const componentType: ComponentType = type
+      const componentType: ComponentTag = type
       expect(componentType).toBe(type)
     })
   })

@@ -1,7 +1,7 @@
 "use client"
 
 import { ImageIcon } from "lucide-react"
-import type { ComponentType } from "./types"
+import type { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
 	src?: string
@@ -9,14 +9,6 @@ export type ComponentAttributes = {
 	width?: string
 	height?: string
 	fallbackSrc?: string
-}
-
-export type ComponentProps = {
-	componentId: string
-	attributes: ComponentAttributes
-	pageBuilderMode: "edit" | "preview"
-	setSelectedComponent: (componentId: string) => void
-	updateComponent: (componentId: string, updates: Partial<ComponentAttributes>) => void
 }
 
 export const defaultAttributes: ComponentAttributes = {
@@ -27,7 +19,7 @@ export const defaultAttributes: ComponentAttributes = {
 	fallbackSrc: "/placeholder.svg?height=200&width=300",
 }
 
-export const tag: ComponentType = "image" as const
+export const tag: ComponentTag = "image" as const
 
 export const label = "Image"
 
@@ -73,7 +65,7 @@ export const Component = ({
 	attributes,
 	pageBuilderMode,
 	setSelectedComponent,
-}: ComponentProps) => {
+}: ComponentProps<typeof tag>) => {
 	const { src, alt, fallbackSrc, ...restAttributes } = attributes
 	return (
 		<img
