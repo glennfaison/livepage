@@ -1,5 +1,5 @@
 import { MousePointerClick } from "lucide-react"
-import { Button } from "../../components/ui/button"
+import { Button } from "@/components/ui/button"
 import { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
