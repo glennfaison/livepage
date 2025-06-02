@@ -9,7 +9,7 @@ export const keywords = ["rest", "api"]
 
 export const Icon = <Plug className="h-4 w-4" />
 
-export const defaultSettings = {
+export const defaultSettings: ConnectionSettings = {
 	url: "",
 	"parse-result": "",
 }
@@ -29,3 +29,7 @@ export const settingsFields = {
 	},
 }
 
+export type ConnectionSettings = {
+	url: string
+	"parse-result": string
+}

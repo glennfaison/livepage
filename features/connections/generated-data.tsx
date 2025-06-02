@@ -9,8 +9,7 @@ export const keywords = ["generated", "data"]
 
 export const Icon = <BlocksIcon className="h-4 w-4" />
 
-export const defaultSettings = {
-	url: "",
+export const defaultSettings: ConnectionSettings = {
 	"generate": "",
 }
 
@@ -23,3 +22,6 @@ export const settingsFields = {
 	},
 }
 
+export type ConnectionSettings = {
+	generate: string
+}
