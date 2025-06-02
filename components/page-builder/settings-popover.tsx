@@ -331,6 +331,17 @@ function ConnectionListViewTabContent<ConnId extends ConnectionId>({
 }
 
 function ConnectionSettingsView<ConnId extends ConnectionId>({ selectedConnection, setSelectedConnection, handleSave, handleDiscard, handleFieldChange, settingsFields, formData }: ConnectionSettingsEditorProps<ConnId>) {
+  const [connectionResult, setConnectionResult] = React.useState<string>("")
+
+  const tryConnection = async (formData) => {
+    try {debugger
+      const result = await selectedConnection.tryConnection(formData)
+      setConnectionResult(JSON.stringify(result, null, 2))
+    } catch (error) {
+      setConnectionResult(JSON.stringify(error, null, 2))
+    }
+  }
+
   return (
     <>
       <div className="flex bg-background border-b align-middle">
@@ -371,11 +382,28 @@ function ConnectionSettingsView<ConnId extends ConnectionId>({ selectedConnectio
         ))}
 
         <div className="space-y-2">
-          <Button className="cursor-pointer w-full">
+          <Button className="cursor-pointer w-full"
+            onClick={() => tryConnection(formData)}
+          >
             <PlugZapIcon className="h-4 w-4" /> &nbsp;
             Connect
           </Button>
         </div>
+
+        {connectionResult && <div className="space-y-2">
+          <Label htmlFor="example-results">Example Results</Label>
+          <pre
+            id="example-results"
+            className={cn(
+              "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3",
+              "py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none",
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "overflow-scroll"
+            )}
+          >
+            {connectionResult || ""}
+          </pre>
+        </div>}
       </div>
 
       {/* Footer Buttons for Settings Tab */}

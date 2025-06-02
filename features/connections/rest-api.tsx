@@ -33,3 +33,35 @@ export type ConnectionSettings = {
 	url: string
 	"parse-result": string
 }
+
+export async function tryConnection(formData: ConnectionSettings): Promise<unknown> {
+	let parseResultFn
+	try {
+		if (!!formData["parse-result"].trim()){
+			parseResultFn = new Function(formData["parse-result"])
+		}
+	} catch (error) {
+		throw error
+	}
+
+	let unparsedData
+	try {
+		const result = await fetch(formData.url)
+		if (!result.ok) {
+			throw await result.json()
+		}
+		unparsedData = await result.json()
+	} catch (error) {
+		throw error
+	}
+
+	if (!parseResultFn) {
+		return unparsedData
+	}
+
+	try {
+		return parseResultFn(unparsedData)
+	} catch (error) {
+		throw error
+	}
+}

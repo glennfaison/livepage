@@ -25,3 +25,18 @@ export const settingsFields = {
 export type ConnectionSettings = {
 	generate: string
 }
+
+export async function tryConnection(formData: ConnectionSettings): Promise<unknown> {
+	let asyncGeneratorFn
+	try {
+		asyncGeneratorFn = new Function(`return (async () => { ${formData.generate} })()`);
+	} catch (error) {
+		throw error
+	}
+	try {
+		const result = await asyncGeneratorFn()
+		return result
+	} catch (error) {
+		throw error
+	}
+}
