@@ -69,7 +69,7 @@ describe("SettingsPopover", () => {
     expect(screen.getByLabelText("Content")).toBeInTheDocument()
 
     // Switch to connect tab
-    await userEvent.click(screen.getByTestId("connect-tab-trigger"))
+    await userEvent.click(screen.getByTestId("data-sources-tab-trigger"))
 
     expect(screen.getByText("Connect")).toBeInTheDocument()
     expect(screen.queryByLabelText("Content")).not.toBeInTheDocument()

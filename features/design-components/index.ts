@@ -13,8 +13,8 @@ import * as Row from "./row"
 import * as Column from "./column"
 
 // Helper function to get component data by type using exhaustive switch
-export function getComponentInfo<Tag extends ComponentTag>(type: Tag): ComponentInfo<Tag> {
-  switch (type) {
+export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentInfo<Tag> {
+  switch (tag) {
     case "header1":
       return Header1 as unknown as ComponentInfo<Tag>;
     case "header2":
@@ -34,7 +34,7 @@ export function getComponentInfo<Tag extends ComponentTag>(type: Tag): Component
     case "column":
       return Column as unknown as ComponentInfo<Tag>;
     default:
-      const _unexpected: never = type
+      const _unexpected: never = tag
       throw new Error(`Unknown component type: ${_unexpected}`)
   }
 }

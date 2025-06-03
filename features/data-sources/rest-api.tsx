@@ -1,7 +1,7 @@
 import { Plug } from "lucide-react"
-import type { ConnectionId } from "./types"
+import type { DataSourceId } from "./types"
 
-export const id: ConnectionId = "rest-api" as const
+export const id: DataSourceId = "rest-api" as const
 
 export const label = "REST API"
 
@@ -9,7 +9,7 @@ export const keywords = ["rest", "api"]
 
 export const Icon = <Plug className="h-4 w-4" />
 
-export const defaultSettings: ConnectionSettings = {
+export const defaultSettings: DataSourceSettings = {
 	url: "",
 	"parse-result": "",
 }
@@ -29,16 +29,16 @@ export const settingsFields = {
 	},
 }
 
-export type ConnectionSettings = {
+export type DataSourceSettings = {
 	url: string
 	"parse-result": string
 }
 
-export async function tryConnection(formData: ConnectionSettings): Promise<unknown> {
+export async function tryConnection(componentDataSourceSettings: DataSourceSettings): Promise<unknown> {
 	let parseResultFn
 	try {
-		if (!!formData["parse-result"].trim()){
-			parseResultFn = new Function(formData["parse-result"])
+		if (!!componentDataSourceSettings["parse-result"].trim()){
+			parseResultFn = new Function(componentDataSourceSettings["parse-result"])
 		}
 	} catch (error) {
 		throw error
@@ -46,7 +46,7 @@ export async function tryConnection(formData: ConnectionSettings): Promise<unkno
 
 	let unparsedData
 	try {
-		const result = await fetch(formData.url)
+		const result = await fetch(componentDataSourceSettings.url)
 		if (!result.ok) {
 			throw await result.json()
 		}

@@ -1,7 +1,7 @@
 import { BlocksIcon } from "lucide-react"
-import type { ConnectionId } from "./types"
+import type { DataSourceId } from "./types"
 
-export const id: ConnectionId = "generated-data" as const
+export const id: DataSourceId = "generated-data" as const
 
 export const label = "Generated Data"
 
@@ -9,7 +9,7 @@ export const keywords = ["generated", "data"]
 
 export const Icon = <BlocksIcon className="h-4 w-4" />
 
-export const defaultSettings: ConnectionSettings = {
+export const defaultSettings: DataSourceSettings = {
 	"generate": "",
 }
 
@@ -22,14 +22,14 @@ export const settingsFields = {
 	},
 }
 
-export type ConnectionSettings = {
+export type DataSourceSettings = {
 	generate: string
 }
 
-export async function tryConnection(formData: ConnectionSettings): Promise<unknown> {
+export async function tryConnection(componentDataSourceSettings: DataSourceSettings): Promise<unknown> {
 	let asyncGeneratorFn
 	try {
-		asyncGeneratorFn = new Function(`return (async () => { ${formData.generate} })()`);
+		asyncGeneratorFn = new Function(`return (async () => { ${componentDataSourceSettings.generate} })()`);
 	} catch (error) {
 		throw error
 	}

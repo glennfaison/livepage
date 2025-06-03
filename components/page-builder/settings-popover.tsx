@@ -5,23 +5,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { connectionIdList, decodeConnectionData, encodeConnectionData, getConnectionInfo } from "@/features/connections"
-import type { ConnectionId, ConnectionInfo, ConnectionSettings, SettingsField as ConnectionSettingsField } from "@/features/connections/types"
+import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
+import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, PlugZapIcon, Search } from "lucide-react"
 import React from "react"
 import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
 
-// Settings Popover Component
+const __data_source__ = "__data_source__"
+
 export interface SettingsPopoverProps<Tag extends ComponentTag> {
   component: DesignComponent<Tag>
   onSave: (updates: ComponentAttributes<Tag>) => void
   children: React.ReactNode
 }
 
-// Connection selector button
-const ConnectionSelectorButton = ({
+const DataSourceSelectorButton = ({
   icon,
   label,
   onClick,
@@ -62,7 +62,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
   }
 
   const settingsFields = React.useMemo(
-    () => Object.values<SettingsField<Tag>>(componentInfo.settingsFields).filter((field) => field.id !== 'pagecrafter_connection'),
+    () => Object.values<SettingsField<Tag>>(componentInfo.settingsFields).filter((field) => field.id !== __data_source__),
     [componentInfo.settingsFields],
   ) as SettingsField<Tag>[]
 
@@ -77,6 +77,70 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
   }
 }
 
+function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSave, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+  const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
+  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__data_source__)
+  const dataSourceInfo = getDataSourceInfo(savedDataSourceSettings.id)
+  const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId>>(dataSourceInfo)
+
+  const filteredDataSources = React.useMemo(() => {
+    const dataSources = dataSourceIdList.map((connId) => getDataSourceInfo(connId))
+    if (!searchDataSourceTerm.trim()) return dataSources
+
+    const search = searchDataSourceTerm.toLowerCase()
+    return dataSources.filter(
+      (conn) =>
+        conn.label.toLowerCase().includes(search) ||
+        conn.keywords.some((keyword) => keyword.includes(search)),
+    )
+  }, [searchDataSourceTerm])
+
+  const [formData, setFormData] = React.useState<DataSourceSettings<DataSourceId>>({ ...savedDataSourceSettings.settings })
+
+  const handleSave = () => {
+    if (!selectedDataSource) {
+      return
+    }
+    for (const key in selectedDataSource.defaultSettings) {
+      if (
+        String(formData[key]).trim() === "" ||
+        !formData.hasOwnProperty(key)
+      ) {
+        formData[key] = selectedDataSource.defaultSettings[key]
+      }
+    }
+    const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: formData })
+    onSave({ ...component.attributes, __data_source__: encodedDataSourceSettings })
+  }
+
+  const handleDiscard = () => {
+    setFormData({ ...savedDataSourceSettings })
+    setIsOpen(false)
+  }
+
+  const handleFieldChange = (fieldId: keyof ComponentAttributes<Tag>, value: string) => {
+    setFormData((prev) => ({ ...prev, [fieldId]: value }))
+  }
+
+  const settingsFields = React.useMemo<DataSourceSettingsField<DataSourceId>[]>(
+    () => Object.values(selectedDataSource?.settingsFields || {}) as DataSourceSettingsField<DataSourceId>[],
+    [selectedDataSource?.settingsFields])
+
+  return {
+    searchDataSourceTerm,
+    filteredDataSources,
+    selectedDataSource,
+    formData,
+    settingsFields,
+    setSearchDataSourceTerm,
+    setSelectedDataSource,
+    setFormData,
+    handleSave,
+    handleDiscard,
+    handleFieldChange,
+  }
+}
+
 export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Tag extends ComponentTag>({
   component,
   onSave,
@@ -84,7 +148,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Ta
 }: SettingsPopoverProps<Tag>) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const componentSettingsEditor = useComponentSettingsEditor({ component, onSave, setIsOpen })
-  const connectionSettingsEditor = useConnectionSettingsEditor({ component, onSave, setIsOpen })
+  const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component, onSave, setIsOpen })
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -107,11 +171,11 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Ta
                 Settings
               </TabsTrigger>
               <TabsTrigger
-                data-testid="connect-tab-trigger"
-                value="connect"
+                data-testid="data-sources-tab-trigger"
+                value="data-sources"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
               >
-                Connect
+                Data Sources
               </TabsTrigger>
             </TabsList>
 
@@ -122,9 +186,9 @@ export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Ta
               />
             </TabsContent>
 
-            {/* Connect Tab Content */}
-            <TabsContent value="connect" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
-              <ConnectionListViewTabContent {...connectionSettingsEditor} />
+            {/* Data Sources Tab Content */}
+            <TabsContent value="data-sources" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
+              <DataSourceListViewTabContent {...dataSourceSettingsEditor} />
             </TabsContent>
           </Tabs>
         </div>
@@ -190,122 +254,54 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
   )
 }
 
-function useConnectionSettingsEditor<Tag extends ComponentTag>({ component, onSave, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
-  const [searchConnectionTerm, setSearchConnectionTerm] = React.useState("")
-  const [selectedConnection, setSelectedConnection] = React.useState<ConnectionInfo<ConnectionId> | undefined>()
-
-  const filteredConnections = React.useMemo(() => {
-    const connections = connectionIdList.map((connId) => getConnectionInfo(connId))
-    if (!searchConnectionTerm.trim()) return connections
-
-    const search = searchConnectionTerm.toLowerCase()
-    return connections.filter(
-      (conn) =>
-        conn.label.toLowerCase().includes(search) ||
-        conn.keywords.some((keyword) => keyword.includes(search)),
-    )
-  }, [searchConnectionTerm])
-
-  const savedConnectionData = decodeConnectionData(component.attributes.pagecrafter_connection)
-  const [formData, setFormData] = React.useState<ConnectionSettings<ConnectionId>>({ ...savedConnectionData })
-
-  const handleSave = () => {
-    if (!selectedConnection) {
-      return
-    }
-    for (const key in selectedConnection.defaultSettings) {
-      type ConnectionSettingType = keyof typeof formData
-
-      if (
-        formData[key as ConnectionSettingType] === "" ||
-        String(formData[key as ConnectionSettingType]).trim() === "" ||
-        !formData.hasOwnProperty(key)
-      ) {
-        formData[key as ConnectionSettingType] = selectedConnection.defaultSettings[key as ConnectionSettingType]
-      }
-    }
-    const encodedConnectionData = encodeConnectionData(formData)
-    onSave({ ...component.attributes, pagecrafter_connection: encodedConnectionData })
-    setSelectedConnection(undefined)
-  }
-
-  const handleDiscard = () => {
-    setFormData({ ...savedConnectionData })
-    setIsOpen(false)
-  }
-
-  const handleFieldChange = (fieldId: keyof ComponentAttributes<Tag>, value: string) => {
-    setFormData((prev) => ({ ...prev, [fieldId]: value }))
-  }
-
-  const settingsFields = React.useMemo<ConnectionSettingsField<ConnectionId>[]>(
-    () => Object.values(selectedConnection?.settingsFields || {}) as ConnectionSettingsField<ConnectionId>[],
-    [selectedConnection?.settingsFields])
-
-  return {
-    searchConnectionTerm,
-    filteredConnections,
-    selectedConnection,
-    formData,
-    settingsFields,
-    setSearchConnectionTerm,
-    setSelectedConnection,
-    setFormData,
-    handleSave,
-    handleDiscard,
-    handleFieldChange,
-  }
-}
-
-type ConnectionSettingsEditorProps<ConnId extends ConnectionId> = {
-  selectedConnection: ConnectionInfo<ConnId> | undefined
-  setSelectedConnection: React.Dispatch<ConnectionInfo<ConnId> | undefined>
-  filteredConnections: ConnectionInfo<ConnectionId>[]
-  searchConnectionTerm: string
-  setSearchConnectionTerm: React.Dispatch<string>
-  settingsFields: ConnectionSettingsField<ConnId>[]
-  formData: ConnectionSettings<ConnId>
+type DataSourceSettingsEditorProps<ConnId extends DataSourceId> = {
+  selectedDataSource: DataSourceInfo<ConnId> | undefined
+  setSelectedDataSource: React.Dispatch<DataSourceInfo<ConnId> | undefined>
+  filteredDataSources: DataSourceInfo<DataSourceId>[]
+  searchDataSourceTerm: string
+  setSearchDataSourceTerm: React.Dispatch<string>
+  settingsFields: DataSourceSettingsField<ConnId>[]
+  formData: DataSourceSettings<ConnId>
   handleDiscard: () => void
   handleSave: () => void
-  handleFieldChange: (fieldId: keyof ConnectionSettings<ConnId>, value: string) => void
+  handleFieldChange: (fieldId: keyof DataSourceSettings<ConnId>, value: string) => void
 }
 
-function ConnectionListViewTabContent<ConnId extends ConnectionId>({
-  selectedConnection,
-  setSelectedConnection,
-  filteredConnections,
-  searchConnectionTerm,
-  setSearchConnectionTerm,
+function DataSourceListViewTabContent<ConnId extends DataSourceId>({
+  selectedDataSource,
+  setSelectedDataSource,
+  filteredDataSources,
+  searchDataSourceTerm,
+  setSearchDataSourceTerm,
   formData,
   settingsFields,
   handleDiscard,
   handleSave,
   handleFieldChange,
-}: ConnectionSettingsEditorProps<ConnId>) {
-
+}: DataSourceSettingsEditorProps<ConnId>) {
   return (
     <>
-      {!selectedConnection && <div className="p-4 space-y-4 flex-1 flex flex-col min-h-1 overflow-clip">
+      {!selectedDataSource && <div className="p-4 space-y-4 flex-1 flex flex-col min-h-1 overflow-clip">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search connections..."
-            defaultValue={searchConnectionTerm}
-            onChange={(e) => setSearchConnectionTerm(e.target.value)}
+            placeholder="Search data sources..."
+            defaultValue={searchDataSourceTerm}
+            onChange={(e) => setSearchDataSourceTerm(e.target.value)}
             className="pl-10 h-8"
           />
         </div>
 
-        {/* Connections Grid */}
-        {filteredConnections.length > 0 ? (
+        {/* Data Sources Grid */}
+        {filteredDataSources.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
-            {filteredConnections.map((connection) => (
-              <ConnectionSelectorButton
-                key={connection.id}
-                icon={connection.Icon}
-                label={connection.label}
-                onClick={() => setSelectedConnection(connection as ConnectionInfo<ConnId>)}
+            {filteredDataSources.map((dataSource) => (
+              <DataSourceSelectorButton
+                key={dataSource.id}
+                icon={dataSource.Icon}
+                label={dataSource.label}
+                onClick={() => setSelectedDataSource(dataSource as DataSourceInfo<ConnId>)}
               />
             ))}
           </div>
@@ -314,28 +310,31 @@ function ConnectionListViewTabContent<ConnId extends ConnectionId>({
         )}
       </div>}
 
-      {selectedConnection && <ConnectionSettingsView
-        selectedConnection={selectedConnection}
-        setSelectedConnection={setSelectedConnection}
+      {selectedDataSource && <DataSourceSettingsView
+        selectedDataSource={selectedDataSource}
+        setSelectedDataSource={setSelectedDataSource}
         formData={formData}
         settingsFields={settingsFields}
         handleDiscard={handleDiscard}
         handleFieldChange={handleFieldChange}
         handleSave={handleSave}
-        filteredConnections={filteredConnections}
-        searchConnectionTerm={searchConnectionTerm}
-        setSearchConnectionTerm={setSearchConnectionTerm}
+        filteredDataSources={filteredDataSources}
+        searchDataSourceTerm={searchDataSourceTerm}
+        setSearchDataSourceTerm={setSearchDataSourceTerm}
       />}
     </>
   )
 }
 
-function ConnectionSettingsView<ConnId extends ConnectionId>({ selectedConnection, setSelectedConnection, handleSave, handleDiscard, handleFieldChange, settingsFields, formData }: ConnectionSettingsEditorProps<ConnId>) {
+function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSource, setSelectedDataSource, handleSave, handleDiscard, handleFieldChange, settingsFields, formData }: DataSourceSettingsEditorProps<ConnId>) {
+  if (!selectedDataSource) {
+    throw new Error(`Could not find data source`)
+  }
   const [connectionResult, setConnectionResult] = React.useState<string>("")
 
-  const tryConnection = async (formData) => {
-    try {debugger
-      const result = await selectedConnection.tryConnection(formData)
+  const tryConnection = async (formData: DataSourceSettings<ConnId>) => {
+    try {
+      const result = await selectedDataSource.tryConnection(formData)
       setConnectionResult(JSON.stringify(result, null, 2))
     } catch (error) {
       setConnectionResult(JSON.stringify(error, null, 2))
@@ -346,11 +345,11 @@ function ConnectionSettingsView<ConnId extends ConnectionId>({ selectedConnectio
     <>
       <div className="flex bg-background border-b align-middle">
         <Button className="rounded-none bg-accent border-r text-foreground hover:bg-accent cursor-pointer"
-          onClick={() => setSelectedConnection(undefined)}
+          onClick={() => setSelectedDataSource(undefined)}
         >
           <ChevronLeftIcon className="h-4 w-4" />
         </Button>
-        <span className="pl-4 flex items-center text-muted-foreground text-sm">{selectedConnection?.label} Settings</span>
+        <span className="pl-4 flex items-center text-muted-foreground text-sm">{selectedDataSource?.label} Settings</span>
       </div>
 
       <div className="p-4 space-y-4 flex-1 flex flex-col min-h-1 overflow-y-scroll">
