@@ -552,9 +552,9 @@ export const ColumnWrapper = ({
 export function getWrapperComponent<Tag extends ComponentTag>(tag: Tag): React.FC<ComponentWrapperProps<Tag>> {
   switch (tag) {
     case "row":
-      return RowWrapper as React.FC<ComponentWrapperProps<Tag>>
+      return RowWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
     case "column":
-      return ColumnWrapper as React.FC<ComponentWrapperProps<Tag>>
+      return ColumnWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
     default:
       return GenericDesignComponentWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
   }
