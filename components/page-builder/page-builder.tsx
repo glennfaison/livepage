@@ -16,6 +16,7 @@ import type { ReactNode } from "react"
 import { generateId, intersperseAndAppend } from "@/lib/utils"
 import { SettingsPopover } from "./settings-popover"
 import { ComponentSelectorPopover } from "./component-selector-popover"
+import { withConnection } from "./connected-component-hoc"
 
 // Divider component for adding elements between existing ones
 const Divider = ({
@@ -187,11 +188,12 @@ export const GenericDesignComponentWrapper = ({
     })
 
   const componentData = React.useMemo(() => getComponentInfo(componentType), [componentType])
+  const Component = withConnection(componentData.Component)
 
   return (
     <div {...componentProps}>
       {componentControls}
-      {componentData.Component({
+      {Component({
         pageBuilderMode,
         componentId: component.id,
         attributes: component.attributes,
@@ -463,27 +465,43 @@ export const ColumnWrapper = ({
   const componentData = getComponentInfo(component.tag)
   const ColumnComponent = componentData.Component
 
-  const children = component.children.map(
-    <Tag extends ComponentTag>(child: DesignComponent<Tag>, childIndex: number) => (
-      <div
-        key={child.id}
-        className="relative"
-        onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
-        onMouseLeave={() => handleChildMouseLeave(childIndex)}
-      >
-        {renderDesignComponent({
-          component: child,
-          selectedComponentId,
-          pageBuilderMode,
-          setSelectedComponent,
-          updateComponent,
-          removeComponent,
-          addComponent,
-          duplicateComponent,
-          replaceComponent,
-        })}
-      </div>
-    ),
+  const children = React.useMemo(
+    () =>
+      component.children.map(
+        <Tag extends ComponentTag>(child: DesignComponent<Tag>, childIndex: number) => (
+          <div
+            key={child.id}
+            className="relative"
+            onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
+            onMouseLeave={() => handleChildMouseLeave(childIndex)}
+          >
+            {renderDesignComponent({
+              component: child,
+              selectedComponentId,
+              pageBuilderMode,
+              setSelectedComponent,
+              updateComponent,
+              removeComponent,
+              addComponent,
+              duplicateComponent,
+              replaceComponent,
+            })}
+          </div>
+        ),
+      ),
+    [
+      component.children,
+      selectedComponentId,
+      pageBuilderMode,
+      setSelectedComponent,
+      updateComponent,
+      removeComponent,
+      addComponent,
+      duplicateComponent,
+      replaceComponent,
+      handleChildMouseMove,
+      handleChildMouseLeave,
+    ],
   )
   return (
     <div {...componentProps}>
@@ -534,9 +552,9 @@ export const ColumnWrapper = ({
 export function getWrapperComponent<Tag extends ComponentTag>(tag: Tag): React.FC<ComponentWrapperProps<Tag>> {
   switch (tag) {
     case "row":
-      return RowWrapper as React.FC<ComponentWrapperProps<Tag>>
+      return RowWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
     case "column":
-      return ColumnWrapper as React.FC<ComponentWrapperProps<Tag>>
+      return ColumnWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
     default:
       return GenericDesignComponentWrapper as unknown as React.FC<ComponentWrapperProps<Tag>>
   }
@@ -555,7 +573,7 @@ export function renderDesignComponent<Tag extends ComponentTag>({
   replaceComponent
 }: ComponentWrapperProps<Tag>): ReactNode {
   const WrapperComponent = getWrapperComponent(component.tag)
-  const Component = getComponentInfo(component.tag).Component
+  const Component = withConnection(getComponentInfo(component.tag).Component)
   const props = {
     pageBuilderMode,
     component,

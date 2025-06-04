@@ -5,7 +5,7 @@ import type { ComponentAttributes as Header1Attributes } from "./header1"
 import type { ComponentAttributes as Header2Attributes } from "./header2"
 import type { ComponentAttributes as Header3Attributes } from "./header3"
 import type { ComponentAttributes as ParagraphAttributes } from "./paragraph"
-import type { ComponentAttributes as SpanAttributes } from "./span"
+import type { ComponentAttributes as InlineTextAttributes } from "./inline-text"
 import type { ComponentAttributes as ButtonAttributes } from "./button"
 import type { ComponentAttributes as ImageAttributes } from "./image"
 import type { ComponentAttributes as RowAttributes } from "./row"
@@ -17,32 +17,28 @@ export type ComponentTag =
   | "header2"
   | "header3"
   | "paragraph"
-  | "span"
+  | "inline-text"
   | "button"
   | "image"
   | "row"
   | "column"
 
+interface Connectable {
+  __data_source__?: string
+}
+
 // Generic component attributes based on component type
-export type ComponentAttributes<Tag extends ComponentTag> = Tag extends "header1"
-  ? Header1Attributes
-  : Tag extends "header2"
-  ? Header2Attributes
-  : Tag extends "header3"
-  ? Header3Attributes
-  : Tag extends "paragraph"
-  ? ParagraphAttributes
-  : Tag extends "span"
-  ? SpanAttributes
-  : Tag extends "button"
-  ? ButtonAttributes
-  : Tag extends "image"
-  ? ImageAttributes
-  : Tag extends "row"
-  ? RowAttributes
-  : Tag extends "column"
-  ? ColumnAttributes
-  : never
+export type ComponentAttributes<Tag extends ComponentTag> =
+  Tag extends "header1" ? (Header1Attributes & Connectable) :
+  Tag extends "header2" ? (Header2Attributes & Connectable) :
+  Tag extends "header3" ? (Header3Attributes & Connectable) :
+  Tag extends "paragraph" ? (ParagraphAttributes & Connectable) :
+  Tag extends "inline-text" ? (InlineTextAttributes & Connectable) :
+  Tag extends "button" ? (ButtonAttributes & Connectable) :
+  Tag extends "image" ? (ImageAttributes & Connectable) :
+  Tag extends "row" ? (RowAttributes & Connectable) :
+  Tag extends "column" ? (ColumnAttributes & Connectable) :
+  never
 
 export type PageBuilderMode = "edit" | "view"
 

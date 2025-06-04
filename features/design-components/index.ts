@@ -6,15 +6,15 @@ import * as Header1 from "./header1"
 import * as Header2 from "./header2"
 import * as Header3 from "./header3"
 import * as Paragraph from "./paragraph"
-import * as Span from "./span"
+import * as InlineText from "./inline-text"
 import * as Button from "./button"
 import * as Image from "./image"
 import * as Row from "./row"
 import * as Column from "./column"
 
 // Helper function to get component data by type using exhaustive switch
-export function getComponentInfo<Tag extends ComponentTag>(type: Tag): ComponentInfo<Tag> {
-  switch (type) {
+export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentInfo<Tag> {
+  switch (tag) {
     case "header1":
       return Header1 as unknown as ComponentInfo<Tag>;
     case "header2":
@@ -23,8 +23,8 @@ export function getComponentInfo<Tag extends ComponentTag>(type: Tag): Component
       return Header3 as unknown as ComponentInfo<Tag>;
     case "paragraph":
       return Paragraph as unknown as ComponentInfo<Tag>;
-    case "span":
-      return Span as unknown as ComponentInfo<Tag>;
+    case "inline-text":
+      return InlineText as unknown as ComponentInfo<Tag>;
     case "button":
       return Button as unknown as ComponentInfo<Tag>;
     case "image":
@@ -34,7 +34,7 @@ export function getComponentInfo<Tag extends ComponentTag>(type: Tag): Component
     case "column":
       return Column as unknown as ComponentInfo<Tag>;
     default:
-      const _unexpected: never = type
+      const _unexpected: never = tag
       throw new Error(`Unknown component type: ${_unexpected}`)
   }
 }
@@ -60,7 +60,7 @@ export const componentTagList = [
   Header2.tag,
   Header3.tag,
   Paragraph.tag,
-  Span.tag,
+  InlineText.tag,
   Button.tag,
   Image.tag,
   Row.tag,
