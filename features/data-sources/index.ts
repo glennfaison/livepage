@@ -32,7 +32,7 @@ export function decodeDataSourceSettings(encodedDataSourceSettings: string): {
 	id: DataSourceId
 	settings: DataSourceSettings<DataSourceId>
 } {
-	if (typeof encodedDataSourceSettings !== "string") {
+	if (typeof encodedDataSourceSettings !== "string" || encodedDataSourceSettings === "") {
 		return {} as {id: DataSourceId; settings: DataSourceSettings<DataSourceId>}
 	}
 	try {
