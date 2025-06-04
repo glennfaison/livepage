@@ -9,7 +9,7 @@ import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, g
 import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
 import { cn } from "@/lib/utils"
-import { ChevronLeftIcon, PlugZapIcon, Search, Loader2Icon, LoaderIcon } from "lucide-react"
+import { ChevronLeftIcon, PlugZapIcon, Search, LoaderIcon } from "lucide-react"
 import React from "react"
 import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
 
