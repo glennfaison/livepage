@@ -270,7 +270,7 @@ const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): st
         type CastType = ComponentAttributes<typeof component.tag>
         return `<p>${(attributes as CastType).content}</p>`
       }
-      case "span": {
+      case "inline-text": {
         type CastType = ComponentAttributes<typeof component.tag>
         return `<span>${(attributes as CastType).content}</span>`
       }

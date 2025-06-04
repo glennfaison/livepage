@@ -7,7 +7,7 @@ describe("Design Component Types", () => {
       "header2",
       "header3",
       "paragraph",
-      "span",
+      "inline-text",
       "button",
       "image",
       "row",
@@ -18,6 +18,7 @@ describe("Design Component Types", () => {
     type ExpectedTypesSubsetOfComponentType = Exclude<(typeof expectedTypes)[number], ComponentTag> extends never
       ? true
       : false
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _typeCheck: ExpectedTypesSubsetOfComponentType = true
 
     // This is just to verify at runtime that our expected types match the actual types
