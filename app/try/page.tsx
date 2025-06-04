@@ -85,6 +85,12 @@ export default function BuilderPage() {
     }
   }
 
+  function setSelectedComponent(componentId: string): void {
+    if (pageBuilderMode === "edit") {
+      dispatch({ type: "SET_SELECTED_COMPONENT", payload: componentId })
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b px-2">
@@ -162,7 +168,7 @@ export default function BuilderPage() {
         <div className="flex-1 overflow-auto bg-gray-50 p-4">
           <div
             className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md p-8"
-            onClick={() => dispatch({ type: "SET_SELECTED_COMPONENT", payload: null })}
+            onClick={() => setSelectedComponent(null)}
           >
             {currentPage.components.map((component) => (
               <React.Fragment key={component.id}>
@@ -170,7 +176,7 @@ export default function BuilderPage() {
                   pageBuilderMode,
                   component,
                   selectedComponentId: state.selectedComponentId,
-                  setSelectedComponent: (id) => dispatch({ type: "SET_SELECTED_COMPONENT", payload: id }),
+                  setSelectedComponent: setSelectedComponent,
                   updateComponent,
                   removeComponent,
                   addComponent,

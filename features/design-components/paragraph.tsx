@@ -1,5 +1,6 @@
 import { Type } from "lucide-react"
 import { ComponentProps, ComponentTag } from "./types"
+import React from "react"
 
 export type ComponentAttributes = {
 	content: string
@@ -39,11 +40,13 @@ export const settingsFields = {
 export const Icon = <Type className="h-4 w-4" />
 
 export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps<typeof tag>) => {
+	const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 	const { content, ...restAttributes } = attributes
+
 	return (
 		<p
 			className="py-2"
-			contentEditable={pageBuilderMode === "edit"}
+			contentEditable={pageBuilderMode === "edit" && contentEditable}
 			suppressContentEditableWarning
 			onBlur={(e) => updateComponent(componentId, { content: e.currentTarget.textContent || "" })}
 			onClick={(e) => {
@@ -52,6 +55,8 @@ export const Component = ({ componentId, attributes, pageBuilderMode, setSelecte
 					setSelectedComponent(componentId)
 				}
 			}}
+			onDoubleClick={() => setContentEditable(true)}
+			onBlurCapture={() => setContentEditable(false)}
 			{...restAttributes}
 		>
 			{content}

@@ -10,29 +10,31 @@ export function withConnection<T extends ComponentProps<ComponentTag>>(
 	return function ConnectedComponent(props: T) {
 		const { attributes } = props;
 		const { __data_source__ } = attributes
-		const [connectedData, setConnectedData] = useState<unknown>(null);
-		const [loading, setLoading] = useState(false);
-		const [error, setError] = useState<unknown>(null);
+		const [connectedData, setConnectedData] = useState<unknown>(null)
+		const [loading, setLoading] = useState(false)
+		const [error, setError] = useState<unknown>(null)
 
 		useEffect(() => {
 			const fetchData = async () => {
 				if (__data_source__ && __data_source__.trim() !== "") {
-					setLoading(true);
-					setError(null);
+					setLoading(true)
+					setError(null)
 					try {
-						const decodedDataSourceSettings = decodeDataSourceSettings(__data_source__);
-						const dataSourceId: DataSourceId = decodedDataSourceSettings.id;
-						const dataSource = getDataSourceInfo(dataSourceId);
-						const result = await dataSource.tryConnection(decodedDataSourceSettings.settings);
+						const decodedDataSourceSettings = decodeDataSourceSettings(__data_source__)
+						const dataSourceId: DataSourceId = decodedDataSourceSettings.id
+						const dataSource = getDataSourceInfo(dataSourceId)
+						const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
 						setConnectedData(result);
 					} catch (err) {
-						setError(err);
+						setError(err)
 					} finally {
-						setLoading(false);
+						setLoading(false)
 					}
 				}
-			};
-			fetchData();
+			}
+			if (__data_source__) {
+				fetchData()
+			}
 		}, [__data_source__]);
 
 		if (__data_source__ && __data_source__.trim() !== "") {

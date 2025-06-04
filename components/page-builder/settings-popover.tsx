@@ -80,7 +80,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
 function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSave, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
   const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__data_source__)
-  const dataSourceInfo = getDataSourceInfo(savedDataSourceSettings.id)
+  const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId>>(dataSourceInfo)
 
   const filteredDataSources = React.useMemo(() => {
