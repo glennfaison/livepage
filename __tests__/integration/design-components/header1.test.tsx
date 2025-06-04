@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import * as Header1 from "@/features/design-components/header1"
 import "@testing-library/jest-dom"
+import { withTextEditing } from "@/features/design-components/content-editable-hoc"
 
 describe("Header1 Component", () => {
   const mockProps = {
@@ -26,27 +27,33 @@ describe("Header1 Component", () => {
     expect(header).toHaveClass("text-4xl font-bold py-2")
   })
 
-  it("is editable in edit mode", () => {
-    render(<Header1.Component {...mockProps} />)
+  it("is editable in edit mode", async () => {
+    const Component = withTextEditing(Header1.Component)
+    render(<Component {...mockProps} />)
 
     const header = screen.getByText("Test Header")
+    await userEvent.dblClick(header)
     expect(header).toHaveAttribute("contentEditable", "true")
   })
 
-  it("is not editable in preview mode", () => {
+  it("is not editable in preview mode", async () => {
     const _mockProps = { ...mockProps, pageBuilderMode: "preview" as const }
-    render(<Header1.Component {..._mockProps} />)
+    const Component = withTextEditing(Header1.Component)
+    render(<Component {..._mockProps} />)
 
     const header = screen.getByText("Test Header")
+    await userEvent.dblClick(header)
     expect(header).not.toHaveAttribute("contentEditable", "true")
   })
 
   it("calls updateComponent when content is edited", async () => {
-    render(<Header1.Component {...mockProps} />)
+    const Component = withTextEditing(Header1.Component)
+    render(<Component {...mockProps} />)
 
     const header = screen.getByText("Test Header")
 
     // Simulate editing the content
+    await userEvent.dblClick(header)
     await userEvent.clear(header)
     await userEvent.type(header, "Updated Header")
 

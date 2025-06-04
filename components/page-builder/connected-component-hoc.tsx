@@ -20,7 +20,9 @@ function replaceConnectedComponentAttributes<T extends ComponentAttributes<Compo
 		matches.forEach((match) => {
 			const evaluateProperty = new Function("data", `return ${match.substring(2, match.length - 2)}`)
 			const output = evaluateProperty(dataFromSource)
-			newAttributes[key] = (newAttributes[key] as string).replaceAll(match, output)
+			if (output !== undefined && output !== null) {
+				newAttributes[key] = (newAttributes[key] as string).replaceAll(match, output)
+			}
 		})
 	}
 

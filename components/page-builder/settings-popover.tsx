@@ -9,7 +9,7 @@ import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, g
 import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
 import { cn } from "@/lib/utils"
-import { ChevronLeftIcon, PlugZapIcon, Search } from "lucide-react"
+import { ChevronLeftIcon, PlugZapIcon, Search, Loader2Icon, LoaderIcon } from "lucide-react"
 import React from "react"
 import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
 
@@ -331,13 +331,17 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
     throw new Error(`Could not find data source`)
   }
   const [connectionResult, setConnectionResult] = React.useState<string>("")
+  const [testingConnection, setTestingConnection] = React.useState(false)
 
   const tryConnection = async (formData: DataSourceSettings<ConnId>) => {
     try {
+      setTestingConnection(true)
       const result = await selectedDataSource.tryConnection(formData)
       setConnectionResult(JSON.stringify(result, null, 2))
     } catch (error) {
       setConnectionResult(JSON.stringify(error, null, 2))
+    } finally {
+      setTestingConnection(false)
     }
   }
 
@@ -384,8 +388,8 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
           <Button className="cursor-pointer w-full"
             onClick={() => tryConnection(formData)}
           >
-            <PlugZapIcon className="h-4 w-4" /> &nbsp;
-            Connect
+            { testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" /> } &nbsp;
+            { testingConnection ? 'Testing...' : 'Test Connection' }
           </Button>
         </div>
 
@@ -412,14 +416,14 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
           className="flex-1 rounded-none rounded-bl-lg bg-muted hover:bg-muted/80 text-foreground h-12 cursor-pointer"
           onClick={handleDiscard}
         >
-          Discard
+          Disconnect
         </Button>
         <Button
           variant="ghost"
           className="flex-1 rounded-none rounded-br-lg bg-foreground hover:bg-foreground/90 text-background h-12 cursor-pointer"
           onClick={handleSave}
         >
-          Save
+          Connect
         </Button>
       </div>
     </>

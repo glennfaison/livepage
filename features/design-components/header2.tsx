@@ -31,6 +31,6 @@ export const Icon = <Heading className="h-4 w-4" />
 export const Component = withTextEditing((props: ComponentProps<typeof tag>) => {
 	const { content } = props.attributes
 	return (
-		<h3 className="text-3xl font-bold py-2" {...props}>{content}</h3>
+		<h2 className="text-3xl font-bold py-2" {...props}>{content}</h2>
 	)
 })

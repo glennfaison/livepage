@@ -68,10 +68,10 @@ describe("SettingsPopover", () => {
     // Default tab is settings
     expect(screen.getByLabelText("Content")).toBeInTheDocument()
 
-    // Switch to connect tab
+    // Switch to Data Sources tab
     await userEvent.click(screen.getByTestId("data-sources-tab-trigger"))
 
-    expect(screen.getByText("Connect")).toBeInTheDocument()
+    expect(screen.getByText("Data Sources")).toBeInTheDocument()
     expect(screen.queryByLabelText("Content")).not.toBeInTheDocument()
 
     // Switch back to settings tab

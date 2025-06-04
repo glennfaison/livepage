@@ -169,7 +169,7 @@ export default function BuilderPage() {
         <div className="flex-1 overflow-auto bg-gray-50 p-4">
           <div
             className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md p-8"
-            onClick={() => setSelectedComponent(null)}
+            onClick={() => setSelectedComponent("")}
           >
             {currentPage.components.map((component) => (
               <React.Fragment key={component.id}>
