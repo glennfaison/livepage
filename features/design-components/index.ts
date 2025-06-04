@@ -6,7 +6,7 @@ import * as Header1 from "./header1"
 import * as Header2 from "./header2"
 import * as Header3 from "./header3"
 import * as Paragraph from "./paragraph"
-import * as Span from "./span"
+import * as InlineText from "./inline-text"
 import * as Button from "./button"
 import * as Image from "./image"
 import * as Row from "./row"
@@ -23,8 +23,8 @@ export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentI
       return Header3 as unknown as ComponentInfo<Tag>;
     case "paragraph":
       return Paragraph as unknown as ComponentInfo<Tag>;
-    case "span":
-      return Span as unknown as ComponentInfo<Tag>;
+    case "inline-text":
+      return InlineText as unknown as ComponentInfo<Tag>;
     case "button":
       return Button as unknown as ComponentInfo<Tag>;
     case "image":
@@ -60,7 +60,7 @@ export const componentTagList = [
   Header2.tag,
   Header3.tag,
   Paragraph.tag,
-  Span.tag,
+  InlineText.tag,
   Button.tag,
   Image.tag,
   Row.tag,

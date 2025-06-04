@@ -61,10 +61,7 @@ export const settingsFields = {
 export const Icon = <ImageIcon className="h-4 w-4" />
 
 export const Component = ({
-	componentId,
-	attributes,
-	pageBuilderMode,
-	setSelectedComponent,
+	attributes
 }: ComponentProps<typeof tag>) => {
 	const { src, alt, fallbackSrc, ...restAttributes } = attributes
 	return (
@@ -72,12 +69,6 @@ export const Component = ({
 			src={src || fallbackSrc}
 			alt={alt}
 			className="max-w-full h-auto"
-			onClick={(e) => {
-				if (pageBuilderMode === "edit") {
-					e.stopPropagation()
-					setSelectedComponent(componentId)
-				}
-			}}
 			{...restAttributes}
 		/>
 	)

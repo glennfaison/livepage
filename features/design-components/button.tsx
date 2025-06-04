@@ -1,6 +1,8 @@
 import { MousePointerClick } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ComponentProps, ComponentTag } from "./types"
+import React from "react"
+import { withTextEditing } from "./content-editable-hoc"
 
 export type ComponentAttributes = {
 	content: string
@@ -27,22 +29,9 @@ export const settingsFields = {
 
 export const Icon = <MousePointerClick className="h-4 w-4" />
 
-export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps<typeof tag>) => {
-	const { content, ...restAttributes } = attributes
+export const Component = withTextEditing((props: ComponentProps<typeof tag>) => {
+	const { content } = props.attributes
 	return (
-		<Button
-			contentEditable={pageBuilderMode === "edit"}
-			suppressContentEditableWarning
-			onBlur={(e) => updateComponent(componentId, { content: e.currentTarget.textContent || "" })}
-			onClick={(e) => {
-				if (pageBuilderMode === "edit") {
-					e.stopPropagation()
-					setSelectedComponent(componentId)
-				}
-			}}
-			{...restAttributes}
-		>
-			{content}
-		</Button>
+		<Button {...props}>{content}</Button>
 	)
-}
+})

@@ -1,5 +1,7 @@
 import { Heading } from "lucide-react"
 import { ComponentProps, ComponentTag } from "./types"
+import React from "react"
+import { withTextEditing } from "./content-editable-hoc"
 
 export type ComponentAttributes = {
 	content: string
@@ -26,23 +28,9 @@ export const settingsFields = {
 
 export const Icon = <Heading className="h-4 w-4" />
 
-export const Component = ({ componentId, attributes, pageBuilderMode, setSelectedComponent, updateComponent }: ComponentProps<typeof tag>) => {
-	const { content, ...restAttributes } = attributes
+export const Component = withTextEditing((props: ComponentProps<typeof tag>) => {
+	const { content } = props.attributes
 	return (
-		<h2
-			className="text-3xl font-bold py-2"
-			contentEditable={pageBuilderMode === "edit"}
-			suppressContentEditableWarning
-			onBlur={(e) => updateComponent(componentId, { content: e.currentTarget.textContent || "" })}
-			onClick={(e) => {
-				if (pageBuilderMode === "edit") {
-					e.stopPropagation()
-					setSelectedComponent(componentId)
-				}
-			}}
-			{...restAttributes}
-		>
-			{content}
-		</h2>
+		<h3 className="text-3xl font-bold py-2" {...props}>{content}</h3>
 	)
-}
+})

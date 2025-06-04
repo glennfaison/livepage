@@ -4,10 +4,10 @@ import type { DataSourceId } from "@/features/data-sources/types";
 import type { ComponentProps, ComponentTag } from "@/features/design-components/types";
 
 // The WrappedComponent should accept a `data` prop for the connected data
-export function withConnection<T extends ComponentProps<ComponentTag>>(
-	WrappedComponent: React.ComponentType<T>
+export function withConnection<Tag extends ComponentTag>(
+	WrappedComponent: React.ComponentType<ComponentProps<Tag>>
 ) {
-	return function ConnectedComponent(props: T) {
+	return function ConnectedComponent(props: ComponentProps<Tag>) {
 		const { attributes } = props;
 		const { __data_source__ } = attributes
 		const [connectedData, setConnectedData] = useState<unknown>(null)
@@ -44,13 +44,13 @@ export function withConnection<T extends ComponentProps<ComponentTag>>(
 				return (
 					<>
 						{connectedData.map((item, idx) => (
-							<WrappedComponent key={idx} {...props} data={item} />
+							<WrappedComponent key={idx} { ...props } __from_data_source__={item} />
 						))}
 					</>
 				);
 			}
 			if (connectedData) {
-				return <WrappedComponent {...props} data={connectedData} />;
+				return <WrappedComponent {...props} __from_data_source__={connectedData} />;
 			}
 			return null;
 		}

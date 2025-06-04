@@ -5,7 +5,7 @@ import type { ComponentAttributes as Header1Attributes } from "./header1"
 import type { ComponentAttributes as Header2Attributes } from "./header2"
 import type { ComponentAttributes as Header3Attributes } from "./header3"
 import type { ComponentAttributes as ParagraphAttributes } from "./paragraph"
-import type { ComponentAttributes as SpanAttributes } from "./span"
+import type { ComponentAttributes as InlineTextAttributes } from "./inline-text"
 import type { ComponentAttributes as ButtonAttributes } from "./button"
 import type { ComponentAttributes as ImageAttributes } from "./image"
 import type { ComponentAttributes as RowAttributes } from "./row"
@@ -17,7 +17,7 @@ export type ComponentTag =
   | "header2"
   | "header3"
   | "paragraph"
-  | "span"
+  | "inline-text"
   | "button"
   | "image"
   | "row"
@@ -32,8 +32,8 @@ export type ComponentAttributes<Tag extends ComponentTag> = Tag extends "header1
   ? Header3Attributes
   : Tag extends "paragraph"
   ? ParagraphAttributes
-  : Tag extends "span"
-  ? SpanAttributes
+  : Tag extends "inline-text"
+  ? InlineTextAttributes
   : Tag extends "button"
   ? ButtonAttributes
   : Tag extends "image"
