@@ -131,6 +131,7 @@ export default function BuilderPage() {
                 })
               }}
               className="text-xl font-semibold w-auto max-w-xs"
+              id="page-title"
               placeholder="Page Title"
             />
             <div className="flex gap-2">

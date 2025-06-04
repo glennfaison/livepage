@@ -1,7 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources";
 import type { DataSourceId } from "@/features/data-sources/types";
-import type { ComponentProps, ComponentTag } from "@/features/design-components/types";
+import type { ComponentAttributes, ComponentProps, ComponentTag } from "@/features/design-components/types";
+
+function replaceConnectedComponentAttributes<T extends ComponentAttributes<ComponentTag>>(originalAttributes: T, dataFromSource: unknown): T {
+	const newAttributes = { ...originalAttributes } as T
+	const placeholderRegExp = /\[#data.*?#\]/g
+	const keysToSkip = ["__data_source__"]
+
+	for (const key in originalAttributes) {
+		if (keysToSkip.includes(key)) {
+			continue
+		}
+		const matches = (originalAttributes[key] as string).match(placeholderRegExp)
+		if (!matches) {
+			newAttributes[key] = originalAttributes[key]
+			continue
+		}
+		matches.forEach((match) => {
+			const evaluateProperty = new Function("data", `return ${match.substring(2, match.length - 2)}`)
+			const output = evaluateProperty(dataFromSource)
+			newAttributes[key] = (newAttributes[key] as string).replaceAll(match, output)
+		})
+	}
+
+	return newAttributes
+}
 
 // The WrappedComponent should accept a `data` prop for the connected data
 export function withConnection<Tag extends ComponentTag>(
@@ -38,21 +62,24 @@ export function withConnection<Tag extends ComponentTag>(
 		}, [__data_source__]);
 
 		if (__data_source__ && __data_source__.trim() !== "") {
-			if (loading) return <div>Loading...</div>;
-			if (error) return <div>Error: {String(error)}</div>;
+			if (loading) return <div>Loading...</div>
+			if (error) return <div>Error: {String(error)}</div>
+
 			if (Array.isArray(connectedData)) {
 				return (
 					<>
-						{connectedData.map((item, idx) => (
-							<WrappedComponent key={idx} { ...props } __from_data_source__={item} />
-						))}
+						{connectedData.map((item, idx) => {
+							const newAttributes = replaceConnectedComponentAttributes(props.attributes, item)
+							return (
+								<WrappedComponent key={idx} {...props} attributes={newAttributes} __from_data_source__={item} />
+							);
+						})}
 					</>
 				);
+			} else {
+				const newAttributes = replaceConnectedComponentAttributes(props.attributes, connectedData)
+				return <WrappedComponent {...props} attributes={newAttributes} __from_data_source__={connectedData} />;
 			}
-			if (connectedData) {
-				return <WrappedComponent {...props} __from_data_source__={connectedData} />;
-			}
-			return null;
 		}
 
 		// Not a connected component, render as usual

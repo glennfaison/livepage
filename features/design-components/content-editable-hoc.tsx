@@ -16,10 +16,11 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 		...otherProps
 	}: ComponentProps<Tag>) {
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
+		const isConnected = !!otherProps.attributes?.__data_source__
 	
 		return (
 			<WrappedComponent
-				contentEditable={pageBuilderMode === "edit" && contentEditable}
+				contentEditable={pageBuilderMode === "edit" && contentEditable && !isConnected}
 				suppressContentEditableWarning
 				onBlur={(e) => updateComponent(componentId, { content: e.currentTarget.textContent || "" })}
 				onClick={(e) => {

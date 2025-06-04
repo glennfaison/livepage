@@ -38,12 +38,7 @@ export async function tryConnection(componentDataSourceSettings: DataSourceSetti
 	let parseResultFn
 	try {
 		if (!!componentDataSourceSettings["parse-result"].trim()){
-			parseResultFn = new Function(`
-				const data = arguments[0];
-				return ((data) => {
-					${componentDataSourceSettings["parse-result"]}
-				})(data);
-			`)
+			parseResultFn = new Function("data", `${componentDataSourceSettings["parse-result"]}`)
 		}
 	} catch (error) {
 		throw error
