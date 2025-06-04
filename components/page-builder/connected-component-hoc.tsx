@@ -19,9 +19,11 @@ function replaceConnectedComponentAttributes<T extends ComponentAttributes<Compo
 		}
 		matches.forEach((match) => {
 			const evaluateProperty = new Function("data", `return ${match.substring(2, match.length - 2)}`)
-			const output = evaluateProperty(dataFromSource)
+			const output = String(evaluateProperty(dataFromSource))
 			if (output !== undefined && output !== null) {
-				newAttributes[key] = (newAttributes[key] as string).replaceAll(match, output)
+				if (typeof newAttributes[key] === "string") {
+					newAttributes[key] = (newAttributes[key] as string).replaceAll(match, output) as T[Extract<keyof T, string>];
+				}
 			}
 		})
 	}
@@ -73,18 +75,18 @@ export function withConnection<Tag extends ComponentTag>(
 						{connectedData.map((item, idx) => {
 							const newAttributes = replaceConnectedComponentAttributes(props.attributes, item)
 							return (
-								<WrappedComponent key={idx} {...props} attributes={newAttributes} __from_data_source__={item} />
+								<WrappedComponent key={idx} {...props} attributes={newAttributes} />
 							);
 						})}
 					</>
 				);
 			} else {
 				const newAttributes = replaceConnectedComponentAttributes(props.attributes, connectedData)
-				return <WrappedComponent {...props} attributes={newAttributes} __from_data_source__={connectedData} />;
+				return <WrappedComponent {...props} attributes={newAttributes} />
 			}
 		}
 
 		// Not a connected component, render as usual
-		return <WrappedComponent {...props} />;
+		return <WrappedComponent {...props} />
 	};
 }

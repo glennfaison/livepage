@@ -23,26 +23,22 @@ export type ComponentTag =
   | "row"
   | "column"
 
+interface Connectable {
+  __data_source__?: string
+}
+
 // Generic component attributes based on component type
-export type ComponentAttributes<Tag extends ComponentTag> = Tag extends "header1"
-  ? Header1Attributes
-  : Tag extends "header2"
-  ? Header2Attributes
-  : Tag extends "header3"
-  ? Header3Attributes
-  : Tag extends "paragraph"
-  ? ParagraphAttributes
-  : Tag extends "inline-text"
-  ? InlineTextAttributes
-  : Tag extends "button"
-  ? ButtonAttributes
-  : Tag extends "image"
-  ? ImageAttributes
-  : Tag extends "row"
-  ? RowAttributes
-  : Tag extends "column"
-  ? ColumnAttributes
-  : never
+export type ComponentAttributes<Tag extends ComponentTag> =
+  Tag extends "header1" ? (Header1Attributes & Connectable) :
+  Tag extends "header2" ? (Header2Attributes & Connectable) :
+  Tag extends "header3" ? (Header3Attributes & Connectable) :
+  Tag extends "paragraph" ? (ParagraphAttributes & Connectable) :
+  Tag extends "inline-text" ? (InlineTextAttributes & Connectable) :
+  Tag extends "button" ? (ButtonAttributes & Connectable) :
+  Tag extends "image" ? (ImageAttributes & Connectable) :
+  Tag extends "row" ? (RowAttributes & Connectable) :
+  Tag extends "column" ? (ColumnAttributes & Connectable) :
+  never
 
 export type PageBuilderMode = "edit" | "view"
 

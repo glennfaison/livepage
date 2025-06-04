@@ -10,9 +10,9 @@ export const dataSourceIdList = [
 export function getDataSourceInfo<DsId extends DataSourceId>(connectionId: DsId): DataSourceInfo<DsId> {
 	switch (connectionId) {
 		case "rest-api":
-			return RestApi
+			return RestApi as unknown as DataSourceInfo<typeof connectionId>
 		case "generated-data":
-			return GeneratedData
+			return GeneratedData as unknown as DataSourceInfo<typeof connectionId>
 		default:
 			const _unexpected: never = connectionId
 			throw new Error(`Unknown data source: ${_unexpected}`)

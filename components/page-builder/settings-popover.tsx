@@ -13,8 +13,6 @@ import { ChevronLeftIcon, PlugZapIcon, Search, LoaderIcon } from "lucide-react"
 import React from "react"
 import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
 
-const __data_source__ = "__data_source__"
-
 export interface SettingsPopoverProps<Tag extends ComponentTag> {
   component: DesignComponent<Tag>
   onSave: (updates: ComponentAttributes<Tag>) => void
@@ -62,7 +60,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
   }
 
   const settingsFields = React.useMemo(
-    () => Object.values<SettingsField<Tag>>(componentInfo.settingsFields).filter((field) => field.id !== __data_source__),
+    () => Object.values<SettingsField<Tag>>(componentInfo.settingsFields).filter((field) => field.id !== "__data_source__"),
     [componentInfo.settingsFields],
   ) as SettingsField<Tag>[]
 
@@ -79,9 +77,9 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
 
 function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSave, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
-  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__data_source__)
+  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__data_source__ || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
-  const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId>>(dataSourceInfo)
+  const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId> | undefined>(dataSourceInfo)
 
   const filteredDataSources = React.useMemo(() => {
     const dataSources = dataSourceIdList.map((connId) => getDataSourceInfo(connId))
@@ -101,7 +99,8 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSa
     if (!selectedDataSource) {
       return
     }
-    for (const key in selectedDataSource.defaultSettings) {
+    for (const _key in selectedDataSource.defaultSettings) {
+      const key = _key  as keyof DataSourceSettings<DataSourceId>
       if (
         String(formData[key]).trim() === "" ||
         !formData.hasOwnProperty(key)
@@ -114,7 +113,7 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSa
   }
 
   const handleDiscard = () => {
-    setFormData({ ...savedDataSourceSettings })
+    setFormData({ ...savedDataSourceSettings.settings })
     setIsOpen(false)
   }
 
