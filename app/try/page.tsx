@@ -113,7 +113,7 @@ export default function BuilderPage() {
               className="gap-2"
               onClick={() => dispatch({ type: "SET_PREVIEW_MODE", payload: pageBuilderMode === "edit" })}
             >
-              {pageBuilderMode === "edit" ? "Edit Mode" : "Preview Mode"}
+              {pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}
             </Button>
           </div>
         </div>

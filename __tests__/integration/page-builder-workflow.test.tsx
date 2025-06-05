@@ -84,7 +84,7 @@ describe("BuilderPage Integration", () => {
     // Check for main UI elements
     expect(screen.getByText("PageCraft")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /home/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /edit mode/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /switch to preview mode/i })).toBeInTheDocument()
     expect(screen.getByPlaceholderText("Page Title")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /load/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument()
@@ -112,7 +112,7 @@ describe("BuilderPage Integration", () => {
 
     render(<BuilderPage />)
 
-    await userEvent.click(screen.getByRole("button", { name: /edit mode/i }))
+    await userEvent.click(screen.getByRole("button", { name: /switch to preview mode/i }))
 
     expect(mockDispatch).toHaveBeenCalledWith({
       type: "SET_PREVIEW_MODE",

@@ -50,7 +50,6 @@ export type SettingsField<Tag extends ComponentTag> = {
   options?: string[] // For select fields
 }
 
-// Design component structure
 export type DesignComponent<Tag extends ComponentTag> = {
   id: string
   tag: Tag
@@ -59,7 +58,6 @@ export type DesignComponent<Tag extends ComponentTag> = {
   settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
 }
 
-// Page structure
 export interface Page {
   id: string
   title: string

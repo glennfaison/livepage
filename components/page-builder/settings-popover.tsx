@@ -332,7 +332,7 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
   const [connectionResult, setConnectionResult] = React.useState<string>("")
   const [testingConnection, setTestingConnection] = React.useState(false)
 
-  const tryConnection = async (formData: DataSourceSettings<ConnId>) => {
+  const testConnection = async (formData: DataSourceSettings<ConnId>) => {
     try {
       setTestingConnection(true)
       const result = await selectedDataSource.tryConnection(formData)
@@ -385,7 +385,8 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
 
         <div className="space-y-2">
           <Button className="cursor-pointer w-full"
-            onClick={() => tryConnection(formData)}
+            disabled={testingConnection}
+            onClick={() => testConnection(formData)}
           >
             { testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" /> } &nbsp;
             { testingConnection ? 'Testing...' : 'Test Connection' }
