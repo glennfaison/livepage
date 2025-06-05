@@ -16,7 +16,7 @@ export const defaultAttributes: ComponentAttributes = {
 	alt: "Image Description",
 	width: "100%",
 	height: "auto",
-	fallbackSrc: "/placeholder.svg?height=200&width=300",
+	fallbackSrc: "/placeholder-img.svg?height=300&width=300",
 }
 
 export const tag: ComponentTag = "image" as const

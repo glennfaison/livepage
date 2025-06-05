@@ -22,8 +22,10 @@ export default function BuilderPage() {
     state,
   )
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const jsonFileInputRef = useRef<HTMLInputElement>(null)
+  const shortcodeFileInputRef = useRef<HTMLInputElement>(null)
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false)
+  const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
 
   // Get the current active page
   const currentPage = state.pages.find((page) => page.id === state.activePage) || state.pages[0]
@@ -80,8 +82,8 @@ export default function BuilderPage() {
     })
 
     // Reset the file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+    if (event.target.type === "file") {
+      event.target.value = ""
     }
   }
 
@@ -135,10 +137,38 @@ export default function BuilderPage() {
               placeholder="Page Title"
             />
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => fileInputRef.current?.click()}>
-                <Upload className="h-4 w-4" /> Load
-              </Button>
-              <input type="file" ref={fileInputRef} onChange={loadPage} accept=".json" className="hidden" />
+              <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Upload className="h-4 w-4" /> Load
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => jsonFileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Load JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => shortcodeFileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Load Shortcode
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <input 
+                type="file" 
+                ref={jsonFileInputRef} 
+                onChange={loadPage} 
+                accept=".json" 
+                className="hidden" 
+              />
+              <input 
+                type="file" 
+                ref={shortcodeFileInputRef} 
+                onChange={loadPage} 
+                accept=".txt" 
+                className="hidden" 
+              />
 
               <DropdownMenu open={saveDropdownOpen} onOpenChange={setSaveDropdownOpen}>
                 <DropdownMenuTrigger asChild>
