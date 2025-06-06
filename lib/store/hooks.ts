@@ -9,7 +9,7 @@ import type { AppState, AppAction } from "./types"
 import type { ComponentAttributes, ComponentTag, DesignComponent, Page } from "@/features/design-components/types"
 import { generateId } from "@/lib/utils"
 import { toast } from "@/components/ui/use-toast"
-import { stringify } from "../shortcode-parser/parser"
+import * as ShortcodeParser from "../shortcode-parser/parser"
 import { createDesignComponent } from "@/features/design-components"
 
 export function useAppState() {
@@ -33,7 +33,6 @@ export function useAppState() {
 }
 
 export function usePageOperations() {
-  // Save page as JSON mutation
   const savePageAsJsonMutation = useMutation({
     mutationFn: async (page: Page) => {
       const data = JSON.stringify(page, null)
@@ -63,14 +62,13 @@ export function usePageOperations() {
     },
   })
 
-  // Save page as Shortcode mutation
   const savePageAsShortcodeMutation = useMutation({
     mutationFn: async (page: Page) => {
       const _attributes = page.attributes
       _attributes.title = page.title
       const _children = JSON.parse(JSON.stringify(page.components))
       const _page = { children: _children, attributes: _attributes, tag: 'page' }
-      const data = stringify([_page])
+      const data = ShortcodeParser.stringify([_page])
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -97,7 +95,6 @@ export function usePageOperations() {
     },
   })
 
-  // Save page as HTML mutation
   const savePageAsHtmlMutation = useMutation({
     mutationFn: async (page: Page) => {
       // Basic HTML template
@@ -209,8 +206,7 @@ export function usePageOperations() {
     },
   })
 
-  // Load page mutation
-  const loadPageMutation = useMutation({
+  const loadPageFromJsonMutation = useMutation({
     mutationFn: async (file: File): Promise<Page> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -242,11 +238,45 @@ export function usePageOperations() {
     },
   })
 
+  const loadPageFromShortcodeMutation = useMutation({
+    mutationFn: async (file: File): Promise<Page> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          try {
+            const content = e.target?.result as string
+            const pages = ShortcodeParser.parse(content)
+            const loadedPage = pages[0] as unknown as Page
+            resolve(loadedPage)
+          } catch (error) {
+            reject(new Error(`Invalid file format ${error}`))
+          }
+        }
+        reader.onerror = () => reject(new Error("Failed to read file"))
+        reader.readAsText(file)
+      })
+    },
+    onSuccess: (loadedPage) => {
+      toast({
+        title: "Page loaded",
+        description: `${loadedPage.title} has been loaded successfully.`,
+      })
+    },
+    onError: () => {
+      toast({
+        title: "Error loading page",
+        description: "The file format is invalid.",
+        variant: "destructive",
+      })
+    },
+  })
+
   return {
     savePageAsShortcodeMutation,
     savePageAsJsonMutation,
     savePageAsHtmlMutation,
-    loadPageMutation,
+    loadPageMutation: loadPageFromJsonMutation,
+    loadPageFromShortcodeMutation,
   }
 }
 
