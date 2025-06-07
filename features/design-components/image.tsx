@@ -2,6 +2,8 @@
 
 import { ImageIcon } from "lucide-react"
 import type { ComponentProps, ComponentTag } from "./types"
+import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { withEditorControls } from "./hoc/component-controls-hoc"
 
 export type ComponentAttributes = {
 	src?: string
@@ -60,10 +62,8 @@ export const settingsFields = {
 
 export const Icon = <ImageIcon className="h-4 w-4" />
 
-export const Component = ({
-	attributes
-}: ComponentProps<typeof tag>) => {
-	const { src, alt, fallbackSrc, ...restAttributes } = attributes
+const Component_ = (props: ComponentProps<typeof tag>) => {
+	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes
 	return (
 		<img
 			src={src || fallbackSrc}
@@ -73,3 +73,6 @@ export const Component = ({
 		/>
 	)
 }
+
+const ConnectedComponent = withConnection(Component_)
+export const Component = withEditorControls(ConnectedComponent)

@@ -31,12 +31,11 @@ function replaceConnectedComponentAttributes<T extends ComponentAttributes<Compo
 	return newAttributes
 }
 
-// The WrappedComponent should accept a `data` prop for the connected data
 export function withConnection<Tag extends ComponentTag>(
 	WrappedComponent: React.ComponentType<ComponentProps<Tag>>
 ) {
 	return function ConnectedComponent(props: ComponentProps<Tag>) {
-		const { attributes } = props;
+		const { attributes } = props.component;
 		const { __data_source__ } = attributes
 		const [connectedData, setConnectedData] = useState<unknown>(null)
 		const [loading, setLoading] = useState(false)
@@ -73,16 +72,18 @@ export function withConnection<Tag extends ComponentTag>(
 				return (
 					<>
 						{connectedData.map((item, idx) => {
-							const newAttributes = replaceConnectedComponentAttributes(props.attributes, item)
+							const newAttributes = replaceConnectedComponentAttributes(attributes, item)
+							const connectedComponent = { ...props.component, attributes: newAttributes }
 							return (
-								<WrappedComponent key={idx} {...props} attributes={newAttributes} />
+								<WrappedComponent key={idx} {...props} component={connectedComponent} />
 							);
 						})}
 					</>
 				);
 			} else {
-				const newAttributes = replaceConnectedComponentAttributes(props.attributes, connectedData)
-				return <WrappedComponent {...props} attributes={newAttributes} />
+				const newAttributes = replaceConnectedComponentAttributes(attributes, connectedData)
+				const connectedComponent = { ...props.component, attributes: newAttributes }
+				return <WrappedComponent {...props} component={connectedComponent} />
 			}
 		}
 

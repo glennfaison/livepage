@@ -3,12 +3,12 @@ import type { ComponentAttributes, ComponentTag, DesignComponent } from "@/featu
 
 // Helper function to add component to parent
 const addComponentToParent = (
-  components: DesignComponent<ComponentTag>[],
+  children: DesignComponent<ComponentTag>[],
   parentId: string,
   newComponent: DesignComponent<ComponentTag>,
   index: number,
 ): DesignComponent<ComponentTag>[] => {
-  return components.map((component) => {
+  return children.map((component) => {
     if (component.id === parentId) {
       const currentChildren = component.children || []
       return {
@@ -30,11 +30,11 @@ const addComponentToParent = (
 
 // Helper function to update component in array
 const updateComponentInArray = (
-  components: DesignComponent<ComponentTag>[],
+  children: DesignComponent<ComponentTag>[],
   id: string,
   updates: Partial<ComponentAttributes<ComponentTag>>,
 ): DesignComponent<ComponentTag>[] => {
-  return components.map((component) => {
+  return children.map((component) => {
     if (component.id === id) {
       return {
         ...component,
@@ -55,11 +55,11 @@ const updateComponentInArray = (
 
 // Helper function to replace component in array
 const replaceComponentInArray = (
-  components: DesignComponent<ComponentTag>[],
+  children: DesignComponent<ComponentTag>[],
   oldComponentId: string,
   newComponent: DesignComponent<ComponentTag>,
 ): DesignComponent<ComponentTag>[] => {
-  return components.map((component) => {
+  return children.map((component) => {
     if (component.id === oldComponentId) {
       return newComponent
     }
@@ -77,10 +77,10 @@ const replaceComponentInArray = (
 
 // Helper function to remove component from array
 const removeComponentFromArray = (
-  components: DesignComponent<ComponentTag>[],
+  children: DesignComponent<ComponentTag>[],
   id: string,
 ): DesignComponent<ComponentTag>[] => {
-  return components
+  return children
     .filter((component) => component.id !== id)
     .map((component) => {
       if (component.children) {
@@ -95,13 +95,13 @@ const removeComponentFromArray = (
 
 // Helper function to add duplicate component
 const addDuplicateToParent = (
-  components: DesignComponent<ComponentTag>[],
+  children: DesignComponent<ComponentTag>[],
   targetId: string,
   duplicatedComponent: DesignComponent<ComponentTag>,
 ): DesignComponent<ComponentTag>[] => {
   const result: DesignComponent<ComponentTag>[] = []
 
-  for (const component of components) {
+  for (const component of children) {
     result.push(component)
 
     if (component.id === targetId) {
@@ -121,15 +121,19 @@ const addDuplicateToParent = (
 export const initialState: AppState = {
   pages: [
     {
+      tag: "page",
       id: "page-1",
-      title: "Home Page",
-      attributes: {},
-      components: [],
+      attributes: {
+        title: "Home Page",
+      },
+      children: [
+        // {id:"row-1",tag:"row",attributes:{},children:[{id:"header1-1",tag:"header1",attributes:{},children:[]}]}
+      ],
     },
   ],
   activePage: "page-1",
-  selectedComponentId: null,
-  previewMode: false,
+  selectedComponentId: "",
+  pageBuilderMode: "edit",
   toolbarMinimized: false,
   showToolbar: true,
   history: [],
@@ -176,12 +180,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           if (parentId) {
             return {
               ...page,
-              components: addComponentToParent(page.components, parentId, component, index),
+              children: addComponentToParent(page.children, parentId, component, index),
             }
           } else {
             return {
               ...page,
-              components: [...page.components.slice(0, index), component, ...page.components.slice(index)],
+              children: [...page.children.slice(0, index), component, ...page.children.slice(index)],
             }
           }
         }),
@@ -197,7 +201,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           page.id === pageId
             ? {
               ...page,
-              components: updateComponentInArray(page.components, componentId, updates),
+              children: updateComponentInArray(page.children, componentId, updates),
             }
             : page,
         ),
@@ -212,7 +216,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           page.id === pageId
             ? {
               ...page,
-              components: removeComponentFromArray(page.components, componentId),
+              children: removeComponentFromArray(page.children, componentId),
             }
             : page,
         ),
@@ -228,7 +232,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           page.id === pageId
             ? {
               ...page,
-              components: addDuplicateToParent(page.components, componentId, duplicatedComponent),
+              children: addDuplicateToParent(page.children, componentId, duplicatedComponent),
             }
             : page,
         ),
@@ -244,7 +248,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           page.id === pageId
             ? {
               ...page,
-              components: replaceComponentInArray(page.components, oldComponentId, newComponent),
+              children: replaceComponentInArray(page.children, oldComponentId, newComponent),
             }
             : page,
         ),
@@ -258,10 +262,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         selectedComponentId: action.payload,
       }
 
-    case "SET_PREVIEW_MODE":
+    case "SET_PAGE_BUILDER_MODE":
       return {
         ...state,
-        previewMode: action.payload,
+        pageBuilderMode: action.payload,
       }
 
     case "SET_TOOLBAR_MINIMIZED":

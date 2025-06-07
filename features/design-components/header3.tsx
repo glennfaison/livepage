@@ -1,11 +1,15 @@
 import { Heading } from "lucide-react"
 import { ComponentProps, ComponentTag } from "./types"
 import React from "react"
-import { withTextEditing } from "./content-editable-hoc"
+import { withTextEditing } from "./hoc/content-editable-hoc"
+import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { withEditorControls } from "./hoc/component-controls-hoc"
 
 export type ComponentAttributes = {
 	content: string
 }
+
+const defaultChildren = ["Header 3"]
 
 export const defaultAttributes: ComponentAttributes = {
 	content: "Header 3",
@@ -28,9 +32,13 @@ export const settingsFields = {
 
 export const Icon = <Heading className="h-4 w-4" />
 
-export const Component = withTextEditing((props: ComponentProps<typeof tag>) => {
-	const { content } = props.attributes
+const Component_ = (props: ComponentProps<typeof tag>) => {
+	const children = props.component.children?.length ? props.component.children : defaultChildren
 	return (
-		<h3 className="text-2xl font-bold py-2" {...props}>{content}</h3>
+		<h3 className="text-2xl font-bold py-2" {...props}>{children as React.ReactNode}</h3>
 	)
-})
+}
+
+const WithContentEditing = withTextEditing(Component_)
+const ConnectedComponent = withConnection(WithContentEditing)
+export const Component = withEditorControls(ConnectedComponent)

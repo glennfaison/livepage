@@ -64,16 +64,12 @@ export function usePageOperations() {
 
   const savePageAsShortcodeMutation = useMutation({
     mutationFn: async (page: Page) => {
-      const _attributes = page.attributes
-      _attributes.title = page.title
-      const _children = JSON.parse(JSON.stringify(page.components))
-      const _page = { children: _children, attributes: _attributes, tag: 'page' }
-      const data = ShortcodeParser.stringify([_page])
+      const data = ShortcodeParser.stringify([page])
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${page.title.toLowerCase().replace(/\s+/g, "-")}.txt`
+      a.download = `${page.attributes.title.toLowerCase().replace(/\s+/g, "-")}.txt`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -173,7 +169,7 @@ export function usePageOperations() {
         </style>
       </head>
       <body>
-        ${renderComponentsToHTML(page.components)}
+        ${renderComponentsToHTML(page.children)}
       </body>
       </html>
       `
@@ -183,7 +179,7 @@ export function usePageOperations() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${page.title.toLowerCase().replace(/\s+/g, "-")}.html`
+      a.download = `${page.attributes.title.toLowerCase().replace(/\s+/g, "-")}.html`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -259,7 +255,7 @@ export function usePageOperations() {
     onSuccess: (loadedPage) => {
       toast({
         title: "Page loaded",
-        description: `${loadedPage.title} has been loaded successfully.`,
+        description: `${loadedPage.attributes.title} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -395,7 +391,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
       setTimeout(() => {
         const currentPage = state.pages.find((page) => page.id === state.activePage)
         if (currentPage) {
-          const component = findComponentById(currentPage.components, id)
+          const component = findComponentById(currentPage.children, id)
           if (component) {
             dispatch({
               type: "ADD_TO_HISTORY",
@@ -410,12 +406,19 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     },
     [dispatch, state.activePage, state.pages, findComponentById],
   )
+  
+  const setSelectedComponent = useCallback((componentId: string): void => {
+    if (state.pageBuilderMode === "edit") {
+      dispatch({ type: "SET_SELECTED_COMPONENT", payload: componentId })
+    }
+  }, [dispatch, state.pageBuilderMode])
+
 
   // Remove component
   const removeComponent = useCallback(
     (id: string) => {
       const currentPage = state.pages.find((page) => page.id === state.activePage)
-      const component = currentPage ? findComponentById(currentPage.components, id) : null
+      const component = currentPage ? findComponentById(currentPage.children, id) : null
 
       dispatch({
         type: "REMOVE_COMPONENT",
@@ -450,7 +453,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   const duplicateComponent = useCallback(
     (id: string) => {
       const currentPage = state.pages.find((page) => page.id === state.activePage)
-      const componentToDuplicate = currentPage ? findComponentById(currentPage.components, id) : null
+      const componentToDuplicate = currentPage ? findComponentById(currentPage.children, id) : null
 
       if (!componentToDuplicate) return
 
@@ -532,6 +535,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     removeComponent,
     duplicateComponent,
     findComponentById,
+    setSelectedComponent,
     replaceComponent,
   }
 }

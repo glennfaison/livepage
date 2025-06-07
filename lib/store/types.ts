@@ -1,4 +1,4 @@
-import type { ComponentAttributes, ComponentTag, DesignComponent, Page } from "@/features/design-components/types"
+import type { ComponentAttributes, ComponentTag, DesignComponent, Page, PageBuilderMode } from "@/features/design-components/types"
 
 // History entry
 export interface HistoryEntry {
@@ -12,8 +12,8 @@ export interface HistoryEntry {
 export interface AppState {
   pages: Page[]
   activePage: string
-  selectedComponentId: string | null
-  previewMode: boolean
+  selectedComponentId: string
+  pageBuilderMode: PageBuilderMode
   toolbarMinimized: boolean
   showToolbar: boolean
   history: HistoryEntry[]
@@ -40,7 +40,7 @@ export type AppAction =
   }
   | { type: "REPLACE_COMPONENT", payload: { pageId: string, oldComponentId: string, newComponent: DesignComponent<ComponentTag> } }
   | { type: "SET_SELECTED_COMPONENT"; payload: string | null }
-  | { type: "SET_PREVIEW_MODE"; payload: boolean }
+  | { type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }
   | { type: "SET_SHOW_TOOLBAR"; payload: boolean }
   | { type: "ADD_TO_HISTORY"; payload: { action: string; pageState: Page[] } }

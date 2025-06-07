@@ -21,7 +21,7 @@ jest.mock("@/lib/store/hooks", () => {
         ],
         activePage: "page-1",
         selectedComponentId: null,
-        previewMode: false,
+        pageBuilderMode: false,
         toolbarMinimized: false,
         showToolbar: true,
         history: [
@@ -99,7 +99,7 @@ describe("BuilderPage Integration", () => {
         pages: [{ id: "page-1", title: "Test Page", attributes: {}, components: [] }],
         activePage: "page-1",
         selectedComponentId: null,
-        previewMode: false,
+        pageBuilderMode: false,
         toolbarMinimized: false,
         showToolbar: true,
         history: [],
@@ -115,8 +115,8 @@ describe("BuilderPage Integration", () => {
     await userEvent.click(screen.getByRole("button", { name: /switch to preview mode/i }))
 
     expect(mockDispatch).toHaveBeenCalledWith({
-      type: "SET_PREVIEW_MODE",
-      payload: true,
+      type: "SET_PAGE_BUILDER_MODE",
+      payload: "preview",
     })
   })
 
@@ -128,7 +128,7 @@ describe("BuilderPage Integration", () => {
         pages: [{ id: "page-1", title: "Test Page", attributes: {}, components: [] }],
         activePage: "page-1",
         selectedComponentId: null,
-        previewMode: false,
+        pageBuilderMode: false,
         toolbarMinimized: false,
         showToolbar: true,
         history: [],

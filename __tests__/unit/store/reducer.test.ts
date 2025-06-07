@@ -77,8 +77,8 @@ describe("App Reducer", () => {
     }
 
     const result = appReducer(state, action)
-    expect(result.pages[0].components).toHaveLength(1)
-    expect(result.pages[0].components[0]).toEqual(component)
+    expect(result.pages[0].children).toHaveLength(1)
+    expect(result.pages[0].children[0]).toEqual(component)
     expect(result.selectedComponentId).toBe(component.id)
   })
 
@@ -94,13 +94,13 @@ describe("App Reducer", () => {
     expect(result.selectedComponentId).toBe(componentId)
   })
 
-  it("should handle SET_PREVIEW_MODE", () => {
+  it("should handle SET_PAGE_BUILDER_MODE", () => {
     const action: AppAction = {
-      type: "SET_PREVIEW_MODE",
-      payload: true,
+      type: "SET_PAGE_BUILDER_MODE",
+      payload: "preview",
     }
 
     const result = appReducer(state, action)
-    expect(result.previewMode).toBe(true)
+    expect(result.pageBuilderMode).toBe("preview")
   })
 })

@@ -10,6 +10,7 @@ import type { ComponentAttributes as ButtonAttributes } from "./button"
 import type { ComponentAttributes as ImageAttributes } from "./image"
 import type { ComponentAttributes as RowAttributes } from "./row"
 import type { ComponentAttributes as ColumnAttributes } from "./column"
+import type { ComponentAttributes as PageAttributes } from "./page-component"
 
 // Component types
 export type ComponentTag =
@@ -22,6 +23,9 @@ export type ComponentTag =
   | "image"
   | "row"
   | "column"
+  | "page"
+
+export type PageBuilderMode = "edit" | "preview"
 
 interface Connectable {
   __data_source__?: string
@@ -38,9 +42,8 @@ export type ComponentAttributes<Tag extends ComponentTag> =
   Tag extends "image" ? (ImageAttributes & Connectable) :
   Tag extends "row" ? (RowAttributes & Connectable) :
   Tag extends "column" ? (ColumnAttributes & Connectable) :
+  Tag extends "page" ? (PageAttributes & Connectable) :
   never
-
-export type PageBuilderMode = "edit" | "view"
 
 export type SettingsField<Tag extends ComponentTag> = {
   id: keyof ComponentAttributes<Tag>
@@ -55,15 +58,9 @@ export type DesignComponent<Tag extends ComponentTag> = {
   tag: Tag
   children: DesignComponent<ComponentTag>[]
   attributes: ComponentAttributes<Tag>
-  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
 }
 
-export interface Page {
-  id: string
-  title: string
-  components: DesignComponent<ComponentTag>[]
-  attributes: Record<string, string>
-}
+export type Page = DesignComponent<"page">
 
 export type ComponentOperations<Tag extends ComponentTag> = {
   setSelectedComponent: (componentId: string) => void
@@ -74,24 +71,12 @@ export type ComponentOperations<Tag extends ComponentTag> = {
   replaceComponent: (oldComponentId: string, newComponentTag: ComponentTag) => void
 }
 
-// Component props type for renderComponent function
 export type ComponentProps<Tag extends ComponentTag> = {
   pageBuilderMode: PageBuilderMode
-  componentId: string
-  attributes: ComponentAttributes<Tag>
-  children?: React.ReactNode
+  component: DesignComponent<Tag>
+  selectedComponentId: string,
 } & ComponentOperations<Tag>
 
-export type ComponentWrapperProps<Tag extends ComponentTag> = {
-  component: DesignComponent<Tag>
-  selectedComponentId: string | null
-} & Omit<ComponentProps<Tag>, "componentId" | "attributes">
-
-export type ComponentControlsProps<Tag extends ComponentTag> = {
-  component: DesignComponent<Tag>
-} & Omit<ComponentOperations<Tag>, "addComponent" | "setSelectedComponent">
-
-// Component data interface - updated to match actual exports
 export interface ComponentInfo<Tag extends ComponentTag> {
   tag: Tag
   label: string

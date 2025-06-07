@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import * as Header1 from "@/features/design-components/header1"
 import "@testing-library/jest-dom"
-import { withTextEditing } from "@/features/design-components/content-editable-hoc"
+import { withTextEditing } from "@/features/design-components/hoc/content-editable-hoc"
 
 describe("Header1 Component", () => {
   const mockProps = {

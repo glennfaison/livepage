@@ -11,6 +11,7 @@ import * as Button from "./button"
 import * as Image from "./image"
 import * as Row from "./row"
 import * as Column from "./column"
+import * as Page from "./page-component"
 
 // Helper function to get component data by type using exhaustive switch
 export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentInfo<Tag> {
@@ -33,6 +34,8 @@ export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentI
       return Row as unknown as ComponentInfo<Tag>;
     case "column":
       return Column as unknown as ComponentInfo<Tag>;
+    case "page":
+      return Page as unknown as ComponentInfo<Tag>
     default:
       const _unexpected: never = tag
       throw new Error(`Unknown component type: ${_unexpected}`)
@@ -51,7 +54,6 @@ export function createDesignComponent<Tag extends ComponentTag>(
     tag: tag,
     attributes: { ...data.defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
     children: [],
-    settingsFields: data.settingsFields,
   }
 }
 
