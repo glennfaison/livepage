@@ -10,7 +10,7 @@ export type ComponentAttributes = {
 	content: string
 }
 
-const defaultChildren = ["Button"]
+export const defaultChildren = ["Button"]
 
 export const defaultAttributes: ComponentAttributes = {
 	content: "Button",
@@ -35,8 +35,12 @@ export const Icon = <MousePointerClick className="h-4 w-4" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
 	const children = props.component.children?.length ? props.component.children : defaultChildren
+	const filteredProps: Partial<ComponentProps<typeof tag>> = { ...props }
+	delete filteredProps.pageBuilderMode
+	delete filteredProps.selectedComponentId
+
 	return (
-		<Button {...props}>{children as React.ReactNode}</Button>
+		<Button {...filteredProps}>{children as React.ReactNode}</Button>
 	)
 }
 

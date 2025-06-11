@@ -6,35 +6,33 @@ import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
 import { appReducer, initialState } from "./reducer"
 import type { AppState, AppAction } from "./types"
-import type { ComponentAttributes, ComponentTag, DesignComponent, Page } from "@/features/design-components/types"
-import { generateId } from "@/lib/utils"
+import type { ComponentAttributes, ComponentTag, DesignComponent } from "@/features/design-components/types"
 import { toast } from "@/components/ui/use-toast"
 import * as ShortcodeParser from "../shortcode-parser/parser"
-import { createDesignComponent } from "@/features/design-components"
 
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
 
   // Initialize history when pages are first loaded
   useEffect(() => {
-    if (state.pages.length > 0 && state.history.length === 0) {
+    if (state.componentTree.length > 0 && state.history.length === 0) {
       dispatch({
         type: "ADD_TO_HISTORY",
         payload: {
           action: "Page created",
-          pageState: state.pages,
+          pageState: state.componentTree,
         },
       })
       dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: 0 })
     }
-  }, [state.pages, state.history])
+  }, [state.componentTree, state.history])
 
   return { state, dispatch }
 }
 
 export function usePageOperations() {
   const savePageAsJsonMutation = useMutation({
-    mutationFn: async (page: Page) => {
+    mutationFn: async (page: DesignComponent<"page">) => {
       const data = JSON.stringify(page, null)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
@@ -63,7 +61,7 @@ export function usePageOperations() {
   })
 
   const savePageAsShortcodeMutation = useMutation({
-    mutationFn: async (page: Page) => {
+    mutationFn: async (page: DesignComponent<"page">) => {
       const data = ShortcodeParser.stringify([page])
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
@@ -92,7 +90,7 @@ export function usePageOperations() {
   })
 
   const savePageAsHtmlMutation = useMutation({
-    mutationFn: async (page: Page) => {
+    mutationFn: async (page: DesignComponent<"page">) => {
       // Basic HTML template
       const htmlTemplate = `
       <!DOCTYPE html>
@@ -203,13 +201,13 @@ export function usePageOperations() {
   })
 
   const loadPageFromJsonMutation = useMutation({
-    mutationFn: async (file: File): Promise<Page> => {
+    mutationFn: async (file: File): Promise<DesignComponent<"page">> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const loadedPage = JSON.parse(content) as Page
+            const loadedPage = JSON.parse(content) as DesignComponent<"page">
             resolve(loadedPage)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -235,14 +233,14 @@ export function usePageOperations() {
   })
 
   const loadPageFromShortcodeMutation = useMutation({
-    mutationFn: async (file: File): Promise<Page> => {
+    mutationFn: async (file: File): Promise<DesignComponent<"page">> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
             const pages = ShortcodeParser.parse(content)
-            const loadedPage = pages[0] as unknown as Page
+            const loadedPage = pages[0] as unknown as DesignComponent<"page">
             resolve(loadedPage)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -342,54 +340,41 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   )
 
   // Add component
-  const addComponent = useCallback(
-    ({ type, parentId, index = 0 }: { type: ComponentTag, parentId?: string, index?: number }) => {
-      const newComponent = createDesignComponent(type, generateId())
+  const addComponent = useCallback(({ tag, parentId, index = 0 }: { tag: ComponentTag, parentId?: string, index?: number }) => {
+    console.log("addComponent")
+    dispatch({
+      type: "ADD_COMPONENT",
+      payload: { newComponentTag: tag, parentId, index },
+    })
 
+    // Add to history after state update
+    setTimeout(() => {
       dispatch({
-        type: "ADD_COMPONENT",
+        type: "ADD_TO_HISTORY",
         payload: {
-          pageId: state.activePage,
-          component: newComponent,
-          parentId,
-          index,
+          action: `Added ${tag}`,
+          pageState: state.componentTree,
         },
       })
+    }, 0)
 
-      // Add to history after state update
-      setTimeout(() => {
-        dispatch({
-          type: "ADD_TO_HISTORY",
-          payload: {
-            action: `Added ${type}`,
-            pageState: state.pages,
-          },
-        })
-      }, 0)
-
-      toast({
-        title: "Component added",
-        description: `Added a new ${type} component to the page.`,
-      })
-    },
-    [dispatch, state.activePage, state.pages],
-  )
+    toast({
+      title: "Component added",
+      description: `Added a new ${tag} component to the page.`,
+    })
+  }, [dispatch, state.componentTree])
 
   // Update component
   const updateComponent = useCallback(
-    <Tag extends ComponentTag>(id: string, updates: Partial<ComponentAttributes<Tag>>) => {
+    <Tag extends ComponentTag>(id: string, updates: Partial<DesignComponent<Tag>>) => {
       dispatch({
         type: "UPDATE_COMPONENT",
-        payload: {
-          pageId: state.activePage,
-          componentId: id,
-          updates,
-        },
+        payload: { componentId: id, updates, },
       })
 
       // Add to history after state update
       setTimeout(() => {
-        const currentPage = state.pages.find((page) => page.id === state.activePage)
+        const currentPage = state.componentTree.find((page) => page.id === state.activePage)
         if (currentPage) {
           const component = findComponentById(currentPage.children, id)
           if (component) {
@@ -397,144 +382,103 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
               type: "ADD_TO_HISTORY",
               payload: {
                 action: `Edited ${component.tag}`,
-                pageState: state.pages,
+                pageState: state.componentTree,
               },
             })
           }
         }
       }, 0)
     },
-    [dispatch, state.activePage, state.pages, findComponentById],
+    [dispatch, state.activePage, state.componentTree, findComponentById],
   )
-  
+
   const setSelectedComponent = useCallback((componentId: string): void => {
     if (state.pageBuilderMode === "edit") {
       dispatch({ type: "SET_SELECTED_COMPONENT", payload: componentId })
     }
   }, [dispatch, state.pageBuilderMode])
 
-
   // Remove component
-  const removeComponent = useCallback(
-    (id: string) => {
-      const currentPage = state.pages.find((page) => page.id === state.activePage)
-      const component = currentPage ? findComponentById(currentPage.children, id) : null
+  const removeComponent = useCallback((id: string) => {
+    dispatch({
+      type: "REMOVE_COMPONENT",
+      payload: { componentId: id },
+    })
 
-      dispatch({
-        type: "REMOVE_COMPONENT",
-        payload: {
-          pageId: state.activePage,
-          componentId: id,
-        },
-      })
+    // Add to history after state update
+    setTimeout(() => {
+      const currentPage = state.componentTree.find((page) => page.id === state.activePage)
+      const component = findComponentById(currentPage?.children || [], id)
+      if (component) {
+        dispatch({
+          type: "ADD_TO_HISTORY",
+          payload: {
+            action: `Deleted ${component.tag}`,
+            pageState: state.componentTree,
+          },
+        })
+      }
+    }, 0)
 
-      // Add to history after state update
-      setTimeout(() => {
-        if (component) {
-          dispatch({
-            type: "ADD_TO_HISTORY",
-            payload: {
-              action: `Deleted ${component.tag}`,
-              pageState: state.pages,
-            },
-          })
-        }
-      }, 0)
-
-      toast({
-        title: "Component removed",
-        description: "The component has been removed from the page.",
-      })
-    },
-    [dispatch, state.activePage, state.pages, findComponentById],
-  )
+    toast({
+      title: "Component removed",
+      description: "The component has been removed from the page.",
+    })
+  }, [dispatch, state.componentTree, state.activePage, findComponentById])
 
   // Duplicate component
-  const duplicateComponent = useCallback(
-    (id: string) => {
-      const currentPage = state.pages.find((page) => page.id === state.activePage)
+  const duplicateComponent = useCallback((id: string) => {
+    dispatch({ type: "DUPLICATE_COMPONENT", payload: { componentId: id } })
+
+    // Add to history after state update
+    setTimeout(() => {
+      const currentPage = state.componentTree.find((page) => page.id === state.activePage)
       const componentToDuplicate = currentPage ? findComponentById(currentPage.children, id) : null
 
       if (!componentToDuplicate) return
-
-      // Deep clone the component with new IDs
-      const cloneComponent = <Tag extends ComponentTag>(comp: DesignComponent<Tag>): DesignComponent<Tag> => {
-        const cloned: DesignComponent<Tag> = {
-          ...comp,
-          id: generateId(),
-          children: comp.children ? comp.children.map(cloneComponent) : [],
-        }
-        return cloned
-      }
-
-      const duplicatedComponent = cloneComponent(componentToDuplicate)
-
       dispatch({
-        type: "DUPLICATE_COMPONENT",
+        type: "ADD_TO_HISTORY",
         payload: {
-          pageId: state.activePage,
-          componentId: id,
-          duplicatedComponent,
+          action: `Duplicated ${componentToDuplicate.tag}`,
+          pageState: state.componentTree,
         },
       })
+    }, 0)
 
-      // Add to history after state update
-      setTimeout(() => {
-        dispatch({
-          type: "ADD_TO_HISTORY",
-          payload: {
-            action: `Duplicated ${componentToDuplicate.tag}`,
-            pageState: state.pages,
-          },
-        })
-      }, 0)
+    toast({
+      title: "Component duplicated",
+      description: "The component has been duplicated successfully.",
+    })
+  }, [dispatch, state.activePage, state.componentTree, findComponentById])
 
-      toast({
-        title: "Component duplicated",
-        description: "The component has been duplicated successfully.",
-      })
-    },
-    [dispatch, state.activePage, state.pages, findComponentById],
-  )
+  const replaceComponent = useCallback((oldComponentId: string, newComponentTag: ComponentTag) => {
+    dispatch({
+      type: "REPLACE_COMPONENT",
+      payload: { oldComponentId, newComponentTag },
+    })
 
-  const replaceComponent = useCallback(
-    (oldComponentId: string, newComponentTag: ComponentTag) => {
-      const newComponent = createDesignComponent(newComponentTag, generateId())
-
+    // Add to history after state update
+    setTimeout(() => {
       dispatch({
-        type: "REPLACE_COMPONENT",
+        type: "ADD_TO_HISTORY",
         payload: {
-          pageId: state.activePage,
-          oldComponentId,
-          newComponent: newComponent,
+          action: `Replaced component ${oldComponentId} with ${newComponentTag}`,
+          pageState: state.componentTree,
         },
       })
+    }, 0)
 
-      // Add to history after state update
-      setTimeout(() => {
-        dispatch({
-          type: "ADD_TO_HISTORY",
-          payload: {
-            action: `Replaced component ${oldComponentId} with ${newComponentTag}`,
-            pageState: state.pages,
-          },
-        })
-      }, 0)
-
-      toast({
-        title: "Component replaced",
-        description: `Replaced component ${oldComponentId} with ${newComponentTag}.`,
-      })
-    },
-    [dispatch, state.activePage, state.pages]
-  )
+    toast({
+      title: "Component replaced",
+      description: `Replaced component ${oldComponentId} with ${newComponentTag}.`,
+    })
+  }, [dispatch, state.componentTree])
 
   return {
     addComponent,
     updateComponent,
     removeComponent,
     duplicateComponent,
-    findComponentById,
     setSelectedComponent,
     replaceComponent,
   }

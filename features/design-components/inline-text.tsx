@@ -9,7 +9,7 @@ export type ComponentAttributes = {
 	content: string
 }
 
-const defaultChildren = ["Inline text."]
+export const defaultChildren = ["Inline text."]
 
 export const defaultAttributes: ComponentAttributes = {
 	content: "Inline text.",
@@ -34,8 +34,12 @@ export const Icon = <Type className="h-4 w-4" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
 	const children = props.component.children?.length ? props.component.children : defaultChildren
+	const filteredProps: Partial<ComponentProps<typeof tag>> = { ...props }
+	delete filteredProps.pageBuilderMode
+	delete filteredProps.selectedComponentId
+
 	return (
-		<span className="inline" {...props}>{children as React.ReactNode}</span>
+		<span className="inline" {...filteredProps}>{children as React.ReactNode}</span>
 	)
 }
 

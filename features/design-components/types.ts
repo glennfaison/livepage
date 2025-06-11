@@ -64,10 +64,10 @@ export type Page = DesignComponent<"page">
 
 export type ComponentOperations<Tag extends ComponentTag> = {
   setSelectedComponent: (componentId: string) => void
-  updateComponent: (componentId: string, updates: Partial<ComponentAttributes<Tag>>) => void
+  updateComponent: (componentId: string, updates: Partial<DesignComponent<Tag>>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
-  addComponent: (args: { type: ComponentTag; parentId?: string; index?: number }) => void
+  addComponent: (args: { tag: ComponentTag; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: ComponentTag) => void
 }
 
@@ -81,6 +81,7 @@ export interface ComponentInfo<Tag extends ComponentTag> {
   tag: Tag
   label: string
   keywords: string[]
+  defaultChildren: DesignComponent<ComponentTag>[]
   defaultAttributes: ComponentAttributes<Tag>
   settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
   Icon: ReactNode

@@ -13,6 +13,8 @@ export type ComponentAttributes = {
 	fallbackSrc?: string
 }
 
+export const defaultChildren = []
+
 export const defaultAttributes: ComponentAttributes = {
 	src: "",
 	alt: "Image Description",

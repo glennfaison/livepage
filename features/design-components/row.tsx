@@ -1,7 +1,7 @@
 import { AlignHorizontalSpaceBetween, Plus } from "lucide-react"
 import { ComponentProps, ComponentTag } from "./types"
-import { generateId, intersperseAndAppend } from "@/lib/utils"
-import { componentTagList, createDesignComponent, getComponentInfo } from "."
+import { intersperseAndAppend } from "@/lib/utils"
+import { componentTagList, getComponentInfo } from "."
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
 import { Button } from "@/components/ui/button"
 import { useCallback } from "react"
@@ -11,6 +11,8 @@ import { withConnection } from "@/features/design-components/hoc/connected-compo
 import { withEditorControls } from "./hoc/component-controls-hoc"
 
 export type ComponentAttributes = object
+
+export const defaultChildren = []
 
 export const defaultAttributes: ComponentAttributes = {
 }
@@ -27,8 +29,9 @@ export const settingsFields = {
 export const Icon = <AlignHorizontalSpaceBetween className="h-4 w-4" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
-	const hasChildren = !!props.component.children.length
-	const { component, addComponent } = props
+	const { addComponent } = props
+	const { component } = props
+	const hasChildren = !!component.children.length
 	const {
 		visibleVerticalDividers,
 		handleChildMouseMove,
@@ -36,14 +39,13 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 	} = useDividerVisibility()
 
 	const onAddChildComponent = useCallback(
-		(type: ComponentTag): void => addComponent({ type, parentId: component.id, index: 0 }),
+		(tag: ComponentTag): void => addComponent({ tag, parentId: component.id, index: 0 }),
 		[addComponent, component.id]
 	)
 
-	const handleAddAtIndex = useCallback((type: ComponentTag, dividerIndex: number) => {
+	const handleAddAtIndex = useCallback((tag: ComponentTag, dividerIndex: number) => {
 		const childIndex = Math.floor(dividerIndex / 2)
-		const newComponent = createDesignComponent(type, generateId())
-		addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
+		addComponent({ tag, parentId: component.id, index: childIndex })
 	}, [addComponent, component.id])
 
 	const children = props.component.children.map(
@@ -55,7 +57,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 					onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 					onMouseLeave={() => handleChildMouseLeave(childIndex)}
 				>
-					<ChildComponent {...props} component={child} />
+					<ChildComponent {...props as ComponentProps<ComponentTag>} component={child} />
 				</span>
 			)
 		}

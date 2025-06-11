@@ -9,7 +9,7 @@ export type ComponentAttributes = {
 	content: string
 }
 
-const defaultChildren = [
+export const defaultChildren = [
 	"Morbi consequat justo enim, sed accumsan metus blandit eget. "
 	+ "Etiam ornare neque sagittis metus hendrerit tincidunt. "
 	+ "Sed sed vulputate quam. Vivamus rutrum elit quis mauris aliquet dictum. "
@@ -60,8 +60,12 @@ export const Icon = <Type className="h-4 w-4" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
 	const children = props.component.children?.length ? props.component.children : defaultChildren
+	const filteredProps: Partial<ComponentProps<typeof tag>> = {...props}
+	delete filteredProps.pageBuilderMode
+	delete filteredProps.selectedComponentId
+
 	return (
-		<p className="py-2" {...props}>{children as React.ReactNode}</p>
+		<p className="py-2" {...filteredProps}>{children as React.ReactNode}</p>
 	)
 }
 

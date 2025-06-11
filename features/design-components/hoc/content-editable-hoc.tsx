@@ -31,13 +31,12 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 		const isConnected = !!component.attributes?.__data_source__
 
-		const onBlur = useCallback(
-			() => (e: React.FocusEvent<HTMLElement>) => {
-				setContentEditable(false)
-				updateComponent(component.id, {
-					content: e.currentTarget.textContent || "",
-				} as Partial<ComponentAttributes<Tag>>)
-			}, [component.id, updateComponent])
+		const onBlur = useCallback(() => (e: React.FocusEvent<HTMLElement>) => {
+			setContentEditable(false)
+			updateComponent(component.id, {
+				content: e.currentTarget.textContent || "",
+			} as Partial<ComponentAttributes<Tag>>)
+		}, [component.id, updateComponent])
 
 		const onClick = useCallback(() => (e: React.MouseEvent<HTMLElement>) => {
 			if (pageBuilderMode === "edit") {
@@ -45,8 +44,14 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 				setSelectedComponent(component.id)
 			}
 		}, [component.id, pageBuilderMode, setSelectedComponent])
-		
+
 		const onDoubleClick = useCallback(() => setContentEditable(true), [])
+
+		Object.defineProperty(component.attributes, 'content', {
+			get: () => component.children,
+			set: (value) => component.children = [value],
+			enumerable: true,
+		})
 
 		return (
 			// @ts-expect-error TODO: fix the argument type for the WrappedComponent

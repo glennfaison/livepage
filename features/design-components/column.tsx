@@ -11,6 +11,8 @@ import { withEditorControls } from "./hoc/component-controls-hoc"
 
 export type ComponentAttributes = object
 
+export const defaultChildren = []
+
 export const defaultAttributes: ComponentAttributes = {
 }
 
@@ -26,8 +28,9 @@ export const settingsFields = {
 export const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
-	const hasChildren = !!props.component.children.length
-	const { component, addComponent } = props
+	const { addComponent } = props
+	const { component } = props
+	const hasChildren = !!component.children.length
 	const {
 		visibleHorizontalDividers,
 		handleChildMouseMove,
@@ -35,14 +38,14 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 	} = useDividerVisibility()
 
 	const onAddChildComponent = useCallback(
-		(type: ComponentTag): void => addComponent({ type, parentId: component.id, index: 0 }),
+		(tag: ComponentTag): void => addComponent({ tag, parentId: component.id, index: 0 }),
 		[addComponent, component.id]
 	)
 
-	const handleAddAtIndex = useCallback((type: ComponentTag, dividerIndex: number) => {
+	const handleAddAtIndex = useCallback((tag: ComponentTag, dividerIndex: number) => {
 		const childIndex = Math.floor(dividerIndex / 2)
-		const newComponent = createDesignComponent(type, generateId())
-		addComponent({ type: newComponent.tag, parentId: component.id, index: childIndex })
+		const newComponent = createDesignComponent(tag, generateId())
+		addComponent({ tag: newComponent.tag, parentId: component.id, index: childIndex })
 	}, [addComponent, component.id])
 
 	const children = props.component.children.map(
@@ -54,7 +57,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 					onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 					onMouseLeave={() => handleChildMouseLeave(childIndex)}
 				>
-					<ChildComponent {...props} component={child} />
+					<ChildComponent {...props as ComponentProps<ComponentTag>} component={child} />
 				</span>
 			)
 		}

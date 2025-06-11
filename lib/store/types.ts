@@ -1,16 +1,17 @@
-import type { ComponentAttributes, ComponentTag, DesignComponent, Page, PageBuilderMode } from "@/features/design-components/types"
+import type { ComponentTag, DesignComponent, Page, PageBuilderMode } from "@/features/design-components/types"
 
 // History entry
 export interface HistoryEntry {
   id: string
   action: string
   timestamp: Date
-  pageState: Page[]
+  pageState: DesignComponent<"page">[]
 }
 
 // Application state
 export interface AppState {
-  pages: Page[]
+  componentTree: DesignComponent<ComponentTag>[]
+  componentMap: Record<string, DesignComponent<ComponentTag>>
   activePage: string
   selectedComponentId: string
   pageBuilderMode: PageBuilderMode
@@ -30,16 +31,16 @@ export type AppAction =
   | { type: "SET_ACTIVE_PAGE"; payload: string }
   | {
     type: "ADD_COMPONENT"
-    payload: { pageId: string; component: DesignComponent<ComponentTag>; parentId?: string; index?: number }
+    payload: { newComponentTag: ComponentTag; parentId?: string; index?: number }
   }
-  | { type: "UPDATE_COMPONENT"; payload: { pageId: string; componentId: string; updates: Partial<ComponentAttributes<ComponentTag>> } }
-  | { type: "REMOVE_COMPONENT"; payload: { pageId: string; componentId: string } }
+  | { type: "UPDATE_COMPONENT"; payload: { componentId: string; updates: Partial<DesignComponent<ComponentTag>> } }
+  | { type: "REMOVE_COMPONENT"; payload: { componentId: string } }
+  | { type: "REPLACE_COMPONENT", payload: { oldComponentId: string, newComponentTag: ComponentTag } }
   | {
     type: "DUPLICATE_COMPONENT"
-    payload: { pageId: string; componentId: string; duplicatedComponent: DesignComponent<ComponentTag> }
+    payload: { componentId: string; parentId?: string }
   }
-  | { type: "REPLACE_COMPONENT", payload: { pageId: string, oldComponentId: string, newComponent: DesignComponent<ComponentTag> } }
-  | { type: "SET_SELECTED_COMPONENT"; payload: string | null }
+  | { type: "SET_SELECTED_COMPONENT"; payload: string }
   | { type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }
   | { type: "SET_SHOW_TOOLBAR"; payload: boolean }

@@ -31,7 +31,7 @@ describe("App Reducer", () => {
     }
 
     const result = appReducer(state, action)
-    expect(result.pages).toEqual(newPages)
+    expect(result.componentTree).toEqual(newPages)
   })
 
   it("should handle ADD_PAGE", () => {
@@ -48,8 +48,8 @@ describe("App Reducer", () => {
     }
 
     const result = appReducer(state, action)
-    expect(result.pages).toHaveLength(state.pages.length + 1)
-    expect(result.pages).toContainEqual(newPage)
+    expect(result.componentTree).toHaveLength(state.componentTree.length + 1)
+    expect(result.componentTree).toContainEqual(newPage)
   })
 
   it("should handle SET_ACTIVE_PAGE", () => {
@@ -77,8 +77,8 @@ describe("App Reducer", () => {
     }
 
     const result = appReducer(state, action)
-    expect(result.pages[0].children).toHaveLength(1)
-    expect(result.pages[0].children[0]).toEqual(component)
+    expect(result.componentTree[0].children).toHaveLength(1)
+    expect(result.componentTree[0].children[0]).toEqual(component)
     expect(result.selectedComponentId).toBe(component.id)
   })
 
@@ -102,5 +102,28 @@ describe("App Reducer", () => {
 
     const result = appReducer(state, action)
     expect(result.pageBuilderMode).toBe("preview")
+  })
+})
+
+describe("insertComponent", () => {
+  it("should insert a component at the root level if no parentId is provided", () => {
+    const { insertComponent } = require("@/lib/store/reducer")
+    const state = { ...initialState, componentTree: [] }
+    const component = createDesignComponent("header1", generateId())
+    insertComponent(state, component)
+    expect(state.componentTree).toHaveLength(1)
+    expect(state.componentTree[0]).toEqual(component)
+    expect(state.componentMap[component.id]).toBe(component)
+  })
+
+  it("should insert a component as a child of a parent component", () => {
+    const { insertComponent } = require("@/lib/store/reducer")
+    const parent = createDesignComponent("row", generateId())
+    const state = { ...initialState, componentTree: [parent] }
+    const child = createDesignComponent("header1", generateId())
+    insertComponent(state, child, parent.id)
+    expect(state.componentTree[0].children).toHaveLength(1)
+    expect(state.componentTree[0].children[0]).toEqual(child)
+    expect(state.componentMap[child.id]).toBe(child)
   })
 })

@@ -9,7 +9,7 @@ export type ComponentAttributes = {
 	content: string
 }
 
-const defaultChildren = ["Header 2"]
+export const defaultChildren = ["Header 2"]
 
 export const defaultAttributes: ComponentAttributes = {
 	content: "Header 2",
@@ -34,8 +34,12 @@ export const Icon = <Heading className="h-4 w-4" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
 	const children = props.component.children?.length ? props.component.children : defaultChildren
+	const filteredProps: Partial<ComponentProps<typeof tag>> = { ...props }
+	delete filteredProps.pageBuilderMode
+	delete filteredProps.selectedComponentId
+
 	return (
-		<h2 className="text-3xl font-bold py-2" {...props}>{children as React.ReactNode}</h2>
+		<h2 className="text-3xl font-bold py-2" {...filteredProps}>{children as React.ReactNode}</h2>
 	)
 }
 

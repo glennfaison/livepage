@@ -53,7 +53,7 @@ export function createDesignComponent<Tag extends ComponentTag>(
     id: `${tag}-${id}`,
     tag: tag,
     attributes: { ...data.defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
-    children: [],
+    children: data.defaultChildren || [],
   }
 }
 
