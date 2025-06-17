@@ -10,12 +10,12 @@ import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as
 import { getComponentInfo } from "@/features/design-components"
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, PlugZapIcon, Search, LoaderIcon } from "lucide-react"
-import React from "react"
+import React, { useCallback } from "react"
 import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
 
 export interface SettingsPopoverProps<Tag extends ComponentTag> {
   component: DesignComponent<Tag>
-  onSave: (updates: ComponentAttributes<Tag>) => void
+  onSave: (updates: Partial<DesignComponent<Tag>>) => void
   children: React.ReactNode
 }
 
@@ -325,7 +325,8 @@ function DataSourceListViewTabContent<ConnId extends DataSourceId>({
   )
 }
 
-function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSource, setSelectedDataSource, handleSave, handleDiscard, handleFieldChange, settingsFields, formData }: DataSourceSettingsEditorProps<ConnId>) {
+function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSettingsEditorProps<ConnId>) {
+  const { selectedDataSource, setSelectedDataSource, handleSave, handleDiscard, handleFieldChange, settingsFields, formData } = props
   if (!selectedDataSource) {
     throw new Error(`Could not find data source`)
   }
@@ -343,6 +344,11 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
       setTestingConnection(false)
     }
   }
+
+  const discardConnection = useCallback(() => {
+    console.log(formData)
+    handleDiscard()
+  }, [formData, handleDiscard])
 
   return (
     <>
@@ -414,7 +420,7 @@ function DataSourceSettingsView<ConnId extends DataSourceId>({ selectedDataSourc
         <Button
           variant="ghost"
           className="flex-1 rounded-none rounded-bl-lg bg-muted hover:bg-muted/80 text-foreground h-12 cursor-pointer"
-          onClick={handleDiscard}
+          onClick={discardConnection}
         >
           Disconnect
         </Button>

@@ -1,19 +1,16 @@
 import { ReplaceWithPopover } from "@/components/page-builder/replace-with-popover";
 import { SettingsPopover } from "@/components/page-builder/settings-popover";
 import { Button } from "@/components/ui/button";
-import { getComponentInfo } from "@/features/design-components";
-import { ComponentProps } from "@/features/design-components/types";
-import { ComponentTag } from "@/features/design-components/types";
-import { useAppState, useComponentOperations } from "@/lib/store/hooks";
 import { cn } from "@/lib/utils";
 import { Settings, Replace, Copy, Trash2, Move } from "lucide-react";
 import { useCallback } from "react";
+import { getComponentInfo } from "..";
+import type { ComponentTag, ComponentProps, DesignComponent } from "../types";
 
 
-function ComponentControls<Tag extends ComponentTag>({
-  component,
-}: ComponentProps<Tag>) {
+function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>) {
   const { updateComponent, duplicateComponent, removeComponent, replaceComponent, } = props
+  const { component } = props
   const { label } = getComponentInfo(component.tag)
 
   const handleReplace = useCallback((newType: ComponentTag) => {
@@ -25,7 +22,7 @@ function ComponentControls<Tag extends ComponentTag>({
       <span className="text-xs font-medium px-2 flex items-center">{label}</span>
       <SettingsPopover
         component={component}
-        onSave={(props) => updateComponent(component.id, props)}
+        onSave={(updates) => updateComponent(component.id, updates as Partial<DesignComponent<Tag>>)}
       >
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
           <Settings className="h-4 w-4" />
@@ -72,7 +69,8 @@ export function withEditorControls<Tag extends ComponentTag>(
     const showControls = props.selectedComponentId === props.component.id
     const { setSelectedComponent } = props
 
-    const selectComponent = useCallback(() => {
+    const selectComponent = useCallback((e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation()
       setSelectedComponent(props.component.id)
     }, [props.component.id, setSelectedComponent])
 

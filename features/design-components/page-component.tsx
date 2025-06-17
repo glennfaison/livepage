@@ -17,10 +17,9 @@ export function Component(props: ComponentProps<"page">) {
   const { pageBuilderMode, component: currentPage } = props
   const { setSelectedComponent, addComponent, updateComponent } = props
 
-  const appendComponent = useCallback(
-    () => addComponent({ tag: "row", parentId: currentPage.id }),
-    [addComponent, currentPage.id]
-  )
+  const appendComponent = useCallback(() => {
+    addComponent({ tag: "row", parentId: currentPage.id })
+  },[addComponent, currentPage.id])
 
 return (
   <main className="flex-1 overflow-hidden flex flex-col">

@@ -11,7 +11,6 @@ export interface HistoryEntry {
 // Application state
 export interface AppState {
   componentTree: DesignComponent<ComponentTag>[]
-  componentMap: Record<string, DesignComponent<ComponentTag>>
   activePage: string
   selectedComponentId: string
   pageBuilderMode: PageBuilderMode

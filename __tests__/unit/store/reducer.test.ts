@@ -113,7 +113,6 @@ describe("insertComponent", () => {
     insertComponent(state, component)
     expect(state.componentTree).toHaveLength(1)
     expect(state.componentTree[0]).toEqual(component)
-    expect(state.componentMap[component.id]).toBe(component)
   })
 
   it("should insert a component as a child of a parent component", () => {
@@ -124,6 +123,5 @@ describe("insertComponent", () => {
     insertComponent(state, child, parent.id)
     expect(state.componentTree[0].children).toHaveLength(1)
     expect(state.componentTree[0].children[0]).toEqual(child)
-    expect(state.componentMap[child.id]).toBe(child)
   })
 })

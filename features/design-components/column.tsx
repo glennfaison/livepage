@@ -3,9 +3,9 @@ import { ComponentProps, ComponentTag } from "./types"
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
 import { useDividerVisibility, Divider } from "@/components/page-builder/layout-divider"
 import { Button } from "@/components/ui/button"
-import { generateId, intersperseAndAppend } from "@/lib/utils"
+import { intersperseAndAppend } from "@/lib/utils"
 import React, { useCallback } from "react"
-import { createDesignComponent, getComponentInfo, componentTagList } from "."
+import { getComponentInfo, componentTagList } from "."
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
 import { withEditorControls } from "./hoc/component-controls-hoc"
 
@@ -44,8 +44,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 
 	const handleAddAtIndex = useCallback((tag: ComponentTag, dividerIndex: number) => {
 		const childIndex = Math.floor(dividerIndex / 2)
-		const newComponent = createDesignComponent(tag, generateId())
-		addComponent({ tag: newComponent.tag, parentId: component.id, index: childIndex })
+		addComponent({ tag, parentId: component.id, index: childIndex })
 	}, [addComponent, component.id])
 
 	const children = props.component.children.map(
