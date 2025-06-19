@@ -1,12 +1,12 @@
 "use client"
 
-import type React from "react"
-import { useState, useRef, useEffect, useCallback } from "react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Check, X, RotateCcw, GripVertical } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { HistoryEntry } from "@/lib/store/types"
+import { cn } from "@/lib/utils"
+import { Check, GripVertical, RotateCcw, X } from "lucide-react"
+import type React from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface HistoryPopoverProps {
   isOpen: boolean
@@ -187,7 +187,7 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
             <Button
               variant="ghost"
               className="flex-1 rounded-none rounded-br-lg bg-foreground hover:bg-foreground/90 text-background h-12"
-              // onClick={() => onAccept(index)}
+            // onClick={() => onAccept(index)}
             >
               <Check className="h-4 w-4 mr-2" />
               Accept

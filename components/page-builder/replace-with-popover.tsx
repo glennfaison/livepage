@@ -1,5 +1,5 @@
 import { componentTagList } from "@/features/design-components"
-import { DesignComponent, ComponentTag } from "@/features/design-components/types"
+import { ComponentTag, DesignComponent } from "@/features/design-components/types"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 
 export const ReplaceWithPopover = ({
@@ -18,10 +18,7 @@ export const ReplaceWithPopover = ({
 	}
 
 	return (
-		<ComponentSelectorPopover
-			componentTagList={tagList}
-			onSelect={handleReplace}
-		>
+		<ComponentSelectorPopover componentTagList={tagList} onSelect={handleReplace}>
 			{children}
 		</ComponentSelectorPopover>
 	)

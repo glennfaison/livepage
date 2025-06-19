@@ -2,14 +2,14 @@ import { ReplaceWithPopover } from "@/components/page-builder/replace-with-popov
 import { SettingsPopover } from "@/components/page-builder/settings-popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Settings, Replace, Copy, Trash2, Move } from "lucide-react";
+import { Copy, Move, Replace, Settings, Trash2 } from "lucide-react";
 import { useCallback } from "react";
 import { getComponentInfo } from "..";
-import type { ComponentTag, ComponentProps, DesignComponent } from "../types";
+import type { ComponentProps, ComponentTag } from "../types";
 
 
 function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>) {
-  const { updateComponent, duplicateComponent, removeComponent, replaceComponent, } = props
+  const { duplicateComponent, removeComponent, replaceComponent, } = props
   const { component } = props
   const { label } = getComponentInfo(component.tag)
 
@@ -22,7 +22,6 @@ function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>)
       <span className="text-xs font-medium px-2 flex items-center">{label}</span>
       <SettingsPopover
         component={component}
-        onSave={(updates) => updateComponent(component.id, updates as Partial<DesignComponent<Tag>>)}
       >
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
           <Settings className="h-4 w-4" />

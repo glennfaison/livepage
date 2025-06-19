@@ -8,16 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
-import { cn } from "@/lib/utils"
-import { ChevronLeftIcon, PlugZapIcon, Search, LoaderIcon } from "lucide-react"
-import React, { useCallback } from "react"
 import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
-
-export interface SettingsPopoverProps<Tag extends ComponentTag> {
-  component: DesignComponent<Tag>
-  onSave: (updates: Partial<DesignComponent<Tag>>) => void
-  children: React.ReactNode
-}
+import { useComponentOperationsContext } from "@/lib/component-operations-context"
+import { cn } from "@/lib/utils"
+import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
+import React, { useCallback } from "react"
 
 const DataSourceSelectorButton = ({
   icon,
@@ -36,9 +31,10 @@ const DataSourceSelectorButton = ({
   )
 }
 
-function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSave, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [formData, setFormData] = React.useState<ComponentAttributes<Tag>>({ ...component.attributes })
   const componentInfo = getComponentInfo(component.tag)
+  const { updateComponent } = useComponentOperationsContext()
 
   const handleSave = () => {
     for (const key in componentInfo.defaultAttributes) {
@@ -46,7 +42,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
         formData[key] = componentInfo.defaultAttributes[key]
       }
     }
-    onSave(formData)
+    updateComponent(component.id, { attributes: formData })
     setIsOpen(false)
   }
 
@@ -75,11 +71,12 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, onSav
   }
 }
 
-function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSave, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
   const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__data_source__ || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId> | undefined>(dataSourceInfo)
+  const { updateComponent } = useComponentOperationsContext()
 
   const filteredDataSources = React.useMemo(() => {
     const dataSources = dataSourceIdList.map((connId) => getDataSourceInfo(connId))
@@ -100,7 +97,7 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSa
       return
     }
     for (const _key in selectedDataSource.defaultSettings) {
-      const key = _key  as keyof DataSourceSettings<DataSourceId>
+      const key = _key as keyof DataSourceSettings<DataSourceId>
       if (
         String(formData[key]).trim() === "" ||
         !formData.hasOwnProperty(key)
@@ -109,12 +106,13 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSa
       }
     }
     const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: formData })
-    onSave({ ...component.attributes, __data_source__: encodedDataSourceSettings })
+    updateComponent(component.id, { attributes: { ...component.attributes, __data_source__: encodedDataSourceSettings } })
   }
 
   const handleDiscard = () => {
-    setFormData({ ...savedDataSourceSettings.settings })
-    setIsOpen(false)
+    setFormData({} as DataSourceSettings<DataSourceId>)
+    setSelectedDataSource(undefined)
+    updateComponent(component.id, { attributes: { ...component.attributes, __data_source__: "" } })
   }
 
   const handleFieldChange = (fieldId: keyof ComponentAttributes<Tag>, value: string) => {
@@ -138,62 +136,6 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component, onSa
     handleDiscard,
     handleFieldChange,
   }
-}
-
-export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Tag extends ComponentTag>({
-  component,
-  onSave,
-  children,
-}: SettingsPopoverProps<Tag>) => {
-  const [isOpen, setIsOpen] = React.useState(false)
-  const componentSettingsEditor = useComponentSettingsEditor({ component, onSave, setIsOpen })
-  const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component, onSave, setIsOpen })
-
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0 z-50" side="bottom" align="end" sideOffset={8}>
-        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[550px] max-h-[600px] overflow-clip flex flex-col">
-          {/* Header */}
-          <div className="bg-foreground text-background p-3 rounded-t-lg">
-            <h2 className="text-sm font-semibold">{componentSettingsEditor.componentInfo.label}</h2>
-          </div>
-
-          {/* Tabs */}
-          <Tabs defaultValue="settings" className="w-full flex flex-col flex-1 min-h-1">
-            <TabsList className="grid w-full grid-cols-2 rounded-none bg-transparent border-b h-auto p-0">
-              <TabsTrigger
-                data-testid="settings-tab-trigger"
-                value="settings"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
-              >
-                Settings
-              </TabsTrigger>
-              <TabsTrigger
-                data-testid="data-sources-tab-trigger"
-                value="data-sources"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
-              >
-                Data Sources
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Settings Tab Content */}
-            <TabsContent value="settings" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
-              <ComponentSettingsTabContent
-                {...componentSettingsEditor}
-              />
-            </TabsContent>
-
-            {/* Data Sources Tab Content */}
-            <TabsContent value="data-sources" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
-              <DataSourceListViewTabContent {...dataSourceSettingsEditor} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </PopoverContent>
-    </Popover>
-  )
 }
 
 function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields, formData, handleDiscard, handleFieldChange, handleSave }: {
@@ -394,8 +336,8 @@ function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSe
             disabled={testingConnection}
             onClick={() => testConnection(formData)}
           >
-            { testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" /> } &nbsp;
-            { testingConnection ? 'Testing...' : 'Test Connection' }
+            {testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" />} &nbsp;
+            {testingConnection ? 'Testing...' : 'Test Connection'}
           </Button>
         </div>
 
@@ -433,5 +375,65 @@ function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSe
         </Button>
       </div>
     </>
+  )
+}
+
+export interface SettingsPopoverProps<Tag extends ComponentTag> {
+  component: DesignComponent<Tag>
+  children: React.ReactNode
+}
+
+export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Tag extends ComponentTag>({
+  component,
+  children,
+}: SettingsPopoverProps<Tag>) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const componentSettingsEditor = useComponentSettingsEditor({ component, setIsOpen })
+  const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component, setIsOpen })
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-80 p-0 z-50" side="bottom" align="end" sideOffset={8}>
+        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[550px] max-h-[600px] overflow-clip flex flex-col">
+          {/* Header */}
+          <div className="bg-foreground text-background p-3 rounded-t-lg">
+            <h2 className="text-sm font-semibold">{componentSettingsEditor.componentInfo.label}</h2>
+          </div>
+
+          {/* Tabs */}
+          <Tabs defaultValue="settings" className="w-full flex flex-col flex-1 min-h-1">
+            <TabsList className="grid w-full grid-cols-2 rounded-none bg-transparent border-b h-auto p-0">
+              <TabsTrigger
+                data-testid="settings-tab-trigger"
+                value="settings"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
+              >
+                Settings
+              </TabsTrigger>
+              <TabsTrigger
+                data-testid="data-sources-tab-trigger"
+                value="data-sources"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
+              >
+                Data Sources
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Settings Tab Content */}
+            <TabsContent value="settings" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
+              <ComponentSettingsTabContent
+                {...componentSettingsEditor}
+              />
+            </TabsContent>
+
+            {/* Data Sources Tab Content */}
+            <TabsContent value="data-sources" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
+              <DataSourceListViewTabContent {...dataSourceSettingsEditor} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }

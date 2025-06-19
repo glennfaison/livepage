@@ -1,16 +1,16 @@
 import type React from "react"
 import type { ReactNode } from "react"
 
+import type { ComponentAttributes as ButtonAttributes } from "./button"
+import type { ComponentAttributes as ColumnAttributes } from "./column"
 import type { ComponentAttributes as Header1Attributes } from "./header1"
 import type { ComponentAttributes as Header2Attributes } from "./header2"
 import type { ComponentAttributes as Header3Attributes } from "./header3"
-import type { ComponentAttributes as ParagraphAttributes } from "./paragraph"
-import type { ComponentAttributes as InlineTextAttributes } from "./inline-text"
-import type { ComponentAttributes as ButtonAttributes } from "./button"
 import type { ComponentAttributes as ImageAttributes } from "./image"
-import type { ComponentAttributes as RowAttributes } from "./row"
-import type { ComponentAttributes as ColumnAttributes } from "./column"
+import type { ComponentAttributes as InlineTextAttributes } from "./inline-text"
 import type { ComponentAttributes as PageAttributes } from "./page-component"
+import type { ComponentAttributes as ParagraphAttributes } from "./paragraph"
+import type { ComponentAttributes as RowAttributes } from "./row"
 
 // Component types
 export type ComponentTag =
@@ -51,6 +51,7 @@ export type SettingsField<Tag extends ComponentTag> = {
   type: "text" | "number" | "boolean" | "textarea"
   placeholder?: string
   options?: string[] // For select fields
+  propertyPath?: string, // TODO: make a type for the expected paths here
 }
 
 export type DesignComponent<Tag extends ComponentTag> = {

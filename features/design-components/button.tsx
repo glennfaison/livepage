@@ -1,10 +1,10 @@
-import { MousePointerClick } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ComponentProps, ComponentTag } from "./types"
-import React from "react"
-import { withTextEditing } from "./hoc/content-editable-hoc"
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { MousePointerClick } from "lucide-react"
+import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
+import { withTextEditing } from "./hoc/content-editable-hoc"
+import { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
 	content: string
@@ -28,6 +28,7 @@ export const settingsFields = {
 		type: "text",
 		label: "Content",
 		placeholder: "Enter button text",
+		propertyPath: "children",
 	},
 }
 

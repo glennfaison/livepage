@@ -1,9 +1,9 @@
 "use client"
 
-import { ImageIcon } from "lucide-react"
-import type { ComponentProps, ComponentTag } from "./types"
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
+import type { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
 	src?: string
@@ -35,30 +35,35 @@ export const settingsFields = {
 		type: "text",
 		label: "Image Source",
 		placeholder: "Enter image URL",
+		propertyPath: "attributes.src",
 	},
 	alt: {
 		id: "alt",
 		type: "text",
 		label: "Alt Text",
 		placeholder: "Enter image description",
+		propertyPath: "attributes.alt",
 	},
 	width: {
 		id: "width",
 		type: "text",
 		label: "Width",
 		placeholder: "Enter width (e.g., 100px, 50%)",
+		propertyPath: "attributes.width",
 	},
 	height: {
 		id: "height",
 		type: "text",
 		label: "Height",
 		placeholder: "Enter height (e.g., 100px, auto)",
+		propertyPath: "attributes.height",
 	},
 	fallbackSrc: {
 		id: "fallbackSrc",
 		type: "text",
 		label: "Fallback Image Source",
 		placeholder: "Enter fallback image URL",
+		propertyPath: "attributes.fallbackSrc",
 	},
 }
 

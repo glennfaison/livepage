@@ -43,7 +43,7 @@ export type AppAction =
   | { type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }
   | { type: "SET_SHOW_TOOLBAR"; payload: boolean }
-  | { type: "ADD_TO_HISTORY"; payload: { action: string; pageState: Page[] } }
+  | { type: "ADD_TO_HISTORY"; payload: { action: string; pageState: DesignComponent<ComponentTag>[] } }
   | { type: "SET_CURRENT_HISTORY_INDEX"; payload: number }
   | { type: "SET_HISTORY_PREVIEW_INDEX"; payload: number | null }
   | { type: "SET_ORIGINAL_HISTORY_STATE"; payload: Page[] | null }

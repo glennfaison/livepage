@@ -2,10 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
-import type { ComponentProps, ComponentTag } from "./types"
-import React, { useCallback } from "react"
+import { useCallback } from "react"
 import { getComponentInfo } from "."
+import type { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
   title: string
@@ -15,7 +16,7 @@ export const defaultChildren = []
 
 export function Component(props: ComponentProps<"page">) {
   const { pageBuilderMode, component: currentPage } = props
-  const { setSelectedComponent, addComponent, updateComponent } = props
+  const { setSelectedComponent, addComponent, updateComponent } = useComponentOperationsContext()
 
   const appendComponent = useCallback(() => {
     addComponent({ tag: "row", parentId: currentPage.id })

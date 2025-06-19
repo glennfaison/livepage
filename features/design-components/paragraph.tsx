@@ -1,9 +1,9 @@
-import { Type } from "lucide-react"
-import { ComponentProps, ComponentTag } from "./types"
-import React from "react"
-import { withTextEditing } from "./hoc/content-editable-hoc"
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { Type } from "lucide-react"
+import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
+import { withTextEditing } from "./hoc/content-editable-hoc"
+import { ComponentProps, ComponentTag } from "./types"
 
 export type ComponentAttributes = {
 	content: string
@@ -53,6 +53,7 @@ export const settingsFields = {
 		type: "textarea",
 		label: "Content",
 		placeholder: "Enter paragraph text",
+		propertyPath: "children",
 	},
 }
 

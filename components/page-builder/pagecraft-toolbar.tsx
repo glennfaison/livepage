@@ -1,13 +1,13 @@
 "use client"
 
-import type React from "react"
-import { useState, useRef, useEffect, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-import { Save, X, GripVertical, Settings, Maximize, Minimize, History, RotateCw } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { HistoryPopover } from "@/components/page-builder/history-popover"
-import type { HistoryEntry } from "@/lib/store/types"
+import { Button } from "@/components/ui/button"
 import type { PageBuilderMode } from "@/features/design-components/types"
+import type { HistoryEntry } from "@/lib/store/types"
+import { cn } from "@/lib/utils"
+import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import type React from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface PageCraftToolbarProps {
   toolbarMinimized: boolean
