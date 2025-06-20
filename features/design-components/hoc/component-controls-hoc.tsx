@@ -6,6 +6,7 @@ import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
 import { getComponentInfo } from "..";
 import type { ComponentProps, ComponentTag } from "../types";
+import { useComponentOperationsContext } from "@/lib/component-operations-context";
 
 
 function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>) {
@@ -64,7 +65,7 @@ export function withEditorControls<Tag extends ComponentTag>(
 ) {
   return function ComponentWithControls(props: ComponentProps<Tag>) {
     const showControls = props.selectedComponentId === props.component.id
-    const { setSelectedComponent } = props
+    const { setSelectedComponent } = useComponentOperationsContext()
 
     const selectComponent = useCallback((e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation()

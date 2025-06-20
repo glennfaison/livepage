@@ -168,7 +168,6 @@ export default function BuilderPage() {
         </header>
 
         <PageComponent
-          {...componentOperations}
           selectedComponentId={state.selectedComponentId}
           pageBuilderMode={pageBuilderMode as PageBuilderMode}
           component={currentPage}

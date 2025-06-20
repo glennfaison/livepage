@@ -9,6 +9,7 @@ import React from "react"
 import { Divider, useDividerVisibility } from "@/components/page-builder/layout-divider"
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
 import { withEditorControls } from "./hoc/component-controls-hoc"
+import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 export type ComponentAttributes = object
 
@@ -24,9 +25,9 @@ export const settingsFields = {
 export const Icon = <AlignHorizontalSpaceBetween className="h-4 w-4" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
-	const { addComponent } = props
 	const { component } = props
 	const hasChildren = !!component.children.length
+	const { addComponent } = useComponentOperationsContext()
 	const {
 		visibleVerticalDividers,
 		handleChildMouseMove,

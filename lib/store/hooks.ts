@@ -340,7 +340,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   )
 
   // Add component
-  const addComponent = useCallback(({ tag, parentId, index = 0 }: { tag: ComponentTag, parentId?: string, index?: number }) => {
+  const addComponent = useCallback(({ tag, parentId, index }: { tag: ComponentTag, parentId?: string, index?: number }) => {
     console.log("addComponent")
     dispatch({
       type: "ADD_COMPONENT",
