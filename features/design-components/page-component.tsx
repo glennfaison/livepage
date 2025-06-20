@@ -6,13 +6,27 @@ import { useComponentOperationsContext } from "@/lib/component-operations-contex
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import { getComponentInfo } from "."
-import type { ComponentProps, ComponentTag } from "./types"
+import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
 
 export type ComponentAttributes = {
   title: string
 }
 
-export const defaultChildren = []
+export const tag: ComponentTag = "page" as const
+
+export const settingsFields = {
+  title: {
+    id: "title",
+    type: "text",
+    label: "Title",
+    placeholder: "Enter page title",
+    defaultValue: "Page Title 1",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes.title,
+    setValue: (component: DesignComponent<typeof tag>, value: string) => {
+      return { ...component, attributes: { ...component.attributes, title: value } }
+    },
+  },
+}
 
 export function Component(props: ComponentProps<"page">) {
   const { pageBuilderMode, component: currentPage } = props

@@ -51,7 +51,9 @@ export type SettingsField<Tag extends ComponentTag> = {
   type: "text" | "number" | "boolean" | "textarea"
   placeholder?: string
   options?: string[] // For select fields
-  propertyPath?: string, // TODO: make a type for the expected paths here
+  defaultValue?: string | number | boolean
+  getValue: (component: DesignComponent<Tag>) => string | number | boolean | string[]
+  setValue: (component: Partial<DesignComponent<Tag>>, value: unknown) => DesignComponent<Tag>
 }
 
 export type DesignComponent<Tag extends ComponentTag> = {
@@ -70,6 +72,7 @@ export type ComponentOperations<Tag extends ComponentTag> = {
   duplicateComponent?: (id: string) => void
   addComponent: (args: { tag: ComponentTag; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: ComponentTag) => void
+  findComponentById: (components: DesignComponent<ComponentTag>[], id: string) => DesignComponent<ComponentTag> | null
 }
 
 export type ComponentProps<Tag extends ComponentTag> = {

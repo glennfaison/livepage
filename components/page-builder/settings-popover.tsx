@@ -32,9 +32,22 @@ const DataSourceSelectorButton = ({
 }
 
 function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
-  const [formData, setFormData] = React.useState<ComponentAttributes<Tag>>({ ...component.attributes })
-  const componentInfo = getComponentInfo(component.tag)
+  const componentInfo = React.useMemo(() => getComponentInfo(component.tag), [component.tag])
+  const settingsFields = React.useMemo(
+    () => Object.values(componentInfo.settingsFields).filter((field) => field.id !== "__data_source__"),
+    [componentInfo.settingsFields],
+  ) as SettingsField<Tag>[]
+  const [formData, setFormData] = React.useState<ComponentAttributes<Tag>>({} as ComponentAttributes<Tag>)
+
   const { updateComponent } = useComponentOperationsContext()
+
+  React.useEffect(() => {
+    const initialFormData = {} as ComponentAttributes<Tag>
+    for (const key in componentInfo.settingsFields) {
+      initialFormData[key] = componentInfo.settingsFields[key].getValue(component) as ComponentAttributes<Tag>[typeof key]
+    }
+    setFormData(initialFormData)
+  }, [componentInfo.settingsFields, component])
 
   const handleSave = () => {
     for (const key in componentInfo.defaultAttributes) {
@@ -42,7 +55,12 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIs
         formData[key] = componentInfo.defaultAttributes[key]
       }
     }
-    updateComponent(component.id, { attributes: formData })
+    let update = {} as Partial<DesignComponent<Tag>>
+    for (const key in formData) {
+      const reference: SettingsField<Tag> = componentInfo.settingsFields[key]
+      update = reference.setValue(update, formData[key])
+    }
+    updateComponent(component.id, update)
     setIsOpen(false)
   }
 
@@ -55,10 +73,6 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIs
     setFormData((prev) => ({ ...prev, [fieldId]: value }))
   }
 
-  const settingsFields = React.useMemo(
-    () => Object.values<SettingsField<Tag>>(componentInfo.settingsFields).filter((field) => field.id !== "__data_source__"),
-    [componentInfo.settingsFields],
-  ) as SettingsField<Tag>[]
 
   return {
     componentInfo,

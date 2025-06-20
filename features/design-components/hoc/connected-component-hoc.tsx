@@ -7,6 +7,7 @@ function replaceConnectedComponentAttributes<T extends ComponentAttributes<Compo
 	const newAttributes = { ...originalAttributes } as T
 	const placeholderRegExp = /\[#data.*?#\]/g
 	const keysToSkip = ["__data_source__"]
+	debugger
 
 	for (const key in originalAttributes) {
 		if (keysToSkip.includes(key)) {

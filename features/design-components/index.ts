@@ -49,10 +49,19 @@ export function createDesignComponent<Tag extends ComponentTag>(
   overrideProps?: Partial<ComponentAttributes<Tag>>,
 ): DesignComponent<Tag> {
   const data = getComponentInfo(tag)
+  const defaultAttributes = {} as ComponentAttributes<Tag>
+  for (const key in data.settingsFields) {
+    if (key === "content") {
+      continue
+    }
+    // @ts-expect-error ignore error on next line
+    defaultAttributes[key] = data.settingsFields[key].defaultValue
+  }
+
   return {
     id: `${tag}-${id}`,
     tag: tag,
-    attributes: { ...data.defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
+    attributes: { ...defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
     children: data.defaultChildren || [],
   }
 }

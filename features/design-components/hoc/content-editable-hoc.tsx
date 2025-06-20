@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { ComponentAttributes, ComponentProps, ComponentTag, DesignComponent } from "../types"
+import { ComponentProps, ComponentTag } from "../types"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 	contentEditable?: boolean
@@ -18,12 +18,12 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 		const { pageBuilderMode, component, setSelectedComponent, updateComponent, ...otherProps } = props
 		const isConnected = !!props.component.attributes?.__data_source__
 
-		const onBlur = useCallback(() => (e: React.FocusEvent<HTMLElement>) => {
+		const onBlur = useCallback((e: React.FocusEvent<HTMLElement>) => {
+			e.stopPropagation()
 			setContentEditable(false)
-			updateComponent(
-				component.id,
-				{ attributes: { content: e.currentTarget.textContent || "" } } as Partial<DesignComponent<Tag>>,
-			)
+			const newText = e.currentTarget.textContent || ""
+			// @ts-expect-error TODO: fix the argument type for the WrappedComponent
+			updateComponent(component.id, { children: [newText] })
 		}, [component.id, updateComponent])
 
 		const onClick = useCallback(() => (e: React.MouseEvent<HTMLElement>) => {
@@ -39,13 +39,13 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 			// @ts-expect-error TODO: fix the argument type for the WrappedComponent
 			<WrappedComponent
 				pageBuilderMode={pageBuilderMode}
-				component={component}
 				contentEditable={pageBuilderMode === "edit" && !isConnected && contentEditable}
 				suppressContentEditableWarning
 				onBlur={onBlur}
 				onClick={onClick}
 				onDoubleClick={onDoubleClick}
 				{...otherProps}
+				component={component}
 			>
 			</WrappedComponent>
 		)

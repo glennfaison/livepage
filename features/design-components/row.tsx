@@ -12,11 +12,6 @@ import { withEditorControls } from "./hoc/component-controls-hoc"
 
 export type ComponentAttributes = object
 
-export const defaultChildren = []
-
-export const defaultAttributes: ComponentAttributes = {
-}
-
 export const tag: ComponentTag = "row" as const
 
 export const label = "Row"

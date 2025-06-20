@@ -2,7 +2,7 @@ import { ReplaceWithPopover } from "@/components/page-builder/replace-with-popov
 import { SettingsPopover } from "@/components/page-builder/settings-popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Copy, Move, Replace, Settings, Trash2 } from "lucide-react";
+import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
 import { getComponentInfo } from "..";
 import type { ComponentProps, ComponentTag } from "../types";
@@ -20,11 +20,9 @@ function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>)
   return (
     <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
       <span className="text-xs font-medium px-2 flex items-center">{label}</span>
-      <SettingsPopover
-        component={component}
-      >
+      <SettingsPopover component={component}>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-          <Settings className="h-4 w-4" />
+          <SettingsIcon className="h-4 w-4" />
         </Button>
       </SettingsPopover>
       <ReplaceWithPopover currentComponent={component} onReplace={handleReplace}>

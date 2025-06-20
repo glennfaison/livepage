@@ -481,6 +481,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     duplicateComponent,
     setSelectedComponent,
     replaceComponent,
+    findComponentById,
   }
 }
 
