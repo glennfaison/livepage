@@ -64,11 +64,11 @@ describe("App Reducer", () => {
     expect(result.activePage).toBe(pageId)
   })
 
-  it("should handle ADD_COMPONENT to root level", () => {
+  it("should handle INSERT_COMPONENT to root level", () => {
     const component = createDesignComponent("header1", generateId())
 
     const action: AppAction = {
-      type: "ADD_COMPONENT",
+      type: "INSERT_COMPONENT",
       payload: {
         pageId: "page-1",
         component,

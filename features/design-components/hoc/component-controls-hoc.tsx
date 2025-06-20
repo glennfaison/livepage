@@ -10,9 +10,9 @@ import { useComponentOperationsContext } from "@/lib/component-operations-contex
 
 
 function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>) {
-  const { duplicateComponent, removeComponent, replaceComponent, } = props
   const { component } = props
   const { label } = getComponentInfo(component.tag)
+  const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 
   const handleReplace = useCallback((newType: ComponentTag) => {
     replaceComponent(component.id, newType);

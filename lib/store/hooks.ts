@@ -343,7 +343,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   const addComponent = useCallback(({ tag, parentId, index }: { tag: ComponentTag, parentId?: string, index?: number }) => {
     console.log("addComponent")
     dispatch({
-      type: "ADD_COMPONENT",
+      type: "INSERT_COMPONENT",
       payload: { newComponentTag: tag, parentId, index },
     })
 

@@ -29,7 +29,7 @@ export type AppAction =
   | { type: "UPDATE_PAGE"; payload: { id: string; updates: Partial<Page> } }
   | { type: "SET_ACTIVE_PAGE"; payload: string }
   | {
-    type: "ADD_COMPONENT"
+    type: "INSERT_COMPONENT"
     payload: { newComponentTag: ComponentTag; parentId?: string; index?: number }
   }
   | { type: "UPDATE_COMPONENT"; payload: { componentId: string; updates: Partial<DesignComponent<ComponentTag>> } }

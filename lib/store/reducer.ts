@@ -82,60 +82,40 @@ function findComponentParentTree(
   return parentTree
 }
 
-function _insertChildren(
-  components: DesignComponent<ComponentTag>[],
-  toInsert: DesignComponent<ComponentTag>,
-  parentId?: string,
-  index?: number,
-): DesignComponent<ComponentTag>[] {
-  return components.map(comp => {
-    if (typeof comp === "string") {
-      return comp
+type InsertComponentProps = {
+  components: DesignComponent<ComponentTag>[]
+  newComponent: DesignComponent<ComponentTag>
+  parentId?: string
+  index?: number
+}
+
+function insertComponent({
+  components,
+  newComponent,
+  parentId,
+  index,
+}: InsertComponentProps): DesignComponent<ComponentTag>[] {
+  return components.map(component => {
+    if (typeof component === "string") {
+      return component
     }
-    if (comp.id === parentId) {
-      const siblingIndexIsValid = typeof index === "number" && -1 < index && index < comp.children.length
-      const siblingIndex = siblingIndexIsValid ? index : comp.children.length
+    if (component.id === parentId) {
+      const siblingIndexIsValid = typeof index === "number" && -1 < index && index < component.children.length
+      const siblingIndex = siblingIndexIsValid ? index : component.children.length
       return {
-        ...comp,
+        ...component,
         children: [
-          ...comp.children.slice(0, siblingIndex),
-          toInsert,
-          ...comp.children.slice(siblingIndex),
+          ...component.children.slice(0, siblingIndex),
+          newComponent,
+          ...component.children.slice(siblingIndex),
         ],
       }
     }
     return {
-      ...comp,
-      children: comp.children ? _insertChildren(comp.children, toInsert, parentId, index) : [],
+      ...component,
+      children: component.children ? insertComponent({ components: component.children, newComponent, parentId, index }) : [],
     }
   })
-}
-
-function insertComponent(
-  state: AppState,
-  newComponentTag: ComponentTag,
-  parentId?: string,
-  index?: number,
-) {
-  const newComponent = createDesignComponent(newComponentTag, generateId())
-  let newComponentTree = state.componentTree
-  if (parentId) {
-    newComponentTree = _insertChildren(state.componentTree, newComponent, parentId, index)
-  } else {
-    // Insert at root
-    const siblingIndexIsValid = typeof index === "number" && -1 < index && index < state.componentTree.length
-    const siblingIndex = siblingIndexIsValid ? index : state.componentTree.length
-    newComponentTree = [
-      ...state.componentTree.slice(0, siblingIndex),
-      newComponent,
-      ...state.componentTree.slice(siblingIndex),
-    ]
-  }
-  return {
-    ...state,
-    componentTree: newComponentTree,
-    selectedComponentId: newComponent.id,
-  }
 }
 
 // Immutable update
@@ -147,6 +127,9 @@ function updateComponent(
   let updated = false
   const updateInTree = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
     components.map(comp => {
+      if (typeof comp === "string") {
+        return comp
+      }
       if (comp.id === componentId) {
         updated = true
         return {
@@ -210,6 +193,9 @@ function duplicateComponent(
   if (parent) {
     const insertToParent = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
       components.map(comp => {
+        if (typeof comp === "string") {
+          return comp
+        }
         if (comp.id === parent!.id) {
           const idx = comp.children.findIndex(child => child.id === componentId)
           return {
@@ -273,6 +259,9 @@ function replaceComponent(
   const newComponent = createDesignComponent(newComponentTag, generateId())
   const replaceInParent = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
     components.map(comp => {
+      if (typeof comp === "string") {
+        return comp
+      }
       if (comp.id === parent!.id) {
         const idx = comp.children.findIndex(child => child.id === oldComponentId)
         return {
@@ -325,6 +314,9 @@ function deleteComponent(
   }
   const removeFromParent = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
     components.map(comp => {
+      if (typeof comp === "string") {
+        return comp
+      }
       if (comp.id === parent!.id) {
         return {
           ...comp,
@@ -371,6 +363,51 @@ export const initialState: AppState = {
 export function appReducer(state: AppState, action: AppAction): AppState {
   console.log("app reducer:", action)
   switch (action.type) {
+
+    case "INSERT_COMPONENT": {
+      const { newComponentTag, parentId, index } = action.payload
+      const newComponent = createDesignComponent(newComponentTag, generateId())
+      let newComponentTree: DesignComponent<ComponentTag>[]
+
+      if (parentId) {
+        newComponentTree = insertComponent({ components: state.componentTree, newComponent, parentId, index })
+      } else {
+        // Insert at root
+        const siblingIndexIsValid = typeof index === "number" && -1 < index && index < state.componentTree.length
+        const siblingIndex = siblingIndexIsValid ? index : state.componentTree.length
+        newComponentTree = [
+          ...state.componentTree.slice(0, siblingIndex),
+          newComponent,
+          ...state.componentTree.slice(siblingIndex),
+        ]
+      }
+      return {
+        ...state,
+        componentTree: newComponentTree,
+        selectedComponentId: newComponent.id,
+      }
+    }
+
+    case "UPDATE_COMPONENT": {
+      const { componentId, updates } = action.payload
+      return updateComponent(state, componentId, updates)
+    }
+
+    case "REMOVE_COMPONENT": {
+      const { componentId } = action.payload
+      return deleteComponent(state, componentId)
+    }
+
+    case "DUPLICATE_COMPONENT": {
+      const { componentId, parentId } = action.payload
+      return duplicateComponent(state, componentId, parentId)
+    }
+
+    case "REPLACE_COMPONENT": {
+      const { oldComponentId, newComponentTag } = action.payload
+      return replaceComponent(state, oldComponentId, newComponentTag)
+    }
+
     case "SET_PAGES":
       return {
         ...state,
@@ -396,31 +433,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         activePage: action.payload,
       }
-
-    case "ADD_COMPONENT": {
-      const { newComponentTag, parentId, index = 0 } = action.payload
-      return insertComponent(state, newComponentTag, parentId, index)
-    }
-
-    case "UPDATE_COMPONENT": {
-      const { componentId, updates } = action.payload
-      return updateComponent(state, componentId, updates)
-    }
-
-    case "REMOVE_COMPONENT": {
-      const { componentId } = action.payload
-      return deleteComponent(state, componentId)
-    }
-
-    case "DUPLICATE_COMPONENT": {
-      const { componentId, parentId } = action.payload
-      return duplicateComponent(state, componentId, parentId)
-    }
-
-    case "REPLACE_COMPONENT": {
-      const { oldComponentId, newComponentTag } = action.payload
-      return replaceComponent(state, oldComponentId, newComponentTag)
-    }
 
     case "SET_SELECTED_COMPONENT":
       return {

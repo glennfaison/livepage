@@ -8,6 +8,7 @@ import React, { useCallback } from "react"
 import { getComponentInfo, componentTagList } from "."
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
 import { withEditorControls } from "./hoc/component-controls-hoc"
+import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 export type ComponentAttributes = object
 
@@ -23,9 +24,9 @@ export const settingsFields = {
 export const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
 const Component_ = (props: ComponentProps<typeof tag>) => {
-	const { addComponent } = props
 	const { component } = props
 	const hasChildren = !!component.children.length
+	const { addComponent } = useComponentOperationsContext()
 	const {
 		visibleHorizontalDividers,
 		handleChildMouseMove,
