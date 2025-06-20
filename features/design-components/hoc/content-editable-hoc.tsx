@@ -1,5 +1,6 @@
 import React, { useCallback } from "react"
 import { ComponentProps, ComponentTag } from "../types"
+import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 	contentEditable?: boolean
@@ -15,7 +16,8 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 ) {
 	return function ContentEditableComponent(props: ComponentProps<Tag>) {
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
-		const { pageBuilderMode, component, setSelectedComponent, updateComponent, ...otherProps } = props
+		const { pageBuilderMode, component, ...otherProps } = props
+		const { setSelectedComponent, updateComponent } = useComponentOperationsContext()
 		const isConnected = !!props.component.attributes?.__data_source__
 
 		const onBlur = useCallback((e: React.FocusEvent<HTMLElement>) => {
@@ -36,7 +38,6 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 		const onDoubleClick = useCallback(() => setContentEditable(true), [])
 
 		return (
-			// @ts-expect-error TODO: fix the argument type for the WrappedComponent
 			<WrappedComponent
 				pageBuilderMode={pageBuilderMode}
 				contentEditable={pageBuilderMode === "edit" && !isConnected && contentEditable}

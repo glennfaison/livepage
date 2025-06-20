@@ -1,42 +1,47 @@
-import React, { useEffect, useState } from "react";
-import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources";
-import type { DataSourceId } from "@/features/data-sources/types";
-import type { ComponentAttributes, ComponentProps, ComponentTag } from "@/features/design-components/types";
+import React, { useEffect, useState } from "react"
+import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
+import type { DataSourceId } from "@/features/data-sources/types"
+import type { ComponentAttributes, ComponentProps, ComponentTag, DesignComponent } from "@/features/design-components/types"
+import { insertDataSourceDataInString } from "@/lib/utils"
 
-function replaceConnectedComponentAttributes<T extends ComponentAttributes<ComponentTag>>(originalAttributes: T, dataFromSource: unknown): T {
-	const newAttributes = { ...originalAttributes } as T
-	const placeholderRegExp = /\[#data.*?#\]/g
+function replaceConnectedComponentProperties<T extends DesignComponent<ComponentTag>>(originalComponent: T, dataFromSource: unknown): T {
+	const newComponent = { ...originalComponent, children: [] } as T
 	const keysToSkip = ["__data_source__"]
-	debugger
 
-	for (const key in originalAttributes) {
+	for (const _key in originalComponent.attributes) {
+		const key = _key as keyof ComponentAttributes<ComponentTag>
 		if (keysToSkip.includes(key)) {
 			continue
 		}
-		const matches = (originalAttributes[key] as string).match(placeholderRegExp)
-		if (!matches) {
-			newAttributes[key] = originalAttributes[key]
-			continue
+		const originalValue = (originalComponent.attributes as ComponentAttributes<ComponentTag>)[key as keyof ComponentAttributes<ComponentTag>]
+		const newAttributes = newComponent.attributes as ComponentAttributes<ComponentTag>
+		if (typeof originalValue === "string") {
+			newAttributes[key] = insertDataSourceDataInString(originalValue, dataFromSource)
+		} else {
+			newAttributes[key] = originalValue
 		}
-		matches.forEach((match) => {
-			const evaluateProperty = new Function("data", `return ${match.substring(2, match.length - 2)}`)
-			const output = String(evaluateProperty(dataFromSource))
-			if (output !== undefined && output !== null) {
-				if (typeof newAttributes[key] === "string") {
-					newAttributes[key] = (newAttributes[key] as string).replaceAll(match, output) as T[Extract<keyof T, string>];
-				}
-			}
-		})
 	}
 
-	return newAttributes
+	for (let i = 0; i < originalComponent.children.length; i++) {
+		const child = originalComponent.children[i]
+		const newChildren = newComponent.children
+		if (typeof child === "string") {
+			// @ts-expect-error TODO: Fix this type error
+			newChildren[i] = insertDataSourceDataInString(child, dataFromSource)
+		} else if (typeof child === "object" && child !== null && "attributes" in child) {
+			// If the child is a component, we can recursively replace its properties
+			newChildren[i] = replaceConnectedComponentProperties(child, dataFromSource)
+		}
+	}
+
+	return newComponent
 }
 
 export function withConnection<Tag extends ComponentTag>(
 	WrappedComponent: React.ComponentType<ComponentProps<Tag>>
 ) {
 	return function ConnectedComponent(props: ComponentProps<Tag>) {
-		const { attributes } = props.component;
+		const { attributes } = props.component
 		const { __data_source__ } = attributes
 		const [connectedData, setConnectedData] = useState<unknown>(null)
 		const [loading, setLoading] = useState(false)
@@ -52,7 +57,7 @@ export function withConnection<Tag extends ComponentTag>(
 						const dataSourceId: DataSourceId = decodedDataSourceSettings.id
 						const dataSource = getDataSourceInfo(dataSourceId)
 						const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
-						setConnectedData(result);
+						setConnectedData(result)
 					} catch (err) {
 						setError(err)
 					} finally {
@@ -63,7 +68,7 @@ export function withConnection<Tag extends ComponentTag>(
 			if (__data_source__) {
 				fetchData()
 			}
-		}, [__data_source__]);
+		}, [__data_source__])
 
 		if (__data_source__ && __data_source__.trim() !== "") {
 			if (loading) return <div>Loading...</div>
@@ -73,22 +78,22 @@ export function withConnection<Tag extends ComponentTag>(
 				return (
 					<>
 						{connectedData.map((item, idx) => {
-							const newAttributes = replaceConnectedComponentAttributes(attributes, item)
-							const connectedComponent = { ...props.component, attributes: newAttributes }
+							const newComponent = replaceConnectedComponentProperties(props.component, item)
+							const connectedComponent = { ...props.component, ...newComponent, attributes: { ...props.component.attributes, ...newComponent.attributes } }
 							return (
 								<WrappedComponent key={idx} {...props} component={connectedComponent} />
-							);
+							)
 						})}
 					</>
-				);
+				)
 			} else {
-				const newAttributes = replaceConnectedComponentAttributes(attributes, connectedData)
-				const connectedComponent = { ...props.component, attributes: newAttributes }
+				const newComponent = replaceConnectedComponentProperties(props.component, connectedData)
+				const connectedComponent = { ...props.component, ...newComponent, attributes: { ...props.component.attributes, ...newComponent.attributes } }
 				return <WrappedComponent {...props} component={connectedComponent} />
 			}
 		}
 
 		// Not a connected component, render as usual
 		return <WrappedComponent {...props} />
-	};
+	}
 }

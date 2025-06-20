@@ -1,6 +1,6 @@
 "use client"
 
-import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent } from "./types"
+import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "./types"
 
 import * as Header1 from "./header1"
 import * as Header2 from "./header2"
@@ -57,12 +57,18 @@ export function createDesignComponent<Tag extends ComponentTag>(
     // @ts-expect-error ignore error on next line
     defaultAttributes[key] = data.settingsFields[key].defaultValue
   }
+  
+  const defaultChildren =
+    "content" in data.settingsFields
+      ? (data.settingsFields as Record<string, SettingsField<Tag>>).content?.defaultValue || []
+      : []
 
   return {
     id: `${tag}-${id}`,
     tag: tag,
     attributes: { ...defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
-    children: data.defaultChildren || [],
+    // @ts-expect-error TODO: fix the type error here
+    children: defaultChildren,
   }
 }
 
