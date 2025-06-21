@@ -3,35 +3,13 @@ import type { AppState, AppAction, HistoryEntry } from "./types"
 import type { ComponentTag, DesignComponent } from "@/features/design-components/types"
 import { generateId } from "../utils"
 
-function _findComponentInArray(
-  components: DesignComponent<ComponentTag>[],
-  componentId: string,
-  state?: AppState,
-): DesignComponent<ComponentTag> | null {
-  for (const component of components) {
-    if (component.id === componentId) {
-      return component
-    }
-    if (component.children) {
-      const found = _findComponentInArray(component.children, componentId, state)
-      if (found) return found
-    }
-  }
-  return null
-}
-
-function findComponentById(
-  state: AppState,
-  componentId: string,
-) {
-  const component = _findComponentInArray(state.componentTree, componentId, state)
-  return component
-}
-
 function cloneComponentWithNewIds(
   component: DesignComponent<ComponentTag>,
   idSuffix: string
 ): DesignComponent<ComponentTag> {
+  if (typeof component === "string") {
+    return component
+  }
   const newId = `${component.id}${idSuffix}`
   return {
     ...component,
@@ -43,43 +21,36 @@ function cloneComponentWithNewIds(
   }
 }
 
+type FindParentTreeProps = {
+  components: DesignComponent<ComponentTag>[]
+  componentId: string
+}
+
 /**
  * Return an array of Components that starts with the component with id = componentId first,
  * followed by its direct parent, followed by the parent's parent, and so on.
  * The last component in the array will be a direct child of state.componentTree
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function findComponentParentTree(
-  state: AppState,
-  componentId: string,
-) {
-  const parentTree: DesignComponent<ComponentTag>[] = []
-  let currentId = componentId
-
-  while (true) {
-    const component = findComponentById(state, currentId)
-    if (!component) break
-    parentTree.push(component)
-
-    // Find parent by searching the tree for a component whose children include currentId
-    let foundParent: DesignComponent<ComponentTag> | null = null
-    const searchParent = (components: DesignComponent<ComponentTag>[]): boolean => {
-      for (const comp of components) {
-        if (comp.children && comp.children.some(child => child.id === currentId)) {
-          foundParent = comp
-          return true
-        }
-        if (comp.children && searchParent(comp.children)) {
-          return true
-        }
-      }
-      return false
+function findComponentParentTree({
+  components,
+  componentId,
+}: FindParentTreeProps): DesignComponent<ComponentTag>[] {
+  for (const component of components) {
+    if (typeof component === "string") {
+      continue
     }
-    if (!searchParent(state.componentTree)) break
-    currentId = foundParent!.id
+    if (component.id === componentId) {
+      return [component]
+    }
+    if (component.children) {
+      const parentTree = findComponentParentTree({ components: component.children, componentId })
+      if (parentTree.length > 0) {
+        return [...parentTree, component]
+      }
+    }
   }
-
-  return parentTree
+  return []
 }
 
 type InsertComponentProps = {
@@ -95,14 +66,20 @@ function insertComponent({
   parentId,
   index,
 }: InsertComponentProps): DesignComponent<ComponentTag>[] {
-  return components.map(component => {
+  return components.reduce<DesignComponent<ComponentTag>[]>((acc, component, idx) => {
     if (typeof component === "string") {
-      return component
+      return [...acc, component]
     }
+    const siblingIndexIsValid = typeof index === "number" && -1 < index && index < components.length
+    const siblingIndex = siblingIndexIsValid ? index : components.length
+    if (parentId === null || parentId === undefined && idx === siblingIndex) {
+      return [...acc, newComponent, component]
+    }
+    // If this is the parent, insert the new component
     if (component.id === parentId) {
       const siblingIndexIsValid = typeof index === "number" && -1 < index && index < component.children.length
       const siblingIndex = siblingIndexIsValid ? index : component.children.length
-      return {
+      const parentComponent = {
         ...component,
         children: [
           ...component.children.slice(0, siblingIndex),
@@ -110,230 +87,118 @@ function insertComponent({
           ...component.children.slice(siblingIndex),
         ],
       }
+      return [...acc, parentComponent]
+    }
+    // Otherwise, recurse into children
+    return [
+      ...acc,
+      {
+        ...component,
+        children: insertComponent({ components: component.children || [], newComponent, parentId, index }),
+      },
+    ]
+  }, [])
+}
+
+type UpdateComponentProps = {
+  components: DesignComponent<ComponentTag>[],
+  componentId: string,
+  updates: Partial<DesignComponent<ComponentTag>>,
+  updated: { value: boolean }
+}
+
+function updateComponent({
+  components,
+  componentId,
+  updates,
+  updated,
+}: UpdateComponentProps): DesignComponent<ComponentTag>[] {
+  return components.map(component => {
+    if (typeof component === "string") {
+      return component
+    }
+    if (component.id === componentId) {
+      updated.value = true
+      return {
+        ...component,
+        attributes: { ...component.attributes, ...updates.attributes },
+        children: updates.children ? updates.children : component.children,
+      }
     }
     return {
       ...component,
-      children: component.children ? insertComponent({ components: component.children, newComponent, parentId, index }) : [],
+      children: component.children ? updateComponent({ components: component.children, componentId, updates, updated }) : [],
     }
   })
 }
 
-// Immutable update
-function updateComponent(
-  state: AppState,
+type RemoveComponentProps = {
+  components: DesignComponent<ComponentTag>[],
   componentId: string,
-  updates: Partial<DesignComponent<ComponentTag>>,
-) {
-  let updated = false
-  const updateInTree = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
-    components.map(comp => {
-      if (typeof comp === "string") {
-        return comp
-      }
-      if (comp.id === componentId) {
-        updated = true
-        return {
-          ...comp,
-          attributes: { ...comp.attributes, ...updates.attributes },
-          children: updates.children ? updates.children : comp.children,
-        }
-      }
-      return {
-        ...comp,
-        children: comp.children ? updateInTree(comp.children) : [],
-      }
-    })
-  const newComponentTree = updateInTree(state.componentTree)
-  if (!updated) {
-    console.error(`Invalid component ID: ${componentId}`)
-    return { ...state }
-  }
-  return {
-    ...state,
-    componentTree: newComponentTree,
-  }
 }
 
-// Immutable duplicate
-function duplicateComponent(
-  state: AppState,
-  componentId: string,
-  parentId?: string,
-): AppState {
-  // Find parent and component
-  let parent: DesignComponent<ComponentTag> | null = null
-  let component: DesignComponent<ComponentTag> | null = null
-  const findParentAndComponent = (
-    components: DesignComponent<ComponentTag>[],
-    parent: DesignComponent<ComponentTag> | null = null
-  ): [DesignComponent<ComponentTag> | null, DesignComponent<ComponentTag> | null] => {
-    for (const comp of components) {
-      if (comp.id === componentId) return [parent, comp]
-      if (comp.children) {
-        const found = findParentAndComponent(comp.children, comp)
-        if (found[1]) return found
-      }
+function removeComponent({
+  components,
+  componentId,
+}: RemoveComponentProps): DesignComponent<ComponentTag>[] {
+  return components.reduce<DesignComponent<ComponentTag>[]>((acc, component) => {
+    if (typeof component === "string") {
+      return [...acc, component]
     }
-    return [null, null]
-  }
-  if (parentId) {
-    parent = findComponentById(state, parentId)
-    component = parent ? _findComponentInArray(parent.children, componentId) : null
-  } else {
-    [parent, component] = findParentAndComponent(state.componentTree)
-  }
-  if (!component) {
-    console.error(`Invalid component ID: ${componentId}`)
-    return { ...state }
-  }
-  // Clone with new IDs
-  const idSuffix = `-copy-${Date.now()}`
-  const duplicatedComponent = cloneComponentWithNewIds(component, idSuffix)
-  let newComponentTree = state.componentTree
-  if (parent) {
-    const insertToParent = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
-      components.map(comp => {
-        if (typeof comp === "string") {
-          return comp
-        }
-        if (comp.id === parent!.id) {
-          const idx = comp.children.findIndex(child => child.id === componentId)
-          return {
-            ...comp,
-            children: [
-              ...comp.children.slice(0, idx + 1),
-              duplicatedComponent,
-              ...comp.children.slice(idx + 1),
-            ],
-          }
-        }
-        return {
-          ...comp,
-          children: comp.children ? insertToParent(comp.children) : [],
-        }
-      })
-    newComponentTree = insertToParent(state.componentTree)
-  } else {
-    // Insert at root
-    const idx = state.componentTree.findIndex(child => child.id === componentId)
-    newComponentTree = [
-      ...state.componentTree.slice(0, idx + 1),
-      duplicatedComponent,
-      ...state.componentTree.slice(idx + 1),
+    if (component.id === componentId) {
+      return acc
+    }
+    const updatedChildren = removeComponent({ components: component.children || [], componentId })
+    return [...acc, { ...component, children: updatedChildren, }]
+  }, [])
+}
+
+function duplicateComponent({
+  components,
+  componentId,
+}: {
+  components: DesignComponent<ComponentTag>[],
+  componentId: string,
+}): DesignComponent<ComponentTag>[] {
+  return components.reduce<DesignComponent<ComponentTag>[]>((acc, component) => {
+    if (typeof component === "string") {
+      return [...acc, component]
+    }
+    if (component.id === componentId) {
+      const idSuffix = `-copy-${Date.now()}`
+      const duplicatedComponent = cloneComponentWithNewIds(component, idSuffix)
+      return [...acc, component, duplicatedComponent]
+    }
+    // Otherwise, recurse into children
+    return [
+      ...acc,
+      {
+        ...component,
+        children: duplicateComponent({ components: component.children || [], componentId }),
+      },
     ]
-  }
-  return {
-    ...state,
-    componentTree: newComponentTree,
-    selectedComponentId: duplicatedComponent.id,
-  }
+  }, [])
 }
 
-// Immutable replace
-function replaceComponent(
-  state: AppState,
-  oldComponentId: string,
-  newComponentTag: ComponentTag,
-) {
-  // Find parent and component
-  let parent: DesignComponent<ComponentTag> | null = null
-  let component: DesignComponent<ComponentTag> | null = null
-  const findParentAndComponent = (
-    components: DesignComponent<ComponentTag>[],
-    parent: DesignComponent<ComponentTag> | null = null
-  ): [DesignComponent<ComponentTag> | null, DesignComponent<ComponentTag> | null] => {
-    for (const comp of components) {
-      if (comp.id === oldComponentId) return [parent, comp]
-      if (comp.children) {
-        const found = findParentAndComponent(comp.children, comp)
-        if (found[1]) return found
-      }
-    }
-    return [null, null]
-  }
-  [parent, component] = findParentAndComponent(state.componentTree)
-  if (!component || !parent) {
-    console.error(`Invalid component ID: ${oldComponentId}`)
-    return { ...state }
-  }
-  const newComponent = createDesignComponent(newComponentTag, generateId())
-  const replaceInParent = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
-    components.map(comp => {
-      if (typeof comp === "string") {
-        return comp
-      }
-      if (comp.id === parent!.id) {
-        const idx = comp.children.findIndex(child => child.id === oldComponentId)
-        return {
-          ...comp,
-          children: [
-            ...comp.children.slice(0, idx),
-            newComponent,
-            ...comp.children.slice(idx + 1),
-          ],
-        }
-      }
-      return {
-        ...comp,
-        children: comp.children ? replaceInParent(comp.children) : [],
-      }
-    })
-  const newComponentTree = replaceInParent(state.componentTree)
-  return {
-    ...state,
-    componentTree: newComponentTree,
-    selectedComponentId: newComponent.id,
-  }
+type ReplaceComponentProps = {
+  components: DesignComponent<ComponentTag>[]
+  oldComponentId: string
+  newComponent: DesignComponent<ComponentTag>
 }
 
-// Immutable delete
-function deleteComponent(
-  state: AppState,
-  componentId: string,
-) {
-  // Find parent and component
-  let parent: DesignComponent<ComponentTag> | null = null
-  let component: DesignComponent<ComponentTag> | null = null
-  const findParentAndComponent = (
-    components: DesignComponent<ComponentTag>[],
-    parent: DesignComponent<ComponentTag> | null = null
-  ): [DesignComponent<ComponentTag> | null, DesignComponent<ComponentTag> | null] => {
-    for (const comp of components) {
-      if (comp.id === componentId) return [parent, comp]
-      if (comp.children) {
-        const found = findParentAndComponent(comp.children, comp)
-        if (found[1]) return found
-      }
+function replaceComponent({ components, oldComponentId, newComponent }: ReplaceComponentProps): DesignComponent<ComponentTag>[] {
+  return components.map(component => {
+    if (typeof component === "string") {
+      return component
     }
-    return [null, null]
-  }
-  [parent, component] = findParentAndComponent(state.componentTree)
-  if (!component || !parent) {
-    console.error(`Invalid component ID: ${componentId}`)
-    return { ...state }
-  }
-  const removeFromParent = (components: DesignComponent<ComponentTag>[]): DesignComponent<ComponentTag>[] =>
-    components.map(comp => {
-      if (typeof comp === "string") {
-        return comp
-      }
-      if (comp.id === parent!.id) {
-        return {
-          ...comp,
-          children: comp.children.filter(child => child.id !== componentId),
-        }
-      }
-      return {
-        ...comp,
-        children: comp.children ? removeFromParent(comp.children) : [],
-      }
-    })
-  const newComponentTree = removeFromParent(state.componentTree)
-  return {
-    ...state,
-    componentTree: newComponentTree,
-    selectedComponentId: state.selectedComponentId === componentId ? "" : state.selectedComponentId,
-  }
+    if (component.id === oldComponentId) {
+      return newComponent
+    }
+    return {
+      ...component,
+      children: component.children ? replaceComponent({ components: component.children, oldComponentId, newComponent }) : [],
+    }
+  })
 }
 
 export const initialState: AppState = {
@@ -367,45 +232,59 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "INSERT_COMPONENT": {
       const { newComponentTag, parentId, index } = action.payload
       const newComponent = createDesignComponent(newComponentTag, generateId())
-      let newComponentTree: DesignComponent<ComponentTag>[]
-
-      if (parentId) {
-        newComponentTree = insertComponent({ components: state.componentTree, newComponent, parentId, index })
-      } else {
-        // Insert at root
-        const siblingIndexIsValid = typeof index === "number" && -1 < index && index < state.componentTree.length
-        const siblingIndex = siblingIndexIsValid ? index : state.componentTree.length
-        newComponentTree = [
-          ...state.componentTree.slice(0, siblingIndex),
-          newComponent,
-          ...state.componentTree.slice(siblingIndex),
-        ]
-      }
       return {
         ...state,
-        componentTree: newComponentTree,
+        componentTree: insertComponent({ components: state.componentTree, newComponent, parentId, index }),
         selectedComponentId: newComponent.id,
       }
     }
 
     case "UPDATE_COMPONENT": {
       const { componentId, updates } = action.payload
-      return updateComponent(state, componentId, updates)
+      const updated = { value: false }
+      const newComponentTree = updateComponent({
+        components: state.componentTree,
+        componentId,
+        updates,
+        updated,
+      })
+      if (!updated.value) {
+        console.error(`Invalid component ID: ${componentId}`)
+        return { ...state }
+      }
+      return {
+        ...state,
+        componentTree: newComponentTree,
+      }
     }
 
     case "REMOVE_COMPONENT": {
       const { componentId } = action.payload
-      return deleteComponent(state, componentId)
+      const newComponentTree = removeComponent({ components: state.componentTree, componentId, })
+      return {
+        ...state,
+        componentTree: newComponentTree,
+        selectedComponentId: state.selectedComponentId === componentId ? "" : state.selectedComponentId,
+      }
     }
 
     case "DUPLICATE_COMPONENT": {
-      const { componentId, parentId } = action.payload
-      return duplicateComponent(state, componentId, parentId)
+      const { componentId } = action.payload
+      return {
+        ...state,
+        componentTree: duplicateComponent({ components: state.componentTree, componentId }),
+      }
     }
 
     case "REPLACE_COMPONENT": {
       const { oldComponentId, newComponentTag } = action.payload
-      return replaceComponent(state, oldComponentId, newComponentTag)
+      const newComponent = createDesignComponent(newComponentTag, generateId())
+      const newComponentTree = replaceComponent({ components: state.componentTree, oldComponentId, newComponent })
+      return {
+        ...state,
+        componentTree: newComponentTree,
+        selectedComponentId: newComponent.id,
+      }
     }
 
     case "SET_PAGES":
