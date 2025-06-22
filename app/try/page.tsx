@@ -14,7 +14,13 @@ import React, { useRef, useState } from "react"
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
   const pageBuilderMode = state.pageBuilderMode
-  const { savePageAsJsonMutation, loadPageMutation, savePageAsHtmlMutation, savePageAsShortcodeMutation } = usePageOperations()
+  const {
+    savePageAsJsonMutation,
+    loadPageFromJsonMutation,
+    loadPageFromShortcodeMutation,
+    savePageAsHtmlMutation,
+    savePageAsShortcodeMutation
+  } = usePageOperations(state)
   const {
     handleSelectHistory,
     handleHistoryAccept,
@@ -47,27 +53,17 @@ export default function BuilderPage() {
   }
 
   // Load a page from a file
-  const loadPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const loadPage = (event: React.ChangeEvent<HTMLInputElement>, uploadType: "json" | "shortcode") => {
     const file = event.target.files?.[0]
     if (!file) return
 
+    const loadPageMutation = uploadType === "json" ? loadPageFromJsonMutation : loadPageFromShortcodeMutation
     loadPageMutation.mutate(file, {
-      onSuccess: (loadedPage) => {
-        // Check if the page already exists
-        const existingPageIndex = state.componentTree.findIndex((p) => p.id === loadedPage.id)
+      onSuccess: (loadedComponentTree) => {
+        const currentPage = componentOperations.findComponentById(loadedComponentTree, state.activePage)
 
-        if (existingPageIndex >= 0) {
-          // Update existing page
-          dispatch({
-            type: "UPDATE_PAGE",
-            payload: { id: loadedPage.id, updates: loadedPage },
-          })
-        } else {
-          // Add as a new page
-          dispatch({ type: "ADD_PAGE", payload: loadedPage })
-        }
-
-        dispatch({ type: "SET_ACTIVE_PAGE", payload: loadedPage.id })
+        dispatch({ type: "SET_PAGES", payload: loadedComponentTree })
+        dispatch({ type: "SET_ACTIVE_PAGE", payload: currentPage?.id || "" })
 
         // Add to history
         setTimeout(() => {
@@ -121,14 +117,14 @@ export default function BuilderPage() {
               <input
                 type="file"
                 ref={jsonFileInputRef}
-                onChange={loadPage}
+                onChange={(e) => loadPage(e, "json")}
                 accept=".json"
                 className="hidden"
               />
               <input
                 type="file"
                 ref={shortcodeFileInputRef}
-                onChange={loadPage}
+                onChange={(e) => loadPage(e, "shortcode")}
                 accept=".txt"
                 className="hidden"
               />

@@ -30,15 +30,15 @@ export function useAppState() {
   return { state, dispatch }
 }
 
-export function usePageOperations() {
+export function usePageOperations(state: AppState) {
   const savePageAsJsonMutation = useMutation({
     mutationFn: async (page: DesignComponent<"page">) => {
-      const data = JSON.stringify(page, null)
+      const data = JSON.stringify(state.componentTree, null)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${page.title.toLowerCase().replace(/\s+/g, "-")}.json`
+      a.download = `${page.attributes.title.toLowerCase().replace(/\s+/g, "-")}.json`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -62,7 +62,7 @@ export function usePageOperations() {
 
   const savePageAsShortcodeMutation = useMutation({
     mutationFn: async (page: DesignComponent<"page">) => {
-      const data = ShortcodeParser.stringify([page])
+      const data = ShortcodeParser.stringify(state.componentTree)
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -201,13 +201,13 @@ export function usePageOperations() {
   })
 
   const loadPageFromJsonMutation = useMutation({
-    mutationFn: async (file: File): Promise<DesignComponent<"page">> => {
+    mutationFn: async (file: File): Promise<typeof state.componentTree> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const loadedPage = JSON.parse(content) as DesignComponent<"page">
+            const loadedPage = JSON.parse(content) as DesignComponent<"page">[]
             resolve(loadedPage)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -217,10 +217,10 @@ export function usePageOperations() {
         reader.readAsText(file)
       })
     },
-    onSuccess: (loadedPage) => {
+    onSuccess: (loadedComponentTree) => {
       toast({
         title: "Page loaded",
-        description: `${loadedPage.title} has been loaded successfully.`,
+        description: `${loadedComponentTree[0].attributes.title} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -233,15 +233,14 @@ export function usePageOperations() {
   })
 
   const loadPageFromShortcodeMutation = useMutation({
-    mutationFn: async (file: File): Promise<DesignComponent<"page">> => {
+    mutationFn: async (file: File): Promise<typeof state.componentTree> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
             const pages = ShortcodeParser.parse(content)
-            const loadedPage = pages[0] as unknown as DesignComponent<"page">
-            resolve(loadedPage)
+            resolve(pages as typeof state.componentTree)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
           }
@@ -250,10 +249,10 @@ export function usePageOperations() {
         reader.readAsText(file)
       })
     },
-    onSuccess: (loadedPage) => {
+    onSuccess: (loadedComponentTree) => {
       toast({
         title: "Page loaded",
-        description: `${loadedPage.attributes.title} has been loaded successfully.`,
+        description: `${loadedComponentTree[0].attributes.title} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -269,7 +268,7 @@ export function usePageOperations() {
     savePageAsShortcodeMutation,
     savePageAsJsonMutation,
     savePageAsHtmlMutation,
-    loadPageMutation: loadPageFromJsonMutation,
+    loadPageFromJsonMutation: loadPageFromJsonMutation,
     loadPageFromShortcodeMutation,
   }
 }

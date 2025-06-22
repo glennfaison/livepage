@@ -1,4 +1,5 @@
 type ShortcodeElement = {
+	id: string;
 	tag: string;
 	attributes: Record<string, string>;
 	children: (string | ShortcodeElement)[];
@@ -53,6 +54,7 @@ export function parse(shortcode: string, acceptedTags?: string[]): (string | Sho
 	const events: ParserEvent[] = [{ status: EventNames.FoundNewShortcode, index: 0 }];
 	const returnValue: (string | ShortcodeElement)[] = [];
 	let currentElement: ShortcodeElement = {
+		id: '',
 		tag: '',
 		attributes: {},
 		children: [],
@@ -93,7 +95,7 @@ export function parse(shortcode: string, acceptedTags?: string[]): (string | Sho
 				const openingTagMatches = shortcode.substring(i).match(RegExps.openingTag);
 				if (openingTagMatches && (!acceptedTags || acceptedTags?.includes(openingTagMatches[1]))) {
 					const tagName = openingTagMatches[1];
-					currentElement = { tag: tagName, attributes: {}, children: [] };
+					currentElement = { id: '', tag: tagName, attributes: {}, children: [] };
 					i += openingTagMatches[0].length - 1;
 					events.push({ status: EventNames.FoundTagName, index: i });
 				} else {
@@ -112,7 +114,11 @@ export function parse(shortcode: string, acceptedTags?: string[]): (string | Sho
 					const pairMatches = shortcode.substring(i).match(RegExps.attrNameValuePair)!;
 					const attrName = pairMatches[1];
 					const attrValue = pairMatches[5] || pairMatches[4] || pairMatches[3] || '';
-					currentElement.attributes[attrName] = attrValue;
+					if (attrName === "id") {
+						currentElement.id = attrValue
+					} else {
+						currentElement.attributes[attrName] = attrValue;
+					}
 					i += pairMatches[0].length - 1;
 				} else if (RegExps.whitespace.test(shortcode[i])) {
 					// Do nothing, just skip whitespace
@@ -190,7 +196,7 @@ export function parse(shortcode: string, acceptedTags?: string[]): (string | Sho
 				events[events.length - 1].index = i + 1;
 
 				outputArray.push(currentElement);
-				currentElement = { tag: '', attributes: {}, children: [] };
+				currentElement = { id: '', tag: '', attributes: {}, children: [] };
 				break;
 			}
 			default: {
@@ -213,7 +219,7 @@ export function stringify(elements: (string | ShortcodeElement)[]): string {
 		const attrs = Object.entries(element.attributes)
 			.map(([key, value]) => value !== '' ? `${key}="${value}"` : key)
 			.join(' ');
-		const openTag = `[${element.tag}${attrs ? ' ' + attrs : ''}`;
+		const openTag = `[${element.tag} id=${element.id}${attrs ? ' ' + attrs : ''}`;
 		const children = ']' + element.children.map(serializeElement).join('');
 		const closeTag = children.length ? `[/${element.tag}]` : '/]';
 		return `${openTag}${children}${closeTag}`;

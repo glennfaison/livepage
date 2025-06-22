@@ -24,7 +24,7 @@ export interface AppState {
 
 // Action types
 export type AppAction =
-  | { type: "SET_PAGES"; payload: Page[] }
+  | { type: "SET_PAGES"; payload: DesignComponent<ComponentTag>[] }
   | { type: "ADD_PAGE"; payload: Page }
   | { type: "UPDATE_PAGE"; payload: { id: string; updates: Partial<Page> } }
   | { type: "SET_ACTIVE_PAGE"; payload: string }

@@ -274,6 +274,36 @@ export const shortcodeSamples = [
 			},
 		],
 	},
+	{
+		shortcode: `
+		[page id=page-1 title="Home Page"]
+			[row id=row-968frt6]
+				[header1 id=header1-460fc7b]Header 1[/header1]
+			[/row]
+			[row id=row-6d4pfj7]
+				[paragraph id=paragraph-fsusmgq]
+					Morbi consequat justo enim, sed accumsan metus blandit eget.
+				[/paragraph]
+			[/row]
+		[/page]
+		`,
+		parsedResult: [{
+			tag: "page",
+			id: "page-1",
+			children: [
+				{
+					tag: "row",
+					id: "row-968frt6",
+					children: [{ tag: "header1", id: "header1-460fc7b", children: ["Header 1"] }],
+				},
+				{
+					tag: "row",
+					id: "row-968frt6",
+					children: [{ tag: "paragraph", id: "paragraph-fsusmgq", children: ["Morbi consequat justo enim, sed accumsan metus blandit eget."] }],
+				},
+			],
+		}],
+	},
 ];
 
 export const parsedShortcodeElementSamples = [
