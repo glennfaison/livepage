@@ -1,6 +1,6 @@
 "use client"
 
-import { PageCraftToolbar } from "@/components/page-builder/pagecraft-toolbar"
+import { Toolbar } from "@/components/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Component as PageComponent } from "@/features/design-components/page-component"
@@ -92,25 +92,25 @@ export default function BuilderPage() {
             <div className="flex items-center gap-2">
               <Link href="/" className="flex items-center gap-2">
                 <Layers className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-bold">PageCraft</h1>
+                <h1 className="text-xl font-bold">LivePage</h1>
               </Link>
             </div>
             <div className="flex items-center gap-4">
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
-                    <Upload className="h-4 w-4" /> Load
+                    <Upload className="h-4 w-4" /> Import
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => jsonFileInputRef.current?.click()}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Load JSON
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => shortcodeFileInputRef.current?.click()}>
                     <Upload className="h-4 w-4 mr-2" />
-                    Load Shortcode
+                    Import Shortcode
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => jsonFileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import JSON
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -132,7 +132,7 @@ export default function BuilderPage() {
               <DropdownMenu open={saveDropdownOpen} onOpenChange={setSaveDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
-                    <Download className="h-4 w-4" /> Save
+                    <Download className="h-4 w-4" /> Export
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -143,7 +143,7 @@ export default function BuilderPage() {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={saveAsJSON} disabled={savePageAsJsonMutation.isPending}>
                     <Download className="h-4 w-4 mr-2" />
-                    {savePageAsJsonMutation.isPending ? "Saving..." : "Download as JSON"}
+                    {savePageAsJsonMutation.isPending ? "Exporting..." : "Download as JSON"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={saveAsHTML} disabled={savePageAsHtmlMutation.isPending}>
                     <Download className="h-4 w-4 mr-2" />
@@ -169,7 +169,7 @@ export default function BuilderPage() {
           component={currentPage}
         />
 
-        <PageCraftToolbar
+        <Toolbar
           toolbarMinimized={state.toolbarMinimized}
           setToolbarMinimized={(minimized) => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: minimized })}
           savePage={saveAsJSON}

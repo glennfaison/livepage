@@ -73,8 +73,8 @@ jest.mock("@/components/page-builder/page-builder", () => ({
   renderDesignComponent: jest.fn(() => <div data-testid="mock-component">Mock Component</div>),
 }))
 
-jest.mock("@/components/page-builder/pagecraft-toolbar", () => ({
-  PageCraftToolbar: jest.fn(() => <div data-testid="mock-toolbar">Mock Toolbar</div>),
+jest.mock("@/components/page-builder/toolbar", () => ({
+  Toolbar: jest.fn(() => <div data-testid="mock-toolbar">Mock Toolbar</div>),
 }))
 
 describe("BuilderPage Integration", () => {
@@ -82,7 +82,7 @@ describe("BuilderPage Integration", () => {
     render(<BuilderPage />)
 
     // Check for main UI elements
-    expect(screen.getByText("PageCraft")).toBeInTheDocument()
+    expect(screen.getByText("LivePage")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /home/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /switch to preview mode/i })).toBeInTheDocument()
     expect(screen.getByPlaceholderText("Page Title")).toBeInTheDocument()

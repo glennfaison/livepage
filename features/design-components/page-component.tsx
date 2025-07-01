@@ -9,12 +9,24 @@ import { getComponentInfo } from "."
 import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
 
 export type ComponentAttributes = {
+  id: string
   title: string
 }
 
 export const tag: ComponentTag = "page" as const
 
 export const settingsFields = {
+  id: {
+    id: "id",
+    type: "text",
+    label: "ID",
+    placeholder: "ID",
+    defaultValue: "",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, id: value } };
+    },
+  },
   title: {
     id: "title",
     type: "text",
@@ -36,13 +48,18 @@ export function Component(props: ComponentProps<"page">) {
     addComponent({ tag: "row", parentId: currentPage.id })
   }, [addComponent, currentPage.id])
 
+  const updatePageTitle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const update = { attributes: { title: e.target.value } } as DesignComponent<typeof tag>
+    updateComponent(currentPage.id, update)
+  }, [updateComponent, currentPage.id])
+
   return (
     <main className="flex-1 overflow-hidden flex flex-col">
       <div className="container py-4 border-b mx-auto">
         <div className="flex justify-between items-center">
           <Input
             defaultValue={currentPage.attributes.title}
-            onChange={(e) => updateComponent(currentPage.id, { attributes: { title: e.target.value } })}
+            onChange={updatePageTitle}
             className="text-xl font-semibold w-auto max-w-xs"
             id="page-title"
             placeholder="Page Title"
@@ -52,7 +69,7 @@ export function Component(props: ComponentProps<"page">) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-gray-50 p-4">
+      <div className="flex-1 overflow-auto bg-gray-50 p-4" id={currentPage.attributes.id}>
         <div
           className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md p-8"
           onClick={() => setSelectedComponent("")}

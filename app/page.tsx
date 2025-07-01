@@ -10,7 +10,7 @@ export default function HomePage() {
         <div className="container flex items-center justify-between py-4 mx-auto">
           <div className="flex items-center gap-2">
             <Layers className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">PageCraft</h1>
+            <h1 className="text-xl font-bold">LivePage</h1>
           </div>
           <nav>
             <Link href="/try">
@@ -78,7 +78,7 @@ export default function HomePage() {
 
       <footer className="border-t py-6">
         <div className="container text-center text-muted-foreground">
-          <p>© {new Date().getFullYear()} PageCraft. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} LivePage. All rights reserved.</p>
         </div>
       </footer>
     </div>

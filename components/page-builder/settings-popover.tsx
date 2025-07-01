@@ -167,7 +167,7 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
         {settingsFields.map((field) => (
           <div className="space-y-2" key={field.id as string}>
             <Label htmlFor={field.id as string}>{field.label}</Label>
-            {field.type === "textarea" ? (
+            {field.inputType === "textarea" ? (
               <textarea
                 id={field.id as string}
                 className={cn(
@@ -182,7 +182,7 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
               />
             ) : (
               <Input
-                type={field.type}
+                type={field.inputType}
                 id={field.id as string}
                 placeholder={field.placeholder}
                 value={(formData[field.id] as string) || ""}

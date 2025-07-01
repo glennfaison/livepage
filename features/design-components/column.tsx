@@ -1,5 +1,5 @@
 import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
-import { ComponentProps, ComponentTag } from "./types"
+import { ComponentProps, ComponentTag, DesignComponent } from "./types"
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
 import { useDividerVisibility, Divider } from "@/components/page-builder/layout-divider"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,9 @@ import { withConnection } from "@/features/design-components/hoc/connected-compo
 import { withEditorControls } from "./hoc/component-controls-hoc"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
-export type ComponentAttributes = object
+export type ComponentAttributes = {
+	id: string
+}
 
 export const tag: ComponentTag = "column" as const
 
@@ -19,6 +21,17 @@ export const label = "Column"
 export const keywords = ["column", "col", "container", "layout", "vertical"]
 
 export const settingsFields = {
+	id: {
+		id: "id",
+		type: "text",
+		label: "ID",
+		placeholder: "ID",
+		defaultValue: "",
+		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
+		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+			return { ...component, attributes: { ...component.attributes, id: value } };
+		},
+	},
 }
 
 export const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
@@ -75,7 +88,6 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 	return (
 		<div
 			className="p-4 border border-dashed border-gray-300 min-h-[50px] flex flex-col gap-2 justify-center"
-			id={props.component.id}
 			{...props.component.attributes}
 		>
 			{hasChildren ? WrappedChilden : (

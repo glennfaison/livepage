@@ -79,7 +79,7 @@ export type ComponentProps<Tag extends ComponentTag> = {
   pageBuilderMode: PageBuilderMode
   component: DesignComponent<Tag>
   selectedComponentId: string,
-} & ComponentOperations<Tag>
+}
 
 export interface ComponentInfo<Tag extends ComponentTag> {
   tag: Tag

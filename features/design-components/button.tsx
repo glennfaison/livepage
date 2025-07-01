@@ -6,7 +6,9 @@ import { withEditorControls } from "./hoc/component-controls-hoc"
 import { withTextEditing } from "./hoc/content-editable-hoc"
 import { ComponentProps, ComponentTag, DesignComponent } from "./types"
 
-export type ComponentAttributes = object
+export type ComponentAttributes = {
+	id: string
+}
 
 export const tag: ComponentTag = "button" as const
 
@@ -17,6 +19,17 @@ export const keywords = ["button", "click", "action", "btn"]
 export const defaultChildren = ["Button"] as const
 
 export const settingsFields = {
+	id: {
+		id: "id",
+		type: "text",
+		label: "ID",
+		placeholder: "ID",
+		defaultValue: "",
+		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
+		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+			return { ...component, attributes: { ...component.attributes, id: value } };
+		},
+	},
 	content: {
 		id: "content",
 		type: "text",

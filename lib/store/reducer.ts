@@ -205,8 +205,8 @@ export const initialState: AppState = {
   componentTree: [
     {
       tag: "page",
-      id: "page-1",
       attributes: {
+        id: "page-1",
         title: "Home Page",
       },
       children: [

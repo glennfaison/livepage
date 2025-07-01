@@ -6,6 +6,7 @@ import { withEditorControls } from "./hoc/component-controls-hoc"
 import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
 
 export type ComponentAttributes = {
+	id: string
 	src?: string
 	alt?: string
 	width?: string
@@ -14,6 +15,7 @@ export type ComponentAttributes = {
 }
 
 export const defaultAttributes: ComponentAttributes = {
+	id: "",
 	src: "",
 	alt: "Image Description",
 	width: "100%",

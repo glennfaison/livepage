@@ -9,7 +9,7 @@ import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X 
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-interface PageCraftToolbarProps {
+interface ToolbarProps {
   toolbarMinimized: boolean
   pageBuilderMode: PageBuilderMode
   history: HistoryEntry[]
@@ -23,7 +23,7 @@ interface PageCraftToolbarProps {
   onDiscardHistory: () => void
 }
 
-export const PageCraftToolbar: React.FC<PageCraftToolbarProps> = ({
+export const Toolbar: React.FC<ToolbarProps> = ({
   toolbarMinimized,
   setToolbarMinimized,
   savePage,
