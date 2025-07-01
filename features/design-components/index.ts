@@ -57,16 +57,15 @@ export function createDesignComponent<Tag extends ComponentTag>(
     // @ts-expect-error ignore error on next line
     defaultAttributes[key] = data.settingsFields[key].defaultValue
   }
-  
+
   const defaultChildren =
     "content" in data.settingsFields
       ? (data.settingsFields as Record<string, SettingsField<Tag>>).content?.defaultValue || []
       : []
 
   return {
-    id: `${tag}-${id}`,
     tag: tag,
-    attributes: { ...defaultAttributes, ...overrideProps } as ComponentAttributes<Tag>,
+    attributes: { ...defaultAttributes, ...overrideProps, id: `${tag}-${id}`, } as ComponentAttributes<Tag>,
     // @ts-expect-error TODO: fix the type error here
     children: defaultChildren,
   }

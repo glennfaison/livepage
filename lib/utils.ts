@@ -5,8 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const idMap = { value: 0 }
 // Generate a unique ID for components
-export const generateId = () => `${Math.random().toString(36).substring(2, 9)}`
+export const generateId = () => `${++idMap.value}`
 
 // Helper function to intersperse and append items
 export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {

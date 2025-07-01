@@ -310,7 +310,7 @@ const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): st
         return `<div class="column">${renderComponentsToHTML(component.children)}</div>`
       default:
         const _: never = component.tag
-        console.log("Unexpected tag:", _)
+        console.error("Unexpected tag:", _)
         return ""
     }
   })
@@ -322,6 +322,10 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   const findComponentById = useCallback(
     (components: DesignComponent<ComponentTag>[], id: string): DesignComponent<ComponentTag> | null => {
       for (const component of components) {
+        if (typeof component === "string") {
+          continue
+        }
+
         if (component.attributes.id === id) {
           return component
         }
@@ -339,7 +343,6 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Add component
   const addComponent = useCallback(({ tag, parentId, index }: { tag: ComponentTag, parentId?: string, index?: number }) => {
-    console.log("addComponent")
     dispatch({
       type: "INSERT_COMPONENT",
       payload: { newComponentTag: tag, parentId, index },

@@ -167,7 +167,7 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
         {settingsFields.map((field) => (
           <div className="space-y-2" key={field.id as string}>
             <Label htmlFor={field.id as string}>{field.label}</Label>
-            {field.inputType === "textarea" ? (
+            {field.type === "textarea" ? (
               <textarea
                 id={field.id as string}
                 className={cn(
@@ -182,7 +182,7 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
               />
             ) : (
               <Input
-                type={field.inputType}
+                type={field.type}
                 id={field.id as string}
                 placeholder={field.placeholder}
                 value={(formData[field.id] as string) || ""}
@@ -307,9 +307,8 @@ function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSe
   }
 
   const discardConnection = useCallback(() => {
-    console.log(formData)
     handleDiscard()
-  }, [formData, handleDiscard])
+  }, [handleDiscard])
 
   return (
     <>

@@ -225,12 +225,12 @@ export const initialState: AppState = {
 }
 
 export function appReducer(state: AppState, action: AppAction): AppState {
-  console.log("app reducer:", action)
   switch (action.type) {
 
     case "INSERT_COMPONENT": {
       const { newComponentTag, parentId, index } = action.payload
-      const newComponent = createDesignComponent(newComponentTag, generateId())
+      const componentId = generateId()
+      const newComponent = createDesignComponent(newComponentTag, componentId)
       return {
         ...state,
         componentTree: insertComponent({ components: state.componentTree, newComponent, parentId, index }),
