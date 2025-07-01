@@ -30,6 +30,17 @@ export const label = "Image"
 export const keywords = ["image", "picture", "photo", "graphic", "media"]
 
 export const settingsFields = {
+	id: {
+		id: "id",
+		type: "text",
+		label: "ID",
+		placeholder: "ID",
+		defaultValue: "",
+		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
+		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+			return { ...component, attributes: { ...component.attributes, id: value } };
+		},
+	},
 	src: {
 		id: "src",
 		type: "text",

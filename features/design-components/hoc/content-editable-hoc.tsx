@@ -25,15 +25,15 @@ export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "h
 			setContentEditable(false)
 			const newText = e.currentTarget.textContent || ""
 			// @ts-expect-error TODO: fix the argument type for the WrappedComponent
-			updateComponent(component.id, { children: [newText] })
-		}, [component.id, updateComponent])
+			updateComponent(component.attributes.id, { children: [newText] })
+		}, [component.attributes.id, updateComponent])
 
 		const onClick = useCallback(() => (e: React.MouseEvent<HTMLElement>) => {
 			if (pageBuilderMode === "edit") {
 				e.stopPropagation()
-				setSelectedComponent(component.id)
+				setSelectedComponent(component.attributes.id)
 			}
-		}, [component.id, pageBuilderMode, setSelectedComponent])
+		}, [component.attributes.id, pageBuilderMode, setSelectedComponent])
 
 		const onDoubleClick = useCallback(() => setContentEditable(true), [])
 

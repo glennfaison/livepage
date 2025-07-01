@@ -48,21 +48,21 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 	} = useDividerVisibility()
 
 	const onAddChildComponent = useCallback(
-		(tag: ComponentTag): void => addComponent({ tag, parentId: component.id, index: 0 }),
-		[addComponent, component.id]
+		(tag: ComponentTag): void => addComponent({ tag, parentId: component.attributes.id, index: 0 }),
+		[addComponent, component.attributes.id]
 	)
 
 	const handleAddAtIndex = useCallback((tag: ComponentTag, dividerIndex: number) => {
 		const childIndex = Math.floor(dividerIndex / 2)
-		addComponent({ tag, parentId: component.id, index: childIndex })
-	}, [addComponent, component.id])
+		addComponent({ tag, parentId: component.attributes.id, index: childIndex })
+	}, [addComponent, component.attributes.id])
 
 	const children = props.component.children.map(
 		(child, childIndex) => {
 			const ChildComponent = getComponentInfo(child.tag).Component
 			return (
 				<span className="flex-1"
-					key={child.id}
+					key={child.attributes.id}
 					onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 					onMouseLeave={() => handleChildMouseLeave(childIndex)}
 				>

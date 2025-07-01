@@ -45,13 +45,13 @@ export function Component(props: ComponentProps<"page">) {
   const { setSelectedComponent, addComponent, updateComponent } = useComponentOperationsContext()
 
   const appendComponent = useCallback(() => {
-    addComponent({ tag: "row", parentId: currentPage.id })
-  }, [addComponent, currentPage.id])
+    addComponent({ tag: "row", parentId: currentPage.attributes.id })
+  }, [addComponent, currentPage.attributes.id])
 
   const updatePageTitle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const update = { attributes: { title: e.target.value } } as DesignComponent<typeof tag>
-    updateComponent(currentPage.id, update)
-  }, [updateComponent, currentPage.id])
+    updateComponent(currentPage.attributes.id, update)
+  }, [updateComponent, currentPage.attributes.id])
 
   return (
     <main className="flex-1 overflow-hidden flex flex-col">
@@ -76,7 +76,7 @@ export function Component(props: ComponentProps<"page">) {
         >
           {currentPage.children.map((component) => {
             const Component = getComponentInfo(component.tag).Component
-            return (<Component key={component.id} {...props as ComponentProps<ComponentTag>} component={component} />)
+            return (<Component key={component.attributes.id} {...props as ComponentProps<ComponentTag>} component={component} />)
           })}
 
           {pageBuilderMode === "edit" && (

@@ -13,9 +13,8 @@ jest.mock("@/lib/store/hooks", () => {
       state: {
         pages: [
           {
-            id: "page-1",
             title: "Test Page",
-            attributes: {},
+            attributes: { id: "page-1", },
             components: [],
           },
         ],
@@ -31,9 +30,8 @@ jest.mock("@/lib/store/hooks", () => {
             timestamp: new Date(),
             pageState: [
               {
-                id: "page-1",
                 title: "Test Page",
-                attributes: {},
+                attributes: { id: "page-1", },
                 components: [],
               },
             ],
@@ -94,21 +92,21 @@ describe("BuilderPage Integration", () => {
   it("toggles preview mode when Edit Mode button is clicked", async () => {
     const { useAppState } = jest.requireMock("@/lib/store/hooks")
     const mockDispatch = jest.fn()
-    ;(useAppState as jest.Mock).mockReturnValue({
-      state: {
-        pages: [{ id: "page-1", title: "Test Page", attributes: {}, components: [] }],
-        activePage: "page-1",
-        selectedComponentId: null,
-        pageBuilderMode: false,
-        toolbarMinimized: false,
-        showToolbar: true,
-        history: [],
-        currentHistoryIndex: -1,
-        historyPreviewIndex: null,
-        originalHistoryState: null,
-      },
-      dispatch: mockDispatch,
-    })
+      ; (useAppState as jest.Mock).mockReturnValue({
+        state: {
+          pages: [{ title: "Test Page", attributes: { id: "page-1", }, components: [] }],
+          activePage: "page-1",
+          selectedComponentId: null,
+          pageBuilderMode: false,
+          toolbarMinimized: false,
+          showToolbar: true,
+          history: [],
+          currentHistoryIndex: -1,
+          historyPreviewIndex: null,
+          originalHistoryState: null,
+        },
+        dispatch: mockDispatch,
+      })
 
     render(<BuilderPage />)
 
@@ -123,21 +121,21 @@ describe("BuilderPage Integration", () => {
   it("updates page title when input changes", async () => {
     const { useAppState } = jest.requireMock("@/lib/store/hooks")
     const mockDispatch = jest.fn()
-    ;(useAppState as jest.Mock).mockReturnValue({
-      state: {
-        pages: [{ id: "page-1", title: "Test Page", attributes: {}, components: [] }],
-        activePage: "page-1",
-        selectedComponentId: null,
-        pageBuilderMode: false,
-        toolbarMinimized: false,
-        showToolbar: true,
-        history: [],
-        currentHistoryIndex: -1,
-        historyPreviewIndex: null,
-        originalHistoryState: null,
-      },
-      dispatch: mockDispatch,
-    })
+      ; (useAppState as jest.Mock).mockReturnValue({
+        state: {
+          pages: [{ title: "Test Page", attributes: { id: "page-1", }, components: [] }],
+          activePage: "page-1",
+          selectedComponentId: null,
+          pageBuilderMode: false,
+          toolbarMinimized: false,
+          showToolbar: true,
+          history: [],
+          currentHistoryIndex: -1,
+          historyPreviewIndex: null,
+          originalHistoryState: null,
+        },
+        dispatch: mockDispatch,
+      })
 
     render(<BuilderPage />)
 
@@ -167,12 +165,12 @@ describe("BuilderPage Integration", () => {
   it("triggers save as JSON when Download as JSON is clicked", async () => {
     const { usePageOperations } = jest.requireMock("@/lib/store/hooks")
     const mockSavePageAsJsonMutation = { mutate: jest.fn(), isPending: false }
-    ;(usePageOperations as jest.Mock).mockReturnValue({
-      savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
-      savePageAsJsonMutation: mockSavePageAsJsonMutation,
-      loadPageMutation: { mutate: jest.fn(), isPending: false },
-      savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
-    })
+      ; (usePageOperations as jest.Mock).mockReturnValue({
+        savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsJsonMutation: mockSavePageAsJsonMutation,
+        loadPageMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
+      })
 
     render(<BuilderPage />)
 
@@ -188,12 +186,12 @@ describe("BuilderPage Integration", () => {
   it("triggers export as HTML when Download as HTML is clicked", async () => {
     const { usePageOperations } = jest.requireMock("@/lib/store/hooks")
     const mockSavePageAsHtmlMutation = { mutate: jest.fn(), isPending: false }
-    ;(usePageOperations as jest.Mock).mockReturnValue({
-      savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
-      savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
-      loadPageMutation: { mutate: jest.fn(), isPending: false },
-      savePageAsHtmlMutation: mockSavePageAsHtmlMutation,
-    })
+      ; (usePageOperations as jest.Mock).mockReturnValue({
+        savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
+        loadPageMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsHtmlMutation: mockSavePageAsHtmlMutation,
+      })
 
     render(<BuilderPage />)
 
@@ -209,14 +207,14 @@ describe("BuilderPage Integration", () => {
   it("adds a row component when Add Row button is clicked", async () => {
     const { useComponentOperations } = jest.requireMock("@/lib/store/hooks")
     const mockAddComponent = jest.fn()
-    ;(useComponentOperations as jest.Mock).mockReturnValue({
-      addComponent: mockAddComponent,
-      updateComponent: jest.fn(),
-      removeComponent: jest.fn(),
-      duplicateComponent: jest.fn(),
-      replaceComponent: jest.fn(),
-      findComponentById: jest.fn(),
-    })
+      ; (useComponentOperations as jest.Mock).mockReturnValue({
+        addComponent: mockAddComponent,
+        updateComponent: jest.fn(),
+        removeComponent: jest.fn(),
+        duplicateComponent: jest.fn(),
+        replaceComponent: jest.fn(),
+        findComponentById: jest.fn(),
+      })
 
     render(<BuilderPage />)
 

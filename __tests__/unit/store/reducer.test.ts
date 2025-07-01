@@ -18,9 +18,8 @@ describe("App Reducer", () => {
   it("should handle SET_PAGES", () => {
     const newPages = [
       {
-        id: "page-2",
         title: "New Page",
-        attributes: {},
+        attributes: { id: "page-2", },
         components: [],
       },
     ]
@@ -36,9 +35,8 @@ describe("App Reducer", () => {
 
   it("should handle ADD_PAGE", () => {
     const newPage = {
-      id: "page-2",
       title: "New Page",
-      attributes: {},
+      attributes: { id: "page-2", },
       components: [],
     }
 
@@ -79,7 +77,7 @@ describe("App Reducer", () => {
     const result = appReducer(state, action)
     expect(result.componentTree[0].children).toHaveLength(1)
     expect(result.componentTree[0].children[0]).toEqual(component)
-    expect(result.selectedComponentId).toBe(component.id)
+    expect(result.selectedComponentId).toBe(component.attributes.id)
   })
 
   it("should handle SET_SELECTED_COMPONENT", () => {
@@ -120,7 +118,7 @@ describe("insertComponent", () => {
     const parent = createDesignComponent("row", generateId())
     const state = { ...initialState, componentTree: [parent] }
     const child = createDesignComponent("header1", generateId())
-    insertComponent(state, child, parent.id)
+    insertComponent(state, child, parent.attributes.id)
     expect(state.componentTree[0].children).toHaveLength(1)
     expect(state.componentTree[0].children[0]).toEqual(child)
   })

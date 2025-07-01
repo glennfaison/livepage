@@ -10,14 +10,13 @@ function cloneComponentWithNewIds(
   if (typeof component === "string") {
     return component
   }
-  const newId = `${component.id}${idSuffix}`
+  const newId = `${component.attributes.id}${idSuffix}`
   return {
     ...component,
-    id: newId,
+    attributes: { ...component.attributes, id: newId, },
     children: component.children
       ? component.children.map(child => cloneComponentWithNewIds(child, idSuffix))
       : [],
-    attributes: { ...component.attributes },
   }
 }
 
@@ -40,7 +39,7 @@ function findComponentParentTree({
     if (typeof component === "string") {
       continue
     }
-    if (component.id === componentId) {
+    if (component.attributes.id === componentId) {
       return [component]
     }
     if (component.children) {
@@ -76,7 +75,7 @@ function insertComponent({
       return [...acc, newComponent, component]
     }
     // If this is the parent, insert the new component
-    if (component.id === parentId) {
+    if (component.attributes.id === parentId) {
       const siblingIndexIsValid = typeof index === "number" && -1 < index && index < component.children.length
       const siblingIndex = siblingIndexIsValid ? index : component.children.length
       const parentComponent = {
@@ -117,7 +116,7 @@ function updateComponent({
     if (typeof component === "string") {
       return component
     }
-    if (component.id === componentId) {
+    if (component.attributes.id === componentId) {
       updated.value = true
       return {
         ...component,
@@ -145,7 +144,7 @@ function removeComponent({
     if (typeof component === "string") {
       return [...acc, component]
     }
-    if (component.id === componentId) {
+    if (component.attributes.id === componentId) {
       return acc
     }
     const updatedChildren = removeComponent({ components: component.children || [], componentId })
@@ -164,7 +163,7 @@ function duplicateComponent({
     if (typeof component === "string") {
       return [...acc, component]
     }
-    if (component.id === componentId) {
+    if (component.attributes.id === componentId) {
       const idSuffix = `-copy-${Date.now()}`
       const duplicatedComponent = cloneComponentWithNewIds(component, idSuffix)
       return [...acc, component, duplicatedComponent]
@@ -191,7 +190,7 @@ function replaceComponent({ components, oldComponentId, newComponent }: ReplaceC
     if (typeof component === "string") {
       return component
     }
-    if (component.id === oldComponentId) {
+    if (component.attributes.id === oldComponentId) {
       return newComponent
     }
     return {
@@ -210,7 +209,7 @@ export const initialState: AppState = {
         title: "Home Page",
       },
       children: [
-        // {id:"row-1",tag:"row",attributes:{},children:[{id:"header1-1",tag:"header1",attributes:{},children:[]}]}
+        // {tag:"row",attributes:{id:"row-1",},children:[{tag:"header1",attributes:{id:"header1-1"},children:[]}]}
       ],
     },
   ],
@@ -235,7 +234,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         componentTree: insertComponent({ components: state.componentTree, newComponent, parentId, index }),
-        selectedComponentId: newComponent.id,
+        selectedComponentId: newComponent.attributes.id,
       }
     }
 
@@ -283,7 +282,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         componentTree: newComponentTree,
-        selectedComponentId: newComponent.id,
+        selectedComponentId: newComponent.attributes.id,
       }
     }
 
@@ -303,7 +302,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         componentTree: state.componentTree.map((page) =>
-          page.id === action.payload.id ? { ...page, ...action.payload.updates } : page,
+          page.attributes.id === action.payload.id ? { ...page, ...action.payload.updates } : page,
         ),
       }
 

@@ -35,7 +35,7 @@ export default function BuilderPage() {
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
 
   // Get the current active page
-  const currentPage = (state.componentTree.find((page) => page.id === state.activePage) || state.componentTree[0]) as DesignComponent<"page">
+  const currentPage = (state.componentTree.find((page) => page.attributes.id === state.activePage) || state.componentTree[0]) as DesignComponent<"page">
 
   const saveAsJSON = () => {
     savePageAsJsonMutation.mutate(currentPage)
@@ -63,7 +63,7 @@ export default function BuilderPage() {
         const currentPage = componentOperations.findComponentById(loadedComponentTree, state.activePage)
 
         dispatch({ type: "SET_PAGES", payload: loadedComponentTree })
-        dispatch({ type: "SET_ACTIVE_PAGE", payload: currentPage?.id || "" })
+        dispatch({ type: "SET_ACTIVE_PAGE", payload: currentPage?.attributes.id || "" })
 
         // Add to history
         setTimeout(() => {

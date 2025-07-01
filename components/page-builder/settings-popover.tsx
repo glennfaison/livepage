@@ -60,7 +60,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIs
       const reference: SettingsField<Tag> = componentInfo.settingsFields[key]
       update = reference.setValue(update, formData[key])
     }
-    updateComponent(component.id, update)
+    updateComponent(component.attributes.id, update)
     setIsOpen(false)
   }
 
@@ -120,13 +120,13 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Om
       }
     }
     const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: formData })
-    updateComponent(component.id, { attributes: { ...component.attributes, __data_source__: encodedDataSourceSettings } })
+    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __data_source__: encodedDataSourceSettings } })
   }
 
   const handleDiscard = () => {
     setFormData({} as DataSourceSettings<DataSourceId>)
     setSelectedDataSource(undefined)
-    updateComponent(component.id, { attributes: { ...component.attributes, __data_source__: "" } })
+    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __data_source__: "" } })
   }
 
   const handleFieldChange = (fieldId: keyof ComponentAttributes<Tag>, value: string) => {

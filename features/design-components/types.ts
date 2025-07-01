@@ -57,7 +57,6 @@ export type SettingsField<Tag extends ComponentTag> = {
 }
 
 export type DesignComponent<Tag extends ComponentTag> = {
-  id: string
   tag: Tag
   children: DesignComponent<ComponentTag>[]
   attributes: ComponentAttributes<Tag>

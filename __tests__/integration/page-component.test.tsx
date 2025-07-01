@@ -34,15 +34,14 @@ describe("page-component", () => {
     const user = userEvent.setup()
     // Initial children
     const children: DesignComponent<ComponentTag>[] = [
-      { id: "row-1", tag: "row", attributes: {}, children: [] },
-      { id: "row-2", tag: "row", attributes: {}, children: [] },
+      { tag: "row", attributes: { id: "row-1", }, children: [] },
+      { tag: "row", attributes: { id: "row-2", }, children: [] },
     ]
     const currentPage = {
-      id: "page-1",
       tag: "page",
-      attributes: { title: "Test Page" },
+      attributes: { id: "page-1", title: "Test Page" },
       children,
-    }
+    } as DesignComponent<"page">
 
     render(
       <Component
@@ -65,7 +64,7 @@ describe("page-component", () => {
     })
 
     // Simulate the effect: addComponent would append a new row to children
-    // const newRow = { id: "row-3", tag: "row", attributes: {}, children: [] }
+    // const newRow = { tag: "row", attributes: { id: "row-3", }, children: [] }
     // const updatedPage = {
     //   ...currentPage,
     //   children: [...children, newRow],

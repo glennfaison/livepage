@@ -62,6 +62,7 @@ export function usePageOperations(state: AppState) {
 
   const savePageAsShortcodeMutation = useMutation({
     mutationFn: async (page: DesignComponent<"page">) => {
+      // @ts-expect-error TODO: fix type casting here
       const data = ShortcodeParser.stringify(state.componentTree)
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
@@ -98,7 +99,7 @@ export function usePageOperations(state: AppState) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${page.title}</title>
+        <title>${page.attributes.title}</title>
         <style>
           /* Reset and base styles */
           * {
@@ -218,9 +219,10 @@ export function usePageOperations(state: AppState) {
       })
     },
     onSuccess: (loadedComponentTree) => {
+      const page = loadedComponentTree[0] as unknown as DesignComponent<"page">
       toast({
         title: "Page loaded",
-        description: `${loadedComponentTree[0].attributes.title} has been loaded successfully.`,
+        description: `${page.attributes.title} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -239,8 +241,8 @@ export function usePageOperations(state: AppState) {
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const pages = ShortcodeParser.parse(content)
-            resolve(pages as typeof state.componentTree)
+            const pages = ShortcodeParser.parse(content) as unknown as DesignComponent<ComponentTag>[]
+            resolve(pages)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
           }
@@ -250,9 +252,10 @@ export function usePageOperations(state: AppState) {
       })
     },
     onSuccess: (loadedComponentTree) => {
+      const page = loadedComponentTree[0] as unknown as DesignComponent<"page">
       toast({
         title: "Page loaded",
-        description: `${loadedComponentTree[0].attributes.title} has been loaded successfully.`,
+        description: `${page.attributes.title} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -278,37 +281,33 @@ const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): st
     const attributes = component.attributes
     switch (component.tag) {
       case "header1": {
-        type CastType = ComponentAttributes<typeof component.tag>
-        return `<h1>${(attributes as CastType).content}</h1>`
+        return `<h1>${component.children}</h1>`
       }
       case "header2": {
-        type CastType = ComponentAttributes<typeof component.tag>
-        return `<h2>${(attributes as CastType).content}</h2>`
+        return `<h2>${component.children}</h2>`
       }
       case "header3": {
-        type CastType = ComponentAttributes<typeof component.tag>
-        return `<h3>${(attributes as CastType).content}</h3>`
+        return `<h3>${component.children}</h3>`
       }
       case "paragraph": {
-        type CastType = ComponentAttributes<typeof component.tag>
-        return `<p>${(attributes as CastType).content}</p>`
+        return `<p>${component.children}</p>`
       }
       case "inline-text": {
-        type CastType = ComponentAttributes<typeof component.tag>
-        return `<span>${(attributes as CastType).content}</span>`
+        return `<span>${component.children}</span>`
       }
       case "image": {
         type CastType = ComponentAttributes<typeof component.tag>
         return `<img src="${(attributes as CastType).src}" alt="${(attributes as CastType).alt || ""}" />`
       }
       case "button": {
-        type CastType = ComponentAttributes<typeof component.tag>
-        return `<button>${(attributes as CastType).content}</button>`
+        return `<button>${component.children}</button>`
       }
       case "row":
-        return `<div class="row">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
+        return `<div class="row">${renderComponentsToHTML(component.children)}</div>`
       case "column":
-        return `<div class="column">${component.children ? renderComponentsToHTML(component.children) : ""}</div>`
+        return `<div class="column">${renderComponentsToHTML(component.children)}</div>`
+      case "page":
+        return `<div class="column">${renderComponentsToHTML(component.children)}</div>`
       default:
         const _: never = component.tag
         console.log("Unexpected tag:", _)
@@ -323,7 +322,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   const findComponentById = useCallback(
     (components: DesignComponent<ComponentTag>[], id: string): DesignComponent<ComponentTag> | null => {
       for (const component of components) {
-        if (component.id === id) {
+        if (component.attributes.id === id) {
           return component
         }
 
@@ -373,7 +372,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
       // Add to history after state update
       setTimeout(() => {
-        const currentPage = state.componentTree.find((page) => page.id === state.activePage)
+        const currentPage = state.componentTree.find((page) => page.attributes.id === state.activePage)
         if (currentPage) {
           const component = findComponentById(currentPage.children, id)
           if (component) {
@@ -406,7 +405,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
     // Add to history after state update
     setTimeout(() => {
-      const currentPage = state.componentTree.find((page) => page.id === state.activePage)
+      const currentPage = state.componentTree.find((page) => page.attributes.id === state.activePage)
       const component = findComponentById(currentPage?.children || [], id)
       if (component) {
         dispatch({
@@ -431,7 +430,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
     // Add to history after state update
     setTimeout(() => {
-      const currentPage = state.componentTree.find((page) => page.id === state.activePage)
+      const currentPage = state.componentTree.find((page) => page.attributes.id === state.activePage)
       const componentToDuplicate = currentPage ? findComponentById(currentPage.children, id) : null
 
       if (!componentToDuplicate) return

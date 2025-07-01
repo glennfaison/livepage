@@ -15,8 +15,8 @@ function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>)
   const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 
   const handleReplace = useCallback((newType: ComponentTag) => {
-    replaceComponent(component.id, newType);
-  }, [component.id, replaceComponent])
+    replaceComponent(component.attributes.id, newType);
+  }, [component.attributes.id, replaceComponent])
 
   return (
     <div className="absolute -top-8 right-0 flex gap-1 bg-background border rounded-t-md p-1 shadow-sm">
@@ -37,7 +37,7 @@ function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>)
         className="h-6 w-6"
         onClick={(e) => {
           e.stopPropagation()
-          duplicateComponent?.(component.id)
+          duplicateComponent?.(component.attributes.id)
         }}
       >
         <Copy className="h-4 w-4" />
@@ -48,7 +48,7 @@ function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>)
         className="h-6 w-6"
         onClick={(e) => {
           e.stopPropagation()
-          removeComponent(component.id)
+          removeComponent(component.attributes.id)
         }}
       >
         <Trash2 className="h-4 w-4" />
@@ -64,13 +64,13 @@ export function withEditorControls<Tag extends ComponentTag>(
   WrappedComponent: React.ComponentType<ComponentProps<Tag>>
 ) {
   return function ComponentWithControls(props: ComponentProps<Tag>) {
-    const showControls = props.selectedComponentId === props.component.id
+    const showControls = props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()
 
     const selectComponent = useCallback((e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation()
-      setSelectedComponent(props.component.id)
-    }, [props.component.id, setSelectedComponent])
+      setSelectedComponent(props.component.attributes.id)
+    }, [props.component.attributes.id, setSelectedComponent])
 
     return (
       <div onClick={selectComponent}
