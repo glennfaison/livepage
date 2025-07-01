@@ -275,6 +275,88 @@ export const shortcodeSamples = [
 		],
 	},
 	{
+		shortcode: '[a][b][c][d] [e] [f/][/e][/d] [/c]',
+		parsedResult: [
+			'[a][b]',
+			{
+				tag: "c",
+				attributes: {},
+				children: [
+					{
+						tag: "d",
+						attributes: {},
+						children: [
+							{
+								tag: "e",
+								attributes: {},
+								children: [
+									{
+										tag: "f",
+										attributes: {},
+										children: [],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+	{
+		shortcode: '[a][b][c][d][e][f/][/e][/d][/c] [a][b][c][d][e][f/][/e][/d][/c]',
+		parsedResult: [
+			'[a][b]',
+			{
+				tag: "c",
+				attributes: {},
+				children: [
+					{
+						tag: "d",
+						attributes: {},
+						children: [
+							{
+								tag: "e",
+								attributes: {},
+								children: [
+									{
+										tag: "f",
+										attributes: {},
+										children: [],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			'[a][b]',
+			{
+				tag: "c",
+				attributes: {},
+				children: [
+					{
+						tag: "d",
+						attributes: {},
+						children: [
+							{
+								tag: "e",
+								attributes: {},
+								children: [
+									{
+										tag: "f",
+										attributes: {},
+										children: [],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+	{
 		shortcode: `
 		[page id=page-1 title="Home Page"]
 			[row id=row-968frt6]
@@ -289,17 +371,17 @@ export const shortcodeSamples = [
 		`,
 		parsedResult: [{
 			tag: "page",
-			id: "page-1",
+			attributes: { id: "page-1", title: "Home Page" },
 			children: [
 				{
 					tag: "row",
-					id: "row-968frt6",
-					children: [{ tag: "header1", id: "header1-460fc7b", children: ["Header 1"] }],
+					attributes: { id: "row-968frt6" },
+					children: [{ tag: "header1", attributes: { id: "header1-460fc7b" }, children: ["Header 1"] }],
 				},
 				{
 					tag: "row",
-					id: "row-968frt6",
-					children: [{ tag: "paragraph", id: "paragraph-fsusmgq", children: ["Morbi consequat justo enim, sed accumsan metus blandit eget."] }],
+					attributes: { id: "row-6d4pfj7" },
+					children: [{ tag: "paragraph", attributes: { id: "paragraph-fsusmgq" }, children: ["Morbi consequat justo enim, sed accumsan metus blandit eget."] }],
 				},
 			],
 		}],

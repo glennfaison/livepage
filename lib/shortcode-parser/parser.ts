@@ -1,225 +1,186 @@
-type ShortcodeElement = {
-	id: string;
+type Token =
+	| { type: "text"; raw: string }
+	| { type: "openTag"; raw: string; tag: string; isSelfClosing: boolean; attributes: Record<string, string> }
+	| { type: "closeTag"; raw: string; tag: string; };
+
+export type Node = string | {
 	tag: string;
 	attributes: Record<string, string>;
-	children: (string | ShortcodeElement)[];
+	children: Node[];
 };
 
-const EventNames = {
-	FoundNewShortcode: 'new-shortcode',
-	FoundOpeningTagPrefix: 'opening-tag-prefix',
-	FoundOpeningTagSuffix: 'opening-tag-suffix',
-	FoundTagName: 'tag-name',
-	FoundClosingTagPrefix: 'closing-tag-prefix',
-	FoundEndOfElement: 'end-of-element',
-} as const;
+function tokenize(shortcode: string): Token[] {
+	const tokens: Token[] = [];
+	let i = 0;
 
-type AllEventNames = typeof EventNames[keyof typeof EventNames];
-type ToExclude = typeof EventNames.FoundOpeningTagSuffix | typeof EventNames.FoundEndOfElement;
-
-type ParserEvent =
-	| {
-		status: typeof EventNames.FoundOpeningTagSuffix;
-		index: number;
-		element: ShortcodeElement;
-	}
-	| {
-		status: typeof EventNames.FoundEndOfElement;
-		index: number;
-		openerSuffixEvent: ParserEvent | null;
-	}
-	| {
-		status: Exclude<AllEventNames, ToExclude>;
-		index: number;
-	};
-
-function isOpenerSuffixEvent(event: ParserEvent): event is Extract<ParserEvent, { status: typeof EventNames.FoundOpeningTagSuffix }> {
-	return event.status === EventNames.FoundOpeningTagSuffix;
-}
-
-function isEndOfElementEvent(event: ParserEvent): event is Extract<ParserEvent, { status: typeof EventNames.FoundEndOfElement }> {
-	return event.status === EventNames.FoundEndOfElement;
-}
-
-export function parse(shortcode: string, acceptedTags?: string[]): (string | ShortcodeElement)[] {
 	const _tagName = /[a-z-_][a-z0-9-_]*/i;
 	const _attrValue = new RegExp(`"([^"]*)"|'([^']*)'|(\\d+)|(${_tagName.source})`, 'i');
-	const RegExps: Record<string, RegExp> = {
-		whitespace: /\s/i,
+	const RegEx = {
+		whitespace: /\s/,
 		openingTag: new RegExp(`^\\[(${_tagName.source})\\s*`, 'i'),
 		attrNameValuePair: new RegExp(`^\\s*(${_tagName.source})\\s*(=\\s*(${_attrValue.source}))?`, 'i'),
-		closingTag: new RegExp(`^\\[/${_tagName.source}\\s*\\]`, 'i'),
+		closingTag: new RegExp(`^\\[/(${_tagName.source})\\s*\\]`, 'i'),
+		selfClosingBrace: /^\s*\/]/,
+		closingBrace: /^\s*]/,
 	};
 
-	const events: ParserEvent[] = [{ status: EventNames.FoundNewShortcode, index: 0 }];
-	const returnValue: (string | ShortcodeElement)[] = [];
-	let currentElement: ShortcodeElement = {
-		id: '',
-		tag: '',
-		attributes: {},
-		children: [],
-	};
-
-	let i = 0;
-	do {
-		if (i === shortcode.length) {
-			events.length = 1;
+	while (i < shortcode.length) {
+		if (shortcode[i] !== "[") {
+			const nextBracket = shortcode.indexOf("[", i);
+			const endIndex = nextBracket === -1 ? shortcode.length : nextBracket;
+			const text = shortcode.slice(i, endIndex);
+			if (tokens[tokens.length - 1]?.type === "text") {
+				tokens[tokens.length - 1].raw += text;
+			} else {
+				tokens.push({ type: "text", raw: text });
+			}
+			i += text.length;
+			continue;
 		}
-		const mostRecentEventName: ParserEvent['status'] = events[events.length - 1].status;
-		switch (mostRecentEventName) {
-			case EventNames.FoundNewShortcode: {
-				const lastOpeningTagSuffixAction = events.findLast(isOpenerSuffixEvent);
-				const currentOutput = lastOpeningTagSuffixAction ? lastOpeningTagSuffixAction.element.children : returnValue;
-				if (shortcode[i] === '[' && shortcode[i + 1] === '/') {
-					events.push({ status: EventNames.FoundClosingTagPrefix, index: i });
-				} else if (shortcode[i] === '[') {
-					events.push({ status: EventNames.FoundOpeningTagPrefix, index: i });
-				} else if (i === shortcode.length) {
-					i++;
-				} else {
-					i++;
-					continue;
-				}
 
-				const lastStartIndex = events.findLast(({ status }) => status === EventNames.FoundNewShortcode)!.index;
-				const stringToOutput = shortcode.substring(lastStartIndex, i).trim();
-				i--;
-				if (typeof currentOutput[currentOutput.length - 1] === 'string') {
-					currentOutput[currentOutput.length - 1] += stringToOutput;
-				} else if (stringToOutput) {
-					currentOutput.push(stringToOutput);
-				}
-				break;
-			}
-			case EventNames.FoundOpeningTagPrefix: {
-				const openingTagMatches = shortcode.substring(i).match(RegExps.openingTag);
-				if (openingTagMatches && (!acceptedTags || acceptedTags?.includes(openingTagMatches[1]))) {
-					const tagName = openingTagMatches[1];
-					currentElement = { id: '', tag: tagName, attributes: {}, children: [] };
-					i += openingTagMatches[0].length - 1;
-					events.push({ status: EventNames.FoundTagName, index: i });
-				} else {
-					const lastOpeningTagIndex = events.findLastIndex(({ status }) => status === EventNames.FoundOpeningTagPrefix);
-					events.length = lastOpeningTagIndex;
-					events[events.length - 1].index = i;
-				}
-				break;
-			}
-			case EventNames.FoundTagName: {
-				if (shortcode[i] === '/' && shortcode[i + 1] === ']') {
-					events.push({ status: EventNames.FoundEndOfElement, index: i + 1, openerSuffixEvent: null });
-				} else if (shortcode[i] === ']') {
-					events.push({ status: EventNames.FoundOpeningTagSuffix, index: i, element: currentElement });
-				} else if (RegExps.attrNameValuePair.test(shortcode.substring(i))) {
-					const pairMatches = shortcode.substring(i).match(RegExps.attrNameValuePair)!;
-					const attrName = pairMatches[1];
-					const attrValue = pairMatches[5] || pairMatches[4] || pairMatches[3] || '';
-					if (attrName === "id") {
-						currentElement.id = attrValue
-					} else {
-						currentElement.attributes[attrName] = attrValue;
-					}
-					i += pairMatches[0].length - 1;
-				} else if (RegExps.whitespace.test(shortcode[i])) {
-					// Do nothing, just skip whitespace
-				} else {
-					const lastOpenerPrefixIndex = events.findLast(({ status }) => status === EventNames.FoundOpeningTagPrefix)!.index;
-					const lastNewShortcodeEventIndex = events.findLastIndex(({ status }) => status === EventNames.FoundNewShortcode);
-					events.length = lastNewShortcodeEventIndex + 1;
-					events[events.length - 1].index = lastOpenerPrefixIndex;
-					i--;
-				}
-				break;
-			}
-			case EventNames.FoundOpeningTagSuffix: {
-				if (RegExps.whitespace.test(shortcode[i])) {
-					// Do nothing, just skip whitespace
-				} else if (RegExps.closingTag.test(shortcode.substring(i))) {
-					events.push({ status: EventNames.FoundClosingTagPrefix, index: i });
-					i--;
-				} else {
-					events.push({ status: EventNames.FoundNewShortcode, index: i });
-					i--;
-				}
-				break;
-			}
-			case EventNames.FoundClosingTagPrefix: {
-				const openerSuffixEvents = events.filter(isOpenerSuffixEvent);
-				let foundMatchingOpeningTag = false;
-				for (const event of openerSuffixEvents) {
-					const { element } = event;
-					const closingTagRegExp = new RegExp(`^\\[/${element!.tag}\\s*\\]`, 'i');
-					const matches = shortcode.substring(i).match(closingTagRegExp);
-					if (matches) {
-						if (openerSuffixEvents[openerSuffixEvents.length - 1] !== event) {
-							const openerSuffixEventIndex = events.indexOf(event);
-							events.length = openerSuffixEventIndex + 1;
-							events.push({ status: EventNames.FoundNewShortcode, index: event.index + 1 });
-							currentElement = event.element;
-						} else {
-							i += matches[0].length - 1;
-							events.push({ status: EventNames.FoundEndOfElement, index: i, openerSuffixEvent: event });
-						}
-						i--;
-						foundMatchingOpeningTag = true;
-						break;
-					}
-				}
-				if (!foundMatchingOpeningTag) {
-					events.pop();
-					if (events[events.length - 1].status === EventNames.FoundOpeningTagSuffix) {
-						events.push({ status: EventNames.FoundNewShortcode, index: i });
-					} else {
-						events[events.length - 1].index = i;
-					}
-				}
-				break;
-			}
-			case EventNames.FoundEndOfElement: {
-				let outputArray = returnValue;
-				let historyCutoffIndex = events.length - 1;
-				const { openerSuffixEvent } = events.findLast(isEndOfElementEvent)!;
+		const rest = shortcode.slice(i);
+		const closingTagMatch = rest.match(RegEx.closingTag);
+		if (closingTagMatch) {
+			const [raw, tag] = closingTagMatch;
+			tokens.push({ type: "closeTag", tag, raw });
+			i += raw.length;
+			continue;
+		}
 
-				const openerSuffixEvents = events.filter(isOpenerSuffixEvent);
-				const parentOpenerSuffixEvent = openerSuffixEvent ? openerSuffixEvents[openerSuffixEvents.length - 2] : openerSuffixEvents[openerSuffixEvents.length - 1];
-				if (!!parentOpenerSuffixEvent) {
-					historyCutoffIndex = events.lastIndexOf(parentOpenerSuffixEvent);
-					outputArray = parentOpenerSuffixEvent.element.children;
-				} else {
-					const elementOpenerPrefixEvent = events.findLastIndex(({ status }) => status === EventNames.FoundOpeningTagPrefix);
-					if (!currentElement.tag) {
-						currentElement = openerSuffixEvents[openerSuffixEvents.length - 1].element;
-					}
-					historyCutoffIndex = elementOpenerPrefixEvent - 1;
-				}
-				events.length = historyCutoffIndex + 1;
-				events[events.length - 1].index = i + 1;
+		const openingTagMatch = rest.match(RegEx.openingTag);
+		if (openingTagMatch) {
+			const startOfTagIndex = i;
+			const tag = openingTagMatch[1];
+			i += openingTagMatch[0].length;
+			const attributes: Record<string, string> = {};
+			let isSelfClosing = false;
 
-				outputArray.push(currentElement);
-				currentElement = { id: '', tag: '', attributes: {}, children: [] };
-				break;
+			let match: RegExpExecArray | null;
+			RegEx.attrNameValuePair.lastIndex = 0;
+			while ((match = RegEx.attrNameValuePair.exec(shortcode.slice(i)))) {
+				const name = match[1];
+				const value = match[5] ?? match[4] ?? match[3] ?? "";
+				attributes[name] = value;
+				i += match[0].length;
 			}
-			default: {
-				// Ensure exhaustiveness by making the default case a compile-time error
-				const _unhandledEventName: never = mostRecentEventName;
-				throw new Error(`Unexpected event ${_unhandledEventName}`);
+
+			// Handle tag closing here
+			if (match = RegEx.selfClosingBrace.exec(shortcode.slice(i))) {
+				isSelfClosing = true;
+			} else if (!(match = RegEx.closingBrace.exec(shortcode.slice(i)))) {
+				const text = shortcode.slice(startOfTagIndex, i);
+				if (tokens[tokens.length - 1]?.type === "text") {
+					tokens[tokens.length - 1].raw += text;
+				} else {
+					tokens.push({ type: "text", raw: text });
+				}
+				continue;
 			}
+
+			i += match[0].length;
+			const raw = shortcode.slice(startOfTagIndex, i);
+			tokens.push({ type: "openTag", tag, isSelfClosing, raw, attributes });
+			continue;
+		}
+
+		const text = "[";
+		if (tokens[tokens.length - 1]?.type === "text") {
+			tokens[tokens.length - 1].raw += text;
+		} else {
+			tokens.push({ type: "text", raw: text });
 		}
 		i++;
-	} while (i <= shortcode.length);
+	}
 
-	return returnValue;
+	return tokens;
 }
 
-export function stringify(elements: (string | ShortcodeElement)[]): string {
-	function serializeElement(element: string | ShortcodeElement): string {
+export function parse(input: string, acceptedTags?: string[]): Node[] {
+	const tokens = tokenize(input);
+	const output: Node[] = [];
+	const stack: { node: Exclude<Node, string>; raw: string }[] = [];
+
+	function appendOutput(target: Node[], node: Node) {
+		if (typeof node === "string") {
+			const text = node.trim();
+			if (!text) return target;
+			if (target[target.length - 1] && typeof target[target.length - 1] === "string") {
+				target[target.length - 1] += text;
+			} else {
+				target.push(text);
+			}
+			return target;
+		}
+		target.push(node);
+		return target;
+	}
+
+	for (const token of tokens) {
+		switch (token.type) {
+			case "text": {
+				const target = stack.length ? stack[stack.length - 1].node.children : output;
+				appendOutput(target, token.raw);
+				break;
+			}
+			case "openTag": {
+				const isAccepted = !acceptedTags || acceptedTags.includes(token.tag);
+				if (!isAccepted) {
+					const target = stack.length ? stack[stack.length - 1].node.children : output;
+					appendOutput(target, token.raw);
+					break;
+				}
+				const node = { tag: token.tag, attributes: token.attributes, children: [] } as Exclude<Node, string>;
+				if (token.isSelfClosing) {
+					const target = stack.length ? stack[stack.length - 1].node.children : output;
+					target.push(node);
+				} else {
+					stack.push({ node, raw: token.raw });
+				}
+				break;
+			}
+			case "closeTag": {
+				const idx = stack.findLastIndex((s) => s.node.tag === token.tag);
+
+				if (idx === -1) {
+					const target = stack.length ? stack[stack.length - 1].node.children : output;
+					appendOutput(target, token.raw);
+					break;
+				}
+
+				const unclosedTags = stack.splice(idx);
+				const item = unclosedTags.shift()!;
+				const unclosedTagsAsString = unclosedTags.map((tag) => tag.raw).join('');
+				if (unclosedTagsAsString) {
+					appendOutput(item.node.children, unclosedTagsAsString);
+				}
+
+				const targetAfterSplice = stack.length ? stack[stack.length - 1].node.children : output;
+				targetAfterSplice.push(item.node);
+				break;
+			}
+		}
+	}
+
+	while (stack.length) {
+		const { node, raw } = stack.shift()!;
+		appendOutput(output, raw);
+		if (node.children.length) {
+			output.push(...node.children);
+		}
+	}
+
+	return output;
+}
+
+export function stringify(elements: Node[]): string {
+	function serializeElement(element: Node): string {
 		if (typeof element === 'string') {
 			return element;
 		}
 		const attrs = Object.entries(element.attributes)
 			.map(([key, value]) => value !== '' ? `${key}="${value}"` : key)
 			.join(' ');
-		const openTag = `[${element.tag} id=${element.id}${attrs ? ' ' + attrs : ''}`;
+		const openTag = `[${element.tag}${attrs ? ' ' + attrs : ''}`;
 		const children = ']' + element.children.map(serializeElement).join('');
 		const closeTag = children.length ? `[/${element.tag}]` : '/]';
 		return `${openTag}${children}${closeTag}`;

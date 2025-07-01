@@ -1,4 +1,4 @@
-import { parse, stringify } from "../../../lib/shortcode-parser/parser";
+import { parse, stringify } from "@/lib/shortcode-parser/parser";
 import { shortcodeSamples, parsedShortcodeElementSamples } from "./data";
 
 describe("parse", () => {
