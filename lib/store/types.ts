@@ -13,6 +13,7 @@ export interface AppState {
   componentTree: DesignComponent<ComponentTag>[]
   activePage: string
   selectedComponentId: string
+  selectedComponentAncestors: DesignComponent<ComponentTag>[]
   pageBuilderMode: PageBuilderMode
   toolbarMinimized: boolean
   showToolbar: boolean
@@ -40,6 +41,7 @@ export type AppAction =
     payload: { componentId: string; parentId?: string }
   }
   | { type: "SET_SELECTED_COMPONENT"; payload: string }
+  | { type: "SET_SELECTED_COMPONENT_ANCESTORS"; payload: string }
   | { type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }
   | { type: "SET_SHOW_TOOLBAR"; payload: boolean }

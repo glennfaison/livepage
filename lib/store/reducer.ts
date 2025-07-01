@@ -215,6 +215,7 @@ export const initialState: AppState = {
   ],
   activePage: "page-1",
   selectedComponentId: "",
+  selectedComponentAncestors: [],
   pageBuilderMode: "edit",
   toolbarMinimized: false,
   showToolbar: true,
@@ -316,6 +317,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         selectedComponentId: action.payload,
+      }
+
+    case "SET_SELECTED_COMPONENT_ANCESTORS":
+      const ancestors = findComponentParentTree({ components: state.componentTree, componentId: action.payload })
+      return {
+        ...state,
+        selectedComponentAncestors: ancestors.slice(1),
       }
 
     case "SET_PAGE_BUILDER_MODE":

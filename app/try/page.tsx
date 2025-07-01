@@ -165,6 +165,7 @@ export default function BuilderPage() {
 
         <PageComponent
           selectedComponentId={state.selectedComponentId}
+          selectedComponentAncestors={state.selectedComponentAncestors}
           pageBuilderMode={pageBuilderMode as PageBuilderMode}
           component={currentPage}
         />

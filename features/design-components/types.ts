@@ -78,6 +78,7 @@ export type ComponentProps<Tag extends ComponentTag> = {
   pageBuilderMode: PageBuilderMode
   component: DesignComponent<Tag>
   selectedComponentId: string,
+  selectedComponentAncestors: DesignComponent<ComponentTag>[]
 }
 
 export interface ComponentInfo<Tag extends ComponentTag> {

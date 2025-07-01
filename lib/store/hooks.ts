@@ -396,6 +396,9 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   const setSelectedComponent = useCallback((componentId: string): void => {
     if (state.pageBuilderMode === "edit") {
       dispatch({ type: "SET_SELECTED_COMPONENT", payload: componentId })
+      setTimeout(() => {
+        dispatch({ type: "SET_SELECTED_COMPONENT_ANCESTORS", payload: componentId })
+      }, 0);
     }
   }, [dispatch, state.pageBuilderMode])
 
