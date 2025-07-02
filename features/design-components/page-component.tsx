@@ -11,6 +11,14 @@ import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
 export type ComponentAttributes = {
   id: string
   title: string
+  "padding-top": string
+  "padding-right": string
+  "padding-bottom": string
+  "padding-left": string
+  "margin-top": string
+  "margin-right": string
+  "margin-bottom": string
+  "margin-left": string
 }
 
 export const tag: ComponentTag = "page" as const
@@ -38,10 +46,111 @@ export const settingsFields = {
       return { ...component, attributes: { ...component.attributes, title: value } }
     },
   },
+  "padding-top": {
+    id: "padding-top",
+    type: "text",
+    label: "Padding Top",
+    placeholder: "Padding Top",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-top"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-top"]: value } };
+    },
+  },
+  "padding-right": {
+    id: "padding-right",
+    type: "text",
+    label: "Padding Right",
+    placeholder: "Padding Right",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-right"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-right"]: value } };
+    },
+  },
+  "padding-bottom": {
+    id: "padding-bottom",
+    type: "text",
+    label: "Padding Bottom",
+    placeholder: "Padding Bottom",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-bottom"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-bottom"]: value } };
+    },
+  },
+  "padding-left": {
+    id: "padding-left",
+    type: "text",
+    label: "Padding Left",
+    placeholder: "Padding Left",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-left"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-left"]: value } };
+    },
+  },
+  "margin-top": {
+    id: "margin-top",
+    type: "text",
+    label: "Margin Top",
+    placeholder: "Margin Top",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-top"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["margin-top"]: value } };
+    },
+  },
+  "margin-right": {
+    id: "margin-right",
+    type: "text",
+    label: "Margin Right",
+    placeholder: "Margin Right",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-right"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["margin-right"]: value } };
+    },
+  },
+  "margin-bottom": {
+    id: "margin-bottom",
+    type: "text",
+    label: "Margin Bottom",
+    placeholder: "Margin Bottom",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-bottom"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["margin-bottom"]: value } };
+    },
+  },
+  "margin-left": {
+    id: "margin-left",
+    type: "text",
+    label: "Margin Left",
+    placeholder: "Margin Left",
+    defaultValue: "0",
+    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-left"] || "",
+    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["margin-left"]: value } };
+    },
+  },
 }
 
 export function Component(props: ComponentProps<"page">) {
   const { pageBuilderMode, component: currentPage } = props
+  const attributes = currentPage.attributes
+  const padding = {
+    top: attributes["padding-top"] || settingsFields["padding-top"].defaultValue,
+    right: attributes["padding-right"] || settingsFields["padding-right"].defaultValue,
+    bottom: attributes["padding-bottom"] || settingsFields["padding-bottom"].defaultValue,
+    left: attributes["padding-left"] || settingsFields["padding-left"].defaultValue,
+  }
+  const margin = {
+    top: attributes["margin-top"] || settingsFields["margin-top"].defaultValue,
+    right: attributes["margin-right"] || settingsFields["margin-right"].defaultValue,
+    bottom: attributes["margin-bottom"] || settingsFields["margin-bottom"].defaultValue,
+    left: attributes["margin-left"] || settingsFields["margin-left"].defaultValue,
+  }
   const { setSelectedComponent, addComponent, updateComponent } = useComponentOperationsContext()
 
   const appendComponent = useCallback(() => {
@@ -69,10 +178,15 @@ export function Component(props: ComponentProps<"page">) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-gray-50 p-4" id={currentPage.attributes.id}>
+      <section className="flex-1 bg-gray-50 overflow-y-visible relative" id={currentPage.attributes.id}>
         <div
-          className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md p-8"
+          className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8"
           onClick={() => setSelectedComponent("")}
+          {...attributes}
+          style={{
+            padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
+            margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
+          }}
         >
           {currentPage.children.map((component) => {
             const Component = getComponentInfo(component.tag).Component
@@ -92,7 +206,7 @@ export function Component(props: ComponentProps<"page">) {
             </div>
           )}
         </div>
-      </div>
+      </section>
     </main>
   )
 }

@@ -14,10 +14,29 @@ function AncestorTags(props: ComponentProps<ComponentTag>) {
   const ancestors = props.selectedComponentAncestors.filter((component) => {
     return component.tag !== "page"
   }).toReversed?.() as DesignComponent<ComponentTag>[]
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  React.useEffect(() => {
+    const timeout = timeoutRef.current;
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
+  }, [])
 
   const selectAncestor = React.useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>, componentId: string) => {
     e.stopPropagation()
     setSelectedComponent(componentId)
+
+    const targetEl = document.getElementById(componentId)
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+      // Add a class temporarily to animate focus
+      targetEl.classList.add('ring', 'ring-blue-500')
+      timeoutRef.current = setTimeout(() => {
+        targetEl.classList.remove('ring', 'ring-blue-500')
+      }, 1000)
+    }
   }, [setSelectedComponent])
 
   return (
@@ -25,7 +44,8 @@ function AncestorTags(props: ComponentProps<ComponentTag>) {
       {ancestors.map((component, idx) => (
         <div key={component.attributes.id}
           className={cn(
-            "relative flex bg-background border p-1 px-2 shadow-sm cursor-pointer text-right justify-end text-xs opacity-95",
+            "relative flex border p-1 px-2 shadow-sm cursor-pointer text-right justify-end text-xs",
+            "bg-background opacity-95 text-muted-foreground",
           )}
           style={{ width: `${100 + 10 * idx}%` }}
           onClick={(e) => selectAncestor(e, component.attributes.id)}
@@ -95,7 +115,8 @@ export function withEditorControls<Tag extends ComponentTag>(
   WrappedComponent: React.ComponentType<ComponentProps<Tag>>
 ) {
   return function ComponentWithControls(props: ComponentProps<Tag>) {
-    const showControls = props.selectedComponentId === props.component.attributes.id
+    const showControls = props.pageBuilderMode === "edit" &&
+      props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()
 
     const selectComponent = useCallback((e: React.MouseEvent<HTMLElement>) => {
