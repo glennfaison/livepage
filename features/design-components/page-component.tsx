@@ -15,10 +15,6 @@ export type ComponentAttributes = {
   "padding-right": string
   "padding-bottom": string
   "padding-left": string
-  "margin-top": string
-  "margin-right": string
-  "margin-bottom": string
-  "margin-left": string
 }
 
 export const tag: ComponentTag = "page" as const
@@ -90,50 +86,6 @@ export const settingsFields = {
       return { ...component, attributes: { ...component.attributes, ["padding-left"]: value } };
     },
   },
-  "margin-top": {
-    id: "margin-top",
-    type: "text",
-    label: "Margin Top",
-    placeholder: "Margin Top",
-    defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-top"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["margin-top"]: value } };
-    },
-  },
-  "margin-right": {
-    id: "margin-right",
-    type: "text",
-    label: "Margin Right",
-    placeholder: "Margin Right",
-    defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-right"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["margin-right"]: value } };
-    },
-  },
-  "margin-bottom": {
-    id: "margin-bottom",
-    type: "text",
-    label: "Margin Bottom",
-    placeholder: "Margin Bottom",
-    defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-bottom"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["margin-bottom"]: value } };
-    },
-  },
-  "margin-left": {
-    id: "margin-left",
-    type: "text",
-    label: "Margin Left",
-    placeholder: "Margin Left",
-    defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["margin-left"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["margin-left"]: value } };
-    },
-  },
 }
 
 export function Component(props: ComponentProps<"page">) {
@@ -144,12 +96,6 @@ export function Component(props: ComponentProps<"page">) {
     right: attributes["padding-right"] || settingsFields["padding-right"].defaultValue,
     bottom: attributes["padding-bottom"] || settingsFields["padding-bottom"].defaultValue,
     left: attributes["padding-left"] || settingsFields["padding-left"].defaultValue,
-  }
-  const margin = {
-    top: attributes["margin-top"] || settingsFields["margin-top"].defaultValue,
-    right: attributes["margin-right"] || settingsFields["margin-right"].defaultValue,
-    bottom: attributes["margin-bottom"] || settingsFields["margin-bottom"].defaultValue,
-    left: attributes["margin-left"] || settingsFields["margin-left"].defaultValue,
   }
   const { setSelectedComponent, addComponent, updateComponent } = useComponentOperationsContext()
 
@@ -185,7 +131,6 @@ export function Component(props: ComponentProps<"page">) {
           {...attributes}
           style={{
             padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
-            margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
           }}
         >
           {currentPage.children.map((component) => {
