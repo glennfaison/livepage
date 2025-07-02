@@ -18,6 +18,7 @@ function replaceConnectedComponentProperties<T extends DesignComponent<Component
 		if (typeof originalValue === "string") {
 			newAttributes[key] = insertDataSourceDataInString(originalValue, dataFromSource)
 		} else {
+			// @ts-expect-error TODO: Fix this type error
 			newAttributes[key] = originalValue
 		}
 	}

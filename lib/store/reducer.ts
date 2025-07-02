@@ -30,7 +30,6 @@ type FindParentTreeProps = {
  * followed by its direct parent, followed by the parent's parent, and so on.
  * The last component in the array will be a direct child of state.componentTree
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function findComponentParentTree({
   components,
   componentId,
