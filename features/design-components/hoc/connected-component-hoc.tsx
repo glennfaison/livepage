@@ -5,6 +5,10 @@ import type { ComponentAttributes, ComponentProps, ComponentTag, DesignComponent
 import { insertDataSourceDataInString } from "@/lib/utils"
 
 function replaceConnectedComponentProperties<T extends DesignComponent<ComponentTag>>(originalComponent: T, dataFromSource: unknown): T {
+	if (dataFromSource === null || dataFromSource === undefined) {
+		return originalComponent
+	}
+
 	const newComponent = { ...originalComponent, children: [] } as T
 	const keysToSkip = ["__data_source__"]
 
