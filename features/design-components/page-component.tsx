@@ -7,6 +7,7 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import { getComponentInfo } from "."
 import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import { cn } from "@/lib/utils"
 
 export type ComponentAttributes = {
   id: string
@@ -139,7 +140,10 @@ export function Component(props: ComponentProps<"page">) {
           })}
 
           {pageBuilderMode === "edit" && (
-            <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-md p-4">
+            <div className={cn(
+              "flex flex-col items-center justify-center rounded-md p-4",
+              props.pageBuilderMode === "edit" && "border-2 border-dashed border-gray-200",
+            )}>
               <Button
                 variant="outline"
                 className="gap-2 px-4 py-2"

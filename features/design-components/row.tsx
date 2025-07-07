@@ -197,8 +197,9 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 
 	return (
 		<div className={cn(
-			"border border-dashed border-gray-300 min-h-[50px] flex flex-row justify-center items-center",
+			"min-h-[50px] flex flex-row justify-center items-center",
 			"p-0 gap-0",
+			props.pageBuilderMode === "edit" && "border border-dashed border-gray-300",
 		)}
 			{...attributes}
 			style={{

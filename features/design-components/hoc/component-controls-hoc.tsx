@@ -124,6 +124,10 @@ export function withEditorControls<Tag extends ComponentTag>(
       setSelectedComponent(props.component.attributes.id)
     }, [props.component.attributes.id, setSelectedComponent])
 
+    if (props.pageBuilderMode === "preview") {
+      return <WrappedComponent {...props} />
+    }
+
     return (
       <div onClick={selectComponent}
         className={cn(
