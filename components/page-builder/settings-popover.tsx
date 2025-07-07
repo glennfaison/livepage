@@ -152,6 +152,40 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Om
   }
 }
 
+function SettingsInput<Tag extends ComponentTag>({ field, formData, handleFieldChange }: {
+  field: SettingsField<Tag>;
+  formData: ComponentAttributes<Tag>;
+  handleFieldChange: (fieldId: keyof ComponentAttributes<Tag>, value: string) => void;
+}): React.JSX.Element {
+  return (
+    <div className="space-y-2" key={field.id as string}>
+      <Label htmlFor={field.id as string}>{field.label}</Label>
+      {field.type === "textarea" ? (
+        <textarea
+          id={field.id as string}
+          className={cn(
+            "flex min-h-[80px] field-sizing-content w-full rounded-md border border-input bg-background",
+            "px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50"
+          )}
+          placeholder={field.placeholder}
+          value={(formData[field.id] as string) || ""}
+          onChange={(e) => handleFieldChange(field.id, e.target.value)} />
+      ) : (
+        <Input
+          type={field.type}
+          id={field.id as string}
+          placeholder={field.placeholder}
+          readOnly={field.readOnly}
+          disabled={field.disabled}
+          value={(formData[field.id] as string) || ""}
+          onChange={(e) => handleFieldChange(field.id, e.target.value)} />
+      )}
+    </div>
+  )
+}
+
 function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields, formData, handleDiscard, handleFieldChange, handleSave }: {
   componentInfo: ComponentInfo<Tag>;
   settingsFields: SettingsField<Tag>[];
@@ -165,33 +199,7 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
     <>
       <div className="space-y-4 p-4 overflow-y-scroll flex-1">
         {settingsFields.map((field) => (
-          <div className="space-y-2" key={field.id as string}>
-            <Label htmlFor={field.id as string}>{field.label}</Label>
-            {field.type === "textarea" ? (
-              <textarea
-                id={field.id as string}
-                className={cn(
-                  "flex min-h-[80px] field-sizing-content w-full rounded-md border border-input bg-background",
-                  "px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                )}
-                placeholder={field.placeholder}
-                value={(formData[field.id] as string) || ""}
-                onChange={(e) => handleFieldChange(field.id, e.target.value)}
-              />
-            ) : (
-              <Input
-                type={field.type}
-                id={field.id as string}
-                placeholder={field.placeholder}
-                readOnly={field.readOnly}
-                disabled={field.disabled}
-                value={(formData[field.id] as string) || ""}
-                onChange={(e) => handleFieldChange(field.id, e.target.value)}
-              />
-            )}
-          </div>
+          <SettingsInput key={field.id as string} field={field} formData={formData} handleFieldChange={handleFieldChange} />
         ))}
       </div>
 
