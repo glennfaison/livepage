@@ -23,6 +23,8 @@ export const settingsFields = {
 		id: "id",
 		type: "text",
 		label: "ID",
+		readOnly: true,
+		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
 		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",

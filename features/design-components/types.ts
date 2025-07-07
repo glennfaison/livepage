@@ -48,7 +48,15 @@ export type ComponentAttributes<Tag extends ComponentTag> =
 export type SettingsField<Tag extends ComponentTag> = {
   id: keyof ComponentAttributes<Tag>
   label: string
-  type: "text" | "number" | "boolean" | "textarea"
+  type: "text" | "number" | "boolean" | "textarea" | "select" | "color"
+  description?: string
+  required?: boolean
+  min?: number // For number fields
+  max?: number // For number fields
+  step?: number // For number fields
+  rows?: number // For textarea fields
+  disabled?: boolean
+  readOnly?: boolean
   placeholder?: string
   options?: string[] // For select fields
   defaultValue?: string | number | boolean

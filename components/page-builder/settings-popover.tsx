@@ -185,6 +185,8 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
                 type={field.type}
                 id={field.id as string}
                 placeholder={field.placeholder}
+                readOnly={field.readOnly}
+                disabled={field.disabled}
                 value={(formData[field.id] as string) || ""}
                 onChange={(e) => handleFieldChange(field.id, e.target.value)}
               />
