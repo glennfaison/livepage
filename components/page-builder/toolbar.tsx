@@ -184,7 +184,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-1">
+        <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
