@@ -31,7 +31,7 @@ export const Divider = ({
         "relative flex items-center justify-center transition-all duration-200 group",
         "cursor-pointer bg-transparent hover:bg-gray-400 hover:visible",
         isVisible ? "bg-gray-400" : "invisible",
-        orientation === "horizontal" ? "flex-row h-px w-full hover:h-2" : "flex-col w-px hover:w-2",
+        orientation === "horizontal" ? "flex-row h-px w-full hover:h-2" : "flex-col w-px hover:w-2 self-stretch",
         isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
       )}
     >
@@ -39,7 +39,9 @@ export const Divider = ({
         <Button
           variant="ghost"
           size="icon"
-          className={cn("absolute bg-background border shadow-sm transition-opacity z-20 h-6 w-6 rounded-full")}
+          className={cn(
+            "absolute bg-background border shadow-sm transition-opacity z-20 h-6 w-6 rounded-full cursor-pointer",
+          )}
           onClick={(e) => {
             e.stopPropagation()
             setPopoverOpen(true)

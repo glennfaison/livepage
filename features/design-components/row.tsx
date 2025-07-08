@@ -199,7 +199,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 
 	return (
 		<div className={cn(
-			"min-h-[50px] flex flex-row justify-center items-center",
+			"min-h-[50px] flex flex-row justify-center items-start",
 			"p-0 gap-0",
 			props.pageBuilderMode === "edit" && "border border-dashed border-gray-300",
 		)}
@@ -210,7 +210,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 			}}
 		>
 			{hasChildren ? WrappedChilden : (
-				<div className="flex items-center justify-center h-full text-muted-foreground flex-1">
+				<div className="flex items-center justify-center h-full text-muted-foreground flex-1 self-center">
 					<ComponentSelectorPopover onSelect={onAddChildComponent} componentTagList={componentTagList}>
 						<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
 							<Plus className="h-3 w-3" />

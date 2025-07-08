@@ -13,6 +13,13 @@ import { useComponentOperationsContext } from "@/lib/component-operations-contex
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
 import React, { useCallback } from "react"
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue
+} from "@/components/ui/select"
 
 const DataSourceSelectorButton = ({
   icon,
@@ -152,27 +159,49 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Om
   }
 }
 
-function SettingsInput<Tag extends ComponentTag>({ field, formData, handleFieldChange }: {
+function SettingsInputField<Tag extends ComponentTag>({ field, formData, handleFieldChange }: {
   field: SettingsField<Tag>;
   formData: ComponentAttributes<Tag>;
   handleFieldChange: (fieldId: keyof ComponentAttributes<Tag>, value: string) => void;
 }): React.JSX.Element {
-  return (
-    <div className="space-y-2" key={field.id as string}>
-      <Label htmlFor={field.id as string}>{field.label}</Label>
-      {field.type === "textarea" ? (
+  let CustomInput;
+
+  switch (field.type) {
+    case "textarea":
+      CustomInput = (
         <textarea
           id={field.id as string}
           className={cn(
-            "flex min-h-[80px] field-sizing-content w-full rounded-md border border-input bg-background",
-            "px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50"
+            "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3",
+            "py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none",
+            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           )}
           placeholder={field.placeholder}
           value={(formData[field.id] as string) || ""}
           onChange={(e) => handleFieldChange(field.id, e.target.value)} />
-      ) : (
+      )
+      break;
+    case "select":
+      CustomInput = (
+        <Select
+          value={formData[field.id] as string}
+          onValueChange={(value) => handleFieldChange(field.id, value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={field.placeholder || "Select an option"} />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options?.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )
+      break;
+    default:
+      CustomInput = (
         <Input
           type={field.type}
           id={field.id as string}
@@ -181,7 +210,18 @@ function SettingsInput<Tag extends ComponentTag>({ field, formData, handleFieldC
           disabled={field.disabled}
           value={(formData[field.id] as string) || ""}
           onChange={(e) => handleFieldChange(field.id, e.target.value)} />
-      )}
+      )
+      break;
+  }
+
+  return (
+    <div className="space-y-2" key={field.id as string}>
+      <Label htmlFor={String(field.id)}>
+        {field.label}
+        {field.required && <span className="text-destructive">*</span>}
+      </Label>
+      {CustomInput}
+      {field.description && <p className="text-sm text-muted-foreground">{field.description}</p>}
     </div>
   )
 }
@@ -199,7 +239,7 @@ function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields,
     <>
       <div className="space-y-4 p-4 overflow-y-scroll flex-1">
         {settingsFields.map((field) => (
-          <SettingsInput key={field.id as string} field={field} formData={formData} handleFieldChange={handleFieldChange} />
+          <SettingsInputField key={field.id as string} field={field} formData={formData} handleFieldChange={handleFieldChange} />
         ))}
       </div>
 
