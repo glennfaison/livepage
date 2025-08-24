@@ -3,7 +3,7 @@ import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
 import { withTextEditing } from "./hoc/content-editable-hoc"
-import { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
 
 export type ComponentAttributes = {
 	id: string
@@ -24,7 +24,7 @@ const defaultChildren = [
 	sit amet.`
 ] as const
 
-export const tag: ComponentTag = "paragraph" as const
+export const tag: DesignComponentTag = "paragraph" as const
 
 export const label = "Paragraph"
 
@@ -59,9 +59,9 @@ export const settingsFields = {
 
 export const Icon = <Type className="h-4 w-4" />
 
-const Component_ = (props: ComponentProps<typeof tag>) => {
+const Component_ = (props: DesignComponentProps<typeof tag>) => {
 	const children = props.component.children?.length ? props.component.children : settingsFields.content.defaultValue
-	const filteredProps: Partial<ComponentProps<typeof tag>> = { ...props }
+	const filteredProps: Partial<DesignComponentProps<typeof tag>> = { ...props }
 	delete filteredProps.pageBuilderMode
 	delete filteredProps.selectedComponentId
 

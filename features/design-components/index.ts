@@ -1,6 +1,6 @@
 "use client"
 
-import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "./types"
+import type { DesignComponentAttributes, DesignComponentMetadata, DesignComponentTag, DesignComponent, DesignComponentSetting } from "./types"
 
 import * as Header1 from "./header1"
 import * as Header2 from "./header2"
@@ -14,28 +14,28 @@ import * as Column from "./column"
 import * as Page from "./page-component"
 
 // Helper function to get component data by type using exhaustive switch
-export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentInfo<Tag> {
+export function getComponentInfo<Tag extends DesignComponentTag>(tag: Tag): DesignComponentMetadata<Tag> {
   switch (tag) {
     case "header1":
-      return Header1 as unknown as ComponentInfo<Tag>;
+      return Header1 as unknown as DesignComponentMetadata<Tag>;
     case "header2":
-      return Header2 as unknown as ComponentInfo<Tag>;
+      return Header2 as unknown as DesignComponentMetadata<Tag>;
     case "header3":
-      return Header3 as unknown as ComponentInfo<Tag>;
+      return Header3 as unknown as DesignComponentMetadata<Tag>;
     case "paragraph":
-      return Paragraph as unknown as ComponentInfo<Tag>;
+      return Paragraph as unknown as DesignComponentMetadata<Tag>;
     case "inline-text":
-      return InlineText as unknown as ComponentInfo<Tag>;
+      return InlineText as unknown as DesignComponentMetadata<Tag>;
     case "button":
-      return Button as unknown as ComponentInfo<Tag>;
+      return Button as unknown as DesignComponentMetadata<Tag>;
     case "image":
-      return Image as unknown as ComponentInfo<Tag>;
+      return Image as unknown as DesignComponentMetadata<Tag>;
     case "row":
-      return Row as unknown as ComponentInfo<Tag>;
+      return Row as unknown as DesignComponentMetadata<Tag>;
     case "column":
-      return Column as unknown as ComponentInfo<Tag>;
+      return Column as unknown as DesignComponentMetadata<Tag>;
     case "page":
-      return Page as unknown as ComponentInfo<Tag>
+      return Page as unknown as DesignComponentMetadata<Tag>
     default:
       const _unexpected: never = tag
       throw new Error(`Unknown component type: ${_unexpected}`)
@@ -43,13 +43,13 @@ export function getComponentInfo<Tag extends ComponentTag>(tag: Tag): ComponentI
 }
 
 // Helper function to create a new design component
-export function createDesignComponent<Tag extends ComponentTag>(
+export function createDesignComponent<Tag extends DesignComponentTag>(
   tag: Tag,
   id: string,
-  overrideProps?: Partial<ComponentAttributes<Tag>>,
+  overrideProps?: Partial<DesignComponentAttributes<Tag>>,
 ): DesignComponent<Tag> {
   const data = getComponentInfo(tag)
-  const defaultAttributes = {} as ComponentAttributes<Tag>
+  const defaultAttributes = {} as DesignComponentAttributes<Tag>
   for (const key in data.settingsFields) {
     if (key === "content") {
       continue
@@ -60,12 +60,12 @@ export function createDesignComponent<Tag extends ComponentTag>(
 
   const defaultChildren =
     "content" in data.settingsFields
-      ? (data.settingsFields as Record<string, SettingsField<Tag>>).content?.defaultValue || []
+      ? (data.settingsFields as Record<string, DesignComponentSetting<Tag>>).content?.defaultValue || []
       : []
 
   return {
     tag: tag,
-    attributes: { ...defaultAttributes, ...overrideProps, id: `${tag}-${id}`, } as ComponentAttributes<Tag>,
+    attributes: { ...defaultAttributes, ...overrideProps, id: `${tag}-${id}`, } as DesignComponentAttributes<Tag>,
     // @ts-expect-error TODO: fix the type error here
     children: defaultChildren,
   }

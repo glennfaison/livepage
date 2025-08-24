@@ -2,7 +2,7 @@
 
 import { HistoryPopover } from "@/components/page-builder/history-popover"
 import { Button } from "@/components/ui/button"
-import type { PageBuilderMode } from "@/features/design-components/types"
+import type { PageBuilderMode } from "@/lib/store/types"
 import type { HistoryEntry } from "@/lib/store/types"
 import { cn } from "@/lib/utils"
 import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"

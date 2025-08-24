@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { ComponentProps, ComponentTag } from "../types"
+import { DesignComponentProps, DesignComponentTag } from "../types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
@@ -11,14 +11,14 @@ interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 	onBlurCapture?: React.FocusEventHandler<HTMLElement>
 }
 
-export function withTextEditing<Tag extends Extract<ComponentTag, "header1" | "header2" | "header3" | "paragraph" | "inline-text" | "button">>(
-	WrappedComponent: React.ComponentType<ComponentProps<Tag> & WrappedComponentProps>
+export function withTextEditing<Tag extends Extract<DesignComponentTag, "header1" | "header2" | "header3" | "paragraph" | "inline-text" | "button">>(
+	WrappedComponent: React.ComponentType<DesignComponentProps<Tag> & WrappedComponentProps>
 ) {
-	return function ContentEditableComponent(props: ComponentProps<Tag>) {
+	return function ContentEditableComponent(props: DesignComponentProps<Tag>) {
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 		const { pageBuilderMode, component, ...otherProps } = props
 		const { setSelectedComponent, updateComponent } = useComponentOperationsContext()
-		const isConnected = !!props.component.attributes?.__data_source__
+		const isConnected = !!props.component.attributes?.__datasource__
 
 		const onBlur = useCallback((e: React.FocusEvent<HTMLElement>) => {
 			e.stopPropagation()

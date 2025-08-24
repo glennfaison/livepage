@@ -1,12 +1,12 @@
 import { createDesignComponent } from "@/features/design-components"
 import type { AppState, AppAction, HistoryEntry } from "./types"
-import type { ComponentTag, DesignComponent } from "@/features/design-components/types"
+import type { DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { generateId } from "../utils"
 
 function cloneComponentWithNewIds(
-  component: DesignComponent<ComponentTag>,
+  component: DesignComponent<DesignComponentTag>,
   idSuffix: string
-): DesignComponent<ComponentTag> {
+): DesignComponent<DesignComponentTag> {
   if (typeof component === "string") {
     return component
   }
@@ -21,7 +21,7 @@ function cloneComponentWithNewIds(
 }
 
 type FindParentTreeProps = {
-  components: DesignComponent<ComponentTag>[]
+  components: DesignComponent<DesignComponentTag>[]
   componentId: string
 }
 
@@ -33,7 +33,7 @@ type FindParentTreeProps = {
 function findComponentParentTree({
   components,
   componentId,
-}: FindParentTreeProps): DesignComponent<ComponentTag>[] {
+}: FindParentTreeProps): DesignComponent<DesignComponentTag>[] {
   for (const component of components) {
     if (typeof component === "string") {
       continue
@@ -52,8 +52,8 @@ function findComponentParentTree({
 }
 
 type InsertComponentProps = {
-  components: DesignComponent<ComponentTag>[]
-  newComponent: DesignComponent<ComponentTag>
+  components: DesignComponent<DesignComponentTag>[]
+  newComponent: DesignComponent<DesignComponentTag>
   parentId?: string
   index?: number
 }
@@ -63,8 +63,8 @@ function insertComponent({
   newComponent,
   parentId,
   index,
-}: InsertComponentProps): DesignComponent<ComponentTag>[] {
-  return components.reduce<DesignComponent<ComponentTag>[]>((acc, component, idx) => {
+}: InsertComponentProps): DesignComponent<DesignComponentTag>[] {
+  return components.reduce<DesignComponent<DesignComponentTag>[]>((acc, component, idx) => {
     if (typeof component === "string") {
       return [...acc, component]
     }
@@ -99,9 +99,9 @@ function insertComponent({
 }
 
 type UpdateComponentProps = {
-  components: DesignComponent<ComponentTag>[],
+  components: DesignComponent<DesignComponentTag>[],
   componentId: string,
-  updates: Partial<DesignComponent<ComponentTag>>,
+  updates: Partial<DesignComponent<DesignComponentTag>>,
   updated: { value: boolean }
 }
 
@@ -110,7 +110,7 @@ function updateComponent({
   componentId,
   updates,
   updated,
-}: UpdateComponentProps): DesignComponent<ComponentTag>[] {
+}: UpdateComponentProps): DesignComponent<DesignComponentTag>[] {
   return components.map(component => {
     if (typeof component === "string") {
       return component
@@ -131,15 +131,15 @@ function updateComponent({
 }
 
 type RemoveComponentProps = {
-  components: DesignComponent<ComponentTag>[],
+  components: DesignComponent<DesignComponentTag>[],
   componentId: string,
 }
 
 function removeComponent({
   components,
   componentId,
-}: RemoveComponentProps): DesignComponent<ComponentTag>[] {
-  return components.reduce<DesignComponent<ComponentTag>[]>((acc, component) => {
+}: RemoveComponentProps): DesignComponent<DesignComponentTag>[] {
+  return components.reduce<DesignComponent<DesignComponentTag>[]>((acc, component) => {
     if (typeof component === "string") {
       return [...acc, component]
     }
@@ -155,10 +155,10 @@ function duplicateComponent({
   components,
   componentId,
 }: {
-  components: DesignComponent<ComponentTag>[],
+  components: DesignComponent<DesignComponentTag>[],
   componentId: string,
-}): DesignComponent<ComponentTag>[] {
-  return components.reduce<DesignComponent<ComponentTag>[]>((acc, component) => {
+}): DesignComponent<DesignComponentTag>[] {
+  return components.reduce<DesignComponent<DesignComponentTag>[]>((acc, component) => {
     if (typeof component === "string") {
       return [...acc, component]
     }
@@ -179,12 +179,12 @@ function duplicateComponent({
 }
 
 type ReplaceComponentProps = {
-  components: DesignComponent<ComponentTag>[]
+  components: DesignComponent<DesignComponentTag>[]
   oldComponentId: string
-  newComponent: DesignComponent<ComponentTag>
+  newComponent: DesignComponent<DesignComponentTag>
 }
 
-function replaceComponent({ components, oldComponentId, newComponent }: ReplaceComponentProps): DesignComponent<ComponentTag>[] {
+function replaceComponent({ components, oldComponentId, newComponent }: ReplaceComponentProps): DesignComponent<DesignComponentTag>[] {
   return components.map(component => {
     if (typeof component === "string") {
       return component

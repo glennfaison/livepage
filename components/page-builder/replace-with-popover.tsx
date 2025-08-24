@@ -1,5 +1,5 @@
 import { componentTagList } from "@/features/design-components"
-import { ComponentTag, DesignComponent } from "@/features/design-components/types"
+import { DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 
 export const ReplaceWithPopover = ({
@@ -8,12 +8,12 @@ export const ReplaceWithPopover = ({
 	onReplace,
 }: {
 	children: React.ReactNode
-	currentComponent: DesignComponent<ComponentTag>
-	onReplace: (newType: ComponentTag) => void
+	currentComponent: DesignComponent<DesignComponentTag>
+	onReplace: (newType: DesignComponentTag) => void
 }) => {
 	const tagList = componentTagList.filter((tag) => tag !== currentComponent.tag)
 
-	const handleReplace = (newType: ComponentTag) => {
+	const handleReplace = (newType: DesignComponentTag) => {
 		onReplace(newType)
 	}
 

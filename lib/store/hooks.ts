@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
 import { appReducer, initialState } from "./reducer"
 import type { AppState, AppAction } from "./types"
-import type { ComponentAttributes, ComponentTag, DesignComponent } from "@/features/design-components/types"
+import type { DesignComponentAttributes, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { toast } from "@/components/ui/use-toast"
 import * as ShortcodeParser from "../shortcode-parser/parser"
 
@@ -241,7 +241,7 @@ export function usePageOperations(state: AppState) {
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const pages = ShortcodeParser.parse(content) as unknown as DesignComponent<ComponentTag>[]
+            const pages = ShortcodeParser.parse(content) as unknown as DesignComponent<DesignComponentTag>[]
             resolve(pages)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -276,7 +276,7 @@ export function usePageOperations(state: AppState) {
   }
 }
 
-const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): string => {
+const renderComponentsToHTML = (components: DesignComponent<DesignComponentTag>[]): string => {
   return components.map((component) => {
     const attributes = component.attributes
     switch (component.tag) {
@@ -296,7 +296,7 @@ const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): st
         return `<span>${component.children}</span>`
       }
       case "image": {
-        type CastType = ComponentAttributes<typeof component.tag>
+        type CastType = DesignComponentAttributes<typeof component.tag>
         return `<img src="${(attributes as CastType).src}" alt="${(attributes as CastType).alt || ""}" />`
       }
       case "button": {
@@ -320,7 +320,7 @@ const renderComponentsToHTML = (components: DesignComponent<ComponentTag>[]): st
 export function useComponentOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
   // Find a component by ID (including nested components)
   const findComponentById = useCallback(
-    (components: DesignComponent<ComponentTag>[], id: string): DesignComponent<ComponentTag> | null => {
+    (components: DesignComponent<DesignComponentTag>[], id: string): DesignComponent<DesignComponentTag> | null => {
       for (const component of components) {
         if (typeof component === "string") {
           continue
@@ -342,7 +342,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   )
 
   // Add component
-  const addComponent = useCallback(({ tag, parentId, index }: { tag: ComponentTag, parentId?: string, index?: number }) => {
+  const addComponent = useCallback(({ tag, parentId, index }: { tag: DesignComponentTag, parentId?: string, index?: number }) => {
     dispatch({
       type: "INSERT_COMPONENT",
       payload: { newComponentTag: tag, parentId, index },
@@ -367,7 +367,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Update component
   const updateComponent = useCallback(
-    <Tag extends ComponentTag>(id: string, updates: Partial<DesignComponent<Tag>>) => {
+    <Tag extends DesignComponentTag>(id: string, updates: Partial<DesignComponent<Tag>>) => {
       dispatch({
         type: "UPDATE_COMPONENT",
         payload: { componentId: id, updates, },
@@ -455,7 +455,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch, state.activePage, state.componentTree, findComponentById])
 
-  const replaceComponent = useCallback((oldComponentId: string, newComponentTag: ComponentTag) => {
+  const replaceComponent = useCallback((oldComponentId: string, newComponentTag: DesignComponentTag) => {
     dispatch({
       type: "REPLACE_COMPONENT",
       payload: { oldComponentId, newComponentTag },

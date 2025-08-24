@@ -1,5 +1,5 @@
 import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
-import { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
 import { useDividerVisibility, Divider } from "@/components/page-builder/layout-divider"
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,7 @@ export type ComponentAttributes = {
 	"margin-left": string
 }
 
-export const tag: ComponentTag = "column" as const
+export const tag: DesignComponentTag = "column" as const
 
 export const label = "Column"
 
@@ -134,7 +134,7 @@ export const settingsFields = {
 
 export const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
-const Component_ = (props: ComponentProps<typeof tag>) => {
+const Component_ = (props: DesignComponentProps<typeof tag>) => {
 	const { component } = props
 	const attributes = component.attributes
 	const padding = {
@@ -158,11 +158,11 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 	} = useDividerVisibility()
 
 	const onAddChildComponent = useCallback(
-		(tag: ComponentTag): void => addComponent({ tag, parentId: component.attributes.id, index: 0 }),
+		(tag: DesignComponentTag): void => addComponent({ tag, parentId: component.attributes.id, index: 0 }),
 		[addComponent, component.attributes.id]
 	)
 
-	const handleAddAtIndex = useCallback((tag: ComponentTag, dividerIndex: number) => {
+	const handleAddAtIndex = useCallback((tag: DesignComponentTag, dividerIndex: number) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: component.attributes.id, index: childIndex })
 	}, [addComponent, component.attributes.id])
@@ -176,7 +176,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 					onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 					onMouseLeave={() => handleChildMouseLeave(childIndex)}
 				>
-					<ChildComponent {...props as ComponentProps<ComponentTag>} component={child} />
+					<ChildComponent {...props as DesignComponentProps<DesignComponentTag>} component={child} />
 				</span>
 			)
 		}

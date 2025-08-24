@@ -5,15 +5,15 @@ import { cn } from "@/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
 import { getComponentInfo } from "..";
-import type { ComponentProps, ComponentTag, DesignComponent } from "../types";
+import type { DesignComponentProps, DesignComponentTag, DesignComponent } from "../types";
 import { useComponentOperationsContext } from "@/lib/component-operations-context";
 import React from "react";
 
-function AncestorTags(props: ComponentProps<ComponentTag>) {
+function AncestorTags(props: DesignComponentProps<DesignComponentTag>) {
   const { setSelectedComponent } = useComponentOperationsContext()
   const ancestors = props.selectedComponentAncestors.filter((component) => {
     return component.tag !== "page"
-  }).toReversed?.() as DesignComponent<ComponentTag>[]
+  }).toReversed?.() as DesignComponent<DesignComponentTag>[]
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   
   React.useEffect(() => {
@@ -57,12 +57,12 @@ function AncestorTags(props: ComponentProps<ComponentTag>) {
   )
 }
 
-function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>) {
+function ComponentControls<Tag extends DesignComponentTag>(props: DesignComponentProps<Tag>) {
   const { component } = props
   const { label } = getComponentInfo(component.tag)
   const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 
-  const handleReplace = useCallback((newType: ComponentTag) => {
+  const handleReplace = useCallback((newType: DesignComponentTag) => {
     replaceComponent(component.attributes.id, newType);
   }, [component.attributes.id, replaceComponent])
 
@@ -111,10 +111,10 @@ function ComponentControls<Tag extends ComponentTag>(props: ComponentProps<Tag>)
   )
 }
 
-export function withEditorControls<Tag extends ComponentTag>(
-  WrappedComponent: React.ComponentType<ComponentProps<Tag>>
+export function withEditorControls<Tag extends DesignComponentTag>(
+  WrappedComponent: React.ComponentType<DesignComponentProps<Tag>>
 ) {
-  return function ComponentWithControls(props: ComponentProps<Tag>) {
+  return function ComponentWithControls(props: DesignComponentProps<Tag>) {
     const showControls = props.pageBuilderMode === "edit" &&
       props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()

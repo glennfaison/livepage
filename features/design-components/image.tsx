@@ -3,7 +3,7 @@
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
 import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
-import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import type { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
 
 export type ComponentAttributes = {
 	id: string
@@ -23,7 +23,7 @@ export const defaultAttributes: ComponentAttributes = {
 	fallbackSrc: "/placeholder-img.svg?height=300&width=300",
 } as const
 
-export const tag: ComponentTag = "image" as const
+export const tag: DesignComponentTag = "image" as const
 
 export const label = "Image"
 
@@ -102,7 +102,7 @@ export const settingsFields = {
 
 export const Icon = <ImageIcon className="h-4 w-4" />
 
-const Component_ = (props: ComponentProps<typeof tag>) => {
+const Component_ = (props: DesignComponentProps<typeof tag>) => {
 	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes
 	return (
 		// eslint-disable-next-line @next/next/no-img-element

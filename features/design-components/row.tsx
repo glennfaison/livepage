@@ -1,15 +1,14 @@
+import React, { useCallback } from "react"
 import { AlignHorizontalSpaceBetween, Plus } from "lucide-react"
-import { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import type { DesignComponentProps, DesignComponentTag, DesignComponent, DesignComponentSetting } from "./types"
 import { cn, intersperseAndAppend } from "@/lib/utils"
 import { componentTagList, getComponentInfo } from "."
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
 import { Button } from "@/components/ui/button"
-import { useCallback } from "react"
-import React from "react"
 import { Divider, useDividerVisibility } from "@/components/page-builder/layout-divider"
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
-import { withEditorControls } from "./hoc/component-controls-hoc"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
+import { withEditorControls } from "./hoc/component-controls-hoc"
 
 export type ComponentAttributes = {
 	id: string
@@ -23,13 +22,13 @@ export type ComponentAttributes = {
 	"margin-left": string
 }
 
-export const tag: ComponentTag = "row" as const
+export const tag: DesignComponentTag = "row" as const
 
 export const label = "Row"
 
 export const keywords = ["row", "container", "layout", "horizontal"]
 
-export const settingsFields = {
+export const settings = {
 	id: {
 		id: "id",
 		type: "text",
@@ -131,24 +130,24 @@ export const settingsFields = {
 			return { ...component, attributes: { ...component.attributes, ["margin-left"]: value } };
 		},
 	},
-}
+} as Record<keyof ComponentAttributes, DesignComponentSetting<typeof tag>>
 
-export const Icon = <AlignHorizontalSpaceBetween className="h-4 w-4" />
+export const Icon = <AlignHorizontalSpaceBetween className="size-4" />
 
-const Component_ = (props: ComponentProps<typeof tag>) => {
+const Component_ = (props: DesignComponentProps<typeof tag>) => {
 	const { component } = props
 	const attributes = component.attributes
 	const padding = {
-		top: attributes["padding-top"] || settingsFields["padding-top"].defaultValue,
-		right: attributes["padding-right"] || settingsFields["padding-right"].defaultValue,
-		bottom: attributes["padding-bottom"] || settingsFields["padding-bottom"].defaultValue,
-		left: attributes["padding-left"] || settingsFields["padding-left"].defaultValue,
+		top: attributes["padding-top"] || settings["padding-top"].defaultValue,
+		right: attributes["padding-right"] || settings["padding-right"].defaultValue,
+		bottom: attributes["padding-bottom"] || settings["padding-bottom"].defaultValue,
+		left: attributes["padding-left"] || settings["padding-left"].defaultValue,
 	}
 	const margin = {
-		top: attributes["margin-top"] || settingsFields["margin-top"].defaultValue,
-		right: attributes["margin-right"] || settingsFields["margin-right"].defaultValue,
-		bottom: attributes["margin-bottom"] || settingsFields["margin-bottom"].defaultValue,
-		left: attributes["margin-left"] || settingsFields["margin-left"].defaultValue,
+		top: attributes["margin-top"] || settings["margin-top"].defaultValue,
+		right: attributes["margin-right"] || settings["margin-right"].defaultValue,
+		bottom: attributes["margin-bottom"] || settings["margin-bottom"].defaultValue,
+		left: attributes["margin-left"] || settings["margin-left"].defaultValue,
 	}
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
@@ -159,11 +158,11 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 	} = useDividerVisibility()
 
 	const onAddChildComponent = useCallback(
-		(tag: ComponentTag): void => addComponent({ tag, parentId: component.attributes.id, index: 0 }),
+		(tag: DesignComponentTag): void => addComponent({ tag, parentId: component.attributes.id, index: 0 }),
 		[addComponent, component.attributes.id]
 	)
 
-	const handleAddAtIndex = useCallback((tag: ComponentTag, dividerIndex: number) => {
+	const handleAddAtIndex = useCallback((tag: DesignComponentTag, dividerIndex: number) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: component.attributes.id, index: childIndex })
 	}, [addComponent, component.attributes.id])
@@ -177,7 +176,7 @@ const Component_ = (props: ComponentProps<typeof tag>) => {
 					onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 					onMouseLeave={() => handleChildMouseLeave(childIndex)}
 				>
-					<ChildComponent {...props as ComponentProps<ComponentTag>} component={child} />
+					<ChildComponent {...props as DesignComponentProps<DesignComponentTag>} component={child} />
 				</span>
 			)
 		}

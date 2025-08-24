@@ -2,7 +2,7 @@ import { Search } from "lucide-react"
 import React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import type { ComponentTag } from "@/features/design-components/types"
+import type { DesignComponentTag } from "@/features/design-components/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { getComponentInfo } from "@/features/design-components"
 
@@ -12,10 +12,10 @@ export const ComponentSelectorPopover = ({
 	children,
 	componentTagList,
 }: {
-	onSelect: (type: ComponentTag) => void
+	onSelect: (type: DesignComponentTag) => void
 	parentId?: string
 	children: React.ReactNode
-	componentTagList: ComponentTag[]
+	componentTagList: DesignComponentTag[]
 }) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
   const [open, setOpen] = React.useState(false)
@@ -32,7 +32,7 @@ export const ComponentSelectorPopover = ({
 		)
 	}, [searchTerm, componentTagList])
 
-	const handleSelect = (type: ComponentTag) => {
+	const handleSelect = (type: DesignComponentTag) => {
 		onSelect(type)
 		if (closePopover) {
 			closePopover()

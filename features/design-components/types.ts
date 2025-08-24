@@ -11,28 +11,30 @@ import type { ComponentAttributes as InlineTextAttributes } from "./inline-text"
 import type { ComponentAttributes as PageAttributes } from "./page-component"
 import type { ComponentAttributes as ParagraphAttributes } from "./paragraph"
 import type { ComponentAttributes as RowAttributes } from "./row"
+import { PageBuilderMode } from "@/lib/store/types"
+
+type DesignComponentTagnames = [
+  "header1",
+  "header2",
+  "header3",
+  "paragraph",
+  "inline-text",
+  "button",
+  "image",
+  "row",
+  "column",
+  "page"
+]
 
 // Component types
-export type ComponentTag =
-  | "header1"
-  | "header2"
-  | "header3"
-  | "paragraph"
-  | "inline-text"
-  | "button"
-  | "image"
-  | "row"
-  | "column"
-  | "page"
-
-export type PageBuilderMode = "edit" | "preview"
+export type DesignComponentTag = DesignComponentTagnames[number]
 
 interface Connectable {
-  __data_source__?: string
+  __datasource__?: string
 }
 
 // Generic component attributes based on component type
-export type ComponentAttributes<Tag extends ComponentTag> =
+export type DesignComponentAttributes<Tag extends DesignComponentTag> =
   Tag extends "header1" ? (Header1Attributes & Connectable) :
   Tag extends "header2" ? (Header2Attributes & Connectable) :
   Tag extends "header3" ? (Header3Attributes & Connectable) :
@@ -45,8 +47,8 @@ export type ComponentAttributes<Tag extends ComponentTag> =
   Tag extends "page" ? (PageAttributes & Connectable) :
   never
 
-export type SettingsField<Tag extends ComponentTag> = {
-  id: keyof ComponentAttributes<Tag>
+export type DesignComponentSetting<Tag extends DesignComponentTag> = {
+  id: keyof DesignComponentAttributes<Tag>
   label: string
   type: "text" | "number" | "boolean" | "textarea" | "select" | "color"
   description?: string
@@ -64,38 +66,38 @@ export type SettingsField<Tag extends ComponentTag> = {
   setValue: (component: Partial<DesignComponent<Tag>>, value: unknown) => DesignComponent<Tag>
 }
 
-export type DesignComponent<Tag extends ComponentTag> = {
+export type DesignComponent<Tag extends DesignComponentTag> = {
   tag: Tag
-  children: DesignComponent<ComponentTag>[]
-  attributes: ComponentAttributes<Tag>
+  children: DesignComponent<DesignComponentTag>[]
+  attributes: DesignComponentAttributes<Tag>
 }
 
 export type Page = DesignComponent<"page">
 
-export type ComponentOperations<Tag extends ComponentTag> = {
+export type DesignComponentOperations<Tag extends DesignComponentTag> = {
   setSelectedComponent: (componentId: string) => void
   updateComponent: (componentId: string, updates: Partial<DesignComponent<Tag>>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
-  addComponent: (args: { tag: ComponentTag; parentId?: string; index?: number }) => void
-  replaceComponent: (oldComponentId: string, newComponentTag: ComponentTag) => void
-  findComponentById: (components: DesignComponent<ComponentTag>[], id: string) => DesignComponent<ComponentTag> | null
+  addComponent: (args: { tag: DesignComponentTag; parentId?: string; index?: number }) => void
+  replaceComponent: (oldComponentId: string, newComponentTag: DesignComponentTag) => void
+  findComponentById: (components: DesignComponent<DesignComponentTag>[], id: string) => DesignComponent<DesignComponentTag> | null
 }
 
-export type ComponentProps<Tag extends ComponentTag> = {
+export type DesignComponentProps<Tag extends DesignComponentTag> = {
   pageBuilderMode: PageBuilderMode
   component: DesignComponent<Tag>
   selectedComponentId: string,
-  selectedComponentAncestors: DesignComponent<ComponentTag>[]
+  selectedComponentAncestors: DesignComponent<DesignComponentTag>[]
 }
 
-export interface ComponentInfo<Tag extends ComponentTag> {
+export interface DesignComponentMetadata<Tag extends DesignComponentTag> {
   tag: Tag
   label: string
   keywords: string[]
-  defaultChildren: DesignComponent<ComponentTag>[]
-  defaultAttributes: ComponentAttributes<Tag>
-  settingsFields: Record<keyof ComponentAttributes<Tag>, SettingsField<Tag>>
+  defaultChildren: DesignComponent<DesignComponentTag>[]
+  defaultAttributes: DesignComponentAttributes<Tag>
+  settingsFields: Record<keyof DesignComponentAttributes<Tag>, DesignComponentSetting<Tag>>
   Icon: ReactNode
-  Component: (props: ComponentProps<Tag>) => React.JSX.Element
+  Component: (props: DesignComponentProps<Tag>) => React.JSX.Element
 }

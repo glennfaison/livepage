@@ -6,7 +6,7 @@ import { useComponentOperationsContext } from "@/lib/component-operations-contex
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import { getComponentInfo } from "."
-import type { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import type { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
 import { cn } from "@/lib/utils"
 
 export type ComponentAttributes = {
@@ -18,7 +18,7 @@ export type ComponentAttributes = {
   "padding-left": string
 }
 
-export const tag: ComponentTag = "page" as const
+export const tag: DesignComponentTag = "page" as const
 
 export const settingsFields = {
   id: {
@@ -89,7 +89,7 @@ export const settingsFields = {
   },
 }
 
-export function Component(props: ComponentProps<"page">) {
+export function Component(props: DesignComponentProps<"page">) {
   const { pageBuilderMode, component: currentPage } = props
   const attributes = currentPage.attributes
   const padding = {
@@ -136,7 +136,7 @@ export function Component(props: ComponentProps<"page">) {
         >
           {currentPage.children.map((component) => {
             const Component = getComponentInfo(component.tag).Component
-            return (<Component key={component.attributes.id} {...props as ComponentProps<ComponentTag>} component={component} />)
+            return (<Component key={component.attributes.id} {...props as DesignComponentProps<DesignComponentTag>} component={component} />)
           })}
 
           {pageBuilderMode === "edit" && (

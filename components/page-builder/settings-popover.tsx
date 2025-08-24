@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
-import type { ComponentAttributes, ComponentInfo, ComponentTag, DesignComponent, SettingsField } from "@/features/design-components/types"
+import type { DesignComponentAttributes, DesignComponentMetadata, DesignComponentTag, DesignComponent, DesignComponentSetting } from "@/features/design-components/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
@@ -20,6 +20,9 @@ import {
   SelectItem,
   SelectValue
 } from "@/components/ui/select"
+import { appSettings } from "@/app/app-settings"
+
+const connectionDataSourceFieldName = appSettings.connections.dataSourceFieldName
 
 const DataSourceSelectorButton = ({
   icon,
@@ -38,20 +41,20 @@ const DataSourceSelectorButton = ({
   )
 }
 
-function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+function useComponentSettingsEditor<Tag extends DesignComponentTag>({ component, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const componentInfo = React.useMemo(() => getComponentInfo(component.tag), [component.tag])
   const settingsFields = React.useMemo(
-    () => Object.values(componentInfo.settingsFields).filter((field) => field.id !== "__data_source__"),
+    () => Object.values(componentInfo.settingsFields).filter((field) => field.id !== connectionDataSourceFieldName),
     [componentInfo.settingsFields],
-  ) as SettingsField<Tag>[]
-  const [formData, setFormData] = React.useState<ComponentAttributes<Tag>>({} as ComponentAttributes<Tag>)
+  ) as DesignComponentSetting<Tag>[]
+  const [formData, setFormData] = React.useState<DesignComponentAttributes<Tag>>({} as DesignComponentAttributes<Tag>)
 
   const { updateComponent } = useComponentOperationsContext()
 
   React.useEffect(() => {
-    const initialFormData = {} as ComponentAttributes<Tag>
+    const initialFormData = {} as DesignComponentAttributes<Tag>
     for (const key in componentInfo.settingsFields) {
-      initialFormData[key] = componentInfo.settingsFields[key].getValue(component) as ComponentAttributes<Tag>[typeof key]
+      initialFormData[key] = componentInfo.settingsFields[key].getValue(component) as DesignComponentAttributes<Tag>[typeof key]
     }
     setFormData(initialFormData)
   }, [componentInfo.settingsFields, component])
@@ -64,7 +67,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIs
     }
     let update = {} as Partial<DesignComponent<Tag>>
     for (const key in formData) {
-      const reference: SettingsField<Tag> = componentInfo.settingsFields[key]
+      const reference: DesignComponentSetting<Tag> = componentInfo.settingsFields[key]
       update = reference.setValue(update, formData[key])
     }
     updateComponent(component.attributes.id, update)
@@ -76,7 +79,7 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIs
     setIsOpen(false)
   }
 
-  const handleFieldChange = (fieldId: keyof ComponentAttributes<Tag>, value: string) => {
+  const handleFieldChange = (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }))
   }
 
@@ -92,9 +95,9 @@ function useComponentSettingsEditor<Tag extends ComponentTag>({ component, setIs
   }
 }
 
-function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+function useDataSourceSettingsEditor<Tag extends DesignComponentTag>({ component }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
-  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__data_source__ || "")
+  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__datasource__ || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId> | undefined>(dataSourceInfo)
   const { updateComponent } = useComponentOperationsContext()
@@ -127,16 +130,16 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Om
       }
     }
     const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: formData })
-    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __data_source__: encodedDataSourceSettings } })
+    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __datasource__: encodedDataSourceSettings } })
   }
 
   const handleDiscard = () => {
     setFormData({} as DataSourceSettings<DataSourceId>)
     setSelectedDataSource(undefined)
-    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __data_source__: "" } })
+    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __datasource__: "" } })
   }
 
-  const handleFieldChange = (fieldId: keyof ComponentAttributes<Tag>, value: string) => {
+  const handleFieldChange = (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }))
   }
 
@@ -159,10 +162,10 @@ function useDataSourceSettingsEditor<Tag extends ComponentTag>({ component }: Om
   }
 }
 
-function SettingsInputField<Tag extends ComponentTag>({ field, formData, handleFieldChange }: {
-  field: SettingsField<Tag>;
-  formData: ComponentAttributes<Tag>;
-  handleFieldChange: (fieldId: keyof ComponentAttributes<Tag>, value: string) => void;
+function SettingsInputField<Tag extends DesignComponentTag>({ field, formData, handleFieldChange }: {
+  field: DesignComponentSetting<Tag>;
+  formData: DesignComponentAttributes<Tag>;
+  handleFieldChange: (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => void;
 }): React.JSX.Element {
   let CustomInput;
 
@@ -226,13 +229,13 @@ function SettingsInputField<Tag extends ComponentTag>({ field, formData, handleF
   )
 }
 
-function ComponentSettingsTabContent<Tag extends ComponentTag>({ settingsFields, formData, handleDiscard, handleFieldChange, handleSave }: {
-  componentInfo: ComponentInfo<Tag>;
-  settingsFields: SettingsField<Tag>[];
-  formData: ComponentAttributes<Tag>;
-  setFormData: React.Dispatch<ComponentAttributes<Tag>>;
+function ComponentSettingsTabContent<Tag extends DesignComponentTag>({ settingsFields, formData, handleDiscard, handleFieldChange, handleSave }: {
+  componentInfo: DesignComponentMetadata<Tag>;
+  settingsFields: DesignComponentSetting<Tag>[];
+  formData: DesignComponentAttributes<Tag>;
+  setFormData: React.Dispatch<DesignComponentAttributes<Tag>>;
   handleDiscard: () => void;
-  handleFieldChange: (fieldId: keyof ComponentAttributes<Tag>, value: string) => void;
+  handleFieldChange: (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => void;
   handleSave: () => void;
 }) {
   return (
@@ -446,12 +449,12 @@ function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSe
   )
 }
 
-export interface SettingsPopoverProps<Tag extends ComponentTag> {
+export interface SettingsPopoverProps<Tag extends DesignComponentTag> {
   component: DesignComponent<Tag>
   children: React.ReactNode
 }
 
-export const SettingsPopover: React.FC<SettingsPopoverProps<ComponentTag>> = <Tag extends ComponentTag>({
+export const SettingsPopover: React.FC<SettingsPopoverProps<DesignComponentTag>> = <Tag extends DesignComponentTag>({
   component,
   children,
 }: SettingsPopoverProps<Tag>) => {

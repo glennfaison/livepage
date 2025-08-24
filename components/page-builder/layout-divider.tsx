@@ -1,5 +1,5 @@
 import { componentTagList } from "@/features/design-components"
-import { ComponentTag } from "@/features/design-components/types"
+import { DesignComponentTag } from "@/features/design-components/types"
 import { cn } from "@/lib/utils"
 import { Plus } from "lucide-react"
 import React from "react"
@@ -13,14 +13,14 @@ export const Divider = ({
   isVisible,
 }: {
   orientation: "horizontal" | "vertical"
-  onAddComponent: (type: ComponentTag, index: number) => void
+  onAddComponent: (type: DesignComponentTag, index: number) => void
   index: number
   isVisible: boolean
 }) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   isVisible = isVisible || popoverOpen
 
-  const handleAddComponent = (type: ComponentTag) => {
+  const handleAddComponent = (type: DesignComponentTag) => {
     onAddComponent(type, index)
     setPopoverOpen(false)
   }

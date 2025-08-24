@@ -4,13 +4,13 @@ import { MousePointerClick } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
 import { withTextEditing } from "./hoc/content-editable-hoc"
-import { ComponentProps, ComponentTag, DesignComponent } from "./types"
+import { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
 
 export type ComponentAttributes = {
 	id: string
 }
 
-export const tag: ComponentTag = "button" as const
+export const tag: DesignComponentTag = "button" as const
 
 export const label = "Button"
 
@@ -47,9 +47,9 @@ export const settingsFields = {
 
 export const Icon = <MousePointerClick className="h-4 w-4" />
 
-const Component_ = (props: ComponentProps<typeof tag>) => {
+const Component_ = (props: DesignComponentProps<typeof tag>) => {
 	const children = props.component.children?.length ? props.component.children : settingsFields.content.defaultValue
-	const filteredProps: Partial<ComponentProps<typeof tag>> = { ...props }
+	const filteredProps: Partial<DesignComponentProps<typeof tag>> = { ...props }
 	delete filteredProps.pageBuilderMode
 	delete filteredProps.selectedComponentId
 
