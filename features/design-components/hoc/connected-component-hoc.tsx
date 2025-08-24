@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId } from "@/features/data-sources/types"
 import type { DesignComponentAttributes, DesignComponentProps, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { insertDataSourceDataInString } from "@/lib/utils"
 import { appSettings } from "@/app/app-settings"
+import { useQuery } from "@tanstack/react-query"
 
 const connectionDataSourceFieldName = appSettings.connections.dataSourceFieldName as keyof DesignComponentAttributes<DesignComponentTag>
 
@@ -49,59 +50,49 @@ export function withConnection<Tag extends DesignComponentTag>(
 	WrappedComponent: React.ComponentType<DesignComponentProps<Tag>>
 ) {
 	return function ConnectedComponent(props: DesignComponentProps<Tag>) {
-		const { attributes } = props.component
-		const __datasource__ = attributes[connectionDataSourceFieldName]
-		const [connectedData, setConnectedData] = useState<unknown>(null)
-		const [loading, setLoading] = useState(false)
-		const [error, setError] = useState<unknown>(null)
+		const __datasource__ = props.component.attributes[connectionDataSourceFieldName]
 
-		useEffect(() => {
-			const fetchData = async () => {
-				if (__datasource__ && __datasource__.trim() !== "") {
-					setLoading(true)
-					setError(null)
-					try {
-						const decodedDataSourceSettings = decodeDataSourceSettings(__datasource__)
-						const dataSourceId: DataSourceId = decodedDataSourceSettings.id
-						const dataSource = getDataSourceInfo(dataSourceId)
-						const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
-						setConnectedData(result)
-					} catch (err) {
-						setError(err)
-					} finally {
-						setLoading(false)
-					}
-				}
+		const fetchData = useCallback(async (__datasource__: string) => {
+			try {
+				const decodedDataSourceSettings = decodeDataSourceSettings(__datasource__)
+				const dataSourceId: DataSourceId = decodedDataSourceSettings.id
+				const dataSource = getDataSourceInfo(dataSourceId)
+				const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
+				return result
+			} catch (err) {
+				throw err
 			}
-			if (__datasource__) {
-				fetchData()
-			}
-		}, [__datasource__])
+		}, [])
 
-		if (__datasource__ && __datasource__.trim() !== "") {
-			if (loading) return <div>Loading...</div>
-			if (error) return <div>Error: {String(error)}</div>
+		const { data: connectedData, isLoading: loading, error } = useQuery({
+			queryKey: ['connected-connection-data', __datasource__],
+			queryFn: () => fetchData(__datasource__!),
+			enabled: !!__datasource__,
+			staleTime: 60 * 60 * 1000, // 60 minutes for now. TODO: make this configurable per data source
+		})
 
-			if (Array.isArray(connectedData)) {
-				return (
-					<>
-						{connectedData.map((item, idx) => {
-							const newComponent = replaceConnectedComponentProperties(props.component, item)
-							const connectedComponent = { ...props.component, ...newComponent, attributes: { ...props.component.attributes, ...newComponent.attributes } }
-							return (
-								<WrappedComponent key={idx} {...props} component={connectedComponent} />
-							)
-						})}
-					</>
-				)
-			} else {
-				const newComponent = replaceConnectedComponentProperties(props.component, connectedData)
-				const connectedComponent = { ...props.component, ...newComponent, attributes: { ...props.component.attributes, ...newComponent.attributes } }
-				return <WrappedComponent {...props} component={connectedComponent} />
-			}
+		if (!__datasource__ || __datasource__.trim() === "") {
+			// Not a connected component, render as usual
+			return <WrappedComponent {...props} />
 		}
 
-		// Not a connected component, render as usual
-		return <WrappedComponent {...props} />
+		if (loading) return <div>Loading...</div>	// TODO: show loading/skeleton component assigned to this design component
+		if (error) return <div>Error: {String(error)}</div>	// TODO: show error component assigned to this design component
+
+		const renderConnectedComponent = (data: unknown, key?: React.Key) => {
+			const newComponent = replaceConnectedComponentProperties(props.component, data)
+			const connectedComponent = {
+				...props.component,
+				...newComponent,
+				attributes: { ...props.component.attributes, ...newComponent.attributes }
+			}
+			return <WrappedComponent {...props} component={connectedComponent} key={key} />
+		}
+
+		if (Array.isArray(connectedData)) {
+			return <>{connectedData.map((item, idx) => renderConnectedComponent(item, idx))}</>
+		} else {
+			return renderConnectedComponent(connectedData)
+		}
 	}
 }
