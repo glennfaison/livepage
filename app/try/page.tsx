@@ -39,17 +39,17 @@ export default function BuilderPage() {
   const currentPage = (state.componentTree.find((page) => page.attributes.id === state.activePage) || state.componentTree[0]) as DesignComponent<"page">
 
   const saveAsJSON = () => {
-    savePageAsJsonMutation.mutate(currentPage)
+    savePageAsJsonMutation.mutate(state.componentTree)
     setSaveDropdownOpen(false)
   }
 
   const saveAsShortcode = () => {
-    savePageAsShortcodeMutation.mutate(currentPage)
+    savePageAsShortcodeMutation.mutate(state.componentTree)
     setSaveDropdownOpen(false)
   }
 
   const saveAsHTML = () => {
-    savePageAsHtmlMutation.mutate(currentPage)
+    savePageAsHtmlMutation.mutate(state.componentTree)
     setSaveDropdownOpen(false)
   }
 

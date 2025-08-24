@@ -1,5 +1,5 @@
 import { createDesignComponent } from "@/features/design-components"
-import { appReducer, initialState } from "@/lib/store/reducer"
+import { appReducer, initialState } from "@/lib/store/reducers/reducer"
 import type { AppState, AppAction } from "@/lib/store/types"
 import { generateId } from "@/lib/utils"
 

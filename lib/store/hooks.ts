@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
-import { appReducer, initialState } from "./reducer"
+import { appReducer, initialState } from "./reducers/reducer"
 import type { AppState, AppAction } from "./types"
 import type { DesignComponentAttributes, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { toast } from "@/components/ui/use-toast"
@@ -32,7 +32,8 @@ export function useAppState() {
 
 export function usePageOperations(state: AppState) {
   const savePageAsJsonMutation = useMutation({
-    mutationFn: async (page: DesignComponent<"page">) => {
+    mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
+      const page = componentTree[0] as unknown as DesignComponent<"page">
       const data = JSON.stringify(state.componentTree, null)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
@@ -61,7 +62,8 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsShortcodeMutation = useMutation({
-    mutationFn: async (page: DesignComponent<"page">) => {
+    mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
+      const page = componentTree[0] as unknown as DesignComponent<"page">
       // @ts-expect-error TODO: fix type casting here
       const data = ShortcodeParser.stringify(state.componentTree)
       const blob = new Blob([data], { type: "text/plain" })
@@ -91,7 +93,8 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsHtmlMutation = useMutation({
-    mutationFn: async (page: DesignComponent<"page">) => {
+    mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
+      const page = componentTree[0] as unknown as DesignComponent<"page">
       // Basic HTML template
       const htmlTemplate = `
       <!DOCTYPE html>
