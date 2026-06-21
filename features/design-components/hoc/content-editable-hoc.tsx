@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { DesignComponentProps, DesignComponentTag } from "../types"
+import { Props, DesignComponentTag } from "../types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
@@ -12,9 +12,9 @@ interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export function withTextEditing<Tag extends Extract<DesignComponentTag, "header1" | "header2" | "header3" | "paragraph" | "inline-text" | "button">>(
-	WrappedComponent: React.ComponentType<DesignComponentProps<Tag> & WrappedComponentProps>
+	WrappedComponent: React.ComponentType<Props<Tag> & WrappedComponentProps>
 ) {
-	return function ContentEditableComponent(props: DesignComponentProps<Tag>) {
+	return function ContentEditableComponent(props: Props<Tag>) {
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 		const { pageBuilderMode, component, ...otherProps } = props
 		const { setSelectedComponent, updateComponent } = useComponentOperationsContext()
@@ -24,8 +24,8 @@ export function withTextEditing<Tag extends Extract<DesignComponentTag, "header1
 			e.stopPropagation()
 			setContentEditable(false)
 			const newText = e.currentTarget.textContent || ""
-			// @ts-expect-error TODO: fix the argument type for the WrappedComponent
-			updateComponent(component.attributes.id, { children: [newText] })
+			// Cast to any because children may be represented as inline text in metadata defaults
+			updateComponent(component.attributes.id, { children: [newText] as any })
 		}, [component.attributes.id, updateComponent])
 
 		const onClick = useCallback(() => (e: React.MouseEvent<HTMLElement>) => {

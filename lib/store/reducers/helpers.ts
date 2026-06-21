@@ -53,13 +53,18 @@ type InsertComponentProps = {
 export function insertComponent({
   components, newComponent, parentId, index,
 }: InsertComponentProps): DesignComponent<DesignComponentTag>[] {
+  // If the components array is empty and no parentId is provided, insert at root
+  if ((!components || components.length === 0) && (parentId === null || parentId === undefined)) {
+    return [newComponent];
+  }
+
   return components.reduce<DesignComponent<DesignComponentTag>[]>((acc, component, idx) => {
     if (typeof component === "string") {
       return [...acc, component];
     }
     const siblingIndexIsValid = typeof index === "number" && -1 < index && index < components.length;
     const siblingIndex = siblingIndexIsValid ? index : components.length;
-    if (parentId === null || parentId === undefined && idx === siblingIndex) {
+    if ((parentId === null || parentId === undefined) && idx === siblingIndex) {
       return [...acc, newComponent, component];
     }
     // If this is the parent, insert the new component

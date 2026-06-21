@@ -1,7 +1,7 @@
 import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId } from "@/features/data-sources/types"
-import type { DesignComponentAttributes, DesignComponentProps, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
+import type { DesignComponentAttributes, Props, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { insertDataSourceDataInString } from "@/lib/utils"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
@@ -26,16 +26,14 @@ function replaceConnectedComponentProperties<T extends DesignComponent<DesignCom
 		if (typeof originalValue === "string") {
 			newAttributes[key] = insertDataSourceDataInString(originalValue, dataFromSource)
 		} else {
-			// @ts-expect-error TODO: Fix this type error
 			newAttributes[key] = originalValue
 		}
 	}
 
 	for (let i = 0; i < originalComponent.children.length; i++) {
 		const child = originalComponent.children[i]
-		const newChildren = newComponent.children
+		const newChildren = newComponent.children as any
 		if (typeof child === "string") {
-			// @ts-expect-error TODO: Fix this type error
 			newChildren[i] = insertDataSourceDataInString(child, dataFromSource)
 		} else if (typeof child === "object" && child !== null && "attributes" in child) {
 			// If the child is a component, we can recursively replace its properties
@@ -47,9 +45,9 @@ function replaceConnectedComponentProperties<T extends DesignComponent<DesignCom
 }
 
 export function withConnection<Tag extends DesignComponentTag>(
-	WrappedComponent: React.ComponentType<DesignComponentProps<Tag>>
+	WrappedComponent: React.ComponentType<Props<Tag>>
 ) {
-	return function ConnectedComponent(props: DesignComponentProps<Tag>) {
+	return function ConnectedComponent(props: Props<Tag>) {
 		const __datasource__ = props.component.attributes[connectionDataSourceFieldName]
 
 		const fetchData = useCallback(async (__datasource__: string) => {

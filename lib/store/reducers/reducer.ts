@@ -1,4 +1,4 @@
-import { createDesignComponent } from "@/features/design-components"
+import { createDesignComponentInstance } from "@/features/design-components"
 import type { AppState, AppAction, HistoryEntry } from "../types"
 import { generateId } from "../../utils"
 import { insertComponent, updateComponent, removeComponent, duplicateComponent, replaceComponent, findComponentParentTree } from "./helpers"
@@ -34,7 +34,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "INSERT_COMPONENT": {
       const { newComponentTag, parentId, index } = action.payload
       const componentId = generateId()
-      const newComponent = createDesignComponent(newComponentTag, componentId)
+      const newComponent = createDesignComponentInstance(newComponentTag, componentId)
       return {
         ...state,
         componentTree: insertComponent({ components: state.componentTree, newComponent, parentId, index }),
@@ -81,7 +81,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case "REPLACE_COMPONENT": {
       const { oldComponentId, newComponentTag } = action.payload
-      const newComponent = createDesignComponent(newComponentTag, generateId())
+      const newComponent = createDesignComponentInstance(newComponentTag, generateId())
       const newComponentTree = replaceComponent({ components: state.componentTree, oldComponentId, newComponent })
       return {
         ...state,

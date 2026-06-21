@@ -4,22 +4,18 @@ import { MousePointerClick } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
 import { withTextEditing } from "./hoc/content-editable-hoc"
-import { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
+import type { Props, Attribute, Metadata } from "./types"
 
-export type ComponentAttributes = {
-	id: string
-}
+const tag = "button" as const
 
-export const tag: DesignComponentTag = "button" as const
+const label = "Button"
 
-export const label = "Button"
+const keywords = ["button", "click", "action", "btn"]
 
-export const keywords = ["button", "click", "action", "btn"]
+const defaultChildren = ["Button"] as const
 
-export const defaultChildren = ["Button"] as const
-
-export const settingsFields = {
-	id: {
+const attributes: Attribute[] = [
+	{
 		id: "id",
 		type: "text",
 		label: "ID",
@@ -27,37 +23,52 @@ export const settingsFields = {
 		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
-		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, id: value } };
-		},
+		getValue: (component) => component.attributes.id || "",
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
 	},
-	content: {
+	{
 		id: "content",
 		type: "text",
 		label: "Content",
 		placeholder: "Enter button text",
-		defaultValue: defaultChildren,
-		getValue: (component: DesignComponent<typeof tag>) => component.children,
-		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-			return { ...component, children: Array.isArray(value) ? value : [value], }
+		defaultValue: "",
+		getValue: (component) => {
+			if (!component.children) return ""
+			if (Array.isArray(component.children)) {
+				return component.children.map(child => typeof child === "string" ? child : "").join("")
+			}
+			return typeof component.children === "string" ? component.children : ""
 		},
+		setValue: (component, value: unknown) => ({ ...component, children: Array.isArray(value) ? value : [value] } as Props["component"]),
 	},
-}
+]
 
-export const Icon = <MousePointerClick className="h-4 w-4" />
+const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
 
-const Component_ = (props: DesignComponentProps<typeof tag>) => {
-	const children = props.component.children?.length ? props.component.children : settingsFields.content.defaultValue
-	const filteredProps: Partial<DesignComponentProps<typeof tag>> = { ...props }
-	delete filteredProps.pageBuilderMode
-	delete filteredProps.selectedComponentId
+const Icon = <MousePointerClick className="h-4 w-4" />
+
+const Component = (props: Props) => {
+	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
+	const filteredProps: Partial<Props> = { ...props }
+	delete (filteredProps as any).pageBuilderMode
+	delete (filteredProps as any).selectedComponentId
 
 	return (
 		<Button {...filteredProps}>{children as React.ReactNode}</Button>
 	)
 }
 
-const WithContentEditing = withTextEditing(Component_)
-const ConnectedComponent = withConnection(WithContentEditing)
-export const Component = withEditorControls(ConnectedComponent)
+const WithContentEditing = withTextEditing(Component)
+const ViewModeComponent = withConnection(WithContentEditing)
+const EditModeComponent = withEditorControls(ViewModeComponent)
+
+export const metadata: Metadata = {
+	tag,
+	label,
+	keywords,
+	defaultChildren,
+	attributes,
+	Icon,
+	ViewModeComponent,
+	EditModeComponent,
+}

@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
-import { getComponentInfo } from "..";
-import type { DesignComponentProps, DesignComponentTag, DesignComponent } from "../types";
+import type { Props, DesignComponentTag, DesignComponent } from "../types";
 import { useComponentOperationsContext } from "@/lib/component-operations-context";
 import React from "react";
 
-function AncestorTags(props: DesignComponentProps<DesignComponentTag>) {
+function AncestorTags(props: Props<DesignComponentTag>) {
   const { setSelectedComponent } = useComponentOperationsContext()
   const ancestors = props.selectedComponentAncestors.filter((component) => {
     return component.tag !== "page"
@@ -41,24 +40,28 @@ function AncestorTags(props: DesignComponentProps<DesignComponentTag>) {
 
   return (
     <div className="absolute bottom-[100%] right-0 flex flex-col items-end">
-      {ancestors.map((component, idx) => (
-        <div key={component.attributes.id}
-          className={cn(
-            "relative flex border p-1 px-2 shadow-sm cursor-pointer text-right justify-end text-xs",
-            "bg-background opacity-95 text-muted-foreground",
-          )}
-          style={{ width: `${100 + 10 * idx}%` }}
-          onClick={(e) => selectAncestor(e, component.attributes.id)}
-        >
-          {getComponentInfo(component.tag).label}
-        </div>
-      ))}
+      {ancestors.map((component, idx) => {
+        const { getComponentInfo } = require("..")
+        return (
+          <div key={component.attributes.id}
+            className={cn(
+              "relative flex border p-1 px-2 shadow-sm cursor-pointer text-right justify-end text-xs",
+              "bg-background opacity-95 text-muted-foreground",
+            )}
+            style={{ width: `${100 + 10 * idx}%` }}
+            onClick={(e) => selectAncestor(e, component.attributes.id)}
+          >
+            {getComponentInfo(component.tag).label}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-function ComponentControls<Tag extends DesignComponentTag>(props: DesignComponentProps<Tag>) {
+function ComponentControls<Tag extends DesignComponentTag>(props: Props<Tag>) {
   const { component } = props
+  const { getComponentInfo } = require("..")
   const { label } = getComponentInfo(component.tag)
   const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 
@@ -112,9 +115,9 @@ function ComponentControls<Tag extends DesignComponentTag>(props: DesignComponen
 }
 
 export function withEditorControls<Tag extends DesignComponentTag>(
-  WrappedComponent: React.ComponentType<DesignComponentProps<Tag>>
+  WrappedComponent: React.ComponentType<Props<Tag>>
 ) {
-  return function ComponentWithControls(props: DesignComponentProps<Tag>) {
+  return function ComponentWithControls(props: Props<Tag>) {
     const showControls = props.pageBuilderMode === "edit" &&
       props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()

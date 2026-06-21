@@ -3,7 +3,7 @@
 import { Toolbar } from "@/components/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Component as PageComponent } from "@/features/design-components/page-component"
+import { metadata as PageMeta } from "@/features/design-components/page"
 import type { DesignComponent } from "@/features/design-components/types"
 import type { PageBuilderMode } from "@/lib/store/types"
 import { ComponentOperationsContext } from "@/lib/component-operations-context"
@@ -164,12 +164,17 @@ export default function BuilderPage() {
           </div>
         </header>
 
-        <PageComponent
-          selectedComponentId={state.selectedComponentId}
-          selectedComponentAncestors={state.selectedComponentAncestors}
-          pageBuilderMode={pageBuilderMode as PageBuilderMode}
-          component={currentPage}
-        />
+        {(() => {
+          const PageComponent = pageBuilderMode === "preview" ? PageMeta.ViewModeComponent : PageMeta.EditModeComponent
+          return (
+            <PageComponent
+              selectedComponentId={state.selectedComponentId}
+              selectedComponentAncestors={state.selectedComponentAncestors}
+              pageBuilderMode={pageBuilderMode as PageBuilderMode}
+              component={currentPage}
+            />
+          )
+        })()}
 
         <Toolbar
           toolbarMinimized={state.toolbarMinimized}

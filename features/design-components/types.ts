@@ -1,103 +1,98 @@
 import type React from "react"
 import type { ReactNode } from "react"
-
-import type { ComponentAttributes as ButtonAttributes } from "./button"
-import type { ComponentAttributes as ColumnAttributes } from "./column"
-import type { ComponentAttributes as Header1Attributes } from "./header1"
-import type { ComponentAttributes as Header2Attributes } from "./header2"
-import type { ComponentAttributes as Header3Attributes } from "./header3"
-import type { ComponentAttributes as ImageAttributes } from "./image"
-import type { ComponentAttributes as InlineTextAttributes } from "./inline-text"
-import type { ComponentAttributes as PageAttributes } from "./page-component"
-import type { ComponentAttributes as ParagraphAttributes } from "./paragraph"
-import type { ComponentAttributes as RowAttributes } from "./row"
 import { PageBuilderMode } from "@/lib/store/types"
-
-type DesignComponentTagnames = [
-  "header1",
-  "header2",
-  "header3",
-  "paragraph",
-  "inline-text",
-  "button",
-  "image",
-  "row",
-  "column",
-  "page"
-]
-
-// Component types
-export type DesignComponentTag = DesignComponentTagnames[number]
+import { Node } from "@/features/shortcode-parser/parser"
 
 interface Connectable {
   __datasource__?: string
 }
 
-// Generic component attributes based on component type
-export type DesignComponentAttributes<Tag extends DesignComponentTag> =
-  Tag extends "header1" ? (Header1Attributes & Connectable) :
-  Tag extends "header2" ? (Header2Attributes & Connectable) :
-  Tag extends "header3" ? (Header3Attributes & Connectable) :
-  Tag extends "paragraph" ? (ParagraphAttributes & Connectable) :
-  Tag extends "inline-text" ? (InlineTextAttributes & Connectable) :
-  Tag extends "button" ? (ButtonAttributes & Connectable) :
-  Tag extends "image" ? (ImageAttributes & Connectable) :
-  Tag extends "row" ? (RowAttributes & Connectable) :
-  Tag extends "column" ? (ColumnAttributes & Connectable) :
-  Tag extends "page" ? (PageAttributes & Connectable) :
-  never
-
-export type DesignComponentSetting<Tag extends DesignComponentTag> = {
-  id: keyof DesignComponentAttributes<Tag>
-  label: string
-  type: "text" | "number" | "boolean" | "textarea" | "select" | "color"
+type BaseAttribute = {
+  id: string
+  /** Optional label - dividers may have no label */
+  label?: string
   description?: string
   required?: boolean
-  min?: number // For number fields
-  max?: number // For number fields
-  step?: number // For number fields
-  rows?: number // For textarea fields
   disabled?: boolean
   readOnly?: boolean
   placeholder?: string
+  defaultValue?: string
+}
+
+// TODO: make getValue and setValue required
+export type Attribute = ({
+  type: "number"
+  min?: number
+  max?: number
+  step?: number
   options?: string[] // For select fields
-  defaultValue?: string | number | boolean
-  getValue: (component: DesignComponent<Tag>) => string | number | boolean | string[]
-  setValue: (component: Partial<DesignComponent<Tag>>, value: unknown) => DesignComponent<Tag>
-}
+  defaultValue?: number
+  getValue?: (node: Node) => number
+  setValue?: (node: Partial<Node>, value: number) => Node
+} | {
+  type: "boolean"
+  defaultValue?: boolean
+  getValue?: (node: Node) => boolean
+  setValue?: (node: Partial<Node>, value: boolean) => Node
+} | {
+  type: "text"
+  defaultValue?: string
+  getValue?: (node: Node) => string
+  setValue?: (node: Partial<Node>, value: string) => Node
+} | {
+  type: "textarea"
+  rows?: number
+  defaultValue?: (string | Node)[]
+  getValue?: (node: Node) => (string | Node)[]
+  setValue?: (node: Partial<Node>, value: (string | Node)[]) => Node
+} | {
+  type: "select"
+  options?: string[]
+  defaultValue?: string | string[]
+  getValue?: (node: Node) => string | string[]
+  setValue?: (node: Partial<Node>, value: string | string[]) => Node
+} | {
+  type: "color"
+  defaultValue?: string
+  getValue?: (node: Node) => string
+  setValue?: (node: Partial<Node>, value: string) => Node
+} | {
+  type: "group"
+  /** If true the group can be collapsed in the UI */
+  collapsible?: boolean
+  /** Initial collapsed state when rendered */
+  collapsed?: boolean
+  /** Nested attribute fields inside the group */
+  fields: Attribute[]
+} | {
+  type: "divider"
+  // Horizontal divider (no extra fields)
+}) & BaseAttribute
 
-export type DesignComponent<Tag extends DesignComponentTag> = {
-  tag: Tag
-  children: DesignComponent<DesignComponentTag>[]
-  attributes: DesignComponentAttributes<Tag>
-}
-
-export type Page = DesignComponent<"page">
-
-export type DesignComponentOperations<Tag extends DesignComponentTag> = {
-  setSelectedComponent: (componentId: string) => void
-  updateComponent: (componentId: string, updates: Partial<DesignComponent<Tag>>) => void
-  removeComponent: (id: string) => void
-  duplicateComponent?: (id: string) => void
-  addComponent: (args: { tag: DesignComponentTag; parentId?: string; index?: number }) => void
-  replaceComponent: (oldComponentId: string, newComponentTag: DesignComponentTag) => void
-  findComponentById: (components: DesignComponent<DesignComponentTag>[], id: string) => DesignComponent<DesignComponentTag> | null
-}
-
-export type DesignComponentProps<Tag extends DesignComponentTag> = {
+export type Props = {
   pageBuilderMode: PageBuilderMode
-  component: DesignComponent<Tag>
+  component: Node
   selectedComponentId: string,
-  selectedComponentAncestors: DesignComponent<DesignComponentTag>[]
+  selectedComponentAncestors: Node[]
 }
 
-export interface DesignComponentMetadata<Tag extends DesignComponentTag> {
-  tag: Tag
+export interface Metadata {
+  tag: string
   label: string
   keywords: string[]
-  defaultChildren: DesignComponent<DesignComponentTag>[]
-  defaultAttributes: DesignComponentAttributes<Tag>
-  settingsFields: Record<keyof DesignComponentAttributes<Tag>, DesignComponentSetting<Tag>>
   Icon: ReactNode
-  Component: (props: DesignComponentProps<Tag>) => React.JSX.Element
+  defaultChildren: ReadonlyArray<Node | string>
+  attributes: Attribute[]
+  ViewModeComponent: React.ComponentType<any>
+  EditModeComponent: React.ComponentType<any>
+}
+
+export type Operations = {
+  setSelectedComponent: (componentId: string) => void
+  updateComponent: (componentId: string, updates: Partial<Node>) => void
+  removeComponent: (id: string) => void
+  duplicateComponent?: (id: string) => void
+  addComponent: (args: { tag: string; parentId?: string; index?: number }) => void
+  replaceComponent: (oldComponentId: string, newComponentTag: string) => void
+  findComponentById: (components: Node[], id: string) => Node | null
 }

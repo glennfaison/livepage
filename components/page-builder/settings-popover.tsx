@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
-import type { DesignComponentAttributes, DesignComponentMetadata, DesignComponentTag, DesignComponent, DesignComponentSetting } from "@/features/design-components/types"
+import type { DesignComponentAttributes, Metadata, DesignComponentTag, DesignComponent, Attribute } from "@/features/design-components/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
@@ -41,41 +41,88 @@ const DataSourceSelectorButton = ({
   )
 }
 
+function flattenAttributes(attrs: Attribute[]): Attribute[] {
+  const out: Attribute[] = []
+  for (const a of attrs) {
+    if ((a as any).type === "group") {
+      out.push(...flattenAttributes((a as any).fields))
+    } else if ((a as any).type === "divider") {
+      continue
+    } else {
+      out.push(a)
+    }
+  }
+  return out
+}
+
+function findAttributeById(attrs: Attribute[], id: string): Attribute | undefined {
+  for (const a of attrs) {
+    if ((a as any).type === "group") {
+      const found = findAttributeById((a as any).fields, id)
+      if (found) return found
+    } else if ((a as any).type === "divider") {
+      continue
+    } else if (a.id === id) {
+      return a
+    }
+  }
+  return undefined
+}
+
 function useComponentSettingsEditor<Tag extends DesignComponentTag>({ component, setIsOpen }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const componentInfo = React.useMemo(() => getComponentInfo(component.tag), [component.tag])
-  const settingsFields = React.useMemo(
-    () => Object.values(componentInfo.settingsFields).filter((field) => field.id !== connectionDataSourceFieldName),
-    [componentInfo.settingsFields],
-  ) as DesignComponentSetting<Tag>[]
+  // Keep the hierarchical attributes for rendering (groups/dividers preserved)
+  const settingsFields = React.useMemo(() => componentInfo.attributes, [componentInfo.attributes]) as Attribute[]
   const [formData, setFormData] = React.useState<DesignComponentAttributes<Tag>>({} as DesignComponentAttributes<Tag>)
 
   const { updateComponent } = useComponentOperationsContext()
 
   React.useEffect(() => {
     const initialFormData = {} as DesignComponentAttributes<Tag>
-    for (const key in componentInfo.settingsFields) {
-      initialFormData[key] = componentInfo.settingsFields[key].getValue(component) as DesignComponentAttributes<Tag>[typeof key]
+    const flat = flattenAttributes(componentInfo.attributes) as any as Attribute<any>[]
+    for (const field of flat) {
+      initialFormData[field.id as keyof DesignComponentAttributes<Tag>] = (field as any).getValue(component) as DesignComponentAttributes<Tag>[typeof field.id]
     }
     setFormData(initialFormData)
-  }, [componentInfo.settingsFields, component])
+  }, [componentInfo.attributes, component])
 
   const handleSave = () => {
-    for (const key in componentInfo.defaultAttributes) {
-      if (formData[key] === "" || String(formData[key]).trim() === "") {
-        formData[key] = componentInfo.defaultAttributes[key]
+    // Build a copy of formData and fill empty values with setting defaults where available
+    const updatedFormData = { ...formData } as DesignComponentAttributes<Tag>
+
+    const flat = flattenAttributes(componentInfo.attributes) as any as Attribute<any>[]
+    for (const field of flat) {
+      const key = field.id as keyof DesignComponentAttributes<Tag>
+      const value = updatedFormData[key]
+
+      if (typeof value === "string" && String(value).trim() === "") {
+        // Prefer the setting's defaultValue (useful for content/defaultChildren), fallback to componentInfo.defaultAttributes
+        if (typeof (field as any).defaultValue !== "undefined") {
+          updatedFormData[key] = (field as any).defaultValue as any
+        } else if (componentInfo.defaultAttributes && typeof (componentInfo.defaultAttributes as any)[key] !== "undefined") {
+          updatedFormData[key] = (componentInfo.defaultAttributes as any)[key]
+        }
       }
     }
+
     let update = {} as Partial<DesignComponent<Tag>>
-    for (const key in formData) {
-      const reference: DesignComponentSetting<Tag> = componentInfo.settingsFields[key]
-      update = reference.setValue(update, formData[key])
+    for (const key in updatedFormData) {
+      const reference = findAttributeById(componentInfo.attributes, key) as Attribute | undefined
+      if (!reference) continue
+      update = (reference as any).setValue(update, (updatedFormData as any)[key])
     }
     updateComponent(component.attributes.id, update)
     setIsOpen(false)
   }
 
   const handleDiscard = () => {
-    setFormData({ ...component.attributes })
+    // Reset form data to the current component values (including children/content)
+    const resetData = {} as DesignComponentAttributes<Tag>
+    const flat = flattenAttributes(componentInfo.attributes) as any as Attribute<any>[]
+    for (const field of flat) {
+      resetData[field.id as keyof DesignComponentAttributes<Tag>] = (field as any).getValue(component) as any
+    }
+    setFormData(resetData)
     setIsOpen(false)
   }
 
@@ -163,7 +210,7 @@ function useDataSourceSettingsEditor<Tag extends DesignComponentTag>({ component
 }
 
 function SettingsInputField<Tag extends DesignComponentTag>({ field, formData, handleFieldChange }: {
-  field: DesignComponentSetting<Tag>;
+  field: Attribute<Tag>;
   formData: DesignComponentAttributes<Tag>;
   handleFieldChange: (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => void;
 }): React.JSX.Element {
@@ -230,8 +277,8 @@ function SettingsInputField<Tag extends DesignComponentTag>({ field, formData, h
 }
 
 function ComponentSettingsTabContent<Tag extends DesignComponentTag>({ settingsFields, formData, handleDiscard, handleFieldChange, handleSave }: {
-  componentInfo: DesignComponentMetadata<Tag>;
-  settingsFields: DesignComponentSetting<Tag>[];
+  componentInfo: Metadata<Tag>;
+  settingsFields: Attribute<Tag>[];
   formData: DesignComponentAttributes<Tag>;
   setFormData: React.Dispatch<DesignComponentAttributes<Tag>>;
   handleDiscard: () => void;
@@ -241,9 +288,62 @@ function ComponentSettingsTabContent<Tag extends DesignComponentTag>({ settingsF
   return (
     <>
       <div className="space-y-4 p-4 overflow-y-scroll flex-1">
-        {settingsFields.map((field) => (
-          <SettingsInputField key={field.id as string} field={field} formData={formData} handleFieldChange={handleFieldChange} />
-        ))}
+        {settingsFields.map((field) => {
+          // Divider
+          if ((field as any).type === "divider") {
+            return <hr key={(field as any).id} className="my-2 border-t" />
+          }
+
+          // Group
+          if ((field as any).type === "group") {
+            const group = field as any
+
+            const GroupRenderer = () => {
+              const [collapsed, setCollapsed] = React.useState<boolean>(group.collapsed ?? false)
+              return (
+                <div key={group.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>{group.label}</Label>
+                    {group.collapsible && (
+                      <Button size="sm" variant="ghost" onClick={() => setCollapsed(!collapsed)}>
+                        {collapsed ? "Expand" : "Collapse"}
+                      </Button>
+                    )}
+                  </div>
+                  {!collapsed && (
+                    <div className="pl-4 space-y-2">
+                      {group.fields.map((nested: Attribute) => {
+                        if ((nested as any).type === "divider") {
+                          return <hr key={(nested as any).id} className="my-2 border-t" />
+                        }
+                        if ((nested as any).type === "group") {
+                          // Nested groups: render recursively
+                          return (
+                            <div key={(nested as any).id}>
+                              {/* Recursive group rendering simplified */}
+                              <Label>{nested.label}</Label>
+                              <div className="pl-4">
+                                {(nested as any).fields.map((nf: Attribute) => (
+                                  <SettingsInputField key={nf.id as string} field={nf} formData={formData} handleFieldChange={handleFieldChange} />
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        }
+                        return <SettingsInputField key={nested.id as string} field={nested} formData={formData} handleFieldChange={handleFieldChange} />
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            return <GroupRenderer key={group.id} />
+          }
+
+          // Default: render a single field
+          return <SettingsInputField key={field.id as string} field={field} formData={formData} handleFieldChange={handleFieldChange} />
+        })}
       </div>
 
       {/* Footer Buttons for Settings Tab */}

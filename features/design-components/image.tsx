@@ -1,36 +1,19 @@
 "use client"
 
+import React from "react"
 import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
 import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
-import type { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
+import type { Props, Attribute, Metadata } from "./types"
 
-export type ComponentAttributes = {
-	id: string
-	src?: string
-	alt?: string
-	width?: string
-	height?: string
-	fallbackSrc?: string
-}
+const tag = "image" as const
 
-export const defaultAttributes: ComponentAttributes = {
-	id: "",
-	src: "",
-	alt: "Image Description",
-	width: "100%",
-	height: "auto",
-	fallbackSrc: "/placeholder-img.svg?height=300&width=300",
-} as const
+const label = "Image"
 
-export const tag: DesignComponentTag = "image" as const
+const keywords = ["image", "picture", "photo", "graphic", "media"]
 
-export const label = "Image"
-
-export const keywords = ["image", "picture", "photo", "graphic", "media"]
-
-export const settingsFields = {
-	id: {
+const attributes: Attribute[] = [
+	{
 		id: "id",
 		type: "text",
 		label: "ID",
@@ -38,72 +21,60 @@ export const settingsFields = {
 		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
-		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, id: value } };
-		},
+		getValue: (component) => component.attributes.id || "",
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
 	},
-	src: {
+	{
 		id: "src",
 		type: "text",
 		label: "Image Source",
 		placeholder: "Enter image URL",
 		defaultValue: "",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.src,
-		setValue: (component: DesignComponent<typeof tag>, value: string): DesignComponent<typeof tag> => ({
-			...component, attributes: { ...component.attributes, src: value },
-		}),
+		getValue: (component) => component.attributes.src,
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, src: value } } as Props["component"]),
 	},
-	alt: {
+	{
 		id: "alt",
 		type: "text",
 		label: "Alt Text",
 		placeholder: "Enter image description",
 		defaultValue: "Image Description",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.alt,
-		setValue: (component: DesignComponent<typeof tag>, value: string): DesignComponent<typeof tag> => ({
-			...component, attributes: { ...component.attributes, alt: value },
-		}),
+		getValue: (component) => component.attributes.alt,
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, alt: value } } as Props["component"]),
 	},
-	width: {
+	{
 		id: "width",
 		type: "text",
 		label: "Width",
 		placeholder: "Enter width (e.g., 100px, 50%)",
 		defaultValue: "100%",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.width,
-		setValue: (component: DesignComponent<typeof tag>, value: string): DesignComponent<typeof tag> => ({
-			...component, attributes: { ...component.attributes, width: value },
-		}),
+		getValue: (component) => component.attributes.width,
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, width: value } } as Props["component"]),
 	},
-	height: {
+	{
 		id: "height",
 		type: "text",
 		label: "Height",
 		placeholder: "Enter height (e.g., 100px, auto)",
 		defaultValue: "auto",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.height,
-		setValue: (component: DesignComponent<typeof tag>, value: string): DesignComponent<typeof tag> => ({
-			...component, attributes: { ...component.attributes, height: value },
-		}),
+		getValue: (component) => component.attributes.height,
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, height: value } } as Props["component"]),
 	},
-	fallbackSrc: {
+	{
 		id: "fallbackSrc",
 		type: "text",
 		label: "Fallback Image Source",
 		placeholder: "Enter fallback image URL",
 		defaultValue: "/placeholder-img.svg?height=300&width=300",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.fallbackSrc,
-		setValue: (component: DesignComponent<typeof tag>, value: string): DesignComponent<typeof tag> => ({
-			...component, attributes: { ...component.attributes, fallbackSrc: value },
-		}),
+		getValue: (component) => component.attributes.fallbackSrc,
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, fallbackSrc: value } } as Props["component"]),
 	},
-}
+]
 
-export const Icon = <ImageIcon className="h-4 w-4" />
+const Icon = <ImageIcon className="h-4 w-4" />
 
-const Component_ = (props: DesignComponentProps<typeof tag>) => {
-	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes
+const Component = (props: Props) => {
+	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes as any
 	return (
 		// eslint-disable-next-line @next/next/no-img-element
 		<img
@@ -115,5 +86,16 @@ const Component_ = (props: DesignComponentProps<typeof tag>) => {
 	)
 }
 
-const ConnectedComponent = withConnection(Component_)
-export const Component = withEditorControls(ConnectedComponent)
+const ViewModeComponent = withConnection(Component)
+const EditModeComponent = withEditorControls(ViewModeComponent)
+
+export const metadata: Metadata = {
+	tag,
+	label,
+	keywords,
+	defaultChildren: [],
+	attributes,
+	Icon,
+	ViewModeComponent,
+	EditModeComponent,
+}

@@ -8,7 +8,7 @@ import { appReducer, initialState } from "./reducers/reducer"
 import type { AppState, AppAction } from "./types"
 import type { DesignComponentAttributes, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { toast } from "@/components/ui/use-toast"
-import * as ShortcodeParser from "../shortcode-parser/parser"
+import * as ShortcodeParser from "../../features/shortcode-parser/parser"
 
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -64,7 +64,6 @@ export function usePageOperations(state: AppState) {
   const savePageAsShortcodeMutation = useMutation({
     mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
       const page = componentTree[0] as unknown as DesignComponent<"page">
-      // @ts-expect-error TODO: fix type casting here
       const data = ShortcodeParser.stringify(state.componentTree)
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
@@ -306,13 +305,13 @@ const renderComponentsToHTML = (components: DesignComponent<DesignComponentTag>[
         return `<button>${component.children}</button>`
       }
       case "row":
-        return `<div class="row">${renderComponentsToHTML(component.children)}</div>`
+        return `<div class="row">${renderComponentsToHTML(component.children as DesignComponent<DesignComponentTag>[])}</div>`
       case "column":
-        return `<div class="column">${renderComponentsToHTML(component.children)}</div>`
+        return `<div class="column">${renderComponentsToHTML(component.children as DesignComponent<DesignComponentTag>[])}</div>`
       case "page":
-        return `<div class="column">${renderComponentsToHTML(component.children)}</div>`
+        return `<div class="column">${renderComponentsToHTML(component.children as DesignComponent<DesignComponentTag>[])}</div>`
       default:
-        const _: never = component.tag
+        const _: never = component.tag as never
         console.error("Unexpected tag:", _)
         return ""
     }

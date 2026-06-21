@@ -3,7 +3,7 @@ import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
 import { withTextEditing } from "./hoc/content-editable-hoc"
-import { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
+import type { Props, DesignComponentTag, DesignComponent, Metadata } from "./types"
 
 export type ComponentAttributes = {
 	id: string
@@ -11,14 +11,14 @@ export type ComponentAttributes = {
 
 export const tag: DesignComponentTag = "inline-text" as const
 
-export const label = "Inline Text"
+const label = "Inline Text"
 
-export const keywords = ["span", "text", "inline", "content"]
+const keywords = ["span", "text", "inline", "content"]
 
-export const defaultChildren = ["Inline text."] as const
+const defaultChildren = ["Inline text."] as const
 
-export const settingsFields = {
-	id: {
+const settings = [
+	{
 		id: "id",
 		type: "text",
 		label: "ID",
@@ -31,7 +31,7 @@ export const settingsFields = {
 			return { ...component, attributes: { ...component.attributes, id: value } };
 		},
 	},
-	content: {
+	{
 		id: "content",
 		type: "text",
 		label: "Content",
@@ -42,13 +42,19 @@ export const settingsFields = {
 			return { ...component, children: Array.isArray(value) ? value : [value], }
 		},
 	},
-}
+]
 
-export const Icon = <Type className="h-4 w-4" />
+const settingsMap = Object.fromEntries((settings as any).filter((s:any)=> (s as any).type !== "divider").map((s:any) => [(s as any).id, s])) as any
 
-const Component_ = (props: DesignComponentProps<typeof tag>) => {
-	const children = props.component.children?.length ? props.component.children : settingsFields.content.defaultValue
-	const filteredProps: Partial<DesignComponentProps<typeof tag>> = { ...props }
+const defaultAttributes = {
+	id: settingsMap.id.defaultValue,
+} as const
+
+const Icon = <Type className="h-4 w-4" />
+
+const Component_ = (props: Props<typeof tag>) => {
+	const children = props.component.children?.length ? props.component.children : settingsMap.content.defaultValue
+	const filteredProps: Partial<Props<typeof tag>> = { ...props }
 	delete filteredProps.pageBuilderMode
 	delete filteredProps.selectedComponentId
 
@@ -59,4 +65,16 @@ const Component_ = (props: DesignComponentProps<typeof tag>) => {
 
 const WithContentEditing = withTextEditing(Component_)
 const ConnectedComponent = withConnection(WithContentEditing)
-export const Component = withEditorControls(ConnectedComponent)
+const EditModeComponent = withEditorControls(ConnectedComponent)
+
+export const metadata: Metadata<typeof tag> = {
+	tag,
+	label,
+	keywords,
+	defaultChildren: defaultChildren,
+	defaultAttributes: defaultAttributes as any,
+	attributes: settings as any,
+	Icon,
+	ViewModeComponent: ConnectedComponent,
+	EditModeComponent,
+}

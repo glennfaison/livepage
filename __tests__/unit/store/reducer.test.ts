@@ -1,4 +1,4 @@
-import { createDesignComponent } from "@/features/design-components"
+import { createDesignComponentInstance } from "@/features/design-components"
 import { appReducer, initialState } from "@/lib/store/reducers/reducer"
 import type { AppState, AppAction } from "@/lib/store/types"
 import { generateId } from "@/lib/utils"
@@ -18,11 +18,11 @@ describe("App Reducer", () => {
   it("should handle SET_PAGES", () => {
     const newPages = [
       {
-        title: "New Page",
-        attributes: { id: "page-2", },
-        components: [],
+        tag: "page",
+        attributes: { id: "page-2", title: "New Page" },
+        children: [],
       },
-    ]
+    ] as any
 
     const action: AppAction = {
       type: "SET_PAGES",
@@ -35,10 +35,10 @@ describe("App Reducer", () => {
 
   it("should handle ADD_PAGE", () => {
     const newPage = {
-      title: "New Page",
-      attributes: { id: "page-2", },
-      components: [],
-    }
+      tag: "page",
+      attributes: { id: "page-2", title: "New Page" },
+      children: [],
+    } as any
 
     const action: AppAction = {
       type: "ADD_PAGE",
@@ -63,21 +63,19 @@ describe("App Reducer", () => {
   })
 
   it("should handle INSERT_COMPONENT to root level", () => {
-    const component = createDesignComponent("header1", generateId())
-
     const action: AppAction = {
       type: "INSERT_COMPONENT",
       payload: {
-        pageId: "page-1",
-        component,
+        newComponentTag: "header1",
+        parentId: "page-1",
         index: 0,
       },
     }
 
     const result = appReducer(state, action)
     expect(result.componentTree[0].children).toHaveLength(1)
-    expect(result.componentTree[0].children[0]).toEqual(component)
-    expect(result.selectedComponentId).toBe(component.attributes.id)
+    expect((result.componentTree[0].children[0] as any).tag).toBe("header1")
+    expect(result.selectedComponentId).toBe((result.componentTree[0].children[0] as any).attributes.id)
   })
 
   it("should handle SET_SELECTED_COMPONENT", () => {
@@ -105,20 +103,22 @@ describe("App Reducer", () => {
 
 describe("insertComponent", () => {
   it("should insert a component at the root level if no parentId is provided", () => {
-    const { insertComponent } = require("@/lib/store/reducer")
+    const { insertComponent } = require("@/lib/store/reducers/helpers")
     const state = { ...initialState, componentTree: [] }
-    const component = createDesignComponent("header1", generateId())
-    insertComponent(state, component)
+    const component = createDesignComponentInstance("header1", generateId())
+    const newComponents = insertComponent({ components: state.componentTree, newComponent: component })
+    state.componentTree = newComponents
     expect(state.componentTree).toHaveLength(1)
     expect(state.componentTree[0]).toEqual(component)
   })
 
   it("should insert a component as a child of a parent component", () => {
-    const { insertComponent } = require("@/lib/store/reducer")
-    const parent = createDesignComponent("row", generateId())
+    const { insertComponent } = require("@/lib/store/reducers/helpers")
+    const parent = createDesignComponentInstance("row", generateId())
     const state = { ...initialState, componentTree: [parent] }
-    const child = createDesignComponent("header1", generateId())
-    insertComponent(state, child, parent.attributes.id)
+    const child = createDesignComponentInstance("header1", generateId())
+    const newComponents = insertComponent({ components: state.componentTree, newComponent: child, parentId: parent.attributes.id })
+    state.componentTree = newComponents
     expect(state.componentTree[0].children).toHaveLength(1)
     expect(state.componentTree[0].children[0]).toEqual(child)
   })

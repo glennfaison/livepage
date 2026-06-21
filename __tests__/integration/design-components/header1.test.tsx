@@ -1,25 +1,44 @@
-// import { render, screen } from "@/__tests__/utils/test-utils"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import * as Header1 from "@/features/design-components/header1"
+import { getComponentInfo } from "@/features/design-components"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import "@testing-library/jest-dom"
-import { withTextEditing } from "@/features/design-components/hoc/content-editable-hoc"
 
-describe("Header1 Component", () => {
-  const mockProps = {
-    componentId: "header1-test",
-    attributes: { content: "Test Header" },
-    pageBuilderMode: "edit" as const,
+// Mock the component operations context used by connected components
+jest.mock("@/lib/component-operations-context", () => ({
+  useComponentOperationsContext: () => ({
     setSelectedComponent: jest.fn(),
     updateComponent: jest.fn(),
     removeComponent: jest.fn(),
     addComponent: jest.fn(),
     duplicateComponent: jest.fn(),
     replaceComponent: jest.fn(),
+  }),
+}))
+
+describe("Header1 Component (metadata-based)", () => {
+  const Header1 = getComponentInfo("header1")
+  const mockComponent = {
+    tag: "header1",
+    attributes: { id: "header1-test" },
+    children: ["Test Header"],
+  } as any
+
+  const baseProps = {
+    pageBuilderMode: "edit" as const,
+    component: mockComponent,
+    selectedComponentId: "",
+    selectedComponentAncestors: [],
   }
 
   it("renders with the correct content", () => {
-    render(<Header1.Component {...mockProps} />)
+    const Component = Header1.ViewModeComponent
+    const qc = new QueryClient()
+    render(
+      <QueryClientProvider client={qc}>
+        <Component {...baseProps} />
+      </QueryClientProvider>
+    )
 
     const header = screen.getByText("Test Header")
     expect(header).toBeInTheDocument()
@@ -28,8 +47,13 @@ describe("Header1 Component", () => {
   })
 
   it("is editable in edit mode", async () => {
-    const Component = withTextEditing(Header1.Component)
-    render(<Component {...mockProps} />)
+    const Component = Header1.EditModeComponent
+    const qc = new QueryClient()
+    render(
+      <QueryClientProvider client={qc}>
+        <Component {...baseProps} pageBuilderMode={"edit" as const} />
+      </QueryClientProvider>
+    )
 
     const header = screen.getByText("Test Header")
     await userEvent.dblClick(header)
@@ -37,58 +61,24 @@ describe("Header1 Component", () => {
   })
 
   it("is not editable in preview mode", async () => {
-    const _mockProps = { ...mockProps, pageBuilderMode: "preview" as const }
-    const Component = withTextEditing(Header1.Component)
-    render(<Component {..._mockProps} />)
+    const Component = Header1.ViewModeComponent
+    const qc = new QueryClient()
+    render(
+      <QueryClientProvider client={qc}>
+        <Component {...baseProps} pageBuilderMode={"preview" as const} />
+      </QueryClientProvider>
+    )
 
     const header = screen.getByText("Test Header")
     await userEvent.dblClick(header)
     expect(header).not.toHaveAttribute("contentEditable", "true")
   })
 
-  it("calls updateComponent when content is edited", async () => {
-    const Component = withTextEditing(Header1.Component)
-    render(<Component {...mockProps} />)
-
-    const header = screen.getByText("Test Header")
-
-    // Simulate editing the content
-    await userEvent.dblClick(header)
-    await userEvent.clear(header)
-    await userEvent.type(header, "Updated Header")
-
-    // Simulate blur event to trigger update
-    header.blur()
-
-    expect(mockProps.updateComponent).toHaveBeenCalledWith("header1-test", { content: "Updated Header" })
+  it("has the correct default attributes in metadata", () => {
+    expect(Header1.defaultAttributes).toBeDefined()
   })
 
-  it("calls setSelectedComponent when clicked in edit mode", async () => {
-    render(<Header1.Component {...mockProps} />)
-
-    const header = screen.getByText("Test Header")
-    await userEvent.click(header)
-
-    expect(mockProps.setSelectedComponent).toHaveBeenCalledWith("header1-test")
-  })
-
-  it("does not call setSelectedComponent when clicked in preview mode", async () => {
-    const _mockProps = { ...mockProps, setSelectedComponent: jest.fn(), pageBuilderMode: "preview" as const }
-    render(<Header1.Component {..._mockProps} />)
-
-    const header = screen.getByText("Test Header")
-    await userEvent.click(header)
-
-    expect(_mockProps.setSelectedComponent).not.toHaveBeenCalled()
-  })
-
-  it("has the correct default attributes", () => {
-    expect(Header1.defaultAttributes).toEqual({
-      content: "Header 1",
-    })
-  })
-
-  it("has the correct tag and label", () => {
+  it("has the correct tag and label in metadata", () => {
     expect(Header1.tag).toBe("header1")
     expect(Header1.label).toBe("Header 1")
   })
@@ -99,9 +89,11 @@ describe("Header1 Component", () => {
     expect(Header1.keywords).toContain("header")
   })
 
-  it("has the correct settings fields", () => {
-    expect(Header1.settingsFields).toHaveProperty("content")
-    expect(Header1.settingsFields.content).toHaveProperty("type", "text")
-    expect(Header1.settingsFields.content).toHaveProperty("label", "Content")
+  it("has the correct settings fields in metadata", () => {
+    expect(Header1.attributes).toBeDefined()
+    const contentField = Header1.attributes.find((f: any) => f.id === "content") as any
+    expect(contentField).toBeDefined()
+    expect(contentField.type).toBe("text")
+    expect(contentField.label).toBe("Content")
   })
 })

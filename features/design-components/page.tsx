@@ -6,97 +6,90 @@ import { useComponentOperationsContext } from "@/lib/component-operations-contex
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import { getComponentInfo } from "."
-import type { DesignComponentProps, DesignComponentTag, DesignComponent } from "./types"
+import type { Props, Metadata, Attribute } from "./types"
 import { cn } from "@/lib/utils"
 
-export type ComponentAttributes = {
-  id: string
-  title: string
-  "padding-top": string
-  "padding-right": string
-  "padding-bottom": string
-  "padding-left": string
-}
+export const tag = "page" as const
 
-export const tag: DesignComponentTag = "page" as const
-
-export const settingsFields = {
-  id: {
+const attributes: Attribute[] = [
+  {
     id: "id",
     type: "text",
     label: "ID",
     placeholder: "ID",
     defaultValue: "",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, id: value } };
+    getValue: (component) => component.attributes.id || "",
+    setValue: (component, value) => {
+      return { ...component, attributes: { ...component.attributes, id: value } } as Props["component"]
     },
   },
-  title: {
+  {
     id: "title",
     type: "text",
     label: "Title",
     placeholder: "Enter page title",
     defaultValue: "Page Title 1",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes.title,
-    setValue: (component: DesignComponent<typeof tag>, value: string) => {
-      return { ...component, attributes: { ...component.attributes, title: value } }
+    getValue: (component) => component.attributes.title,
+    setValue: (component, value: string) => {
+      return { ...component, attributes: { ...component.attributes, title: value } } as Props["component"]
     },
   },
-  "padding-top": {
+  {
     id: "padding-top",
     type: "text",
     label: "Padding Top",
     placeholder: "Padding Top",
     defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-top"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["padding-top"]: value } };
+    getValue: (component) => component.attributes["padding-top"] || "",
+    setValue: (component, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-top"]: value } } as Props["component"]
     },
   },
-  "padding-right": {
+  {
     id: "padding-right",
     type: "text",
     label: "Padding Right",
     placeholder: "Padding Right",
     defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-right"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["padding-right"]: value } };
+    getValue: (component) => component.attributes["padding-right"] || "",
+    setValue: (component, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-right"]: value } } as Props["component"]
     },
   },
-  "padding-bottom": {
+  {
     id: "padding-bottom",
     type: "text",
     label: "Padding Bottom",
     placeholder: "Padding Bottom",
     defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-bottom"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["padding-bottom"]: value } };
+    getValue: (component) => component.attributes["padding-bottom"] || "",
+    setValue: (component, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-bottom"]: value } } as Props["component"]
     },
   },
-  "padding-left": {
+  {
     id: "padding-left",
     type: "text",
     label: "Padding Left",
     placeholder: "Padding Left",
     defaultValue: "0",
-    getValue: (component: DesignComponent<typeof tag>) => component.attributes["padding-left"] || "",
-    setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-      return { ...component, attributes: { ...component.attributes, ["padding-left"]: value } };
+    getValue: (component) => component.attributes["padding-left"] || "",
+    setValue: (component, value: unknown) => {
+      return { ...component, attributes: { ...component.attributes, ["padding-left"]: value } } as Props["component"]
     },
   },
-}
+]
 
-export function Component(props: DesignComponentProps<"page">) {
+const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
+
+function Component(props: Props) {
   const { pageBuilderMode, component: currentPage } = props
   const attributes = currentPage.attributes
   const padding = {
-    top: attributes["padding-top"] || settingsFields["padding-top"].defaultValue,
-    right: attributes["padding-right"] || settingsFields["padding-right"].defaultValue,
-    bottom: attributes["padding-bottom"] || settingsFields["padding-bottom"].defaultValue,
-    left: attributes["padding-left"] || settingsFields["padding-left"].defaultValue,
+    top: attributes["padding-top"] || attributesMap["padding-top"].defaultValue,
+    right: attributes["padding-right"] || attributesMap["padding-right"].defaultValue,
+    bottom: attributes["padding-bottom"] || attributesMap["padding-bottom"].defaultValue,
+    left: attributes["padding-left"] || attributesMap["padding-left"].defaultValue,
   }
   const { setSelectedComponent, addComponent, updateComponent } = useComponentOperationsContext()
 
@@ -105,7 +98,7 @@ export function Component(props: DesignComponentProps<"page">) {
   }, [addComponent, currentPage.attributes.id])
 
   const updatePageTitle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const update = { attributes: { title: e.target.value } } as DesignComponent<typeof tag>
+    const update = { attributes: { title: e.target.value } }
     updateComponent(currentPage.attributes.id, update)
   }, [updateComponent, currentPage.attributes.id])
 
@@ -120,8 +113,8 @@ export function Component(props: DesignComponentProps<"page">) {
             id="page-title"
             placeholder="Page Title"
           />
-          <div className="flex gap-2">
-          </div>
+          {/* <div className="flex gap-2">
+          </div> */}
         </div>
       </div>
 
@@ -135,8 +128,11 @@ export function Component(props: DesignComponentProps<"page">) {
           }}
         >
           {currentPage.children.map((component) => {
-            const Component = getComponentInfo(component.tag).Component
-            return (<Component key={component.attributes.id} {...props as DesignComponentProps<DesignComponentTag>} component={component} />)
+            if (typeof component === "string") return component
+
+            const meta = getComponentInfo(component.tag)
+            const Child = props.pageBuilderMode === "preview" ? meta.ViewModeComponent : meta.EditModeComponent
+            return (<Child key={component.attributes.id} {...props as Props} component={component} />)
           })}
 
           {pageBuilderMode === "edit" && (
@@ -158,4 +154,15 @@ export function Component(props: DesignComponentProps<"page">) {
       </section>
     </main>
   )
+}
+
+export const metadata: Metadata = {
+  tag,
+  label: "Page",
+  keywords: [],
+  defaultChildren: [],
+  attributes,
+  Icon: null,
+  ViewModeComponent: Component,
+  EditModeComponent: Component,
 }

@@ -3,10 +3,10 @@ type Token =
 	| { type: "openTag"; raw: string; tag: string; isSelfClosing: boolean; attributes: Record<string, string> }
 	| { type: "closeTag"; raw: string; tag: string; };
 
-export type Node = string | {
+export type Node = {
 	tag: string;
 	attributes: Record<string, string>;
-	children: Node[];
+	children: (Node | string)[];
 };
 
 function tokenize(shortcode: string): Token[] {
@@ -95,12 +95,12 @@ function tokenize(shortcode: string): Token[] {
 	return tokens;
 }
 
-export function parse(input: string, acceptedTags?: string[]): Node[] {
+export function parse(input: string, acceptedTags?: string[]): (Node | string)[] {
 	const tokens = tokenize(input);
-	const output: Node[] = [];
-	const stack: { node: Exclude<Node, string>; raw: string }[] = [];
+	const output: (Node | string)[] = [];
+	const stack: { node: Node; raw: string }[] = [];
 
-	function appendOutput(target: Node[], node: Node) {
+	function appendOutput(target: (Node | string)[], node: (Node | string)) {
 		if (typeof node === "string") {
 			const text = node.trim();
 			if (!text) return target;
@@ -129,7 +129,7 @@ export function parse(input: string, acceptedTags?: string[]): Node[] {
 					appendOutput(target, token.raw);
 					break;
 				}
-				const node = { tag: token.tag, attributes: token.attributes, children: [] } as Exclude<Node, string>;
+				const node = { tag: token.tag, attributes: token.attributes, children: [] } as Node;
 				if (token.isSelfClosing) {
 					const target = stack.length ? stack[stack.length - 1].node.children : output;
 					target.push(node);
@@ -172,8 +172,8 @@ export function parse(input: string, acceptedTags?: string[]): Node[] {
 	return output;
 }
 
-export function stringify(elements: Node[]): string {
-	function serializeElement(element: Node): string {
+export function stringify(elements: (Node | string)[]): string {
+	function serializeElement(element: (Node | string)): string {
 		if (typeof element === 'string') {
 			return element;
 		}

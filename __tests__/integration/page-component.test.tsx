@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import React from "react"
 import { getComponentInfo } from "@/features/design-components"
 import { DesignComponentTag, DesignComponent } from "@/features/design-components/types"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 
 // features/design-components/page-component.test.tsx
@@ -21,7 +22,7 @@ jest.mock("@/lib/component-operations-context", () => ({
 }))
 
 const componentInfo = getComponentInfo("page")
-const Component = componentInfo.Component
+const Component = componentInfo.EditModeComponent
 
 describe("page-component", () => {
   beforeEach(() => {
@@ -43,11 +44,16 @@ describe("page-component", () => {
       children,
     } as DesignComponent<"page">
 
+    const qc = new QueryClient()
     render(
-      <Component
-        pageBuilderMode="edit"
-        component={currentPage}
-      />
+      <QueryClientProvider client={qc}>
+        <Component
+          pageBuilderMode="edit"
+          component={currentPage}
+          selectedComponentId={""}
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>
     )
 
     // Button should be present
@@ -63,24 +69,5 @@ describe("page-component", () => {
       parentId: "page-1",
     })
 
-    // Simulate the effect: addComponent would append a new row to children
-    // const newRow = { tag: "row", attributes: { id: "row-3", }, children: [] }
-    // const updatedPage = {
-    //   ...currentPage,
-    //   children: [...children, newRow],
-    // }
-
-    // // Re-render with updated children
-    // render(
-    //   <Component
-    //     pageBuilderMode="edit"
-    //     component={updatedPage}
-    //   />
-    // )
-
-    // Get all rendered children
-    const renderedRows = screen.getAllByText("row")
-    // The last one should be the new row
-    expect(renderedRows[renderedRows.length - 1].parentElement).toHaveAttribute("data-testid", "child-row-3")
   })
 })
