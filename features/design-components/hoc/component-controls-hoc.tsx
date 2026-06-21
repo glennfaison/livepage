@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
-import type { Props, DesignComponentTag, DesignComponent } from "../types";
+import type { Props } from "../types";
 import { useComponentOperationsContext } from "@/lib/component-operations-context";
 import React from "react";
 
-function AncestorTags(props: Props<DesignComponentTag>) {
+function AncestorTags(props: Props) {
   const { setSelectedComponent } = useComponentOperationsContext()
   const ancestors = props.selectedComponentAncestors.filter((component) => {
     return component.tag !== "page"
-  }).toReversed?.() as DesignComponent<DesignComponentTag>[]
+  }).toReversed?.() as Props["component"][]
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  
+
   React.useEffect(() => {
     const timeout = timeoutRef.current;
     return () => {
@@ -59,13 +59,13 @@ function AncestorTags(props: Props<DesignComponentTag>) {
   )
 }
 
-function ComponentControls<Tag extends DesignComponentTag>(props: Props<Tag>) {
+function ComponentControls(props: Props) {
   const { component } = props
   const { getComponentInfo } = require("..")
   const { label } = getComponentInfo(component.tag)
   const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 
-  const handleReplace = useCallback((newType: DesignComponentTag) => {
+  const handleReplace = useCallback((newType: string) => {
     replaceComponent(component.attributes.id, newType);
   }, [component.attributes.id, replaceComponent])
 
@@ -114,10 +114,8 @@ function ComponentControls<Tag extends DesignComponentTag>(props: Props<Tag>) {
   )
 }
 
-export function withEditorControls<Tag extends DesignComponentTag>(
-  WrappedComponent: React.ComponentType<Props<Tag>>
-) {
-  return function ComponentWithControls(props: Props<Tag>) {
+export function withEditorControls(WrappedComponent: React.ComponentType<Props>) {
+  return function ComponentWithControls(props: Props) {
     const showControls = props.pageBuilderMode === "edit" &&
       props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()

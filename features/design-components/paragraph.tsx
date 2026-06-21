@@ -43,7 +43,7 @@ const attributes: Attribute[] = [
 		type: "textarea",
 		label: "Content",
 		placeholder: "Enter paragraph text",
-		defaultValue: "",
+		defaultValue: [],
 		getValue: (component) => component.children,
 		setValue: (component, value: unknown) => ({ ...component, children: Array.isArray(value) ? value : [value] } as Props["component"]),
 	},

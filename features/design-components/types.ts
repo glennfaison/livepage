@@ -16,7 +16,6 @@ type BaseAttribute = {
   disabled?: boolean
   readOnly?: boolean
   placeholder?: string
-  defaultValue?: string
 }
 
 // TODO: make getValue and setValue required
@@ -64,9 +63,11 @@ export type Attribute = ({
   collapsed?: boolean
   /** Nested attribute fields inside the group */
   fields: Attribute[]
+  defaultValue?: undefined
 } | {
   type: "divider"
   // Horizontal divider (no extra fields)
+  defaultValue?: undefined
 }) & BaseAttribute
 
 export type Props = {
