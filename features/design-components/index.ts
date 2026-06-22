@@ -34,16 +34,16 @@ export const componentTagList: Metadata["tag"][] = [
  * This allows us to avoid using switch statements and instead directly access component metadata by tag.
  */
 const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
-  "header1": Header1,
-  "header2": Header2,
-  "header3": Header3,
-  "paragraph": Paragraph,
-  "inline-text": InlineText,
-  "button": Button,
-  "image": Image,
-  "row": Row,
-  "column": Column,
-  "page": Page,
+  [Header1.tag]: Header1,
+  [Header2.tag]: Header2,
+  [Header3.tag]: Header3,
+  [Paragraph.tag]: Paragraph,
+  [InlineText.tag]: InlineText,
+  [Button.tag]: Button,
+  [Image.tag]: Image,
+  [Row.tag]: Row,
+  [Column.tag]: Column,
+  [Page.tag]: Page,
 }
 
 function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unknown>> {
