@@ -1,7 +1,7 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
+import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
 import { Button } from "@/components/ui/button"
 import { componentTagList } from "@/features/design-components"
 

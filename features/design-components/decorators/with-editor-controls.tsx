@@ -1,5 +1,5 @@
-import { ReplaceWithPopover } from "@/components/page-builder/replace-with-popover";
-import { SettingsPopover } from "@/components/page-builder/settings-popover";
+import { ReplaceWithPopover } from "@/features/page-builder/replace-with-popover";
+import { SettingsPopover } from "@/features/page-builder/settings-popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";

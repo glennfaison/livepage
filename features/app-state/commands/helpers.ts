@@ -1,5 +1,4 @@
 import { createDesignComponentInstance } from "@/features/design-components"
-import type { DesignComponentTag } from "@/features/design-components/types"
 import type { AppNode } from "../types"
 
 function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
@@ -244,6 +243,6 @@ export function replaceComponent({
   })
 }
 
-export function createNewComponent(tag: DesignComponentTag, id: string): AppNode {
+export function createNewComponent(tag: string, id: string): AppNode {
   return createDesignComponentInstance(tag, id) as AppNode
 }

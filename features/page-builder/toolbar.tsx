@@ -1,6 +1,6 @@
 "use client"
 
-import { HistoryPopover } from "@/components/page-builder/history-popover"
+import { HistoryPopover } from "@/features/page-builder/history-popover"
 import { Button } from "@/components/ui/button"
 import type { PageBuilderMode, HistoryEntry } from "@/features/app-state"
 import { cn } from "@/lib/utils"

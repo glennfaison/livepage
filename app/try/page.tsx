@@ -1,6 +1,6 @@
 "use client"
 
-import { Toolbar } from "@/components/page-builder/toolbar"
+import { Toolbar } from "@/features/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { componentMetadata as PageMeta } from "@/features/design-components/page-component"

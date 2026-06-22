@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { getComponentInfo } from "@/features/design-components"
-import { DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { AppNode } from "@/features/app-state"
 
 
 // features/design-components/page-component.test.tsx
@@ -34,7 +34,7 @@ describe("page-component", () => {
   it('appends a new row as the last child when "Add Row" is clicked', async () => {
     const user = userEvent.setup()
     // Initial children
-    const children: DesignComponent<DesignComponentTag>[] = [
+    const children: AppNode[] = [
       { tag: "row", attributes: { id: "row-1", }, children: [] },
       { tag: "row", attributes: { id: "row-2", }, children: [] },
     ]
@@ -42,7 +42,7 @@ describe("page-component", () => {
       tag: "page",
       attributes: { id: "page-1", title: "Test Page" },
       children,
-    } as DesignComponent<"page">
+    } as AppNode
 
     const qc = new QueryClient()
     render(

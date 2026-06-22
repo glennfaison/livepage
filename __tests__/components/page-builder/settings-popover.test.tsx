@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { SettingsPopover } from "@/components/page-builder/settings-popover"
+import { SettingsPopover } from "@/features/page-builder/settings-popover"
 import { Button } from "@/components/ui/button"
 import { createDesignComponentInstance, getComponentInfo } from "@/features/design-components"
 

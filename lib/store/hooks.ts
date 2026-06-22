@@ -6,7 +6,6 @@ import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
 import { appReducer, initialState } from "@/features/app-state/commands/reducer"
 import type { AppState, AppAction } from "@/features/app-state"
-import type { DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { toast } from "@/components/ui/use-toast"
 import type { AppNode } from "@/features/app-state"
 import { selectCurrentPage } from "@/features/app-state"
@@ -40,11 +39,11 @@ export function useAppState() {
 
 export function usePageOperations(state: AppState) {
   const savePageAsJsonMutation = useMutation({
-    mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
+    mutationFn: async (componentTree: AppNode[]) => {
       const page = selectCurrentPage({
         componentTree: componentTree as ReadonlyArray<AppNode>,
         activePage: state.activePage,
-      }) as DesignComponent<"page"> | undefined
+      }) as AppNode | undefined
       const data = serializeAppStateAsJson(componentTree as ReadonlyArray<AppNode>)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
@@ -73,11 +72,11 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsShortcodeMutation = useMutation({
-    mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
+    mutationFn: async (componentTree: AppNode[]) => {
       const page = selectCurrentPage({
         componentTree: componentTree as ReadonlyArray<AppNode>,
         activePage: state.activePage,
-      }) as DesignComponent<"page"> | undefined
+      }) as AppNode | undefined
       const data = serializeAppStateAsShortcode(componentTree as ReadonlyArray<AppNode>)
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
@@ -106,7 +105,7 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsHtmlMutation = useMutation({
-    mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
+    mutationFn: async (componentTree: AppNode[]) => {
       const htmlTemplate = serializeAppStateAsHtml(componentTree as ReadonlyArray<AppNode>)
 
       // Create and download the HTML file
@@ -117,7 +116,7 @@ export function usePageOperations(state: AppState) {
       const page = selectCurrentPage({
         componentTree: componentTree as ReadonlyArray<AppNode>,
         activePage: state.activePage,
-      }) as DesignComponent<"page"> | undefined
+      }) as AppNode | undefined
       a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}.html`
       document.body.appendChild(a)
       a.click()
@@ -148,7 +147,7 @@ export function usePageOperations(state: AppState) {
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const loadedPage = deserializeAppStateFromJson(content) as DesignComponent<"page">[]
+            const loadedPage = deserializeAppStateFromJson(content) as AppNode[]
             resolve(loadedPage)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -159,7 +158,7 @@ export function usePageOperations(state: AppState) {
       })
     },
     onSuccess: (loadedComponentTree) => {
-      const page = loadedComponentTree[0] as unknown as DesignComponent<"page"> | undefined
+      const page = loadedComponentTree[0] as unknown as AppNode | undefined
       toast({
         title: "Page loaded",
         description: `${page?.attributes.title ?? "Untitled Page"} has been loaded successfully.`,
@@ -181,7 +180,7 @@ export function usePageOperations(state: AppState) {
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const pages = deserializeAppStateFromShortcode(content) as DesignComponent<DesignComponentTag>[]
+            const pages = deserializeAppStateFromShortcode(content) as AppNode[]
             resolve(pages)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -192,7 +191,7 @@ export function usePageOperations(state: AppState) {
       })
     },
     onSuccess: (loadedComponentTree) => {
-      const page = loadedComponentTree[0] as unknown as DesignComponent<"page"> | undefined
+      const page = loadedComponentTree[0] as unknown as AppNode | undefined
       toast({
         title: "Page loaded",
         description: `${page?.attributes.title ?? "Untitled Page"} has been loaded successfully.`,
@@ -219,7 +218,7 @@ export function usePageOperations(state: AppState) {
 export function useComponentOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
   // Find a component by ID (including nested components)
   const findComponentById = useCallback(
-    (components: DesignComponent<DesignComponentTag>[], id: string): DesignComponent<DesignComponentTag> | null => {
+    (components: AppNode[], id: string): AppNode | null => {
       for (const component of components) {
         if (typeof component === "string") {
           continue
@@ -230,7 +229,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
         }
 
         if (component.children) {
-          const found = findComponentById(component.children, id)
+          const found = findComponentById(component.children as AppNode[], id)
           if (found) return found
         }
       }
@@ -241,7 +240,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   )
 
   // Add component
-  const addComponent = useCallback(({ tag, parentId, index }: { tag: DesignComponentTag, parentId?: string, index?: number }) => {
+  const addComponent = useCallback(({ tag, parentId, index }: { tag: string, parentId?: string, index?: number }) => {
     dispatch({
       type: "INSERT_COMPONENT",
       payload: { newComponentTag: tag, parentId, index },
@@ -255,7 +254,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Update component
   const updateComponent = useCallback(
-    <Tag extends DesignComponentTag>(id: string, updates: Partial<DesignComponent<Tag>>) => {
+    <Tag extends string>(id: string, updates: Partial<AppNode>) => {
       dispatch({
         type: "UPDATE_COMPONENT",
         payload: { componentId: id, updates, },
@@ -296,7 +295,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch])
 
-  const replaceComponent = useCallback((oldComponentId: string, newComponentTag: DesignComponentTag) => {
+  const replaceComponent = useCallback((oldComponentId: string, newComponentTag: string) => {
     dispatch({
       type: "REPLACE_COMPONENT",
       payload: { oldComponentId, newComponentTag },
