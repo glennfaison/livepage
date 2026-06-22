@@ -44,8 +44,17 @@ const attributes = [
 		label: "Content",
 		placeholder: "Enter paragraph text",
 		defaultValue: [],
-		getValue: (component) => component.children,
-		setValue: (component, value: unknown) => ({ ...component, children: Array.isArray(value) ? value : [value] } as Props["component"]),
+		getValue: (component) => {
+			if (!component.children) return []
+			if (typeof component.children === "string") return [component.children]
+			if (Array.isArray(component.children)) {
+				return component.children
+			}
+			return []
+		},
+		setValue: (component, value) => {
+			return { ...component, children: Array.isArray(value) ? value : [value], } as Props["component"]
+		},
 	},
 ] as const satisfies Attribute[]
 
@@ -55,7 +64,7 @@ const Icon = <Type className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
-	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
 		<p className="py-2" {...filteredProps}>{children as React.ReactNode}</p>

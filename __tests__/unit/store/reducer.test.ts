@@ -78,6 +78,22 @@ describe("App Reducer", () => {
     expect(result.selectedComponentId).toBe((result.componentTree[0].children[0] as any).attributes.id)
   })
 
+  it("should record history after INSERT_COMPONENT", () => {
+    const action: AppAction = {
+      type: "INSERT_COMPONENT",
+      payload: {
+        newComponentTag: "header1",
+        parentId: "page-1",
+        index: 0,
+      },
+    }
+
+    const result = appReducer(state, action)
+    expect(result.history).toHaveLength(1)
+    expect(result.currentHistoryIndex).toBe(0)
+    expect(result.history[0].pageState[0].children[0].tag).toBe("header1")
+  })
+
   it("should handle SET_SELECTED_COMPONENT", () => {
     const componentId = "test-component-id"
 

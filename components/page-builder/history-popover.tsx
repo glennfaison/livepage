@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import type { HistoryEntry } from "@/lib/store/types"
+import type { HistoryEntry } from "@/features/app-state"
 import { cn } from "@/lib/utils"
 import { Check, GripVertical, RotateCcw, X } from "lucide-react"
 import type React from "react"

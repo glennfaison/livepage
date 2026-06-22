@@ -48,7 +48,7 @@ const Icon = <Heading className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
-	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
 		<h1 className="text-4xl font-bold py-2" {...filteredProps}>{children as React.ReactNode}</h1>

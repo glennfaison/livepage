@@ -95,6 +95,11 @@ function useComponentSettingsEditor<Tag extends DesignComponentTag>({ component,
       const key = field.id as keyof DesignComponentAttributes<Tag>
       const value = updatedFormData[key]
 
+      if (key === "content" && componentInfo.defaultChildren.length > 0 && String(value).trim() === "") {
+        updatedFormData[key] = componentInfo.defaultChildren as any
+        continue
+      }
+
       if (typeof value === "string" && String(value).trim() === "") {
         // Prefer the setting's defaultValue (useful for content/defaultChildren), fallback to componentInfo.defaultAttributes
         if (typeof (field as any).defaultValue !== "undefined") {

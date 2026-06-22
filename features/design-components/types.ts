@@ -1,7 +1,6 @@
 import type React from "react"
 import type { ReactNode } from "react"
-import { PageBuilderMode } from "@/lib/store/types"
-import { Node } from "@/features/shortcode-parser/parser"
+import type { AppNode, PageBuilderMode } from "@/features/app-state"
 
 interface Connectable {
   __datasource__?: string
@@ -25,35 +24,35 @@ export type Attribute = Readonly<({
   max?: number
   step?: number
   defaultValue: number
-  getValue?: (node: Node) => number
-  setValue?: (node: Partial<Node>, value: number) => Node
+  getValue?: (node: AppNode) => number
+  setValue?: (node: Partial<AppNode>, value: number) => AppNode
 } | {
   type: "boolean"
   defaultValue: boolean
-  getValue?: (node: Node) => boolean
-  setValue?: (node: Partial<Node>, value: boolean) => Node
+  getValue?: (node: AppNode) => boolean
+  setValue?: (node: Partial<AppNode>, value: boolean) => AppNode
 } | {
   type: "text"
   defaultValue: string
-  getValue?: (node: Node) => string
-  setValue?: (node: Partial<Node>, value: string) => Node
+  getValue?: (node: AppNode) => string
+  setValue?: (node: Partial<AppNode>, value: string) => AppNode
 } | {
   type: "textarea"
   rows?: number
-  defaultValue: (string | Node)[]
-  getValue?: (node: Node) => (string | Node)[]
-  setValue?: (node: Partial<Node>, value: (string | Node)[]) => Node
+  defaultValue: (string | AppNode)[]
+  getValue?: (node: AppNode) => (string | AppNode)[]
+  setValue?: (node: Partial<AppNode>, value: (string | AppNode)[]) => AppNode
 } | {
   type: "select"
   options?: string[]
   defaultValue: string | string[]
-  getValue?: (node: Node) => string | string[]
-  setValue?: (node: Partial<Node>, value: string | string[]) => Node
+  getValue?: (node: AppNode) => string | string[]
+  setValue?: (node: Partial<AppNode>, value: string | string[]) => AppNode
 } | {
   type: "color"
   defaultValue: string
-  getValue?: (node: Node) => string
-  setValue?: (node: Partial<Node>, value: string) => Node
+  getValue?: (node: AppNode) => string
+  setValue?: (node: Partial<AppNode>, value: string) => AppNode
 } | {
   type: "group"
   /** If true the group can be collapsed in the UI */
@@ -71,9 +70,9 @@ export type Attribute = Readonly<({
 
 export type Props = Readonly<{
   pageBuilderMode: PageBuilderMode
-  component: Readonly<Node>
-  selectedComponentId: string,
-  selectedComponentAncestors: Readonly<Readonly<Node>[]>
+  component: Readonly<AppNode>
+  selectedComponentId: string
+  selectedComponentAncestors: Readonly<Readonly<AppNode>[]>
 }>
 
 export type EditModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
@@ -84,13 +83,13 @@ export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "preview">
 }>
 
-
 export interface Metadata {
   readonly tag: string
   readonly label: string
   readonly keywords: string[]
   readonly Icon: ReactNode
-  readonly defaultChildren: ReadonlyArray<Node | string>
+  readonly defaultChildren: ReadonlyArray<AppNode | string>
+  readonly defaultAttributes?: Readonly<Record<string, unknown>>
   readonly attributes: Readonly<Readonly<Attribute>[]>
   readonly ViewModeComponent: React.ComponentType<Readonly<ViewModeProps>>
   readonly EditModeComponent: React.ComponentType<Readonly<EditModeProps>>
@@ -98,10 +97,10 @@ export interface Metadata {
 
 export type Operations = {
   setSelectedComponent: (componentId: string) => void
-  updateComponent: (componentId: string, updates: Partial<Node>) => void
+  updateComponent: (componentId: string, updates: Partial<AppNode>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
   addComponent: (args: { tag: string; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: string) => void
-  findComponentById: (components: Node[], id: string) => Node | null
+  findComponentById: (components: AppNode[], id: string) => AppNode | null
 }

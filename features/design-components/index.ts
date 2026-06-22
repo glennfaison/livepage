@@ -11,7 +11,7 @@ import { componentMetadata as Image } from "./image"
 import { componentMetadata as Row } from "./row"
 import { componentMetadata as Column } from "./column"
 import { componentMetadata as Page } from "./page-component"
-import { Node } from "@/features/shortcode-parser/parser"
+import type { AppNode } from "@/features/app-state"
 
 /**
  * The Page component is a special case and is not included in the componentTagList,
@@ -46,6 +46,18 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   "page": Page,
 }
 
+function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unknown>> {
+  const defaultAttributes: Record<string, unknown> = {}
+
+  for (const attribute of metadata.attributes) {
+    if (attribute.type === "group" || attribute.type === "divider") continue
+    if (attribute.id === "content") continue
+    defaultAttributes[attribute.id] = attribute.defaultValue
+  }
+
+  return defaultAttributes
+}
+
 // Helper function to get component data by type using exhaustive switch
 export function getComponentInfo(tag: string): Metadata {
   const metadata = componentMap[tag]
@@ -54,6 +66,7 @@ export function getComponentInfo(tag: string): Metadata {
     ...metadata,
     keywords: [...metadata.keywords],
     defaultChildren: [...metadata.defaultChildren],
+    defaultAttributes: getDefaultAttributes(metadata),
     attributes: metadata.attributes.map(attr => {
       if (attr.type === "group") {
         return {
@@ -71,21 +84,13 @@ export function createDesignComponentInstance(
   tag: string,
   id: string,
   overrideProps?: Props["component"]["attributes"],
-): Readonly<Node> {
+): Readonly<AppNode> {
   const metadata = getComponentInfo(tag)
-  const defaultAttributes: Record<Attribute["id"], Attribute["defaultValue"]> = {}
-
-  for (const attribute of metadata.attributes) {
-    // Skip groups and dividers
-    if (attribute.type === 'group' || attribute.type === 'divider') continue
-    if (attribute.id === "content") continue
-    defaultAttributes[attribute.id] = attribute.defaultValue
-  }
   const defaultChildren = [...metadata.defaultChildren]
 
   return {
-    tag: tag,
-    attributes: { ...defaultAttributes, ...overrideProps, id: `${tag}-${id}`, },
+    tag,
+    attributes: { ...(metadata.defaultAttributes || {}), ...overrideProps, id: `${tag}-${id}`, },
     children: defaultChildren,
   }
 }

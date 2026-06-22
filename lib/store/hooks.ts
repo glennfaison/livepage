@@ -4,11 +4,19 @@ import type React from "react"
 
 import { useMutation } from "@tanstack/react-query"
 import { useReducer, useEffect, useCallback } from "react"
-import { appReducer, initialState } from "./reducers/reducer"
-import type { AppState, AppAction } from "./types"
-import type { DesignComponentAttributes, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
+import { appReducer, initialState } from "@/features/app-state/commands/reducer"
+import type { AppState, AppAction } from "@/features/app-state"
+import type { DesignComponentTag, DesignComponent } from "@/features/design-components/types"
 import { toast } from "@/components/ui/use-toast"
-import * as ShortcodeParser from "../../features/shortcode-parser/parser"
+import type { AppNode } from "@/features/app-state"
+import { selectCurrentPage } from "@/features/app-state"
+import {
+  deserializeAppStateFromJson,
+  deserializeAppStateFromShortcode,
+  serializeAppStateAsHtml,
+  serializeAppStateAsJson,
+  serializeAppStateAsShortcode,
+} from "@/features/serializers"
 
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
@@ -33,13 +41,16 @@ export function useAppState() {
 export function usePageOperations(state: AppState) {
   const savePageAsJsonMutation = useMutation({
     mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
-      const page = componentTree[0] as unknown as DesignComponent<"page">
-      const data = JSON.stringify(state.componentTree, null)
+      const page = selectCurrentPage({
+        componentTree: componentTree as ReadonlyArray<AppNode>,
+        activePage: state.activePage,
+      }) as DesignComponent<"page"> | undefined
+      const data = serializeAppStateAsJson(componentTree as ReadonlyArray<AppNode>)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${page.attributes.title.toLowerCase().replace(/\s+/g, "-")}.json`
+      a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}.json`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -63,13 +74,16 @@ export function usePageOperations(state: AppState) {
 
   const savePageAsShortcodeMutation = useMutation({
     mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
-      const page = componentTree[0] as unknown as DesignComponent<"page">
-      const data = ShortcodeParser.stringify(state.componentTree)
+      const page = selectCurrentPage({
+        componentTree: componentTree as ReadonlyArray<AppNode>,
+        activePage: state.activePage,
+      }) as DesignComponent<"page"> | undefined
+      const data = serializeAppStateAsShortcode(componentTree as ReadonlyArray<AppNode>)
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${page.attributes.title.toLowerCase().replace(/\s+/g, "-")}.txt`
+      a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}.txt`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -93,94 +107,18 @@ export function usePageOperations(state: AppState) {
 
   const savePageAsHtmlMutation = useMutation({
     mutationFn: async (componentTree: DesignComponent<DesignComponentTag>[]) => {
-      const page = componentTree[0] as unknown as DesignComponent<"page">
-      // Basic HTML template
-      const htmlTemplate = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${page.attributes.title}</title>
-        <style>
-          /* Reset and base styles */
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.5;
-            color: #333;
-          }
-          .container {
-            padding: 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-          }
-          .row {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1rem;
-          }
-          .column {
-            display: flex;
-            flex-direction: row;
-            gap: 1rem;
-            margin-bottom: 1rem;
-          }
-          .column > * {
-            flex: 1;
-          }
-          
-          img {
-            max-width: 100%;
-            height: auto;
-          }
-          
-          button {
-            background-color: #0070f3;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-weight: 500;
-          }
-          
-          button:hover {
-            background-color: #0060df;
-          }
-          
-          h1, h2, h3, h4, h5, h6 {
-            margin-bottom: 0.5rem;
-          }
-          
-          p {
-            margin-bottom: 1rem;
-          }
-          
-          @media (max-width: 768px) {
-            .column {
-              flex-direction: column;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        ${renderComponentsToHTML(page.children)}
-      </body>
-      </html>
-      `
+      const htmlTemplate = serializeAppStateAsHtml(componentTree as ReadonlyArray<AppNode>)
 
       // Create and download the HTML file
       const blob = new Blob([htmlTemplate], { type: "text/html" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `${page.attributes.title.toLowerCase().replace(/\s+/g, "-")}.html`
+      const page = selectCurrentPage({
+        componentTree: componentTree as ReadonlyArray<AppNode>,
+        activePage: state.activePage,
+      }) as DesignComponent<"page"> | undefined
+      a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}.html`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -210,7 +148,7 @@ export function usePageOperations(state: AppState) {
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const loadedPage = JSON.parse(content) as DesignComponent<"page">[]
+            const loadedPage = deserializeAppStateFromJson(content) as DesignComponent<"page">[]
             resolve(loadedPage)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -221,10 +159,10 @@ export function usePageOperations(state: AppState) {
       })
     },
     onSuccess: (loadedComponentTree) => {
-      const page = loadedComponentTree[0] as unknown as DesignComponent<"page">
+      const page = loadedComponentTree[0] as unknown as DesignComponent<"page"> | undefined
       toast({
         title: "Page loaded",
-        description: `${page.attributes.title} has been loaded successfully.`,
+        description: `${page?.attributes.title ?? "Untitled Page"} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -243,7 +181,7 @@ export function usePageOperations(state: AppState) {
         reader.onload = (e) => {
           try {
             const content = e.target?.result as string
-            const pages = ShortcodeParser.parse(content) as unknown as DesignComponent<DesignComponentTag>[]
+            const pages = deserializeAppStateFromShortcode(content) as DesignComponent<DesignComponentTag>[]
             resolve(pages)
           } catch (error) {
             reject(new Error(`Invalid file format ${error}`))
@@ -254,10 +192,10 @@ export function usePageOperations(state: AppState) {
       })
     },
     onSuccess: (loadedComponentTree) => {
-      const page = loadedComponentTree[0] as unknown as DesignComponent<"page">
+      const page = loadedComponentTree[0] as unknown as DesignComponent<"page"> | undefined
       toast({
         title: "Page loaded",
-        description: `${page.attributes.title} has been loaded successfully.`,
+        description: `${page?.attributes.title ?? "Untitled Page"} has been loaded successfully.`,
       })
     },
     onError: () => {
@@ -276,47 +214,6 @@ export function usePageOperations(state: AppState) {
     loadPageFromJsonMutation: loadPageFromJsonMutation,
     loadPageFromShortcodeMutation,
   }
-}
-
-const renderComponentsToHTML = (components: DesignComponent<DesignComponentTag>[]): string => {
-  return components.map((component) => {
-    const attributes = component.attributes
-    switch (component.tag) {
-      case "header1": {
-        return `<h1>${component.children}</h1>`
-      }
-      case "header2": {
-        return `<h2>${component.children}</h2>`
-      }
-      case "header3": {
-        return `<h3>${component.children}</h3>`
-      }
-      case "paragraph": {
-        return `<p>${component.children}</p>`
-      }
-      case "inline-text": {
-        return `<span>${component.children}</span>`
-      }
-      case "image": {
-        type CastType = DesignComponentAttributes<typeof component.tag>
-        return `<img src="${(attributes as CastType).src}" alt="${(attributes as CastType).alt || ""}" />`
-      }
-      case "button": {
-        return `<button>${component.children}</button>`
-      }
-      case "row":
-        return `<div class="row">${renderComponentsToHTML(component.children as DesignComponent<DesignComponentTag>[])}</div>`
-      case "column":
-        return `<div class="column">${renderComponentsToHTML(component.children as DesignComponent<DesignComponentTag>[])}</div>`
-      case "page":
-        return `<div class="column">${renderComponentsToHTML(component.children as DesignComponent<DesignComponentTag>[])}</div>`
-      default:
-        const _: never = component.tag as never
-        console.error("Unexpected tag:", _)
-        return ""
-    }
-  })
-    .join("\n")
 }
 
 export function useComponentOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
@@ -350,22 +247,11 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
       payload: { newComponentTag: tag, parentId, index },
     })
 
-    // Add to history after state update
-    setTimeout(() => {
-      dispatch({
-        type: "ADD_TO_HISTORY",
-        payload: {
-          action: `Added ${tag}`,
-          pageState: state.componentTree,
-        },
-      })
-    }, 0)
-
     toast({
       title: "Component added",
       description: `Added a new ${tag} component to the page.`,
     })
-  }, [dispatch, state.componentTree])
+  }, [dispatch])
 
   // Update component
   const updateComponent = useCallback(
@@ -374,26 +260,9 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
         type: "UPDATE_COMPONENT",
         payload: { componentId: id, updates, },
       })
-
-      // Add to history after state update
-      setTimeout(() => {
-        const currentPage = state.componentTree.find((page) => page.attributes.id === state.activePage)
-        if (currentPage) {
-          const component = findComponentById(currentPage.children, id)
-          if (component) {
-            dispatch({
-              type: "ADD_TO_HISTORY",
-              payload: {
-                action: `Edited ${component.tag}`,
-                pageState: state.componentTree,
-              },
-            })
-          }
-        }
-      }, 0)
     },
-    [dispatch, state.activePage, state.componentTree, findComponentById],
-  )
+      [dispatch],
+    )
 
   const setSelectedComponent = useCallback((componentId: string): void => {
     if (state.pageBuilderMode === "edit") {
@@ -411,51 +280,21 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
       payload: { componentId: id },
     })
 
-    // Add to history after state update
-    setTimeout(() => {
-      const currentPage = state.componentTree.find((page) => page.attributes.id === state.activePage)
-      const component = findComponentById(currentPage?.children || [], id)
-      if (component) {
-        dispatch({
-          type: "ADD_TO_HISTORY",
-          payload: {
-            action: `Deleted ${component.tag}`,
-            pageState: state.componentTree,
-          },
-        })
-      }
-    }, 0)
-
     toast({
       title: "Component removed",
       description: "The component has been removed from the page.",
     })
-  }, [dispatch, state.componentTree, state.activePage, findComponentById])
+  }, [dispatch])
 
   // Duplicate component
   const duplicateComponent = useCallback((id: string) => {
     dispatch({ type: "DUPLICATE_COMPONENT", payload: { componentId: id } })
 
-    // Add to history after state update
-    setTimeout(() => {
-      const currentPage = state.componentTree.find((page) => page.attributes.id === state.activePage)
-      const componentToDuplicate = currentPage ? findComponentById(currentPage.children, id) : null
-
-      if (!componentToDuplicate) return
-      dispatch({
-        type: "ADD_TO_HISTORY",
-        payload: {
-          action: `Duplicated ${componentToDuplicate.tag}`,
-          pageState: state.componentTree,
-        },
-      })
-    }, 0)
-
     toast({
       title: "Component duplicated",
       description: "The component has been duplicated successfully.",
     })
-  }, [dispatch, state.activePage, state.componentTree, findComponentById])
+  }, [dispatch])
 
   const replaceComponent = useCallback((oldComponentId: string, newComponentTag: DesignComponentTag) => {
     dispatch({
@@ -463,22 +302,11 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
       payload: { oldComponentId, newComponentTag },
     })
 
-    // Add to history after state update
-    setTimeout(() => {
-      dispatch({
-        type: "ADD_TO_HISTORY",
-        payload: {
-          action: `Replaced component ${oldComponentId} with ${newComponentTag}`,
-          pageState: state.componentTree,
-        },
-      })
-    }, 0)
-
     toast({
       title: "Component replaced",
       description: `Replaced component ${oldComponentId} with ${newComponentTag}.`,
     })
-  }, [dispatch, state.componentTree])
+  }, [dispatch])
 
   return {
     addComponent,

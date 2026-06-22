@@ -56,7 +56,7 @@ const Icon = <Type className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
-	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
 		<span className="inline" {...filteredProps}>{children as React.ReactNode}</span>

@@ -4,7 +4,8 @@ import { Toolbar } from "@/components/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { componentMetadata as PageMeta } from "@/features/design-components/page-component"
-import type { PageBuilderMode } from "@/lib/store/types"
+import { selectCurrentPage } from "@/features/app-state"
+import type { PageBuilderMode } from "@/features/app-state"
 import { ComponentOperationsContext } from "@/lib/component-operations-context"
 import { useAppState, useComponentOperations, useHistoryOperations, usePageOperations } from "@/lib/store/hooks"
 import { ChevronDown, Download, Layers, Upload } from "lucide-react"
@@ -36,7 +37,13 @@ export default function BuilderPage() {
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
 
   // Get the current active page
-  const currentPage = (state.componentTree.find((page) => page.attributes.id === state.activePage) || state.componentTree[0])
+  const currentPage = selectCurrentPage(state) ?? state.componentTree[0]
+  const updatePageTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!currentPage) return
+    componentOperations.updateComponent(currentPage.attributes.id, {
+      attributes: { title: e.target.value },
+    })
+  }
 
   const saveAsJSON = () => {
     savePageAsJsonMutation.mutate(state.componentTree)
@@ -65,17 +72,13 @@ export default function BuilderPage() {
 
         dispatch({ type: "SET_PAGES", payload: loadedComponentTree })
         dispatch({ type: "SET_ACTIVE_PAGE", payload: currentPage?.attributes.id || "" })
-
-        // Add to history
-        setTimeout(() => {
-          dispatch({
-            type: "ADD_TO_HISTORY",
-            payload: {
-              action: "Loaded page",
-              pageState: state.componentTree,
-            },
-          })
-        }, 0)
+        dispatch({
+          type: "ADD_TO_HISTORY",
+          payload: {
+            action: "Loaded page",
+            pageState: loadedComponentTree,
+          },
+        })
       },
     })
 
@@ -168,8 +171,8 @@ export default function BuilderPage() {
           <div className="container py-4 border-b mx-auto">
             <div className="flex justify-between items-center">
               <Input
-                // defaultValue={currentPage.attributes.title}
-                // onChange={updatePageTitle}
+                defaultValue={currentPage?.attributes.title}
+                onChange={updatePageTitle}
                 className="text-xl font-semibold w-auto max-w-xs"
                 id="page-title"
                 placeholder="Page Title"
