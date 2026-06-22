@@ -20,10 +20,23 @@ _Avoid_: Exporters, importers
 An external provider that supplies data to a design component.
 _Avoid_: Connection
 
+**Placeholder**:
+A runtime token embedded in a component string and replaced before rendering.
+_Avoid_: Template marker
+
+**Data-source placeholder**:
+A placeholder whose value comes from a data source.
+_Avoid_: Connection placeholder
+
+**Computable placeholder**:
+A placeholder whose value is derived at runtime, such as the current date.
+_Avoid_: Dynamic token
+
 ## Relationships
 
 - The **App-state API** operates on **App state**
 - **Serializers** read from or write to **App state**
+- **Placeholders** are resolved inside component strings before rendering
 
 ## Example dialogue
 

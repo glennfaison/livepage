@@ -14,18 +14,9 @@ export const generateId = () =>
 // Helper function to intersperse and append items
 export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {
   if (originalArray.length === 0) {
-    return [];
+    return []
   }
   const result: (T | U)[] = originalArray.flatMap((element) => [itemToInsert, element])
   result.push(itemToInsert)
   return result
-}
-
-export function insertDataSourceDataInString(str: string, data: unknown): string {
-  const placeholderRegExp = /\[#data.*?#\]/g
-  return str.replaceAll(placeholderRegExp, (match) => {
-    const evaluateProperty = new Function("data", `return ${match.substring(2, match.length - 2)}`)
-    const output = String(evaluateProperty(data))
-    return output !== undefined && output !== null ? output : match
-  })
 }

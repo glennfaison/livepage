@@ -2,52 +2,11 @@ import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId } from "@/features/data-sources/types"
 import type { Props } from "../types"
-import type { AppNode } from "@/features/app-state"
-import { insertDataSourceDataInString } from "@/lib/utils"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
+import { replaceDataSourceComponentProperties } from "@/features/placeholders/data-source"
 
 const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
-
-function replaceDataSourceComponentProperties<T extends AppNode>(originalComponent: T, dataFromSource: unknown): T {
-	if (dataFromSource === null || dataFromSource === undefined) {
-		return originalComponent
-	}
-
-	const newComponent = {
-		...originalComponent,
-		attributes: { ...originalComponent.attributes },
-		children: [...originalComponent.children],
-	} as T
-	const keysToSkip = [dataSourceFieldName]
-
-	for (const _key in originalComponent.attributes) {
-		const key = _key
-		if (keysToSkip.includes(key)) {
-			continue
-		}
-		const originalValue = originalComponent.attributes[key]
-		const newAttributes = newComponent.attributes as Record<string, string>
-		if (typeof originalValue === "string") {
-			newAttributes[key] = insertDataSourceDataInString(originalValue, dataFromSource)
-		} else {
-			newAttributes[key] = originalValue
-		}
-	}
-
-	for (let i = 0; i < originalComponent.children.length; i++) {
-		const child = originalComponent.children[i]
-		const newChildren = newComponent.children as Array<AppNode | string>
-		if (typeof child === "string") {
-			newChildren[i] = insertDataSourceDataInString(child, dataFromSource)
-		} else if (typeof child === "object" && child !== null && "attributes" in child) {
-			// If the child is a component, we can recursively replace its properties
-			newChildren[i] = replaceDataSourceComponentProperties(child as AppNode, dataFromSource)
-		}
-	}
-
-	return newComponent
-}
 
 export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 	return function DataSourceComponent(props: Props) {

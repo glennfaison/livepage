@@ -104,8 +104,6 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
   }
 }
 
-type DataSourceListViewTabContentProps = DataSourceSettingsEditorState
-
 export function DataSourceListViewTabContent({
   selectedDataSource,
   setSelectedDataSource,
