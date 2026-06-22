@@ -1,28 +1,33 @@
 import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
 import type { DataSourceId } from "@/features/data-sources/types"
-import type { DesignComponentAttributes, Props, DesignComponentTag, DesignComponent } from "@/features/design-components/types"
+import type { Props } from "../types"
+import type { AppNode } from "@/features/app-state"
 import { insertDataSourceDataInString } from "@/lib/utils"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
 
-const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName as keyof DesignComponentAttributes<DesignComponentTag>
+const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
 
-function replaceDataSourceComponentProperties<T extends DesignComponent<DesignComponentTag>>(originalComponent: T, dataFromSource: unknown): T {
+function replaceDataSourceComponentProperties<T extends AppNode>(originalComponent: T, dataFromSource: unknown): T {
 	if (dataFromSource === null || dataFromSource === undefined) {
 		return originalComponent
 	}
 
-	const newComponent = { ...originalComponent, children: [] } as T
+	const newComponent = {
+		...originalComponent,
+		attributes: { ...originalComponent.attributes },
+		children: [...originalComponent.children],
+	} as T
 	const keysToSkip = [dataSourceFieldName]
 
 	for (const _key in originalComponent.attributes) {
-		const key = _key as keyof DesignComponentAttributes<DesignComponentTag>
+		const key = _key
 		if (keysToSkip.includes(key)) {
 			continue
 		}
-		const originalValue = (originalComponent.attributes as DesignComponentAttributes<DesignComponentTag>)[key as keyof DesignComponentAttributes<DesignComponentTag>]
-		const newAttributes = newComponent.attributes as DesignComponentAttributes<DesignComponentTag>
+		const originalValue = originalComponent.attributes[key]
+		const newAttributes = newComponent.attributes as Record<string, string>
 		if (typeof originalValue === "string") {
 			newAttributes[key] = insertDataSourceDataInString(originalValue, dataFromSource)
 		} else {
@@ -32,22 +37,22 @@ function replaceDataSourceComponentProperties<T extends DesignComponent<DesignCo
 
 	for (let i = 0; i < originalComponent.children.length; i++) {
 		const child = originalComponent.children[i]
-		const newChildren = newComponent.children as any
+		const newChildren = newComponent.children as Array<AppNode | string>
 		if (typeof child === "string") {
 			newChildren[i] = insertDataSourceDataInString(child, dataFromSource)
 		} else if (typeof child === "object" && child !== null && "attributes" in child) {
 			// If the child is a component, we can recursively replace its properties
-			newChildren[i] = replaceDataSourceComponentProperties(child, dataFromSource)
+			newChildren[i] = replaceDataSourceComponentProperties(child as AppNode, dataFromSource)
 		}
 	}
 
 	return newComponent
 }
 
-export function withDataSource<Tag extends DesignComponentTag>(
-	WrappedComponent: React.ComponentType<Props<Tag>>
+export function withDataSource(
+	WrappedComponent: React.ComponentType<Props>
 ) {
-	return function DataSourceComponent(props: Props<Tag>) {
+	return function DataSourceComponent(props: Props) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 
 		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {

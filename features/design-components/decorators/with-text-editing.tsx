@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { Props, DesignComponentTag } from "../types"
+import type { EditModeProps } from "../types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
@@ -11,10 +11,10 @@ interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 	onBlurCapture?: React.FocusEventHandler<HTMLElement>
 }
 
-export function withTextEditing<Tag extends Extract<DesignComponentTag, "header1" | "header2" | "header3" | "paragraph" | "inline-text" | "button">>(
-	WrappedComponent: React.ComponentType<Props<Tag> & WrappedComponentProps>
+export function withTextEditing(
+	WrappedComponent: React.ComponentType<EditModeProps & WrappedComponentProps>
 ) {
-	return function TextEditingComponent(props: Props<Tag>) {
+	return function TextEditingComponent(props: EditModeProps) {
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 		const { pageBuilderMode, component, ...otherProps } = props
 		const { setSelectedComponent, updateComponent } = useComponentOperationsContext()

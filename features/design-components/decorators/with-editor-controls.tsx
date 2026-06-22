@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
-import type { Props } from "../types";
+import type { EditModeProps } from "../types";
 import { useComponentOperationsContext } from "@/lib/component-operations-context";
 import React from "react";
 
-function AncestorTags(props: Props) {
+function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
   const ancestors = props.selectedComponentAncestors.filter((component) => {
     return component.tag !== "page"
-  }).toReversed?.() as Props["component"][]
+  }).toReversed?.() as EditModeProps["component"][]
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
@@ -59,7 +59,7 @@ function AncestorTags(props: Props) {
   )
 }
 
-function EditorControls(props: Props) {
+function EditorControls(props: EditModeProps) {
   const { component } = props
   const { getComponentInfo } = require("..") as typeof import("..")
   const { label } = getComponentInfo(component.tag)
@@ -114,8 +114,8 @@ function EditorControls(props: Props) {
   )
 }
 
-export function withEditorControls(WrappedComponent: React.ComponentType<Props>) {
-  return function ComponentWithEditorControls(props: Props) {
+export function withEditorControls(WrappedComponent: React.ComponentType<EditModeProps>) {
+  return function ComponentWithEditorControls(props: EditModeProps) {
     const showControls = props.pageBuilderMode === "edit" &&
       props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()
@@ -124,10 +124,6 @@ export function withEditorControls(WrappedComponent: React.ComponentType<Props>)
       e.stopPropagation()
       setSelectedComponent(props.component.attributes.id)
     }, [props.component.attributes.id, setSelectedComponent])
-
-    if (props.pageBuilderMode === "preview") {
-      return <WrappedComponent {...props} />
-    }
 
     return (
       <div onClick={selectComponent}
