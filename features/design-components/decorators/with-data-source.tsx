@@ -49,9 +49,7 @@ function replaceDataSourceComponentProperties<T extends AppNode>(originalCompone
 	return newComponent
 }
 
-export function withDataSource(
-	WrappedComponent: React.ComponentType<Props>
-) {
+export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 	return function DataSourceComponent(props: Props) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 
@@ -60,6 +58,9 @@ export function withDataSource(
 				const decodedDataSourceSettings = decodeDataSourceSettings(dataSourceSettingsValue)
 				const dataSourceId: DataSourceId = decodedDataSourceSettings.id
 				const dataSource = getDataSourceInfo(dataSourceId)
+				if (!dataSource) {
+					throw new Error(`Unknown data source: ${dataSourceId}`)
+				}
 				const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
 				return result
 			} catch (err) {

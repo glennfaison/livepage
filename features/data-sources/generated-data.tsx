@@ -1,35 +1,20 @@
 import { BlocksIcon } from "lucide-react"
-import type { DataSourceId } from "./types"
+import type { DataSourceInfo } from "./types"
 
-export const id: DataSourceId = "generated-data" as const
-
-export const label = "Generated Data"
-
-export const keywords = ["generated", "data"]
-
-export const Icon = <BlocksIcon className="h-4 w-4" />
-
-export const defaultSettings: DataSourceSettings = {
-	"generate": "",
-}
-
-export const settingsFields = {
-	"generate": {
+const settings = [
+	{
 		id: "generate",
 		type: "textarea",
 		label: "JavaScript function to generate your data",
 		placeholder: "Enter the function body",
+		defaultValue: "",
 	},
-}
+] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>
 
-export type DataSourceSettings = {
-	generate: string
-}
-
-export async function tryConnection(componentDataSourceSettings: DataSourceSettings): Promise<unknown> {
+async function tryConnection(componentDataSourceSettings: Readonly<Record<string, string>>): Promise<unknown> {
 	let asyncGeneratorFn
 	try {
-		asyncGeneratorFn = new Function(`return (async () => { ${componentDataSourceSettings.generate} })()`);
+		asyncGeneratorFn = new Function(`return (async () => { ${componentDataSourceSettings.generate} })()`)
 	} catch (error) {
 		throw error
 	}
@@ -40,3 +25,13 @@ export async function tryConnection(componentDataSourceSettings: DataSourceSetti
 		throw error
 	}
 }
+
+export const dataSourceInfo = {
+	id: "generated-data",
+	label: "Generated Data",
+	keywords: ["generated", "data"],
+	Icon: <BlocksIcon className="h-4 w-4" />,
+	settings,
+	tryConnection,
+} as const satisfies DataSourceInfo
+

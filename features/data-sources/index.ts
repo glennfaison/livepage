@@ -1,27 +1,24 @@
-import type { DataSourceId, DataSourceInfo, DataSourceSettings } from "./types";
-import * as RestApi from "./rest-api"
-import * as GeneratedData from "./generated-data"
+import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "./types"
+import { dataSourceInfo as RestApi } from "./rest-api"
+import { dataSourceInfo as GeneratedData } from "./generated-data"
 
 export const dataSourceIdList = [
-	"rest-api",
-	"generated-data",
+	RestApi.id,
+	GeneratedData.id,
 ] as const
 
-export function getDataSourceInfo<DsId extends DataSourceId>(connectionId: DsId): DataSourceInfo<DsId> {
-	switch (connectionId) {
-		case "rest-api":
-			return RestApi as unknown as DataSourceInfo<typeof connectionId>
-		case "generated-data":
-			return GeneratedData as unknown as DataSourceInfo<typeof connectionId>
-		default:
-			const _unexpected: never = connectionId
-			throw new Error(`Unknown data source: ${_unexpected}`)
-	}
+const dataSourceMap: DataSourceInfoMap = {
+	[RestApi.id]: RestApi,
+	[GeneratedData.id]: GeneratedData,
+}
+
+export function getDataSourceInfo(connectionId: DataSourceId): DataSourceInfo | undefined {
+	return dataSourceMap[connectionId]
 }
 
 export function encodeDataSourceSettings(dataSourceSettings: {
 	id: DataSourceId
-	settings: DataSourceSettings<DataSourceId>
+	settings: DataSourceSettings
 }) {
 	const connectionDataString = JSON.stringify(dataSourceSettings)
 	const base64 = Buffer.from(connectionDataString, "utf8").toString("base64")
@@ -30,10 +27,10 @@ export function encodeDataSourceSettings(dataSourceSettings: {
 
 export function decodeDataSourceSettings(encodedDataSourceSettings: string): {
 	id: DataSourceId
-	settings: DataSourceSettings<DataSourceId>
+	settings: DataSourceSettings
 } {
 	if (typeof encodedDataSourceSettings !== "string" || encodedDataSourceSettings === "") {
-		return {} as {id: DataSourceId; settings: DataSourceSettings<DataSourceId>}
+		return {} as {id: DataSourceId; settings: DataSourceSettings}
 	}
 	try {
 		const jsonString = Buffer.from(encodedDataSourceSettings, "base64").toString("utf8")
@@ -42,3 +39,4 @@ export function decodeDataSourceSettings(encodedDataSourceSettings: string): {
 		throw error
 	}
 }
+

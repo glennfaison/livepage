@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { dataSourceIdList, decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
-import type { DataSourceId, DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
+import type { DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { getComponentInfo } from "@/features/design-components"
 import type { DesignComponentAttributes, Metadata, DesignComponentTag, DesignComponent, Attribute } from "@/features/design-components/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
@@ -129,7 +129,7 @@ function useComponentSettingsEditor<Tag extends DesignComponentTag>({ component,
   }
 
   const handleFieldChange = (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => {
-    setFormData((prev) => ({ ...prev, [fieldId]: value }))
+    setFormData((prev: DataSourceSettings) => ({ ...prev, [fieldId]: value }))
   }
 
 
@@ -148,11 +148,13 @@ function useDataSourceSettingsEditor<Tag extends DesignComponentTag>({ component
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
   const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__datasource__ || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
-  const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo<DataSourceId> | undefined>(dataSourceInfo)
+  const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo | undefined>(dataSourceInfo)
   const { updateComponent } = useComponentOperationsContext()
 
-  const filteredDataSources = React.useMemo(() => {
-    const dataSources = dataSourceIdList.map((connId) => getDataSourceInfo(connId))
+  const filteredDataSources = React.useMemo<DataSourceInfo[]>(() => {
+    const dataSources = dataSourceIdList
+      .map((connId) => getDataSourceInfo(connId))
+      .filter((dataSource): dataSource is DataSourceInfo => !!dataSource)
     if (!searchDataSourceTerm.trim()) return dataSources
 
     const search = searchDataSourceTerm.toLowerCase()
@@ -163,38 +165,35 @@ function useDataSourceSettingsEditor<Tag extends DesignComponentTag>({ component
     )
   }, [searchDataSourceTerm])
 
-  const [formData, setFormData] = React.useState<DataSourceSettings<DataSourceId>>({ ...savedDataSourceSettings.settings })
+  const [formData, setFormData] = React.useState<DataSourceSettings>({ ...savedDataSourceSettings.settings })
 
   const handleSave = () => {
     if (!selectedDataSource) {
       return
     }
-    for (const _key in selectedDataSource.defaultSettings) {
-      const key = _key as keyof DataSourceSettings<DataSourceId>
-      if (
-        String(formData[key]).trim() === "" ||
-        !formData.hasOwnProperty(key)
-      ) {
-        formData[key] = selectedDataSource.defaultSettings[key]
+    const updatedFormData: Record<string, string> = { ...formData }
+    for (const field of selectedDataSource.settings) {
+      if (String(updatedFormData[field.id] || "").trim() === "") {
+        updatedFormData[field.id] = field.defaultValue
       }
     }
-    const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: formData })
+    const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: updatedFormData })
     updateComponent(component.attributes.id, { attributes: { ...component.attributes, __datasource__: encodedDataSourceSettings } })
   }
 
   const handleDiscard = () => {
-    setFormData({} as DataSourceSettings<DataSourceId>)
+    setFormData({} as DataSourceSettings)
     setSelectedDataSource(undefined)
     updateComponent(component.attributes.id, { attributes: { ...component.attributes, __datasource__: "" } })
   }
 
-  const handleFieldChange = (fieldId: keyof DesignComponentAttributes<Tag>, value: string) => {
+  const handleFieldChange = (fieldId: string, value: string) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }))
   }
 
-  const settingsFields = React.useMemo<DataSourceSettingsField<DataSourceId>[]>(
-    () => Object.values(selectedDataSource?.settingsFields || {}) as DataSourceSettingsField<DataSourceId>[],
-    [selectedDataSource?.settingsFields])
+  const settingsFields = React.useMemo<ReadonlyArray<DataSourceSettingsField>>(
+    () => selectedDataSource?.settings || [],
+    [selectedDataSource?.settings])
 
   return {
     searchDataSourceTerm,
@@ -369,20 +368,20 @@ function ComponentSettingsTabContent<Tag extends DesignComponentTag>({ settingsF
   )
 }
 
-type DataSourceSettingsEditorProps<ConnId extends DataSourceId> = {
-  selectedDataSource: DataSourceInfo<ConnId> | undefined
-  setSelectedDataSource: React.Dispatch<DataSourceInfo<ConnId> | undefined>
-  filteredDataSources: DataSourceInfo<DataSourceId>[]
+type DataSourceSettingsEditorProps = {
+  selectedDataSource: DataSourceInfo | undefined
+  setSelectedDataSource: React.Dispatch<React.SetStateAction<DataSourceInfo | undefined>>
+  filteredDataSources: DataSourceInfo[]
   searchDataSourceTerm: string
-  setSearchDataSourceTerm: React.Dispatch<string>
-  settingsFields: DataSourceSettingsField<ConnId>[]
-  formData: DataSourceSettings<ConnId>
+  setSearchDataSourceTerm: React.Dispatch<React.SetStateAction<string>>
+  settingsFields: ReadonlyArray<DataSourceSettingsField>
+  formData: DataSourceSettings
   handleDiscard: () => void
   handleSave: () => void
-  handleFieldChange: (fieldId: keyof DataSourceSettings<ConnId>, value: string) => void
+  handleFieldChange: (fieldId: string, value: string) => void
 }
 
-function DataSourceListViewTabContent<ConnId extends DataSourceId>({
+function DataSourceListViewTabContent({
   selectedDataSource,
   setSelectedDataSource,
   filteredDataSources,
@@ -393,7 +392,7 @@ function DataSourceListViewTabContent<ConnId extends DataSourceId>({
   handleDiscard,
   handleSave,
   handleFieldChange,
-}: DataSourceSettingsEditorProps<ConnId>) {
+}: DataSourceSettingsEditorProps) {
   return (
     <>
       {!selectedDataSource && <div className="p-4 space-y-4 flex-1 flex flex-col min-h-1 overflow-clip">
@@ -416,7 +415,7 @@ function DataSourceListViewTabContent<ConnId extends DataSourceId>({
                 key={dataSource.id}
                 icon={dataSource.Icon}
                 label={dataSource.label}
-                onClick={() => setSelectedDataSource(dataSource as DataSourceInfo<ConnId>)}
+                onClick={() => setSelectedDataSource(dataSource)}
               />
             ))}
           </div>
@@ -441,7 +440,7 @@ function DataSourceListViewTabContent<ConnId extends DataSourceId>({
   )
 }
 
-function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSettingsEditorProps<ConnId>) {
+function DataSourceSettingsView(props: DataSourceSettingsEditorProps) {
   const { selectedDataSource, setSelectedDataSource, handleSave, handleDiscard, handleFieldChange, settingsFields, formData } = props
   if (!selectedDataSource) {
     throw new Error(`Could not find data source`)
@@ -449,7 +448,7 @@ function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSe
   const [connectionResult, setConnectionResult] = React.useState<string>("")
   const [testingConnection, setTestingConnection] = React.useState(false)
 
-  const testConnection = async (formData: DataSourceSettings<ConnId>) => {
+  const testConnection = async (formData: DataSourceSettings) => {
     try {
       setTestingConnection(true)
       const result = await selectedDataSource.tryConnection(formData)
@@ -478,26 +477,26 @@ function DataSourceSettingsView<ConnId extends DataSourceId>(props: DataSourceSe
 
       <div className="p-4 space-y-4 flex-1 flex flex-col min-h-1 overflow-y-scroll">
         {settingsFields.map((field) => (
-          <div className="space-y-2" key={field.id as string}>
-            <Label htmlFor={field.id as string}>{field.label}</Label>
+          <div className="space-y-2" key={field.id}>
+            <Label htmlFor={field.id}>{field.label}</Label>
             {field.type === "textarea" ? (
               <textarea
-                id={field.id as string}
+                id={field.id}
                 className={cn(
                   "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3",
                   "py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none",
                   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 )}
                 placeholder={field.placeholder}
-                value={(formData[field.id] as string) || ""}
+                value={formData[field.id] || ""}
                 onChange={(e) => handleFieldChange(field.id, e.target.value)}
               />
             ) : (
               <Input
                 type={field.type}
-                id={field.id as string}
+                id={field.id}
                 placeholder={field.placeholder}
-                value={(formData[field.id] as string) || ""}
+                value={formData[field.id] || ""}
                 onChange={(e) => handleFieldChange(field.id, e.target.value)}
               />
             )}
