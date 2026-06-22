@@ -6,8 +6,8 @@ import { useDividerVisibility, Divider } from "@/components/page-builder/layout-
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
 import { getComponentInfo, componentTagList } from "."
-import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
-import { withEditorControls } from "./hoc/component-controls-hoc"
+import { withDataSource } from "@/features/design-components/decorators/with-data-source"
+import { withEditorControls } from "./decorators/with-editor-controls"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 
 const tag = "column" as const
@@ -269,6 +269,6 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent: withConnection(_ViewModeComponent),
-	EditModeComponent: withEditorControls(withConnection(_EditModeComponent)),
+	ViewModeComponent: withDataSource(_ViewModeComponent),
+	EditModeComponent: withEditorControls(withDataSource(_EditModeComponent)),
 } as const satisfies Metadata

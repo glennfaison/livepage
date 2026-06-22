@@ -20,9 +20,6 @@ import {
   SelectItem,
   SelectValue
 } from "@/components/ui/select"
-import { appSettings } from "@/app/app-settings"
-
-const connectionDataSourceFieldName = appSettings.connections.dataSourceFieldName
 
 const DataSourceSelectorButton = ({
   icon,

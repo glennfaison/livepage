@@ -1,5 +1,5 @@
 export const appSettings = {
-	connections: {
+	dataSources: {
 		dataSourceFieldName: "__datasource__",
 	},
 }

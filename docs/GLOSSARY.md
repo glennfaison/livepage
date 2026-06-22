@@ -16,6 +16,10 @@ _Avoid_: Facade, helper layer
 Modules that transform app state to and from external formats such as JSON, shortcode, and HTML.
 _Avoid_: Exporters, importers
 
+**Data source**:
+An external provider that supplies data to a design component.
+_Avoid_: Connection
+
 ## Relationships
 
 - The **App-state API** operates on **App state**

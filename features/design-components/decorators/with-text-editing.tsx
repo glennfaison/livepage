@@ -14,7 +14,7 @@ interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 export function withTextEditing<Tag extends Extract<DesignComponentTag, "header1" | "header2" | "header3" | "paragraph" | "inline-text" | "button">>(
 	WrappedComponent: React.ComponentType<Props<Tag> & WrappedComponentProps>
 ) {
-	return function ContentEditableComponent(props: Props<Tag>) {
+	return function TextEditingComponent(props: Props<Tag>) {
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 		const { pageBuilderMode, component, ...otherProps } = props
 		const { setSelectedComponent, updateComponent } = useComponentOperationsContext()
@@ -28,7 +28,7 @@ export function withTextEditing<Tag extends Extract<DesignComponentTag, "header1
 			updateComponent(component.attributes.id, { children: [newText] as any })
 		}, [component.attributes.id, updateComponent])
 
-		const onClick = useCallback(() => (e: React.MouseEvent<HTMLElement>) => {
+		const onClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
 			if (pageBuilderMode === "edit") {
 				e.stopPropagation()
 				setSelectedComponent(component.attributes.id)

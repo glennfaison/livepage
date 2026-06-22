@@ -6,15 +6,15 @@ import { insertDataSourceDataInString } from "@/lib/utils"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
 
-const connectionDataSourceFieldName = appSettings.connections.dataSourceFieldName as keyof DesignComponentAttributes<DesignComponentTag>
+const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName as keyof DesignComponentAttributes<DesignComponentTag>
 
-function replaceConnectedComponentProperties<T extends DesignComponent<DesignComponentTag>>(originalComponent: T, dataFromSource: unknown): T {
+function replaceDataSourceComponentProperties<T extends DesignComponent<DesignComponentTag>>(originalComponent: T, dataFromSource: unknown): T {
 	if (dataFromSource === null || dataFromSource === undefined) {
 		return originalComponent
 	}
 
 	const newComponent = { ...originalComponent, children: [] } as T
-	const keysToSkip = [connectionDataSourceFieldName]
+	const keysToSkip = [dataSourceFieldName]
 
 	for (const _key in originalComponent.attributes) {
 		const key = _key as keyof DesignComponentAttributes<DesignComponentTag>
@@ -37,22 +37,22 @@ function replaceConnectedComponentProperties<T extends DesignComponent<DesignCom
 			newChildren[i] = insertDataSourceDataInString(child, dataFromSource)
 		} else if (typeof child === "object" && child !== null && "attributes" in child) {
 			// If the child is a component, we can recursively replace its properties
-			newChildren[i] = replaceConnectedComponentProperties(child, dataFromSource)
+			newChildren[i] = replaceDataSourceComponentProperties(child, dataFromSource)
 		}
 	}
 
 	return newComponent
 }
 
-export function withConnection<Tag extends DesignComponentTag>(
+export function withDataSource<Tag extends DesignComponentTag>(
 	WrappedComponent: React.ComponentType<Props<Tag>>
 ) {
-	return function ConnectedComponent(props: Props<Tag>) {
-		const __datasource__ = props.component.attributes[connectionDataSourceFieldName]
+	return function DataSourceComponent(props: Props<Tag>) {
+		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 
-		const fetchData = useCallback(async (__datasource__: string) => {
+		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {
 			try {
-				const decodedDataSourceSettings = decodeDataSourceSettings(__datasource__)
+				const decodedDataSourceSettings = decodeDataSourceSettings(dataSourceSettingsValue)
 				const dataSourceId: DataSourceId = decodedDataSourceSettings.id
 				const dataSource = getDataSourceInfo(dataSourceId)
 				const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
@@ -62,35 +62,35 @@ export function withConnection<Tag extends DesignComponentTag>(
 			}
 		}, [])
 
-		const { data: connectedData, isLoading: loading, error } = useQuery({
-			queryKey: ['connected-connection-data', __datasource__],
-			queryFn: () => fetchData(__datasource__!),
-			enabled: !!__datasource__,
+		const { data: dataSourceData, isLoading: loading, error } = useQuery({
+			queryKey: ["data-source-data", dataSourceSettings],
+			queryFn: () => fetchData(dataSourceSettings!),
+			enabled: !!dataSourceSettings,
 			staleTime: 60 * 60 * 1000, // 60 minutes for now. TODO: make this configurable per data source
 		})
 
-		if (!__datasource__ || __datasource__.trim() === "") {
-			// Not a connected component, render as usual
+		if (!dataSourceSettings || dataSourceSettings.trim() === "") {
+			// Not a data-source-bound component, render as usual
 			return <WrappedComponent {...props} />
 		}
 
 		if (loading) return <div>Loading...</div>	// TODO: show loading/skeleton component assigned to this design component
 		if (error) return <div>Error: {String(error)}</div>	// TODO: show error component assigned to this design component
 
-		const renderConnectedComponent = (data: unknown, key?: React.Key) => {
-			const newComponent = replaceConnectedComponentProperties(props.component, data)
-			const connectedComponent = {
+		const renderDataSourceComponent = (data: unknown, key?: React.Key) => {
+			const newComponent = replaceDataSourceComponentProperties(props.component, data)
+			const dataSourceComponent = {
 				...props.component,
 				...newComponent,
 				attributes: { ...props.component.attributes, ...newComponent.attributes }
 			}
-			return <WrappedComponent {...props} component={connectedComponent} key={key} />
+			return <WrappedComponent {...props} component={dataSourceComponent} key={key} />
 		}
 
-		if (Array.isArray(connectedData)) {
-			return <>{connectedData.map((item, idx) => renderConnectedComponent(item, idx))}</>
+		if (Array.isArray(dataSourceData)) {
+			return <>{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}</>
 		} else {
-			return renderConnectedComponent(connectedData)
+			return renderDataSourceComponent(dataSourceData)
 		}
 	}
 }

@@ -1,8 +1,8 @@
-import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { withDataSource } from "@/features/design-components/decorators/with-data-source"
 import { Type } from "lucide-react"
 import React from "react"
-import { withEditorControls } from "./hoc/component-controls-hoc"
-import { withTextEditing } from "./hoc/content-editable-hoc"
+import { withEditorControls } from "./decorators/with-editor-controls"
+import { withTextEditing } from "./decorators/with-text-editing"
 import type { Props, Attribute, Metadata } from "./types"
 
 const defaultChildren = [
@@ -78,6 +78,6 @@ export const componentMetadata = {
 	defaultChildren,
 	attributes,
 	Icon,
-	ViewModeComponent: withConnection(Component),
-	EditModeComponent: withEditorControls(withTextEditing(withConnection(Component))),
+	ViewModeComponent: withDataSource(Component),
+	EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))),
 } as const satisfies Metadata

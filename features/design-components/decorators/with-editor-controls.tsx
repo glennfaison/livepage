@@ -59,7 +59,7 @@ function AncestorTags(props: Props) {
   )
 }
 
-function ComponentControls(props: Props) {
+function EditorControls(props: Props) {
   const { component } = props
   const { getComponentInfo } = require("..") as typeof import("..")
   const { label } = getComponentInfo(component.tag)
@@ -115,7 +115,7 @@ function ComponentControls(props: Props) {
 }
 
 export function withEditorControls(WrappedComponent: React.ComponentType<Props>) {
-  return function ComponentWithControls(props: Props) {
+  return function ComponentWithEditorControls(props: Props) {
     const showControls = props.pageBuilderMode === "edit" &&
       props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()
@@ -137,7 +137,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<Props>)
           "hover:border-gray-300",
         )}
       >
-        {showControls && <ComponentControls {...props} />}
+        {showControls && <EditorControls {...props} />}
         <WrappedComponent {...props} />
       </div>
     )

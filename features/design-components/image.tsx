@@ -1,9 +1,9 @@
 "use client"
 
 import React from "react"
-import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { withDataSource } from "@/features/design-components/decorators/with-data-source"
 import { ImageIcon } from "lucide-react"
-import { withEditorControls } from "./hoc/component-controls-hoc"
+import { withEditorControls } from "./decorators/with-editor-controls"
 import type { Props, Attribute, Metadata } from "./types"
 
 const tag = "image" as const
@@ -94,6 +94,6 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent: withConnection(Component),
-	EditModeComponent: withEditorControls(withConnection(Component)),
+	ViewModeComponent: withDataSource(Component),
+	EditModeComponent: withEditorControls(withDataSource(Component)),
 } as const satisfies Metadata

@@ -6,9 +6,9 @@ import { componentTagList, getComponentInfo } from "."
 import { ComponentSelectorPopover } from "@/components/page-builder/component-selector-popover"
 import { Button } from "@/components/ui/button"
 import { Divider, useDividerVisibility } from "@/components/page-builder/layout-divider"
-import { withConnection } from "@/features/design-components/hoc/connected-component-hoc"
+import { withDataSource } from "@/features/design-components/decorators/with-data-source"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
-import { withEditorControls } from "./hoc/component-controls-hoc"
+import { withEditorControls } from "./decorators/with-editor-controls"
 
 const tag = "row" as const
 
@@ -254,6 +254,6 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent: withConnection(_ViewModeComponent),
-	EditModeComponent: withEditorControls(withConnection(_EditModeComponent)),
+	ViewModeComponent: withDataSource(_ViewModeComponent),
+	EditModeComponent: withEditorControls(withDataSource(_EditModeComponent)),
 } as const satisfies Metadata
