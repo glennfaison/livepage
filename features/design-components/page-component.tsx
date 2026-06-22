@@ -1,17 +1,15 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
-import { getComponentInfo } from "."
-import type { Props, Metadata, Attribute } from "./types"
+import type { Props, Metadata, Attribute, ViewModeProps, EditModeProps } from "./types"
 import { cn } from "@/lib/utils"
 
 export const tag = "page" as const
 
-const attributes: Attribute[] = [
+const attributes = [
   {
     id: "id",
     type: "text",
@@ -78,11 +76,43 @@ const attributes: Attribute[] = [
       return { ...component, attributes: { ...component.attributes, ["padding-left"]: value } } as Props["component"]
     },
   },
-]
+] as const satisfies Attribute[]
 
 const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
 
-function Component(props: Props) {
+function _ViewModeComponent(props: ViewModeProps) {
+  const { component: currentPage } = props
+  const attributes = currentPage.attributes
+  const padding = {
+    top: attributes["padding-top"] || attributesMap["padding-top"].defaultValue,
+    right: attributes["padding-right"] || attributesMap["padding-right"].defaultValue,
+    bottom: attributes["padding-bottom"] || attributesMap["padding-bottom"].defaultValue,
+    left: attributes["padding-left"] || attributesMap["padding-left"].defaultValue,
+  }
+
+  return (
+    <section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
+      <div
+        className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8"
+        {...attributes}
+        style={{
+          padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
+        }}
+      >
+        {currentPage.children.map((component) => {
+          if (typeof component === "string") return component
+
+          const { getComponentInfo } = require(".") as typeof import(".")
+          const meta = getComponentInfo(component.tag)
+          const Child = meta.ViewModeComponent
+          return (<Child key={component.attributes.id} {...props} component={component} />)
+        })}
+      </div>
+    </section>
+  )
+}
+
+function _EditModeComponent(props: EditModeProps) {
   const { pageBuilderMode, component: currentPage } = props
   const attributes = currentPage.attributes
   const padding = {
@@ -94,75 +124,58 @@ function Component(props: Props) {
   const { setSelectedComponent, addComponent, updateComponent } = useComponentOperationsContext()
 
   const appendComponent = useCallback(() => {
-    addComponent({ tag: "row", parentId: currentPage.attributes.id })
-  }, [addComponent, currentPage.attributes.id])
+    addComponent({ tag: "row", parentId: attributes.id })
+  }, [addComponent, attributes.id])
 
   const updatePageTitle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const update = { attributes: { title: e.target.value } }
-    updateComponent(currentPage.attributes.id, update)
-  }, [updateComponent, currentPage.attributes.id])
+    updateComponent(attributes.id, update)
+  }, [updateComponent, attributes.id])
 
   return (
-    <main className="flex-1 overflow-hidden flex flex-col">
-      <div className="container py-4 border-b mx-auto">
-        <div className="flex justify-between items-center">
-          <Input
-            defaultValue={currentPage.attributes.title}
-            onChange={updatePageTitle}
-            className="text-xl font-semibold w-auto max-w-xs"
-            id="page-title"
-            placeholder="Page Title"
-          />
-          {/* <div className="flex gap-2">
-          </div> */}
+    <section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
+      <div
+        className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8"
+        onClick={() => setSelectedComponent("")}
+        {...attributes}
+        style={{
+          padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
+        }}
+      >
+        {currentPage.children.map((component) => {
+          if (typeof component === "string") return component
+
+          const { getComponentInfo } = require(".") as typeof import(".")
+          const meta = getComponentInfo(component.tag)
+          const Child = meta.EditModeComponent
+          return (<Child key={component.attributes.id} {...props} component={component} />)
+        })}
+
+        <div className={cn(
+          "flex flex-col items-center justify-center rounded-md p-4",
+          props.pageBuilderMode === "edit" && "border-2 border-dashed border-gray-200",
+        )}>
+          <Button
+            variant="outline"
+            className="gap-2 px-4 py-2"
+            onClick={appendComponent}
+          >
+            <AlignHorizontalSpaceBetweenIcon className="h-5 w-5" />
+            <span>Add Row</span>
+          </Button>
         </div>
       </div>
-
-      <section className="flex-1 bg-gray-50 overflow-y-visible relative" id={currentPage.attributes.id}>
-        <div
-          className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8"
-          onClick={() => setSelectedComponent("")}
-          {...attributes}
-          style={{
-            padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
-          }}
-        >
-          {currentPage.children.map((component) => {
-            if (typeof component === "string") return component
-
-            const meta = getComponentInfo(component.tag)
-            const Child = props.pageBuilderMode === "preview" ? meta.ViewModeComponent : meta.EditModeComponent
-            return (<Child key={component.attributes.id} {...props as Props} component={component} />)
-          })}
-
-          {pageBuilderMode === "edit" && (
-            <div className={cn(
-              "flex flex-col items-center justify-center rounded-md p-4",
-              props.pageBuilderMode === "edit" && "border-2 border-dashed border-gray-200",
-            )}>
-              <Button
-                variant="outline"
-                className="gap-2 px-4 py-2"
-                onClick={appendComponent}
-              >
-                <AlignHorizontalSpaceBetweenIcon className="h-5 w-5" />
-                <span>Add Row</span>
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+    </section>
   )
 }
 
-export const metadata: Metadata = {
+export const componentMetadata = {
   tag,
   label: "Page",
   keywords: [],
   defaultChildren: [],
   attributes,
   Icon: null,
-  ViewModeComponent: Component,
-  EditModeComponent: Component,
-}
+  ViewModeComponent: _ViewModeComponent,
+  EditModeComponent: _EditModeComponent,
+} as const satisfies Metadata

@@ -1,16 +1,16 @@
 "use client"
 
 import type { Metadata, Attribute, Props } from "./types"
-import { metadata as Header1 } from "./header1"
-import { metadata as Header2 } from "./header2"
-import { metadata as Header3 } from "./header3"
-import { metadata as Paragraph } from "./paragraph"
-import { metadata as InlineText } from "./inline-text"
-import { metadata as Button } from "./button"
-import { metadata as Image } from "./image"
-import { metadata as Row } from "./row"
-import { metadata as Column } from "./column"
-import { metadata as Page } from "./page"
+import { componentMetadata as Header1 } from "./header1"
+import { componentMetadata as Header2 } from "./header2"
+import { componentMetadata as Header3 } from "./header3"
+import { componentMetadata as Paragraph } from "./paragraph"
+import { componentMetadata as InlineText } from "./inline-text"
+import { componentMetadata as Button } from "./button"
+import { componentMetadata as Image } from "./image"
+import { componentMetadata as Row } from "./row"
+import { componentMetadata as Column } from "./column"
+import { componentMetadata as Page } from "./page-component"
 import { Node } from "@/features/shortcode-parser/parser"
 
 /**
@@ -33,7 +33,7 @@ export const componentTagList: Metadata["tag"][] = [
  * Mapping of component tags to their metadata for easy lookup when creating new instances or rendering components.
  * This allows us to avoid using switch statements and instead directly access component metadata by tag.
  */
-const componentMap: Record<Metadata["tag"], Metadata> = {
+const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   "header1": Header1,
   "header2": Header2,
   "header3": Header3,
@@ -49,6 +49,7 @@ const componentMap: Record<Metadata["tag"], Metadata> = {
 // Helper function to get component data by type using exhaustive switch
 export function getComponentInfo(tag: string): Metadata {
   const metadata = componentMap[tag]
+
   return {
     ...metadata,
     keywords: [...metadata.keywords],
@@ -70,28 +71,21 @@ export function createDesignComponentInstance(
   tag: string,
   id: string,
   overrideProps?: Props["component"]["attributes"],
-): Node {
-  const data = getComponentInfo(tag)
+): Readonly<Node> {
+  const metadata = getComponentInfo(tag)
   const defaultAttributes: Record<Attribute["id"], Attribute["defaultValue"]> = {}
-  for (const setting of data.attributes) {
-    // Skip groups and dividers
-    if (setting.type === 'group' || setting.type === 'divider') continue
-    if (setting.id === "content") continue
-    defaultAttributes[setting.id] = setting.defaultValue
-  }
 
-  let contentSetting: Attribute | undefined = undefined
-  for (const s of data.attributes) {
-    if ((s as any).type === 'group') {
-      const found = (s as any).fields.find((f: any) => f.id === 'content')
-      if (found) { contentSetting = found; break }
-    } else if (s.id === 'content') { contentSetting = s; break }
+  for (const attribute of metadata.attributes) {
+    // Skip groups and dividers
+    if (attribute.type === 'group' || attribute.type === 'divider') continue
+    if (attribute.id === "content") continue
+    defaultAttributes[attribute.id] = attribute.defaultValue
   }
-  const defaultChildren = contentSetting ? contentSetting.defaultValue || [] : []
+  const defaultChildren = [...metadata.defaultChildren]
 
   return {
     tag: tag,
     attributes: { ...defaultAttributes, ...overrideProps, id: `${tag}-${id}`, },
-    children: defaultChildren as any,
+    children: defaultChildren,
   }
 }

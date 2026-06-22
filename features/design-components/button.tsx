@@ -49,26 +49,20 @@ const Icon = <MousePointerClick className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
-	const filteredProps: Partial<Props> = { ...props }
-	delete (filteredProps as any).pageBuilderMode
-	delete (filteredProps as any).selectedComponentId
+	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
 
 	return (
 		<Button {...filteredProps}>{children as React.ReactNode}</Button>
 	)
 }
 
-const WithContentEditing = withTextEditing(Component)
-const ViewModeComponent = withConnection(WithContentEditing)
-const EditModeComponent = withEditorControls(ViewModeComponent)
-
-export const metadata: Metadata = {
+export const componentMetadata = {
 	tag,
 	label,
 	keywords,
 	defaultChildren,
 	attributes,
 	Icon,
-	ViewModeComponent,
-	EditModeComponent,
-}
+	ViewModeComponent: withConnection(Component),
+	EditModeComponent: withEditorControls(withTextEditing(withConnection(Component))),
+} as const satisfies Metadata

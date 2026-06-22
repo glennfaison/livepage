@@ -13,7 +13,7 @@ const keywords = ["h3", "title", "subtitle", "subheading", "header", "heading", 
 
 const defaultChildren = ["Header 3"] as const
 
-const attributes: Attribute[] = [
+const attributes = [
 	{
 		id: "id",
 		type: "text",
@@ -23,7 +23,7 @@ const attributes: Attribute[] = [
 		placeholder: "ID",
 		defaultValue: "",
 		getValue: (component) => component.attributes.id || "",
-		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
+		setValue: (component, value) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
 	},
 	{
 		id: "content",
@@ -40,7 +40,7 @@ const attributes: Attribute[] = [
 		},
 		setValue: (component, value: unknown) => ({ ...component, children: Array.isArray(value) ? value : [value] } as Props["component"]),
 	},
-]
+] as const satisfies Attribute[]
 
 const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
 
@@ -48,26 +48,20 @@ const Icon = <Heading className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
-	const filteredProps: Partial<Props> = { ...props }
-	delete (filteredProps as any).pageBuilderMode
-	delete (filteredProps as any).selectedComponentId
+	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
 
 	return (
-		<h3 className="text-2xl font-bold py-2" {...(filteredProps as any)}>{children as React.ReactNode}</h3>
+		<h3 className="text-2xl font-bold py-2" {...filteredProps}>{children as React.ReactNode}</h3>
 	)
 }
 
-const WithContentEditing = withTextEditing(Component)
-const ViewModeComponent = withConnection(WithContentEditing)
-const EditModeComponent = withEditorControls(ViewModeComponent)
-
-export const metadata: Metadata = {
+export const componentMetadata = {
 	tag,
 	label,
 	keywords,
 	defaultChildren,
 	attributes,
 	Icon,
-	ViewModeComponent,
-	EditModeComponent,
-}
+	ViewModeComponent: withConnection(Component),
+	EditModeComponent: withEditorControls(withTextEditing(withConnection(Component))),
+} as const satisfies Metadata

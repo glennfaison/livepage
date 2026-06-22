@@ -4,9 +4,9 @@ type Token =
 	| { type: "closeTag"; raw: string; tag: string; };
 
 export type Node = {
-	tag: string;
-	attributes: Record<string, string>;
-	children: (Node | string)[];
+	readonly tag: string;
+	readonly attributes: Record<string, string>;
+	readonly children: (Node | string)[];
 };
 
 function tokenize(shortcode: string): Token[] {

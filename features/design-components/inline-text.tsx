@@ -3,13 +3,13 @@ import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./hoc/component-controls-hoc"
 import { withTextEditing } from "./hoc/content-editable-hoc"
-import type { Props, DesignComponentTag, DesignComponent, Metadata } from "./types"
+import type { Props, Metadata, Attribute } from "./types"
 
 export type ComponentAttributes = {
 	id: string
 }
 
-export const tag: DesignComponentTag = "inline-text" as const
+export const tag = "inline-text" as const
 
 const label = "Inline Text"
 
@@ -17,7 +17,7 @@ const keywords = ["span", "text", "inline", "content"]
 
 const defaultChildren = ["Inline text."] as const
 
-const settings = [
+const attributes = [
 	{
 		id: "id",
 		type: "text",
@@ -26,9 +26,9 @@ const settings = [
 		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
-		getValue: (component: DesignComponent<typeof tag>) => component.attributes.id || "",
-		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, id: value } };
+		getValue: (component) => component.attributes.id || "",
+		setValue: (component, value) => {
+			return { ...component, tag: component.tag ?? tag, attributes: { ...component.attributes, id: value } } as Props["component"]
 		},
 	},
 	{
@@ -36,45 +36,40 @@ const settings = [
 		type: "text",
 		label: "Content",
 		placeholder: "Enter inline text",
-		defaultValue: defaultChildren,
-		getValue: (component: DesignComponent<typeof tag>) => component.children,
-		setValue: (component: DesignComponent<typeof tag>, value: unknown) => {
-			return { ...component, children: Array.isArray(value) ? value : [value], }
+		defaultValue: defaultChildren[0],
+		getValue: (component) => {
+			if (!component.children) return ""
+			if (Array.isArray(component.children)) {
+				return component.children.map(child => typeof child === "string" ? child : "").join("")
+			}
+			return typeof component.children === "string" ? component.children : ""
+		},
+		setValue: (component, value) => {
+			return { ...component, children: Array.isArray(value) ? value : [value], } as Props["component"]
 		},
 	},
-]
+] as const satisfies Attribute[]
 
-const settingsMap = Object.fromEntries((settings as any).filter((s:any)=> (s as any).type !== "divider").map((s:any) => [(s as any).id, s])) as any
-
-const defaultAttributes = {
-	id: settingsMap.id.defaultValue,
-} as const
+const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
 
 const Icon = <Type className="h-4 w-4" />
 
-const Component_ = (props: Props<typeof tag>) => {
-	const children = props.component.children?.length ? props.component.children : settingsMap.content.defaultValue
-	const filteredProps: Partial<Props<typeof tag>> = { ...props }
-	delete filteredProps.pageBuilderMode
-	delete filteredProps.selectedComponentId
+const Component = (props: Props) => {
+	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
+	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
 
 	return (
 		<span className="inline" {...filteredProps}>{children as React.ReactNode}</span>
 	)
 }
 
-const WithContentEditing = withTextEditing(Component_)
-const ConnectedComponent = withConnection(WithContentEditing)
-const EditModeComponent = withEditorControls(ConnectedComponent)
-
-export const metadata: Metadata<typeof tag> = {
+export const componentMetadata = {
 	tag,
 	label,
 	keywords,
-	defaultChildren: defaultChildren,
-	defaultAttributes: defaultAttributes as any,
-	attributes: settings as any,
+	defaultChildren,
+	attributes,
 	Icon,
-	ViewModeComponent: ConnectedComponent,
-	EditModeComponent,
-}
+	ViewModeComponent: withConnection(Component),
+	EditModeComponent: withEditorControls(withTextEditing(withConnection(Component))),
+} as const satisfies Metadata

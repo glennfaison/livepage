@@ -48,26 +48,20 @@ const Icon = <Heading className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
-	const filteredProps: Partial<Props> = { ...props }
-	delete (filteredProps as any).pageBuilderMode
-	delete (filteredProps as any).selectedComponentId
+	const { pageBuilderMode: _, selectedComponentId: __, ...filteredProps } = props
 
 	return (
-		<h1 className="text-4xl font-bold py-2" {...(filteredProps as any)}>{children as React.ReactNode}</h1>
+		<h1 className="text-4xl font-bold py-2" {...filteredProps}>{children as React.ReactNode}</h1>
 	)
 }
 
-const WithContentEditing = withTextEditing(Component)
-const ViewModeComponent = withConnection(WithContentEditing)
-const EditModeComponent = withEditorControls(ViewModeComponent)
-
-export const metadata: Metadata = {
+export const componentMetadata = {
 	tag,
 	label,
 	keywords,
 	defaultChildren,
 	attributes,
 	Icon,
-	ViewModeComponent,
-	EditModeComponent,
-}
+	ViewModeComponent: withConnection(Component),
+	EditModeComponent: withEditorControls(withTextEditing(withConnection(Component))),
+} as const satisfies Metadata

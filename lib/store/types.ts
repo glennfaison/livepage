@@ -1,41 +1,41 @@
-import type { DesignComponentTag, DesignComponent, Page } from "@/features/design-components/types"
+import { Node } from "@/features/shortcode-parser/parser"
 
 // History entry
 export interface HistoryEntry {
   id: string
   action: string
   timestamp: Date
-  pageState: DesignComponent<"page">[]
+  pageState: Node[]
 }
 
 // Application state
 export interface AppState {
-  componentTree: DesignComponent<DesignComponentTag>[]
+  componentTree: Node[]
   activePage: string
   selectedComponentId: string
-  selectedComponentAncestors: DesignComponent<DesignComponentTag>[]
+  selectedComponentAncestors: Node[]
   pageBuilderMode: PageBuilderMode
   toolbarMinimized: boolean
   showToolbar: boolean
   history: HistoryEntry[]
   currentHistoryIndex: number
   historyPreviewIndex: number | null
-  originalHistoryState: Page[] | null
+  originalHistoryState: Node[] | null
 }
 
 // Action types
 export type AppAction =
-  | { type: "SET_PAGES"; payload: DesignComponent<DesignComponentTag>[] }
-  | { type: "ADD_PAGE"; payload: Page }
-  | { type: "UPDATE_PAGE"; payload: { id: string; updates: Partial<Page> } }
+  | { type: "SET_PAGES"; payload: Node[] }
+  | { type: "ADD_PAGE"; payload: Node }
+  | { type: "UPDATE_PAGE"; payload: { id: string; updates: Partial<Node> } }
   | { type: "SET_ACTIVE_PAGE"; payload: string }
   | {
     type: "INSERT_COMPONENT"
-    payload: { newComponentTag: DesignComponentTag; parentId?: string; index?: number }
+    payload: { newComponentTag: string; parentId?: string; index?: number }
   }
-  | { type: "UPDATE_COMPONENT"; payload: { componentId: string; updates: Partial<DesignComponent<DesignComponentTag>> } }
+  | { type: "UPDATE_COMPONENT"; payload: { componentId: string; updates: Partial<Node> } }
   | { type: "REMOVE_COMPONENT"; payload: { componentId: string } }
-  | { type: "REPLACE_COMPONENT", payload: { oldComponentId: string, newComponentTag: DesignComponentTag } }
+  | { type: "REPLACE_COMPONENT", payload: { oldComponentId: string, newComponentTag: string } }
   | {
     type: "DUPLICATE_COMPONENT"
     payload: { componentId: string; parentId?: string }
@@ -45,10 +45,10 @@ export type AppAction =
   | { type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }
   | { type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }
   | { type: "SET_SHOW_TOOLBAR"; payload: boolean }
-  | { type: "ADD_TO_HISTORY"; payload: { action: string; pageState: DesignComponent<DesignComponentTag>[] } }
+  | { type: "ADD_TO_HISTORY"; payload: { action: string; pageState: Node[] } }
   | { type: "SET_CURRENT_HISTORY_INDEX"; payload: number }
   | { type: "SET_HISTORY_PREVIEW_INDEX"; payload: number | null }
-  | { type: "SET_ORIGINAL_HISTORY_STATE"; payload: Page[] | null }
+  | { type: "SET_ORIGINAL_HISTORY_STATE"; payload: Node[] | null }
   | { type: "RESTORE_FROM_HISTORY"; payload: { historyIndex: number } }
   | { type: "DISCARD_CHANGES" }
 

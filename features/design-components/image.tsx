@@ -74,7 +74,8 @@ const attributes: Attribute[] = [
 const Icon = <ImageIcon className="h-4 w-4" />
 
 const Component = (props: Props) => {
-	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes as any
+	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes
+
 	return (
 		// eslint-disable-next-line @next/next/no-img-element
 		<img
@@ -86,16 +87,13 @@ const Component = (props: Props) => {
 	)
 }
 
-const ViewModeComponent = withConnection(Component)
-const EditModeComponent = withEditorControls(ViewModeComponent)
-
-export const metadata: Metadata = {
+export const componentMetadata = {
 	tag,
 	label,
 	keywords,
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent,
-	EditModeComponent,
-}
+	ViewModeComponent: withConnection(Component),
+	EditModeComponent: withEditorControls(withConnection(Component)),
+} as const satisfies Metadata

@@ -7,7 +7,7 @@ interface Connectable {
   __datasource__?: string
 }
 
-type BaseAttribute = {
+type BaseAttribute = Readonly<{
   id: string
   /** Optional label - dividers may have no label */
   label?: string
@@ -16,43 +16,42 @@ type BaseAttribute = {
   disabled?: boolean
   readOnly?: boolean
   placeholder?: string
-}
+}>
 
 // TODO: make getValue and setValue required
-export type Attribute = ({
+export type Attribute = Readonly<({
   type: "number"
   min?: number
   max?: number
   step?: number
-  options?: string[] // For select fields
-  defaultValue?: number
+  defaultValue: number
   getValue?: (node: Node) => number
   setValue?: (node: Partial<Node>, value: number) => Node
 } | {
   type: "boolean"
-  defaultValue?: boolean
+  defaultValue: boolean
   getValue?: (node: Node) => boolean
   setValue?: (node: Partial<Node>, value: boolean) => Node
 } | {
   type: "text"
-  defaultValue?: string
+  defaultValue: string
   getValue?: (node: Node) => string
   setValue?: (node: Partial<Node>, value: string) => Node
 } | {
   type: "textarea"
   rows?: number
-  defaultValue?: (string | Node)[]
+  defaultValue: (string | Node)[]
   getValue?: (node: Node) => (string | Node)[]
   setValue?: (node: Partial<Node>, value: (string | Node)[]) => Node
 } | {
   type: "select"
   options?: string[]
-  defaultValue?: string | string[]
+  defaultValue: string | string[]
   getValue?: (node: Node) => string | string[]
   setValue?: (node: Partial<Node>, value: string | string[]) => Node
 } | {
   type: "color"
-  defaultValue?: string
+  defaultValue: string
   getValue?: (node: Node) => string
   setValue?: (node: Partial<Node>, value: string) => Node
 } | {
@@ -63,29 +62,38 @@ export type Attribute = ({
   collapsed?: boolean
   /** Nested attribute fields inside the group */
   fields: Attribute[]
-  defaultValue?: undefined
+  defaultValue: never
 } | {
   type: "divider"
   // Horizontal divider (no extra fields)
-  defaultValue?: undefined
-}) & BaseAttribute
+  defaultValue: never
+})> & BaseAttribute
 
-export type Props = {
+export type Props = Readonly<{
   pageBuilderMode: PageBuilderMode
-  component: Node
+  component: Readonly<Node>
   selectedComponentId: string,
-  selectedComponentAncestors: Node[]
-}
+  selectedComponentAncestors: Readonly<Readonly<Node>[]>
+}>
+
+export type EditModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
+  pageBuilderMode: Extract<PageBuilderMode, "edit">
+}>
+
+export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
+  pageBuilderMode: Extract<PageBuilderMode, "preview">
+}>
+
 
 export interface Metadata {
-  tag: string
-  label: string
-  keywords: string[]
-  Icon: ReactNode
-  defaultChildren: ReadonlyArray<Node | string>
-  attributes: Attribute[]
-  ViewModeComponent: React.ComponentType<any>
-  EditModeComponent: React.ComponentType<any>
+  readonly tag: string
+  readonly label: string
+  readonly keywords: string[]
+  readonly Icon: ReactNode
+  readonly defaultChildren: ReadonlyArray<Node | string>
+  readonly attributes: Readonly<Readonly<Attribute>[]>
+  readonly ViewModeComponent: React.ComponentType<Readonly<ViewModeProps>>
+  readonly EditModeComponent: React.ComponentType<Readonly<EditModeProps>>
 }
 
 export type Operations = {

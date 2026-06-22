@@ -41,7 +41,7 @@ function AncestorTags(props: Props) {
   return (
     <div className="absolute bottom-[100%] right-0 flex flex-col items-end">
       {ancestors.map((component, idx) => {
-        const { getComponentInfo } = require("..")
+        const { getComponentInfo } = require("..") as typeof import("..")
         return (
           <div key={component.attributes.id}
             className={cn(
@@ -61,7 +61,7 @@ function AncestorTags(props: Props) {
 
 function ComponentControls(props: Props) {
   const { component } = props
-  const { getComponentInfo } = require("..")
+  const { getComponentInfo } = require("..") as typeof import("..")
   const { label } = getComponentInfo(component.tag)
   const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 

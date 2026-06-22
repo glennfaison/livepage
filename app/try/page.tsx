@@ -3,14 +3,14 @@
 import { Toolbar } from "@/components/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { metadata as PageMeta } from "@/features/design-components/page"
-import type { DesignComponent } from "@/features/design-components/types"
+import { componentMetadata as PageMeta } from "@/features/design-components/page-component"
 import type { PageBuilderMode } from "@/lib/store/types"
 import { ComponentOperationsContext } from "@/lib/component-operations-context"
 import { useAppState, useComponentOperations, useHistoryOperations, usePageOperations } from "@/lib/store/hooks"
 import { ChevronDown, Download, Layers, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useRef, useState } from "react"
+import { Input } from "@/components/ui/input"
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
@@ -36,7 +36,7 @@ export default function BuilderPage() {
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
 
   // Get the current active page
-  const currentPage = (state.componentTree.find((page) => page.attributes.id === state.activePage) || state.componentTree[0]) as DesignComponent<"page">
+  const currentPage = (state.componentTree.find((page) => page.attributes.id === state.activePage) || state.componentTree[0])
 
   const saveAsJSON = () => {
     savePageAsJsonMutation.mutate(state.componentTree)
@@ -164,17 +164,37 @@ export default function BuilderPage() {
           </div>
         </header>
 
-        {(() => {
-          const PageComponent = pageBuilderMode === "preview" ? PageMeta.ViewModeComponent : PageMeta.EditModeComponent
-          return (
-            <PageComponent
+        <main className="flex-1 overflow-hidden flex flex-col">
+          <div className="container py-4 border-b mx-auto">
+            <div className="flex justify-between items-center">
+              <Input
+                // defaultValue={currentPage.attributes.title}
+                // onChange={updatePageTitle}
+                className="text-xl font-semibold w-auto max-w-xs"
+                id="page-title"
+                placeholder="Page Title"
+              />
+              {/* <div className="flex gap-2">
+          </div> */}
+            </div>
+          </div>
+
+          {pageBuilderMode === "preview" ? (
+            <PageMeta.ViewModeComponent
               selectedComponentId={state.selectedComponentId}
               selectedComponentAncestors={state.selectedComponentAncestors}
-              pageBuilderMode={pageBuilderMode as PageBuilderMode}
+              pageBuilderMode="preview"
               component={currentPage}
             />
-          )
-        })()}
+          ) : (
+            <PageMeta.EditModeComponent
+              selectedComponentId={state.selectedComponentId}
+              selectedComponentAncestors={state.selectedComponentAncestors}
+              pageBuilderMode="edit"
+              component={currentPage}
+            />
+          )}
+        </main>
 
         <Toolbar
           toolbarMinimized={state.toolbarMinimized}
