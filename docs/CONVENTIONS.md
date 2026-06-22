@@ -1,6 +1,6 @@
 # LivePage Conventions
 
-- Prefer Zod schemas for runtime validation and parsing when repeated `if` checks are guarding an object shape we already expect.
-- When launching parallel agents or sub-agents, use the cheapest model that can do the job; only choose a larger model if the task truly needs it.
-- Avoid `useEffect` unless you are synchronizing with an external system; prefer deriving data during render, event handlers, or other React patterns first.
-- Prefer plain presentational components plus orchestrator components and custom hooks over components that mix lots of hooks and JSX in one place.
+- Prefer Zod for runtime validation and parsing when the same object-shape checks repeat across call sites.
+- For parallel agents or sub-agents, use the lowest-cost model that still meets the task's quality and context requirements; upgrade only if needed.
+- Use `useEffect` only to synchronize with external systems, such as subscriptions, timers, DOM APIs, or network requests. Derive data during render or handle it in event handlers. (Reference: https://react.dev/learn/you-might-not-need-an-effect)
+- Split complex UI into presentational components, orchestrator components, and custom hooks. Avoid components that combine data fetching, state coordination, and rendering in one file.
