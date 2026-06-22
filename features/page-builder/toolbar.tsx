@@ -2,25 +2,12 @@
 
 import { HistoryPopover } from "@/features/page-builder/history-popover"
 import { Button } from "@/components/ui/button"
-import type { PageBuilderMode, HistoryEntry } from "@/features/app-state"
+import type { PageBuilderMode } from "@/features/app-state"
 import { cn } from "@/lib/utils"
 import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-
-interface ToolbarProps {
-  toolbarMinimized: boolean
-  pageBuilderMode: PageBuilderMode
-  history: HistoryEntry[]
-  currentHistoryIndex: number
-  historyPreviewIndex: number | null
-  setToolbarMinimized: (minimized: boolean) => void
-  savePage: () => void
-  handleDiscard: () => void
-  onSelectHistory: (index: number) => void
-  onAcceptHistory: (index: number) => void
-  onDiscardHistory: () => void
-}
+import type { ToolbarProps } from "./types"
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   toolbarMinimized,

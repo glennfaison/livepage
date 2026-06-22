@@ -10,32 +10,9 @@ import { decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo, 
 import type { DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
-import { AppNode } from "@/features/app-state"
+import type { ComponentSettingsEditorArgs, DataSourceSettingsEditorArgs, DataSourceSettingsEditorState, DataSourceSettingsViewProps } from "../types"
 
 type DataSourceFormData = Record<string, string>
-
-type DataSourceSettingsEditorArgs = Readonly<{
-  component: AppNode
-}>
-
-export type DataSourceSettingsEditorState = Readonly<{
-  searchDataSourceTerm: string
-  filteredDataSources: DataSourceInfo[]
-  selectedDataSource: DataSourceInfo | undefined
-  formData: DataSourceFormData
-  settingsFields: ReadonlyArray<DataSourceSettingsField>
-  setSearchDataSourceTerm: React.Dispatch<React.SetStateAction<string>>
-  setSelectedDataSource: React.Dispatch<React.SetStateAction<DataSourceInfo | undefined>>
-  setFormData: React.Dispatch<React.SetStateAction<DataSourceFormData>>
-  handleSave: () => void
-  handleDiscard: () => void
-  handleFieldChange: (fieldId: string, value: string) => void
-}>
-
-type DataSourceSettingsViewProps = Pick<
-  DataSourceSettingsEditorState,
-  "selectedDataSource" | "setSelectedDataSource" | "handleSave" | "handleDiscard" | "handleFieldChange" | "settingsFields" | "formData"
->
 
 function normalizeDataSourceFields(fields: ReadonlyArray<DataSourceSettingsField>): ReadonlyArray<DataSourceSettingsField> {
   return fields
@@ -140,7 +117,7 @@ export function DataSourceListViewTabContent({
   handleDiscard,
   handleSave,
   handleFieldChange,
-}: DataSourceListViewTabContentProps): React.JSX.Element {
+}: DataSourceSettingsEditorState): React.JSX.Element {
   return (
     <>
       {!selectedDataSource && (

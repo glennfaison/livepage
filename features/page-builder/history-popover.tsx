@@ -2,23 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import type { HistoryEntry } from "@/features/app-state"
 import { cn } from "@/lib/utils"
 import { Check, GripVertical, RotateCcw, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-
-interface HistoryPopoverProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  history: HistoryEntry[]
-  currentHistoryIndex: number
-  onSelectHistory: (index: number) => void
-  onAccept: (index: number) => void
-  onDiscard: () => void
-  previewIndex: number | null
-  children: React.ReactNode
-}
+import type { HistoryPopoverProps } from "./types"
 
 export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
   isOpen,
@@ -134,7 +122,7 @@ export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
 
               return (
                 <div
-                  key={entry.id}
+                  key={`${entry.id}-${index}`}
                   className={cn(
                     "flex items-center justify-between p-3 cursor-pointer hover:bg-muted border-b border-border",
                     isSelected && "bg-muted border-border",

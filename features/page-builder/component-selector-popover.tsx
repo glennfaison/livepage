@@ -4,18 +4,14 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { getComponentInfo } from "@/features/design-components"
+import type { ComponentSelectorPopoverProps } from "./types"
 
 // Component selector popover
 export const ComponentSelectorPopover = ({
 	onSelect,
 	children,
 	componentTagList,
-}: {
-	onSelect: (type: string) => void
-	parentId?: string
-	children: React.ReactNode
-	componentTagList: string[]
-}) => {
+}: ComponentSelectorPopoverProps) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
   const [open, setOpen] = React.useState(false)
 
@@ -86,7 +82,6 @@ export const ComponentSelectorPopover = ({
 	)
 }
 
-// Component selector button
 const ComponentSelectorButton = ({
 	icon,
 	label,

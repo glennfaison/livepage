@@ -40,7 +40,7 @@ function withHistory(
   historyAction: string,
 ): AppState {
   const newEntry: HistoryEntry = {
-    id: `history-${Date.now()}`,
+    id: generateId(),
     action: historyAction,
     timestamp: new Date(),
     pageState: JSON.parse(JSON.stringify(componentTree)),
@@ -216,7 +216,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "ADD_TO_HISTORY": {
       const { action: historyAction, pageState } = action.payload
       const newEntry: HistoryEntry = {
-        id: `history-${Date.now()}`,
+        id: generateId(),
         action: historyAction,
         timestamp: new Date(),
         pageState: JSON.parse(JSON.stringify(pageState)),

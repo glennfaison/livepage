@@ -18,6 +18,8 @@ type BaseAttribute = Readonly<{
   placeholder?: string
 }>
 
+export type DesignComponentTag = string
+
 // TODO: make getValue and setValue required
 export type Attribute = Readonly<({
   type: "number"

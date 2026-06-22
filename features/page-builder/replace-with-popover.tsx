@@ -1,16 +1,12 @@
 import { componentTagList } from "@/features/design-components"
 import { ComponentSelectorPopover } from "./component-selector-popover"
-import { AppNode } from "../app-state"
+import type { ReplaceWithPopoverProps } from "./types"
 
 export const ReplaceWithPopover = ({
 	children,
 	currentComponent,
 	onReplace,
-}: {
-	children: React.ReactNode
-	currentComponent: AppNode
-	onReplace: (newType: string) => void
-}) => {
+}: ReplaceWithPopoverProps) => {
 	const tagList = componentTagList.filter((tag) => tag !== currentComponent.tag)
 
 	const handleReplace = (newType: string) => {

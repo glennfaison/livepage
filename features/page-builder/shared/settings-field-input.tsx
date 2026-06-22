@@ -5,24 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import type React from "react"
-
-export type SettingsFieldInputModel = Readonly<{
-  id: string
-  label?: string
-  type: "text" | "number" | "boolean" | "textarea" | "select" | "color"
-  placeholder?: string
-  options?: ReadonlyArray<string>
-  description?: string
-  required?: boolean
-  disabled?: boolean
-  readOnly?: boolean
-}>
-
-export type SettingsFieldInputProps = Readonly<{
-  field: SettingsFieldInputModel
-  value: string
-  onChange: (value: string) => void
-}>
+import type { SettingsFieldInputProps } from "../types"
 
 export function SettingsFieldInput({ field, value, onChange }: SettingsFieldInputProps): React.JSX.Element {
   const input = (() => {

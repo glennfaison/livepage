@@ -94,6 +94,39 @@ describe("App Reducer", () => {
     expect(result.history[0].pageState[0].children[0].tag).toBe("header1")
   })
 
+  it("should generate unique history ids across rapid updates", () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1782154286619)
+    const randomSpy = jest.spyOn(Math, "random")
+      .mockReturnValueOnce(0.1111111111111111)
+      .mockReturnValueOnce(0.2222222222222222)
+      .mockReturnValueOnce(0.3333333333333333)
+      .mockReturnValueOnce(0.4444444444444444)
+
+    try {
+      const firstInsert = appReducer(state, {
+        type: "INSERT_COMPONENT",
+        payload: {
+          newComponentTag: "header1",
+          parentId: "page-1",
+          index: 0,
+        },
+      })
+
+      const secondResult = appReducer(firstInsert, {
+        type: "ADD_TO_HISTORY",
+        payload: {
+          action: "Manual history entry",
+          pageState: firstInsert.componentTree,
+        },
+      })
+
+      expect(secondResult.history[0].id).not.toBe(secondResult.history[1].id)
+    } finally {
+      randomSpy.mockRestore()
+      dateNowSpy.mockRestore()
+    }
+  })
+
   it("should handle SET_SELECTED_COMPONENT", () => {
     const componentId = "test-component-id"
 

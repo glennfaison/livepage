@@ -3,14 +3,9 @@
 import React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import type { SettingsPopoverProps } from "./types"
 import { ComponentSettingsTabContent, useComponentSettingsEditor } from "./design-component-settings"
 import { DataSourceListViewTabContent, useDataSourceSettingsEditor } from "./data-source-settings"
-import { AppNode } from "../app-state"
-
-export interface SettingsPopoverProps {
-  component: AppNode
-  children: React.ReactNode
-}
 
 export function SettingsPopover({ component, children }: SettingsPopoverProps): React.JSX.Element {
   const [isOpen, setIsOpen] = React.useState(false)

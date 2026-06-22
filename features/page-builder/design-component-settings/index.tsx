@@ -8,6 +8,7 @@ import type { Attribute, Metadata } from "@/features/design-components/types"
 import type { AppNode } from "@/features/app-state"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
+import type { ComponentSettingsEditorArgs, ComponentSettingsTabContentProps } from "../types"
 
 type ComponentFormData = Readonly<Record<string, string>>
 type PrimitiveAttribute =
@@ -18,19 +19,6 @@ type PrimitiveAttribute =
   | Extract<Attribute, { type: "select" }>
   | Extract<Attribute, { type: "color" }>
 type FieldSaveValue = string | number | boolean | ReadonlyArray<string | AppNode>
-
-type ComponentSettingsEditorArgs = Readonly<{
-  component: AppNode
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}>
-
-export type ComponentSettingsTabContentProps = Readonly<{
-  settingsFields: ReadonlyArray<Attribute>
-  formData: ComponentFormData
-  handleDiscard: () => void
-  handleFieldChange: (fieldId: string, value: string) => void
-  handleSave: () => void
-}>
 
 function isGroupAttribute(field: Attribute): field is Extract<Attribute, { type: "group" }> {
   return field.type === "group"
