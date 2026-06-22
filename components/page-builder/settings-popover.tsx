@@ -20,6 +20,7 @@ import {
   SelectItem,
   SelectValue
 } from "@/components/ui/select"
+import { appSettings } from "@/app/app-settings"
 
 const DataSourceSelectorButton = ({
   icon,
@@ -146,7 +147,8 @@ function useComponentSettingsEditor<Tag extends DesignComponentTag>({ component,
 
 function useDataSourceSettingsEditor<Tag extends DesignComponentTag>({ component }: Omit<SettingsPopoverProps<Tag>, "children"> & { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
-  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes.__datasource__ || "")
+  const DATASOURCE_FIELD = appSettings.dataSources.dataSourceFieldName
+  const savedDataSourceSettings = decodeDataSourceSettings(component.attributes[DATASOURCE_FIELD] || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo | undefined>(dataSourceInfo)
   const { updateComponent } = useComponentOperationsContext()
@@ -178,13 +180,13 @@ function useDataSourceSettingsEditor<Tag extends DesignComponentTag>({ component
       }
     }
     const encodedDataSourceSettings = encodeDataSourceSettings({ id: selectedDataSource.id, settings: updatedFormData })
-    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __datasource__: encodedDataSourceSettings } })
+    updateComponent(component.attributes.id, { attributes: { ...component.attributes, [DATASOURCE_FIELD]: encodedDataSourceSettings } })
   }
 
   const handleDiscard = () => {
     setFormData({} as DataSourceSettings)
     setSelectedDataSource(undefined)
-    updateComponent(component.attributes.id, { attributes: { ...component.attributes, __datasource__: "" } })
+    updateComponent(component.attributes.id, { attributes: { ...component.attributes, [DATASOURCE_FIELD]: "" } })
   }
 
   const handleFieldChange = (fieldId: string, value: string) => {

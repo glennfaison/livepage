@@ -1,6 +1,7 @@
 import React, { useCallback } from "react"
 import type { EditModeProps } from "../types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
+import { appSettings } from "@/app/app-settings"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {
 	contentEditable?: boolean
@@ -18,7 +19,7 @@ export function withTextEditing(
 		const [contentEditable, setContentEditable] = React.useState<boolean>(false)
 		const { pageBuilderMode, component, ...otherProps } = props
 		const { setSelectedComponent, updateComponent } = useComponentOperationsContext()
-		const isConnected = !!props.component.attributes?.__datasource__
+		const isConnected = !!props.component.attributes?.[appSettings.dataSources.dataSourceFieldName]
 
 		const onBlur = useCallback((e: React.FocusEvent<HTMLElement>) => {
 			e.stopPropagation()

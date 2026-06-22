@@ -1,9 +1,10 @@
 import type React from "react"
 import type { ReactNode } from "react"
 import type { AppNode, PageBuilderMode } from "@/features/app-state"
+import { appSettings } from "@/app/app-settings"
 
 interface Connectable {
-  __datasource__?: string
+  [appSettings.dataSources.dataSourceFieldName]?: string
 }
 
 type BaseAttribute = Readonly<{
