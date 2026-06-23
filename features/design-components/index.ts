@@ -1,6 +1,6 @@
 "use client"
 
-import type { Metadata, Attribute, Props } from "./types"
+import type { Metadata, Props } from "@/features/types"
 import { componentMetadata as Header1 } from "./header1"
 import { componentMetadata as Header2 } from "./header2"
 import { componentMetadata as Header3 } from "./header3"

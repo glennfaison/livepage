@@ -96,9 +96,11 @@ describe("SettingsPopover", () => {
   })
 
   it("locks the back button and shows Update/Disconnect for connected data sources", async () => {
-    const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
-    designComponentData.attributes = {
-      ...designComponentData.attributes,
+    const baseComponentData = createDesignComponentInstance("header1", "header1-2345")
+    const designComponentData = {
+      ...baseComponentData,
+      attributes: {
+      ...baseComponentData.attributes,
       [appSettings.dataSources.dataSourceFieldName]: encodeDataSourceSettings({
         id: "rest-api",
         settings: {
@@ -106,6 +108,7 @@ describe("SettingsPopover", () => {
           "parse-result": "return data",
         },
       }),
+      },
     }
 
     render(

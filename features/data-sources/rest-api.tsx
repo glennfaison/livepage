@@ -1,5 +1,5 @@
 import { Plug } from "lucide-react"
-import type { DataSourceInfo } from "./types"
+import type { DataSourceInfo, DataSourceSettings } from "@/features/types"
 
 const settings = [
 	{
@@ -7,22 +7,30 @@ const settings = [
 		type: "textarea",
 		label: "REST API URL",
 		placeholder: "Enter the REST API URL",
-		defaultValue: "",
+		defaultValue: [],
 	},
 	{
 		id: "parse-result",
 		type: "textarea",
 		label: "JavaScript function to parse your results",
 		placeholder: "Enter the function body",
-		defaultValue: "",
+		defaultValue: [],
 	},
 ] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>
 
-async function tryConnection(componentDataSourceSettings: Readonly<Record<string, string>>): Promise<unknown> {
+async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSettings>): Promise<unknown> {
+	const urlValue = componentDataSourceSettings.url
+	const url = Array.isArray(urlValue) ? urlValue.join("") : String(urlValue)
+	if (!url.trim()) {
+		throw new Error("Expected REST API settings to provide a URL string")
+	}
+
 	let parseResultFn
 	try {
-		if (componentDataSourceSettings["parse-result"].trim()) {
-			parseResultFn = new Function("data", `${componentDataSourceSettings["parse-result"]}`)
+		const parseResult = componentDataSourceSettings["parse-result"]
+		const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
+		if (parseResultSource.trim()) {
+			parseResultFn = new Function("data", `${parseResultSource}`)
 		}
 	} catch (error) {
 		throw error
@@ -30,7 +38,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<Record<string
 
 	let unparsedData
 	try {
-		const result = await fetch(componentDataSourceSettings.url)
+		const result = await fetch(url)
 		if (!result.ok) {
 			throw await result.json()
 		}
@@ -58,4 +66,3 @@ export const dataSourceInfo = {
 	settings,
 	tryConnection,
 } as const satisfies DataSourceInfo
-

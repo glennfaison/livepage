@@ -1,4 +1,4 @@
-import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "./types"
+import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "@/features/types"
 import { dataSourceInfo as RestApi } from "./rest-api"
 import { dataSourceInfo as GeneratedData } from "./generated-data"
 
@@ -39,4 +39,3 @@ export function decodeDataSourceSettings(encodedDataSourceSettings: string): {
 		throw error
 	}
 }
-

@@ -4,14 +4,18 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { getComponentInfo } from "@/features/design-components"
-import type { ComponentSelectorPopoverProps } from "./types"
+import type { AppNodeTag } from "@/features/types"
 
 // Component selector popover
 export const ComponentSelectorPopover = ({
 	onSelect,
 	children,
 	componentTagList,
-}: ComponentSelectorPopoverProps) => {
+}: Readonly<{
+	onSelect: (type: AppNodeTag) => void
+	children: React.ReactNode
+	componentTagList: ReadonlyArray<AppNodeTag>
+}>) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
   const [open, setOpen] = React.useState(false)
 
@@ -27,7 +31,7 @@ export const ComponentSelectorPopover = ({
 		)
 	}, [searchTerm, componentTagList])
 
-	const handleSelect = (type: string) => {
+	const handleSelect = (type: AppNodeTag) => {
 		onSelect(type)
 		if (closePopover) {
 			closePopover()
@@ -86,11 +90,11 @@ const ComponentSelectorButton = ({
 	icon,
 	label,
 	onClick,
-}: {
+}: Readonly<{
 	icon: React.ReactNode
 	label: string
 	onClick: () => void
-}) => {
+}>) => {
 	return (
 		<Button variant="outline" size="sm" className="flex flex-col items-center h-auto py-2 gap-1" onClick={onClick}>
 			<div className="p-1 bg-muted rounded-md">{icon}</div>

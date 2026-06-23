@@ -3,11 +3,17 @@
 import React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { SettingsPopoverProps } from "./types"
+import type { AppNode } from "@/features/types"
 import { ComponentSettingsTabContent, useComponentSettingsEditor } from "./design-component-settings"
 import { DataSourceListViewTabContent, useDataSourceSettingsEditor } from "./data-source-settings"
 
-export function SettingsPopover({ component, children }: SettingsPopoverProps): React.JSX.Element {
+export function SettingsPopover({
+  component,
+  children,
+}: Readonly<{
+  component: AppNode
+  children: React.ReactNode
+}>): React.JSX.Element {
   const [isOpen, setIsOpen] = React.useState(false)
   const componentSettingsEditor = useComponentSettingsEditor({ component, setIsOpen })
   const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component })

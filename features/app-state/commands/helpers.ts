@@ -1,5 +1,5 @@
 import { createDesignComponentInstance } from "@/features/design-components"
-import type { AppNode } from "../types"
+import type { AppNode } from "@/features/types"
 
 function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
   const newId = `${component.attributes.id}${idSuffix}`
@@ -10,15 +10,13 @@ function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
   }
 }
 
-type FindParentTreeProps = {
-  components: ReadonlyArray<AppNode | string>
-  componentId: string
-}
-
 export function findComponentParentTree({
   components,
   componentId,
-}: FindParentTreeProps): AppNode[] {
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+}>): AppNode[] {
   for (const component of components) {
     if (typeof component === "string") {
       continue
@@ -58,19 +56,17 @@ export function findComponentById(
   return null
 }
 
-type InsertComponentProps = {
-  components: ReadonlyArray<AppNode | string>
-  newComponent: AppNode
-  parentId?: string
-  index?: number
-}
-
 export function insertComponent({
   components,
   newComponent,
   parentId,
   index,
-}: InsertComponentProps): AppNode[] {
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  newComponent: AppNode
+  parentId?: string
+  index?: number
+}>): AppNode[] {
   if (components.length === 0 && (parentId === null || parentId === undefined)) {
     return [newComponent]
   }
@@ -115,19 +111,17 @@ export function insertComponent({
   }, [])
 }
 
-type UpdateComponentProps = {
-  components: ReadonlyArray<AppNode | string>
-  componentId: string
-  updates: Partial<AppNode>
-  updated: { value: boolean }
-}
-
 export function updateComponent({
   components,
   componentId,
   updates,
   updated,
-}: UpdateComponentProps): AppNode[] {
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+  updates: Partial<AppNode>
+  updated: { value: boolean }
+}>): AppNode[] {
   return components.map((component) => {
     if (typeof component === "string") {
       return component as never
@@ -154,15 +148,13 @@ export function updateComponent({
   })
 }
 
-type RemoveComponentProps = {
-  components: ReadonlyArray<AppNode | string>
-  componentId: string
-}
-
 export function removeComponent({
   components,
   componentId,
-}: RemoveComponentProps): AppNode[] {
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+}>): AppNode[] {
   return components.reduce<AppNode[]>((acc, component) => {
     if (typeof component === "string") {
       return [...acc, component as never]
@@ -212,17 +204,15 @@ export function duplicateComponent({
   }, [])
 }
 
-type ReplaceComponentProps = {
-  components: ReadonlyArray<AppNode | string>
-  oldComponentId: string
-  newComponent: AppNode
-}
-
 export function replaceComponent({
   components,
   oldComponentId,
   newComponent,
-}: ReplaceComponentProps): AppNode[] {
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  oldComponentId: string
+  newComponent: AppNode
+}>): AppNode[] {
   return components.map((component) => {
     if (typeof component === "string") {
       return component as never

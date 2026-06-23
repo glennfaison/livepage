@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
-import type { Props, Metadata, Attribute, ViewModeProps, EditModeProps } from "./types"
+import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/features/types"
 import { cn } from "@/lib/utils"
 import { createAttributeMap, createSpacingAttributes, readBoxSpacing, createTextAttribute } from "./shared/component-helpers"
 
 const tag = "page" as const
 
-const attributes: Attribute[] = [
+const attributes: SettingsField[] = [
 	createTextAttribute({
 		id: "id",
 		label: "ID",

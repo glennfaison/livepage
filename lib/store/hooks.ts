@@ -39,12 +39,12 @@ export function useAppState() {
 
 export function usePageOperations(state: AppState) {
   const savePageAsJsonMutation = useMutation({
-    mutationFn: async (componentTree: AppNode[]) => {
+    mutationFn: async (componentTree: ReadonlyArray<AppNode>) => {
       const page = selectCurrentPage({
-        componentTree: componentTree as ReadonlyArray<AppNode>,
+        componentTree,
         activePage: state.activePage,
       }) as AppNode | undefined
-      const data = serializeAppStateAsJson(componentTree as ReadonlyArray<AppNode>)
+      const data = serializeAppStateAsJson(componentTree)
       const blob = new Blob([data], { type: "application/json" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -72,12 +72,12 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsShortcodeMutation = useMutation({
-    mutationFn: async (componentTree: AppNode[]) => {
+    mutationFn: async (componentTree: ReadonlyArray<AppNode>) => {
       const page = selectCurrentPage({
-        componentTree: componentTree as ReadonlyArray<AppNode>,
+        componentTree,
         activePage: state.activePage,
       }) as AppNode | undefined
-      const data = serializeAppStateAsShortcode(componentTree as ReadonlyArray<AppNode>)
+      const data = serializeAppStateAsShortcode(componentTree)
       const blob = new Blob([data], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -105,8 +105,8 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsHtmlMutation = useMutation({
-    mutationFn: async (componentTree: AppNode[]) => {
-      const htmlTemplate = serializeAppStateAsHtml(componentTree as ReadonlyArray<AppNode>)
+    mutationFn: async (componentTree: ReadonlyArray<AppNode>) => {
+      const htmlTemplate = serializeAppStateAsHtml(componentTree)
 
       // Create and download the HTML file
       const blob = new Blob([htmlTemplate], { type: "text/html" })
@@ -114,7 +114,7 @@ export function usePageOperations(state: AppState) {
       const a = document.createElement("a")
       a.href = url
       const page = selectCurrentPage({
-        componentTree: componentTree as ReadonlyArray<AppNode>,
+        componentTree,
         activePage: state.activePage,
       }) as AppNode | undefined
       a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}.html`
@@ -218,7 +218,7 @@ export function usePageOperations(state: AppState) {
 export function useComponentOperations(dispatch: React.Dispatch<AppAction>, state: AppState) {
   // Find a component by ID (including nested components)
   const findComponentById = useCallback(
-    (components: AppNode[], id: string): AppNode | null => {
+    (components: ReadonlyArray<AppNode | string>, id: string): AppNode | null => {
       for (const component of components) {
         if (typeof component === "string") {
           continue
@@ -229,7 +229,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
         }
 
         if (component.children) {
-          const found = findComponentById(component.children as AppNode[], id)
+          const found = findComponentById(component.children, id)
           if (found) return found
         }
       }

@@ -4,32 +4,25 @@ import React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { getComponentInfo } from "@/features/design-components"
-import type { Attribute, Metadata } from "@/features/design-components/types"
 import type { AppNode } from "@/features/app-state"
+import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
-import type { ComponentSettingsEditorArgs, ComponentSettingsTabContentProps } from "../types"
 
-type ComponentFormData = Readonly<Record<string, string>>
-type PrimitiveAttribute =
-  | Extract<Attribute, { type: "number" }>
-  | Extract<Attribute, { type: "boolean" }>
-  | Extract<Attribute, { type: "text" }>
-  | Extract<Attribute, { type: "textarea" }>
-  | Extract<Attribute, { type: "select" }>
-  | Extract<Attribute, { type: "color" }>
-type FieldSaveValue = string | number | boolean | ReadonlyArray<string | AppNode>
-
-function isGroupAttribute(field: Attribute): field is Extract<Attribute, { type: "group" }> {
+function isGroupAttribute(field: SettingsField): field is Extract<SettingsField, { type: "group" }> {
   return field.type === "group"
 }
 
-function isDividerAttribute(field: Attribute): field is Extract<Attribute, { type: "divider" }> {
+function isDividerAttribute(field: SettingsField): field is Extract<SettingsField, { type: "divider" }> {
   return field.type === "divider"
 }
 
-function flattenAttributes(fields: ReadonlyArray<Attribute>): ReadonlyArray<PrimitiveAttribute> {
-  const out: PrimitiveAttribute[] = []
+function isPrimitiveAttribute(field: SettingsField): field is PrimitiveSettingsField {
+  return field.type !== "group" && field.type !== "divider"
+}
+
+function flattenAttributes(fields: ReadonlyArray<SettingsField>): ReadonlyArray<PrimitiveSettingsField> {
+  const out: PrimitiveSettingsField[] = []
 
   for (const field of fields) {
     if (isGroupAttribute(field)) {
@@ -41,14 +34,46 @@ function flattenAttributes(fields: ReadonlyArray<Attribute>): ReadonlyArray<Prim
       continue
     }
 
-    out.push(field)
+    if (isPrimitiveAttribute(field)) {
+      out.push(field)
+    }
   }
 
   return out
 }
 
-function readFieldValue(field: PrimitiveAttribute, component: Readonly<AppNode>): string {
+function readFieldValue(field: PrimitiveSettingsField, component: Readonly<AppNode>): SettingsValue {
   const value = field.getValue ? field.getValue(component) : component.attributes[field.id]
+
+  if (field.type === "multi-select") {
+    if (Array.isArray(value) && value.every((entry) => typeof entry === "string")) {
+      return value
+    }
+    if (typeof value === "string" && value.trim().startsWith("[")) {
+      try {
+        const parsed = JSON.parse(value) as unknown
+        if (Array.isArray(parsed) && parsed.every((entry) => typeof entry === "string")) {
+          return parsed
+        }
+      } catch {
+        // Fall through to the legacy single-string fallback below.
+      }
+    }
+    if (Array.isArray(value)) return value.filter((entry): entry is string => typeof entry === "string")
+    if (typeof value === "string" && value !== "") return [value]
+    return [...field.defaultValue]
+  }
+
+  if (field.type === "boolean") {
+    if (typeof value === "boolean") return value
+    return value === "true"
+  }
+
+  if (field.type === "number") {
+    if (typeof value === "number") return String(value)
+    if (typeof value === "string") return value
+    return String(field.defaultValue)
+  }
 
   if (Array.isArray(value)) {
     return value.map((entry) => (typeof entry === "string" ? entry : "")).join("")
@@ -57,13 +82,47 @@ function readFieldValue(field: PrimitiveAttribute, component: Readonly<AppNode>)
   return String(value ?? "")
 }
 
-function resolveSaveValue(field: PrimitiveAttribute, fieldId: string, value: string, componentInfo: Metadata): FieldSaveValue {
-  if (fieldId === "content" && componentInfo.defaultChildren.length > 0 && value.trim() === "") {
-    return componentInfo.defaultChildren
+function resolveSaveValue(
+  field: PrimitiveSettingsField,
+  fieldId: string,
+  value: SettingsValue,
+  componentInfo: Metadata,
+): SettingsValue {
+  if (fieldId === "content" && componentInfo.defaultChildren.length > 0 && typeof value === "string" && value.trim() === "") {
+    return componentInfo.defaultChildren.filter((entry): entry is string => typeof entry === "string")
   }
 
-  if (value.trim() === "") {
-    if (typeof field.defaultValue !== "undefined") {
+  if (field.type === "multi-select") {
+    if (Array.isArray(value) && value.length === 0 && field.defaultValue.length > 0) {
+      return field.defaultValue
+    }
+    return Array.isArray(value) ? value : [String(value)]
+  }
+
+  if (field.type === "boolean") {
+    return typeof value === "boolean" ? value : value === "true"
+  }
+
+  if (field.type === "number") {
+    if (typeof value === "string" && value.trim() === "") {
+      return field.defaultValue
+    }
+    if (typeof value === "string") {
+      return Number(value)
+    }
+    return value
+  }
+
+  if (field.type === "textarea") {
+    if (typeof value === "string" && value.trim() === "") {
+      return field.defaultValue
+    }
+
+    return typeof value === "string" ? [value] : field.defaultValue
+  }
+
+  if (typeof value === "string" && value.trim() === "") {
+    if (field.type === "select" || field.type === "text" || field.type === "color") {
       return field.defaultValue
     }
 
@@ -73,13 +132,13 @@ function resolveSaveValue(field: PrimitiveAttribute, fieldId: string, value: str
     }
   }
 
-  return value
+  return typeof value === "string" ? value : String(value)
 }
 
 function applyFieldValue(
   update: Partial<AppNode>,
-  field: PrimitiveAttribute,
-  value: FieldSaveValue,
+  field: PrimitiveSettingsField,
+  value: SettingsValue,
 ): Partial<AppNode> {
   switch (field.type) {
     case "textarea": {
@@ -100,6 +159,12 @@ function applyFieldValue(
         ? field.setValue(update, nextValue)
         : { ...update, attributes: { ...(update.attributes ?? {}), [field.id]: String(nextValue) } }
     }
+    case "multi-select": {
+      const nextValue = Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [String(value)]
+      return field.setValue
+        ? field.setValue(update, nextValue)
+        : { ...update, attributes: { ...(update.attributes ?? {}), [field.id]: JSON.stringify(nextValue) } }
+    }
     default: {
       const stringValue = Array.isArray(value)
         ? value.map((entry) => (typeof entry === "string" ? entry : "")).join("")
@@ -112,14 +177,20 @@ function applyFieldValue(
   }
 }
 
-function useComponentSettingsEditor({ component, setIsOpen }: ComponentSettingsEditorArgs) {
+function useComponentSettingsEditor({
+  component,
+  setIsOpen,
+}: Readonly<{
+  component: AppNode
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+}>) {
   const componentInfo = React.useMemo(() => getComponentInfo(component.tag), [component.tag])
   const settingsFields = React.useMemo(() => componentInfo.attributes, [componentInfo.attributes])
-  const [formData, setFormData] = React.useState<ComponentFormData>({})
+  const [formData, setFormData] = React.useState<SettingsFormData>({})
   const { updateComponent } = useComponentOperationsContext()
 
   React.useEffect(() => {
-    const nextFormData: Record<string, string> = {}
+    const nextFormData: Record<string, SettingsValue> = {}
     for (const field of flattenAttributes(componentInfo.attributes)) {
       nextFormData[field.id] = readFieldValue(field, component)
     }
@@ -138,7 +209,7 @@ function useComponentSettingsEditor({ component, setIsOpen }: ComponentSettingsE
   }, [component.attributes.id, componentInfo, formData, setIsOpen, updateComponent])
 
   const handleDiscard = React.useCallback(() => {
-    const nextFormData: Record<string, string> = {}
+    const nextFormData: Record<string, SettingsValue> = {}
     for (const field of flattenAttributes(componentInfo.attributes)) {
       nextFormData[field.id] = readFieldValue(field, component)
     }
@@ -146,7 +217,7 @@ function useComponentSettingsEditor({ component, setIsOpen }: ComponentSettingsE
     setIsOpen(false)
   }, [component, componentInfo.attributes, setIsOpen])
 
-  const handleFieldChange = React.useCallback((fieldId: string, value: string) => {
+  const handleFieldChange = React.useCallback((fieldId: string, value: string | number | boolean | ReadonlyArray<string>) => {
     setFormData((previous) => ({ ...previous, [fieldId]: value }))
   }, [])
 
@@ -165,9 +236,9 @@ function SettingsFieldList({
   formData,
   handleFieldChange,
 }: Readonly<{
-  fields: ReadonlyArray<Attribute>
-  formData: ComponentFormData
-  handleFieldChange: (fieldId: string, value: string) => void
+  fields: ReadonlyArray<SettingsField>
+  formData: SettingsFormData
+  handleFieldChange: (fieldId: string, value: SettingsValue) => void
 }>): React.JSX.Element {
   return (
     <>
@@ -187,11 +258,15 @@ function SettingsFieldList({
           )
         }
 
+        if (!isPrimitiveAttribute(field)) {
+          return null
+        }
+
         return (
           <SettingsFieldInput
             key={field.id}
             field={field}
-            value={formData[field.id] ?? ""}
+            value={formData[field.id] ?? field.defaultValue}
             onChange={(value) => handleFieldChange(field.id, value)}
           />
         )
@@ -205,9 +280,9 @@ function SettingsFieldGroup({
   formData,
   handleFieldChange,
 }: Readonly<{
-  field: Extract<Attribute, { type: "group" }>
-  formData: ComponentFormData
-  handleFieldChange: (fieldId: string, value: string) => void
+  field: Extract<SettingsField, { type: "group" }>
+  formData: SettingsFormData
+  handleFieldChange: (fieldId: string, value: SettingsValue) => void
 }>): React.JSX.Element {
   const [collapsed, setCollapsed] = React.useState(field.collapsed ?? false)
 
@@ -237,7 +312,13 @@ export function ComponentSettingsTabContent({
   handleDiscard,
   handleFieldChange,
   handleSave,
-}: ComponentSettingsTabContentProps): React.JSX.Element {
+}: Readonly<{
+  settingsFields: ReadonlyArray<SettingsField>
+  formData: SettingsFormData
+  handleDiscard: () => void
+  handleFieldChange: (fieldId: string, value: SettingsValue) => void
+  handleSave: () => void
+}>): React.JSX.Element {
   return (
     <>
       <div className="space-y-4 p-4 overflow-y-scroll flex-1">

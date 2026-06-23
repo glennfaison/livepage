@@ -4,18 +4,23 @@ import { Plus } from "lucide-react"
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
-import type { DividerProps } from "./types"
+import type { AppNodeTag } from "@/features/types"
 
 export const Divider = ({
   orientation,
   onAddComponent,
   index,
   isVisible,
-}: DividerProps) => {
+}: Readonly<{
+  orientation: "horizontal" | "vertical"
+  onAddComponent: (type: AppNodeTag, index: number) => void
+  index: number
+  isVisible: boolean
+}>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   isVisible = isVisible || popoverOpen
 
-  const handleAddComponent = (type: string) => {
+  const handleAddComponent = (type: AppNodeTag) => {
     onAddComponent(type, index)
     setPopoverOpen(false)
   }

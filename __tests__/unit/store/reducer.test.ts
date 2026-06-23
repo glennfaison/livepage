@@ -91,7 +91,7 @@ describe("App Reducer", () => {
     const result = appReducer(state, action)
     expect(result.history).toHaveLength(1)
     expect(result.currentHistoryIndex).toBe(0)
-    expect(result.history[0].pageState[0].children[0].tag).toBe("header1")
+    expect((result.history[0].pageState[0].children[0] as { tag: string }).tag).toBe("header1")
   })
 
   it("should generate unique history ids across rapid updates", () => {

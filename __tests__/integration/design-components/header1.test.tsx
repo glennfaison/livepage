@@ -24,11 +24,16 @@ describe("Header1 Component (metadata-based)", () => {
     children: ["Test Header"],
   } as any
 
-  const baseProps = {
+  const editProps = {
     pageBuilderMode: "edit" as const,
     component: mockComponent,
     selectedComponentId: "",
     selectedComponentAncestors: [],
+  }
+
+  const previewProps = {
+    ...editProps,
+    pageBuilderMode: "preview" as const,
   }
 
   it("renders with the correct content", () => {
@@ -36,7 +41,7 @@ describe("Header1 Component (metadata-based)", () => {
     const qc = new QueryClient()
     render(
       <QueryClientProvider client={qc}>
-        <Component {...baseProps} />
+        <Component {...previewProps} />
       </QueryClientProvider>
     )
 
@@ -51,7 +56,7 @@ describe("Header1 Component (metadata-based)", () => {
     const qc = new QueryClient()
     render(
       <QueryClientProvider client={qc}>
-        <Component {...baseProps} pageBuilderMode={"edit" as const} />
+        <Component {...editProps} />
       </QueryClientProvider>
     )
 
@@ -65,7 +70,7 @@ describe("Header1 Component (metadata-based)", () => {
     const qc = new QueryClient()
     render(
       <QueryClientProvider client={qc}>
-        <Component {...baseProps} pageBuilderMode={"preview" as const} />
+        <Component {...previewProps} />
       </QueryClientProvider>
     )
 

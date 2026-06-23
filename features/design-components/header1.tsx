@@ -3,7 +3,7 @@ import { Heading } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
-import type { Props, Attribute, Metadata } from "./types"
+import type { Props, SettingsField, Metadata } from "@/features/types"
 import { createAttributeMap, createTextAttribute, readTextChildren } from "./shared/component-helpers"
 
 const tag = "header1" as const
@@ -14,7 +14,7 @@ const keywords = ["h1", "title", "header", "heading", "large"]
 
 const defaultChildren = ["Header 1"] as const
 
-const attributes: Attribute[] = [
+const attributes: SettingsField[] = [
 	createTextAttribute({
 		id: "id",
 		label: "ID",

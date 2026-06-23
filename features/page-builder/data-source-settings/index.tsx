@@ -7,25 +7,35 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { appSettings } from "@/app/app-settings"
 import { decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo, dataSourceIdList } from "@/features/data-sources"
-import type { DataSourceInfo, DataSourceSettings, SettingsField as DataSourceSettingsField } from "@/features/data-sources/types"
+import type { AppNode, DataSourceInfo, DataSourceSettings, PrimitiveSettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
-import type { ComponentSettingsEditorArgs, DataSourceSettingsEditorArgs, DataSourceSettingsEditorState, DataSourceSettingsViewProps } from "../types"
 
-type DataSourceFormData = Record<string, string>
-
-function normalizeDataSourceFields(fields: ReadonlyArray<DataSourceSettingsField>): ReadonlyArray<DataSourceSettingsField> {
-  return fields
-}
-
-function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs): DataSourceSettingsEditorState {
+function useDataSourceSettingsEditor({
+  component,
+}: Readonly<{
+  component: AppNode
+}>): Readonly<{
+  searchDataSourceTerm: string
+  filteredDataSources: ReadonlyArray<DataSourceInfo>
+  selectedDataSource: DataSourceInfo | undefined
+  isConnected: boolean
+  formData: SettingsFormData
+  settingsFields: ReadonlyArray<PrimitiveSettingsField>
+  setSearchDataSourceTerm: React.Dispatch<React.SetStateAction<string>>
+  setSelectedDataSource: React.Dispatch<React.SetStateAction<DataSourceInfo | undefined>>
+  setFormData: React.Dispatch<React.SetStateAction<SettingsFormData>>
+  handleSave: () => void
+  handleDiscard: () => void
+  handleFieldChange: (fieldId: string, value: SettingsValue) => void
+}> {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
   const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
   const savedDataSourceSettings = decodeDataSourceSettings(component.attributes[dataSourceFieldName] || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
   const isConnected = !!savedDataSourceSettings.id
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo | undefined>(dataSourceInfo)
-  const [formData, setFormData] = React.useState<DataSourceFormData>({ ...savedDataSourceSettings.settings })
+  const [formData, setFormData] = React.useState<SettingsFormData>({ ...savedDataSourceSettings.settings })
   const { updateComponent } = useComponentOperationsContext()
 
   const filteredDataSources = React.useMemo<DataSourceInfo[]>(() => {
@@ -46,7 +56,7 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
   }, [searchDataSourceTerm])
 
   const settingsFields = React.useMemo(
-    () => normalizeDataSourceFields(selectedDataSource?.settings || []),
+    () => selectedDataSource?.settings || [],
     [selectedDataSource?.settings],
   )
 
@@ -55,11 +65,37 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
       return
     }
 
-    const updatedFormData: Record<string, string> = { ...formData }
+    const updatedFormData: Record<string, SettingsValue> = {}
     for (const field of selectedDataSource.settings) {
-      if (updatedFormData[field.id]?.trim() === "") {
-        updatedFormData[field.id] = field.defaultValue
+      const value = formData[field.id]
+
+      if (field.type === "textarea") {
+        if (Array.isArray(value)) {
+          updatedFormData[field.id] = value.length > 0 ? value : field.defaultValue
+        } else if (typeof value === "string") {
+          updatedFormData[field.id] = value.trim() === "" ? field.defaultValue : [value]
+        } else {
+          updatedFormData[field.id] = field.defaultValue
+        }
+        continue
       }
+
+      if (field.type === "multi-select") {
+        updatedFormData[field.id] = Array.isArray(value) && value.length > 0 ? value : field.defaultValue
+        continue
+      }
+
+      if (field.type === "number") {
+        updatedFormData[field.id] = typeof value === "string" && value.trim() !== "" ? Number(value) : field.defaultValue
+        continue
+      }
+
+      if (field.type === "boolean") {
+        updatedFormData[field.id] = typeof value === "boolean" ? value : value === "true"
+        continue
+      }
+
+      updatedFormData[field.id] = typeof value === "string" && value.trim() === "" ? field.defaultValue : value
     }
 
     const encodedDataSourceSettings = encodeDataSourceSettings({
@@ -86,7 +122,7 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
     })
   }, [component.attributes, dataSourceFieldName, updateComponent])
 
-  const handleFieldChange = React.useCallback((fieldId: string, value: string) => {
+  const handleFieldChange = React.useCallback((fieldId: string, value: SettingsValue) => {
     setFormData((previous) => ({ ...previous, [fieldId]: value }))
   }, [])
 
@@ -118,7 +154,19 @@ export function DataSourceListViewTabContent({
   handleDiscard,
   handleSave,
   handleFieldChange,
-}: DataSourceSettingsEditorState): React.JSX.Element {
+}: Readonly<{
+  selectedDataSource: DataSourceInfo | undefined
+  setSelectedDataSource: React.Dispatch<React.SetStateAction<DataSourceInfo | undefined>>
+  isConnected: boolean
+  filteredDataSources: ReadonlyArray<DataSourceInfo>
+  searchDataSourceTerm: string
+  setSearchDataSourceTerm: React.Dispatch<React.SetStateAction<string>>
+  formData: SettingsFormData
+  settingsFields: ReadonlyArray<PrimitiveSettingsField>
+  handleDiscard: () => void
+  handleSave: () => void
+  handleFieldChange: (fieldId: string, value: SettingsValue) => void
+}>): React.JSX.Element {
   return (
     <>
       {!selectedDataSource && (
@@ -166,7 +214,16 @@ export function DataSourceListViewTabContent({
   )
 }
 
-function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.Element {
+function DataSourceSettingsView(props: Readonly<{
+  selectedDataSource: DataSourceInfo | undefined
+  setSelectedDataSource: React.Dispatch<React.SetStateAction<DataSourceInfo | undefined>>
+  isConnected: boolean
+  handleSave: () => void
+  handleDiscard: () => void
+  handleFieldChange: (fieldId: string, value: SettingsValue) => void
+  settingsFields: ReadonlyArray<PrimitiveSettingsField>
+  formData: SettingsFormData
+}>): React.JSX.Element {
   const {
     selectedDataSource,
     setSelectedDataSource,
@@ -220,7 +277,7 @@ function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.E
           <SettingsFieldInput
             key={field.id}
             field={field}
-            value={formData[field.id] ?? ""}
+            value={formData[field.id] ?? field.defaultValue}
             onChange={(value) => handleFieldChange(field.id, value)}
           />
         ))}

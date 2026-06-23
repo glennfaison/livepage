@@ -1,5 +1,5 @@
 import { createDesignComponentInstance } from "@/features/design-components"
-import type { AppAction, AppState, HistoryEntry } from "../types"
+import type { AppAction, AppState, HistoryEntry } from "@/features/types"
 import { generateId } from "@/lib/utils"
 import {
   insertComponent,

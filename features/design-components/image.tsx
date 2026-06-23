@@ -4,7 +4,7 @@ import React from "react"
 import { withDataSource } from "@/features/design-components/decorators/with-data-source"
 import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "./decorators/with-editor-controls"
-import type { Props, Attribute, Metadata } from "./types"
+import type { Props, SettingsField, Metadata } from "@/features/types"
 
 const tag = "image" as const
 
@@ -12,7 +12,7 @@ const label = "Image"
 
 const keywords = ["image", "picture", "photo", "graphic", "media"]
 
-const attributes: Attribute[] = [
+const attributes: SettingsField[] = [
 	{
 		id: "id",
 		type: "text",

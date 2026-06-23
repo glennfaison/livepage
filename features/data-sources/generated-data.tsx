@@ -1,5 +1,5 @@
 import { BlocksIcon } from "lucide-react"
-import type { DataSourceInfo } from "./types"
+import type { DataSourceInfo, DataSourceSettings } from "@/features/types"
 
 const settings = [
 	{
@@ -7,14 +7,20 @@ const settings = [
 		type: "textarea",
 		label: "JavaScript function to generate your data",
 		placeholder: "Enter the function body",
-		defaultValue: "",
+		defaultValue: [],
 	},
 ] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>
 
-async function tryConnection(componentDataSourceSettings: Readonly<Record<string, string>>): Promise<unknown> {
+async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSettings>): Promise<unknown> {
+	const generate = componentDataSourceSettings.generate
+	const generateSource = Array.isArray(generate) ? generate.join("") : String(generate)
+	if (!generateSource.trim()) {
+		throw new Error("Expected generated data settings to provide a string function body")
+	}
+
 	let asyncGeneratorFn
 	try {
-		asyncGeneratorFn = new Function(`return (async () => { ${componentDataSourceSettings.generate} })()`)
+		asyncGeneratorFn = new Function(`return (async () => { ${generateSource} })()`)
 	} catch (error) {
 		throw error
 	}
@@ -34,4 +40,3 @@ export const dataSourceInfo = {
 	settings,
 	tryConnection,
 } as const satisfies DataSourceInfo
-

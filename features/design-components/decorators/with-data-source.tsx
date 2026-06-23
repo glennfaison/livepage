@@ -1,7 +1,6 @@
 import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
-import type { DataSourceId } from "@/features/data-sources/types"
-import type { Props } from "../types"
+import type { DataSourceId, Props } from "@/features/types"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
 import { replaceDataSourceComponentProperties } from "@/features/placeholders/data-source"

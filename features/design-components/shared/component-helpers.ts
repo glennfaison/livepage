@@ -1,7 +1,7 @@
 import type { AppNode } from "@/features/app-state"
-import type { Attribute, Props } from "../types"
+import type { Props, SettingsField } from "@/features/types"
 
-type AttributeMap = Readonly<Record<ReadonlyArray<Attribute>[number]["id"], ReadonlyArray<Attribute>[number]>>
+type AttributeMap = Readonly<Record<ReadonlyArray<SettingsField>[number]["id"], ReadonlyArray<SettingsField>[number]>>
 
 type BoxSide = "top" | "right" | "bottom" | "left"
 
@@ -16,7 +16,7 @@ function isString(value: unknown): value is string {
   return typeof value === "string"
 }
 
-export function createAttributeMap(attributes: ReadonlyArray<Attribute>): AttributeMap {
+export function createAttributeMap(attributes: ReadonlyArray<SettingsField>): AttributeMap {
   return Object.fromEntries(attributes.map((attribute) => [attribute.id, attribute]))
 }
 
@@ -29,7 +29,7 @@ export function createTextAttribute(config: Readonly<{
   disabled?: boolean
   getValue?: (component: Readonly<AppNode>) => string
   setValue?: (component: Readonly<Partial<AppNode>>, value: string) => AppNode
-}>): Attribute {
+}>): SettingsField {
   return {
     id: config.id,
     type: "text",
@@ -46,17 +46,17 @@ export function createTextAttribute(config: Readonly<{
       ...component,
       attributes: { ...component.attributes, [config.id]: value },
     }) as AppNode),
-  } satisfies Attribute
+  } satisfies SettingsField
 }
 
 export function createTextareaAttribute(config: Readonly<{
   id: string
   label: string
   placeholder: string
-  defaultValue: ReadonlyArray<string | AppNode>
-  getValue?: (component: Readonly<AppNode>) => ReadonlyArray<string | AppNode>
-  setValue?: (component: Readonly<Partial<AppNode>>, value: ReadonlyArray<string | AppNode>) => AppNode
-}>): Attribute {
+  defaultValue: ReadonlyArray<string>
+  getValue?: (component: Readonly<AppNode>) => ReadonlyArray<string>
+  setValue?: (component: Readonly<Partial<AppNode>>, value: ReadonlyArray<string>) => AppNode
+}>): SettingsField {
   return {
     id: config.id,
     type: "textarea",
@@ -67,16 +67,16 @@ export function createTextareaAttribute(config: Readonly<{
       const value = component.attributes[config.id]
       if (Array.isArray(value)) return value
       if (isString(value) && value !== "") return [value]
-      return [...config.defaultValue] as unknown as AppNode["children"]
+      return [...config.defaultValue]
     }),
     setValue: config.setValue ?? ((component, value) => ({
       ...component,
       attributes: { ...component.attributes, [config.id]: value },
     }) as AppNode),
-  } satisfies Attribute
+  } satisfies SettingsField
 }
 
-export function createSpacingAttributes(prefix: "padding" | "margin"): Attribute[] {
+export function createSpacingAttributes(prefix: "padding" | "margin"): SettingsField[] {
   return boxSides.map(([side, suffix]) => createTextAttribute({
     id: `${prefix}-${side}`,
     label: `${prefix[0].toUpperCase()}${prefix.slice(1)} ${suffix}`,
@@ -109,7 +109,7 @@ export function readTextArrayChildren(component: Readonly<AppNode>): string[] {
 
 export function readBoxSpacing(
   attributes: Readonly<Record<string, unknown>>,
-  attributeMap: Readonly<Record<string, Attribute>>,
+  attributeMap: Readonly<Record<string, SettingsField>>,
   prefix: "padding" | "margin",
 ): Readonly<{ top: string; right: string; bottom: string; left: string }> {
   const read = (side: BoxSide) => {

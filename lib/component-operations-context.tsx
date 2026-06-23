@@ -1,4 +1,4 @@
-import { Operations } from "@/features/design-components/types"
+import { Operations } from "@/features/types"
 import React from "react"
 
 export const ComponentOperationsContext = React.createContext<Operations>({} as Operations)

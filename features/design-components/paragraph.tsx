@@ -3,7 +3,7 @@ import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
-import type { Props, Metadata, Attribute } from "./types"
+import type { Props, Metadata, SettingsField } from "@/features/types"
 import { createAttributeMap, createTextAttribute, createTextareaAttribute, readTextArrayChildren } from "./shared/component-helpers"
 
 const defaultChildren = [
@@ -27,7 +27,7 @@ const label = "Paragraph"
 
 const keywords = ["p", "text", "content", "paragraph", "body"]
 
-const attributes: Attribute[] = [
+const attributes: SettingsField[] = [
 	createTextAttribute({
 		id: "id",
 		label: "ID",

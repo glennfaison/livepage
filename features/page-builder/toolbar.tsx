@@ -7,9 +7,21 @@ import { cn } from "@/lib/utils"
 import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { ToolbarProps } from "./types"
+import type { HistoryEntry } from "@/features/types"
 
-export const Toolbar: React.FC<ToolbarProps> = ({
+export const Toolbar: React.FC<Readonly<{
+  toolbarMinimized: boolean
+  setToolbarMinimized: (minimized: boolean) => void
+  savePage: () => void
+  handleDiscard: () => void
+  pageBuilderMode: PageBuilderMode
+  history: ReadonlyArray<HistoryEntry>
+  currentHistoryIndex: number
+  onSelectHistory: (index: number) => void
+  onAcceptHistory: (index: number) => void
+  onDiscardHistory: () => void
+  historyPreviewIndex: number | null
+}>> = ({
   toolbarMinimized,
   setToolbarMinimized,
   savePage,
@@ -121,7 +133,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               history={history}
               currentHistoryIndex={currentHistoryIndex}
               onSelectHistory={onSelectHistory}
-              onAccept={onAcceptHistory}
               onDiscard={onDiscardHistory}
               previewIndex={historyPreviewIndex}
             >

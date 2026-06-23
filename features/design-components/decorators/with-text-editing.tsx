@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import type { EditModeProps } from "../types"
+import type { EditModeProps } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { appSettings } from "@/app/app-settings"
 

@@ -6,9 +6,18 @@ import { cn } from "@/lib/utils"
 import { Check, GripVertical, RotateCcw, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { HistoryPopoverProps } from "./types"
+import type { HistoryEntry } from "@/features/types"
 
-export const HistoryPopover: React.FC<HistoryPopoverProps> = ({
+export const HistoryPopover: React.FC<Readonly<{
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+  history: ReadonlyArray<HistoryEntry>
+  currentHistoryIndex: number
+  onSelectHistory: (index: number) => void
+  onDiscard: () => void
+  previewIndex: number | null
+  children: React.ReactNode
+}>> = ({
   isOpen,
   onOpenChange,
   history,

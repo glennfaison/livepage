@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import { AlignHorizontalSpaceBetween, Plus } from "lucide-react"
-import type { Attribute, Metadata, EditModeProps, Props, ViewModeProps } from "./types"
+import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } from "@/features/types"
 import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
 import { Divider, useDividerVisibility } from "@/features/page-builder/layout-divider"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,7 @@ const attributes = [
 	},
 	...createSpacingAttributes("padding"),
 	...createSpacingAttributes("margin"),
-] as const satisfies ReadonlyArray<Attribute>
+] as const satisfies ReadonlyArray<SettingsField>
 
 const attributesMap = createAttributeMap(attributes)
 
@@ -71,14 +71,14 @@ const _ViewModeComponent = (props: ViewModeProps) => {
 	)
 }
 
-type EmptyColumnContentProps = {
+const EmptyColumnContent = ({
+	onAddChildComponent,
+}: Readonly<{
 	onAddChildComponent: (tag: string) => void
-}
-
-const EmptyColumnContent: React.ComponentType<EmptyColumnContentProps> = (props) => {
+}>) => {
 	return (
 		<div className="flex items-center justify-center h-full w-full text-muted-foreground">
-			<ComponentSelectorPopover onSelect={props.onAddChildComponent} componentTagList={componentTagList}>
+			<ComponentSelectorPopover onSelect={onAddChildComponent} componentTagList={componentTagList}>
 				<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
 					<Plus className="h-3 w-3" />
 					<span className="sr-only">Add component</span>
