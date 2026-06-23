@@ -43,7 +43,7 @@ export type Attribute = Readonly<({
   type: "textarea"
   rows?: number
   defaultValue: (string | AppNode)[]
-  getValue?: (node: AppNode) => (string | AppNode)[]
+  getValue?: (node: AppNode) => ReadonlyArray<string | AppNode>
   setValue?: (node: Partial<AppNode>, value: (string | AppNode)[]) => AppNode
 } | {
   type: "select"
@@ -75,7 +75,7 @@ export type Props = Readonly<{
   pageBuilderMode: PageBuilderMode
   component: Readonly<AppNode>
   selectedComponentId: string
-  selectedComponentAncestors: Readonly<Readonly<AppNode>[]>
+  selectedComponentAncestors: ReadonlyArray<Readonly<AppNode>>
 }>
 
 export type EditModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
@@ -92,8 +92,7 @@ export interface Metadata {
   readonly keywords: string[]
   readonly Icon: ReactNode
   readonly defaultChildren: ReadonlyArray<AppNode | string>
-  readonly defaultAttributes?: Readonly<Record<string, unknown>>
-  readonly attributes: Readonly<Readonly<Attribute>[]>
+  readonly attributes: Readonly<ReadonlyArray<Attribute>>
   readonly ViewModeComponent: React.ComponentType<Readonly<ViewModeProps>>
   readonly EditModeComponent: React.ComponentType<Readonly<EditModeProps>>
 }

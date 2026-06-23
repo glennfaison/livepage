@@ -3,7 +3,8 @@ import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
-import type { Props, Attribute, Metadata } from "./types"
+import type { Props, Metadata, Attribute } from "./types"
+import { createAttributeMap, createTextAttribute, createTextareaAttribute, readTextArrayChildren } from "./shared/component-helpers"
 
 const defaultChildren = [
 	`Morbi consequat justo enim, sed accumsan metus blandit eget. Etiam ornare neque
@@ -26,48 +27,36 @@ const label = "Paragraph"
 
 const keywords = ["p", "text", "content", "paragraph", "body"]
 
-const attributes = [
-	{
+const attributes: Attribute[] = [
+	createTextAttribute({
 		id: "id",
-		type: "text",
 		label: "ID",
-		readOnly: true,
-		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
-		getValue: (component) => component.attributes.id || "",
-		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
-	},
-	{
+		readOnly: true,
+		disabled: true,
+	}),
+	createTextareaAttribute({
 		id: "content",
-		type: "textarea",
 		label: "Content",
 		placeholder: "Enter paragraph text",
 		defaultValue: [],
-		getValue: (component) => {
-			if (!component.children) return []
-			if (typeof component.children === "string") return [component.children]
-			if (Array.isArray(component.children)) {
-				return component.children
-			}
-			return []
-		},
-		setValue: (component, value) => {
-			return { ...component, children: Array.isArray(value) ? value : [value], } as Props["component"]
-		},
-	},
-] as const satisfies Attribute[]
+		getValue: (component) => readTextArrayChildren(component),
+		setValue: (component, value) => ({ ...component, children: [...value] } as Props["component"]),
+	}),
+]
 
-const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
+const attributesMap = createAttributeMap(attributes)
 
 const Icon = <Type className="h-4 w-4" />
 
 const Component = (props: Props) => {
-	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
+	const children = readTextArrayChildren(props.component)
+	const renderedChildren = children.length ? children : attributesMap.content.defaultValue
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
-		<p className="py-2" {...filteredProps}>{children as React.ReactNode}</p>
+		<p className="py-2" {...filteredProps}>{renderedChildren as React.ReactNode}</p>
 	)
 }
 

@@ -4,12 +4,9 @@ import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
 import type { Props, Metadata, Attribute } from "./types"
+import { createAttributeMap, createTextAttribute, readTextChildren } from "./shared/component-helpers"
 
-export type ComponentAttributes = {
-	id: string
-}
-
-export const tag = "inline-text" as const
+const tag = "inline-text" as const
 
 const label = "Inline Text"
 
@@ -17,45 +14,37 @@ const keywords = ["span", "text", "inline", "content"]
 
 const defaultChildren = ["Inline text."] as const
 
-const attributes = [
-	{
+const attributes: Attribute[] = [
+	createTextAttribute({
 		id: "id",
-		type: "text",
 		label: "ID",
-		readOnly: true,
-		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
+		readOnly: true,
+		disabled: true,
 		getValue: (component) => component.attributes.id || "",
 		setValue: (component, value) => {
 			return { ...component, tag: component.tag ?? tag, attributes: { ...component.attributes, id: value } } as Props["component"]
 		},
-	},
-	{
+	}),
+	createTextAttribute({
 		id: "content",
-		type: "text",
 		label: "Content",
 		placeholder: "Enter inline text",
 		defaultValue: defaultChildren[0],
-		getValue: (component) => {
-			if (!component.children) return ""
-			if (Array.isArray(component.children)) {
-				return component.children.map(child => typeof child === "string" ? child : "").join("")
-			}
-			return typeof component.children === "string" ? component.children : ""
-		},
+		getValue: (component) => readTextChildren(component),
 		setValue: (component, value) => {
-			return { ...component, children: Array.isArray(value) ? value : [value], } as Props["component"]
+			return { ...component, children: [value] } as Props["component"]
 		},
-	},
-] as const satisfies Attribute[]
+	}),
+]
 
-const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
+const attributesMap = createAttributeMap(attributes)
 
 const Icon = <Type className="h-4 w-4" />
 
 const Component = (props: Props) => {
-	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
+	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (

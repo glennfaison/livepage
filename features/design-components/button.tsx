@@ -5,6 +5,7 @@ import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
 import type { Props, Attribute, Metadata } from "./types"
+import { createAttributeMap, createTextAttribute, readTextChildren } from "./shared/component-helpers"
 
 const tag = "button" as const
 
@@ -15,40 +16,30 @@ const keywords = ["button", "click", "action", "btn"]
 const defaultChildren = ["Button"] as const
 
 const attributes: Attribute[] = [
-	{
+	createTextAttribute({
 		id: "id",
-		type: "text",
 		label: "ID",
-		readOnly: true,
-		disabled: true,
 		placeholder: "ID",
 		defaultValue: "",
-		getValue: (component) => component.attributes.id || "",
-		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
-	},
-	{
+		readOnly: true,
+		disabled: true,
+	}),
+	createTextAttribute({
 		id: "content",
-		type: "text",
 		label: "Content",
 		placeholder: "Enter button text",
 		defaultValue: "",
-		getValue: (component) => {
-			if (!component.children) return ""
-			if (Array.isArray(component.children)) {
-				return component.children.map(child => typeof child === "string" ? child : "").join("")
-			}
-			return typeof component.children === "string" ? component.children : ""
-		},
-		setValue: (component, value: unknown) => ({ ...component, children: Array.isArray(value) ? value : [value] } as Props["component"]),
-	},
+		getValue: (component) => readTextChildren(component),
+		setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
+	}),
 ]
 
-const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
+const attributesMap = createAttributeMap(attributes)
 
 const Icon = <MousePointerClick className="h-4 w-4" />
 
 const Component = (props: Props) => {
-	const children = props.component.children?.length ? props.component.children : attributesMap.content.defaultValue
+	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (

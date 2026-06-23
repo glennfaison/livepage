@@ -1,14 +1,15 @@
 import React, { useCallback } from "react"
 import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
-import type { Props, Attribute, Metadata, ViewModeProps, EditModeProps } from "./types"
+import type { Attribute, Metadata, EditModeProps, Props, ViewModeProps } from "./types"
 import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
-import { useDividerVisibility, Divider } from "@/features/page-builder/layout-divider"
+import { Divider, useDividerVisibility } from "@/features/page-builder/layout-divider"
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
-import { getComponentInfo, componentTagList } from "."
+import { componentTagList, getComponentInfo } from "."
 import { withDataSource } from "@/features/design-components/decorators/with-data-source"
-import { withEditorControls } from "./decorators/with-editor-controls"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
+import { withEditorControls } from "./decorators/with-editor-controls"
+import { createAttributeMap, createSpacingAttributes, readBoxSpacing } from "./shared/component-helpers"
 
 const tag = "column" as const
 
@@ -27,118 +28,22 @@ const attributes: Attribute[] = [
 		defaultValue: "",
 		getValue: (component) => component.attributes.id || "",
 		setValue: (component, value: string) => {
-			return { ...component, attributes: { ...component.attributes, id: value } } as Props["component"];
+			return { ...component, attributes: { ...component.attributes, id: value } } as Props["component"]
 		},
 	},
-	{
-		id: "padding-top",
-		type: "text",
-		label: "Padding Top",
-		placeholder: "Padding Top",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["padding-top"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["padding-top"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "padding-right",
-		type: "text",
-		label: "Padding Right",
-		placeholder: "Padding Right",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["padding-right"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["padding-right"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "padding-bottom",
-		type: "text",
-		label: "Padding Bottom",
-		placeholder: "Padding Bottom",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["padding-bottom"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["padding-bottom"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "padding-left",
-		type: "text",
-		label: "Padding Left",
-		placeholder: "Padding Left",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["padding-left"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["padding-left"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "margin-top",
-		type: "text",
-		label: "Margin Top",
-		placeholder: "Margin Top",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["margin-top"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["margin-top"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "margin-right",
-		type: "text",
-		label: "Margin Right",
-		placeholder: "Margin Right",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["margin-right"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["margin-right"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "margin-bottom",
-		type: "text",
-		label: "Margin Bottom",
-		placeholder: "Margin Bottom",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["margin-bottom"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["margin-bottom"]: value } } as Props["component"];
-		},
-	},
-	{
-		id: "margin-left",
-		type: "text",
-		label: "Margin Left",
-		placeholder: "Margin Left",
-		defaultValue: "0",
-		getValue: (component) => component.attributes["margin-left"] || "",
-		setValue: (component, value: unknown) => {
-			return { ...component, attributes: { ...component.attributes, ["margin-left"]: value } } as Props["component"];
-		},
-	},
+	...createSpacingAttributes("padding"),
+	...createSpacingAttributes("margin"),
 ]
 
-const attributesMap = Object.fromEntries((attributes).map((s) => [s.id, s]))
+const attributesMap = createAttributeMap(attributes)
 
 const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
 const _ViewModeComponent = (props: ViewModeProps) => {
 	const { component } = props
 	const attributes = component.attributes
-	const padding = {
-		top: attributes["padding-top"] || attributesMap["padding-top"].defaultValue,
-		right: attributes["padding-right"] || attributesMap["padding-right"].defaultValue,
-		bottom: attributes["padding-bottom"] || attributesMap["padding-bottom"].defaultValue,
-		left: attributes["padding-left"] || attributesMap["padding-left"].defaultValue,
-	}
-	const margin = {
-		top: attributes["margin-top"] || attributesMap["margin-top"].defaultValue,
-		right: attributes["margin-right"] || attributesMap["margin-right"].defaultValue,
-		bottom: attributes["margin-bottom"] || attributesMap["margin-bottom"].defaultValue,
-		left: attributes["margin-left"] || attributesMap["margin-left"].defaultValue,
-	}
+	const padding = readBoxSpacing(attributes, attributesMap, "padding")
+	const margin = readBoxSpacing(attributes, attributesMap, "margin")
 
 	const childComponents = component.children.map((child) => {
 		if (typeof child === "string") return child
@@ -163,7 +68,7 @@ const _ViewModeComponent = (props: ViewModeProps) => {
 		>
 			{childComponents}
 		</div>
-	);
+	)
 }
 
 type EmptyColumnContentProps = {
@@ -186,18 +91,8 @@ const EmptyColumnContent: React.ComponentType<EmptyColumnContentProps> = (props)
 const _EditModeComponent = (props: EditModeProps) => {
 	const { component } = props
 	const attributes = component.attributes
-	const padding = {
-		top: attributes["padding-top"] || attributesMap["padding-top"].defaultValue,
-		right: attributes["padding-right"] || attributesMap["padding-right"].defaultValue,
-		bottom: attributes["padding-bottom"] || attributesMap["padding-bottom"].defaultValue,
-		left: attributes["padding-left"] || attributesMap["padding-left"].defaultValue,
-	}
-	const margin = {
-		top: attributes["margin-top"] || attributesMap["margin-top"].defaultValue,
-		right: attributes["margin-right"] || attributesMap["margin-right"].defaultValue,
-		bottom: attributes["margin-bottom"] || attributesMap["margin-bottom"].defaultValue,
-		left: attributes["margin-left"] || attributesMap["margin-left"].defaultValue,
-	}
+	const padding = readBoxSpacing(attributes, attributesMap, "padding")
+	const margin = readBoxSpacing(attributes, attributesMap, "margin")
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
 	const {
@@ -220,6 +115,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 		if (typeof child === "string") return child
 		const meta = getComponentInfo(child.tag)
 		const ChildComponent = meta.EditModeComponent
+
 		return (
 			<span className="flex-1"
 				key={child.attributes.id}
@@ -231,7 +127,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 		)
 	})
 
-	const WrappedChilden = intersperseAndAppend(children, null).map((item, index) => {
+	const WrappedChildren = intersperseAndAppend(children, null).map((item, index) => {
 		return item === null ? (
 			<Divider
 				key={`divider-${index}`}
@@ -257,9 +153,9 @@ const _EditModeComponent = (props: EditModeProps) => {
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
 			}}
 		>
-			{hasChildren ? WrappedChilden : <EmptyColumnContent onAddChildComponent={onAddChildComponent} />}
+			{hasChildren ? WrappedChildren : <EmptyColumnContent onAddChildComponent={onAddChildComponent} />}
 		</div>
-	);
+	)
 }
 
 export const componentMetadata = {
@@ -269,6 +165,6 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent: withDataSource(_ViewModeComponent),
-	EditModeComponent: withEditorControls(withDataSource(_EditModeComponent)),
+	ViewModeComponent: withDataSource(_ViewModeComponent as React.ComponentType<Props>),
+	EditModeComponent: withEditorControls(withDataSource(_EditModeComponent as React.ComponentType<Props>)),
 } as const satisfies Metadata

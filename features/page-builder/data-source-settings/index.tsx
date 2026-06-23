@@ -23,6 +23,7 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
   const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
   const savedDataSourceSettings = decodeDataSourceSettings(component.attributes[dataSourceFieldName] || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
+  const isConnected = !!savedDataSourceSettings.id
   const [selectedDataSource, setSelectedDataSource] = React.useState<DataSourceInfo | undefined>(dataSourceInfo)
   const [formData, setFormData] = React.useState<DataSourceFormData>({ ...savedDataSourceSettings.settings })
   const { updateComponent } = useComponentOperationsContext()
@@ -93,6 +94,7 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
     searchDataSourceTerm,
     filteredDataSources,
     selectedDataSource,
+    isConnected,
     formData,
     settingsFields,
     setSearchDataSourceTerm,
@@ -107,6 +109,7 @@ function useDataSourceSettingsEditor({ component }: DataSourceSettingsEditorArgs
 export function DataSourceListViewTabContent({
   selectedDataSource,
   setSelectedDataSource,
+  isConnected,
   filteredDataSources,
   searchDataSourceTerm,
   setSearchDataSourceTerm,
@@ -151,6 +154,7 @@ export function DataSourceListViewTabContent({
         <DataSourceSettingsView
           selectedDataSource={selectedDataSource}
           setSelectedDataSource={setSelectedDataSource}
+          isConnected={isConnected}
           formData={formData}
           settingsFields={settingsFields}
           handleDiscard={handleDiscard}
@@ -166,6 +170,7 @@ function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.E
   const {
     selectedDataSource,
     setSelectedDataSource,
+    isConnected,
     handleSave,
     handleDiscard,
     handleFieldChange,
@@ -201,6 +206,8 @@ function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.E
       <div className="flex bg-background border-b align-middle">
         <Button
           className="rounded-none bg-accent border-r text-foreground hover:bg-accent cursor-pointer"
+          aria-label="Back to data source list"
+          disabled={isConnected}
           onClick={() => setSelectedDataSource(undefined)}
         >
           <ChevronLeftIcon className="h-4 w-4" />
@@ -219,7 +226,7 @@ function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.E
         ))}
 
         <div className="space-y-2">
-          <Button className="cursor-pointer w-full" disabled={testingConnection} onClick={() => testConnection(formData)}>
+          <Button className="cursor-pointer w-full" disabled={testingConnection || !selectedDataSource} onClick={() => testConnection(formData)}>
             {testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" />}&nbsp;
             {testingConnection ? "Testing..." : "Test Connection"}
           </Button>
@@ -242,6 +249,7 @@ function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.E
         <Button
           variant="ghost"
           className="flex-1 rounded-none rounded-bl-lg bg-muted hover:bg-muted/80 text-foreground h-12 cursor-pointer"
+          disabled={!isConnected || testingConnection}
           onClick={discardConnection}
         >
           Disconnect
@@ -249,9 +257,10 @@ function DataSourceSettingsView(props: DataSourceSettingsViewProps): React.JSX.E
         <Button
           variant="ghost"
           className="flex-1 rounded-none rounded-br-lg bg-foreground hover:bg-foreground/90 text-background h-12 cursor-pointer"
+          disabled={testingConnection || !selectedDataSource}
           onClick={handleSave}
         >
-          Connect
+          {isConnected ? "Update" : "Connect"}
         </Button>
       </div>
     </>

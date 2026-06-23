@@ -83,6 +83,7 @@ export type DataSourceSettingsEditorState = Readonly<{
   searchDataSourceTerm: string
   filteredDataSources: ReadonlyArray<DataSourceInfo>
   selectedDataSource: DataSourceInfo | undefined
+  isConnected: boolean
   formData: Readonly<Record<string, string>>
   settingsFields: ReadonlyArray<DataSourceInfo["settings"][number]>
   setSearchDataSourceTerm: React.Dispatch<React.SetStateAction<string>>
@@ -95,7 +96,7 @@ export type DataSourceSettingsEditorState = Readonly<{
 
 export type DataSourceSettingsViewProps = Pick<
   DataSourceSettingsEditorState,
-  "selectedDataSource" | "setSelectedDataSource" | "handleSave" | "handleDiscard" | "handleFieldChange" | "settingsFields" | "formData"
+  "selectedDataSource" | "setSelectedDataSource" | "isConnected" | "handleSave" | "handleDiscard" | "handleFieldChange" | "settingsFields" | "formData"
 >
 
 export type ComponentSettingsEditorArgs = Readonly<{
