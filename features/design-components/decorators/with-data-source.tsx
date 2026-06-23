@@ -3,7 +3,7 @@ import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sou
 import type { DataSourceId, Props } from "@/features/types"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
-import { replaceDataSourceComponentProperties } from "@/features/placeholders/data-source"
+import { replaceDataSourceComponentProperties } from "@/features/placeholders"
 
 const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
 
