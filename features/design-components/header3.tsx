@@ -4,7 +4,8 @@ import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
 import type { Props, SettingsField, Metadata } from "@/features/types"
-import { createAttributeMap, createTextAttribute, readTextChildren } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "./shared/component-helpers"
+import { cn } from "@/lib/utils"
 
 const tag = "header3" as const
 
@@ -15,14 +16,8 @@ const keywords = ["h3", "title", "subtitle", "subheading", "header", "heading", 
 const defaultChildren = ["Header 3"] as const
 
 const attributes: SettingsField[] = [
-	createTextAttribute({
-		id: "id",
-		label: "ID",
-		placeholder: "ID",
-		defaultValue: "",
-		readOnly: true,
-		disabled: true,
-	}),
+	createIdAttribute(),
+	createCustomClassesAttribute(),
 	createTextAttribute({
 		id: "content",
 		label: "Content",
@@ -39,10 +34,11 @@ const Icon = <Heading className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
+	const customClasses = readCustomClasses(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
-		<h3 className="text-2xl font-bold py-2" {...filteredProps}>{children as React.ReactNode}</h3>
+		<h3 className={cn("text-2xl font-bold py-2", customClasses)} {...filteredProps}>{children as React.ReactNode}</h3>
 	)
 }
 

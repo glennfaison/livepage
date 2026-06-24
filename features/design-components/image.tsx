@@ -5,6 +5,8 @@ import { withDataSource } from "@/features/design-components/decorators/with-dat
 import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"
+import { cn } from "@/lib/utils"
+import { createCustomClassesAttribute, createIdAttribute, readCustomClasses } from "./shared/component-helpers"
 
 const tag = "image" as const
 
@@ -13,17 +15,8 @@ const label = "Image"
 const keywords = ["image", "picture", "photo", "graphic", "media"]
 
 const attributes: SettingsField[] = [
-	{
-		id: "id",
-		type: "text",
-		label: "ID",
-		readOnly: true,
-		disabled: true,
-		placeholder: "ID",
-		defaultValue: "",
-		getValue: (component) => component.attributes.id || "",
-		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, id: value } } as Props["component"]),
-	},
+	createIdAttribute(),
+	createCustomClassesAttribute(),
 	{
 		id: "src",
 		type: "text",
@@ -74,14 +67,15 @@ const attributes: SettingsField[] = [
 const Icon = <ImageIcon className="h-4 w-4" />
 
 const Component = (props: Props) => {
-	const { src, alt, fallbackSrc, ...restAttributes } = props.component.attributes
+	const { src, alt, fallbackSrc, "custom-classes": _, ...restAttributes } = props.component.attributes
+	const customClasses = readCustomClasses(props.component.attributes)
 
 	return (
 		// eslint-disable-next-line @next/next/no-img-element
 		<img
 			src={src || fallbackSrc}
 			alt={alt}
-			className="max-w-full h-auto"
+			className={cn("max-w-full h-auto", readCustomClasses(props.component.attributes))}
 			{...restAttributes}
 		/>
 	)

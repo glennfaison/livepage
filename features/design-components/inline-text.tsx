@@ -4,7 +4,8 @@ import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
 import type { Props, Metadata, SettingsField } from "@/features/types"
-import { createAttributeMap, createTextAttribute, readTextChildren } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "./shared/component-helpers"
+import { cn } from "@/lib/utils"
 
 const tag = "inline-text" as const
 
@@ -15,18 +16,13 @@ const keywords = ["span", "text", "inline", "content"]
 const defaultChildren = ["Inline text."] as const
 
 const attributes: SettingsField[] = [
-	createTextAttribute({
-		id: "id",
-		label: "ID",
-		placeholder: "ID",
-		defaultValue: "",
-		readOnly: true,
-		disabled: true,
+	createIdAttribute({
 		getValue: (component) => component.attributes.id || "",
 		setValue: (component, value) => {
 			return { ...component, tag: component.tag ?? tag, attributes: { ...component.attributes, id: value } } as Props["component"]
 		},
 	}),
+	createCustomClassesAttribute(),
 	createTextAttribute({
 		id: "content",
 		label: "Content",
@@ -45,10 +41,11 @@ const Icon = <Type className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
+	const customClasses = readCustomClasses(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
-		<span className="inline" {...filteredProps}>{children as React.ReactNode}</span>
+		<span className={cn("inline", customClasses)} {...filteredProps}>{children as React.ReactNode}</span>
 	)
 }
 

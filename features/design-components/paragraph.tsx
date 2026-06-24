@@ -4,7 +4,8 @@ import React from "react"
 import { withEditorControls } from "./decorators/with-editor-controls"
 import { withTextEditing } from "./decorators/with-text-editing"
 import type { Props, Metadata, SettingsField } from "@/features/types"
-import { createAttributeMap, createTextAttribute, createTextareaAttribute, readTextArrayChildren } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, createTextareaAttribute, readCustomClasses, readTextArrayChildren } from "./shared/component-helpers"
+import { cn } from "@/lib/utils"
 
 const defaultChildren = [
 	`Morbi consequat justo enim, sed accumsan metus blandit eget. Etiam ornare neque
@@ -28,14 +29,8 @@ const label = "Paragraph"
 const keywords = ["p", "text", "content", "paragraph", "body"]
 
 const attributes: SettingsField[] = [
-	createTextAttribute({
-		id: "id",
-		label: "ID",
-		placeholder: "ID",
-		defaultValue: "",
-		readOnly: true,
-		disabled: true,
-	}),
+	createIdAttribute(),
+	createCustomClassesAttribute(),
 	createTextareaAttribute({
 		id: "content",
 		label: "Content",
@@ -53,10 +48,11 @@ const Icon = <Type className="h-4 w-4" />
 const Component = (props: Props) => {
 	const children = readTextArrayChildren(props.component)
 	const renderedChildren = children.length ? children : attributesMap.content.defaultValue
+	const customClasses = readCustomClasses(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
 
 	return (
-		<p className="py-2" {...filteredProps}>{renderedChildren as React.ReactNode}</p>
+		<p className={cn("py-2", customClasses)} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
 	)
 }
 

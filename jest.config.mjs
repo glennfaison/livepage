@@ -12,6 +12,7 @@ const customJestConfig = {
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     "^@/components/(.*)$": "<rootDir>/components/$1",
+    "^@/features/(.*)$": "<rootDir>/features/$1",
     "^@/lib/(.*)$": "<rootDir>/lib/$1",
     "^@/app/(.*)$": "<rootDir>/app/$1",
   },

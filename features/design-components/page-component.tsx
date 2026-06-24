@@ -6,17 +6,13 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/features/types"
 import { cn } from "@/lib/utils"
-import { createAttributeMap, createSpacingAttributes, readBoxSpacing, createTextAttribute } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "./shared/component-helpers"
 
 const tag = "page" as const
 
 const attributes: SettingsField[] = [
-	createTextAttribute({
-		id: "id",
-		label: "ID",
-		placeholder: "ID",
-		defaultValue: "",
-	}),
+	createIdAttribute(),
+	createCustomClassesAttribute(),
 	createTextAttribute({
 		id: "title",
 		label: "Title",
@@ -30,13 +26,14 @@ const attributesMap = createAttributeMap(attributes)
 
 function _ViewModeComponent(props: ViewModeProps) {
 	const { component: currentPage } = props
-	const attributes = currentPage.attributes
+	const { "custom-classes": _, ...attributes } = currentPage.attributes
+	const customClasses = readCustomClasses(currentPage.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 
 	return (
 		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
 			<div
-				className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8"
+				className={cn("bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8", customClasses)}
 				{...attributes}
 				style={{
 					padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
@@ -57,7 +54,8 @@ function _ViewModeComponent(props: ViewModeProps) {
 
 function _EditModeComponent(props: EditModeProps) {
 	const { component: currentPage } = props
-	const attributes = currentPage.attributes
+	const { "custom-classes": _, ...attributes } = currentPage.attributes
+	const customClasses = readCustomClasses(currentPage.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const { setSelectedComponent, addComponent } = useComponentOperationsContext()
 
@@ -68,7 +66,7 @@ function _EditModeComponent(props: EditModeProps) {
 	return (
 		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
 			<div
-				className="bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8"
+				className={cn("bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8", customClasses)}
 				onClick={() => setSelectedComponent("")}
 				{...attributes}
 				style={{

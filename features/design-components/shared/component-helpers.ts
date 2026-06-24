@@ -49,6 +49,31 @@ export function createTextAttribute(config: Readonly<{
   } satisfies SettingsField
 }
 
+export function createIdAttribute(config?: Readonly<{
+  getValue?: (component: Readonly<AppNode>) => string
+  setValue?: (component: Readonly<Partial<AppNode>>, value: string) => AppNode
+}>): SettingsField {
+  return createTextAttribute({
+    id: "id",
+    label: "ID",
+    placeholder: "ID",
+    defaultValue: "",
+    readOnly: true,
+    disabled: true,
+    getValue: config?.getValue,
+    setValue: config?.setValue,
+  })
+}
+
+export function createCustomClassesAttribute(): SettingsField {
+  return createTextAttribute({
+    id: "custom-classes",
+    label: "Custom Classes",
+    placeholder: "Add CSS classes",
+    defaultValue: "",
+  })
+}
+
 export function createTextareaAttribute(config: Readonly<{
   id: string
   label: string
@@ -128,4 +153,9 @@ export function readBoxSpacing(
     bottom: read("bottom"),
     left: read("left"),
   }
+}
+
+export function readCustomClasses(attributes: Readonly<Record<string, unknown>>): string {
+  const value = attributes["custom-classes"]
+  return typeof value === "string" ? value : ""
 }

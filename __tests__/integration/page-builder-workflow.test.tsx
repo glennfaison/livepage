@@ -69,7 +69,7 @@ jest.mock("@/lib/store/hooks", () => {
 })
 
 // Mock the page-builder toolbar (page rendering is handled by the real components in tests)
-jest.mock("@/components/page-builder/toolbar", () => ({
+jest.mock("@/features/page-builder/toolbar", () => ({
   Toolbar: jest.fn(() => (
     <div data-testid="mock-toolbar">
       <button aria-label="Save">Save</button>
