@@ -253,15 +253,12 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   }, [dispatch])
 
   // Update component
-  const updateComponent = useCallback(
-    <Tag extends string>(id: string, updates: Partial<AppNode>) => {
-      dispatch({
-        type: "UPDATE_COMPONENT",
-        payload: { componentId: id, updates, },
-      })
-    },
-      [dispatch],
-    )
+  const updateComponent = useCallback((id: string, updates: Partial<AppNode>) => {
+    dispatch({
+      type: "UPDATE_COMPONENT",
+      payload: { componentId: id, updates, },
+    })
+  }, [dispatch])
 
   const setSelectedComponent = useCallback((componentId: string): void => {
     if (state.pageBuilderMode === "edit") {
