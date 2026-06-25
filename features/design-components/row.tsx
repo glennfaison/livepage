@@ -36,17 +36,13 @@ const _ViewModeComponent = (props: ViewModeProps) => {
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
 
 	const childComponents = props.component.children.map((child) => {
-		if (typeof child === "string") {
-			return child
-		}
+		if (typeof child === "string") return child
 		const meta = getComponentInfo(child.tag)
 		const ChildComponent = meta.ViewModeComponent
 
 		return (
-			<span className="flex-1 self-stretch h-full" key={child.attributes.id}>
-				<span className="flex h-full w-full items-stretch">
-					<ChildComponent {...props} component={child} />
-				</span>
+			<span className="flex-1 h-full w-full items-stretch self-stretch justify-stretch" key={child.attributes.id}>
+				<ChildComponent {...props} component={child} />
 			</span>
 		)
 	})
@@ -111,14 +107,12 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const meta = getComponentInfo(child.tag)
 		const ChildComponent = meta.EditModeComponent
 		return (
-			<span className="flex-1 self-stretch h-full"
+			<span className="flex-1 h-full w-full items-stretch self-stretch justify-stretch"
 				key={child.attributes.id}
 				onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 				onMouseLeave={() => handleChildMouseLeave(childIndex)}
 			>
-				<span className="flex h-full w-full items-stretch">
-					<ChildComponent {...props} component={child} />
-				</span>
+				<ChildComponent {...props} component={child} />
 			</span>
 		)
 	})
