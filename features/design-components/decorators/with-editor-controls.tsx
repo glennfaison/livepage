@@ -75,12 +75,26 @@ function EditorControls(props: EditModeProps) {
       <div className="flex gap-1 bg-background border p-1 shadow-sm">
         <span className="text-xs font-medium px-2 flex items-center">{label}</span>
         <SettingsPopover component={component}>
-          <Button variant="ghost" size="icon" className="h-6 w-6 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 cursor-pointer"
+            aria-label="Settings"
+            title="Settings"
+            onClick={(e) => e.stopPropagation()}
+          >
             <SettingsIcon className="h-4 w-4" />
           </Button>
         </SettingsPopover>
         <ReplaceWithPopover currentComponent={component} onReplace={handleReplace}>
-          <Button variant="ghost" size="icon" className="h-6 w-6 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 cursor-pointer"
+            aria-label="Replace"
+            title="Replace"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Replace className="h-4 w-4" />
           </Button>
         </ReplaceWithPopover>
@@ -88,6 +102,8 @@ function EditorControls(props: EditModeProps) {
           variant="ghost"
           size="icon"
           className="h-6 w-6 cursor-pointer"
+          aria-label="Duplicate"
+          title="Duplicate"
           onClick={(e) => {
             e.stopPropagation()
             duplicateComponent?.(component.attributes.id)
@@ -99,6 +115,8 @@ function EditorControls(props: EditModeProps) {
           variant="ghost"
           size="icon"
           className="h-6 w-6 cursor-pointer"
+          aria-label="Delete"
+          title="Delete"
           onClick={(e) => {
             e.stopPropagation()
             removeComponent(component.attributes.id)
@@ -106,7 +124,13 @@ function EditorControls(props: EditModeProps) {
         >
           <Trash2 className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-6 w-6 cursor-grab">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 cursor-grab"
+          aria-label="Move"
+          title="Move"
+        >
           <Move className="h-4 w-4" />
         </Button>
       </div>
@@ -119,6 +143,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
     const showControls = props.pageBuilderMode === "edit" &&
       props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()
+    const { childClassName, onMouseMove, onMouseLeave } = props
 
     const selectComponent = useCallback((e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation()
@@ -126,16 +151,20 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
     }, [props.component.attributes.id, setSelectedComponent])
 
     return (
-      <div onClick={selectComponent}
+      <span
+        onClick={selectComponent}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
         className={cn(
           "relative border border-transparent transition-all",
           showControls && "border-primary",
           "hover:border-gray-300",
+          childClassName,
         )}
       >
         {showControls && <EditorControls {...props} />}
         <WrappedComponent {...props} />
-      </div>
+      </span>
     )
   }
 }

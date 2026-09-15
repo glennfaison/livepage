@@ -27,25 +27,26 @@ const attributesMap = createAttributeMap(attributes)
 function _ViewModeComponent(props: ViewModeProps) {
 	const { component: currentPage } = props
 	const { "custom-classes": _, ...attributes } = currentPage.attributes
+	const { childClassName } = props
 	const customClasses = readCustomClasses(currentPage.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 
 	return (
 		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
 			<div
-				className={cn("bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8", customClasses)}
+				className={cn("bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
 				{...attributes}
 				style={{
 					padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				}}
 			>
-				{currentPage.children.map((component) => {
+				{currentPage.children.map((component, childIndex) => {
 					if (typeof component === "string") return component
 
 					const { getComponentInfo } = require(".") as typeof import(".")
 					const meta = getComponentInfo(component.tag)
 					const Child = meta.ViewModeComponent
-					return (<Child key={component.attributes.id} {...props} component={component} />)
+					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />)
 				})}
 			</div>
 		</section>
@@ -55,6 +56,7 @@ function _ViewModeComponent(props: ViewModeProps) {
 function _EditModeComponent(props: EditModeProps) {
 	const { component: currentPage } = props
 	const { "custom-classes": _, ...attributes } = currentPage.attributes
+	const { childClassName, onMouseMove, onMouseLeave } = props
 	const customClasses = readCustomClasses(currentPage.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const { setSelectedComponent, addComponent } = useComponentOperationsContext()
@@ -66,20 +68,22 @@ function _EditModeComponent(props: EditModeProps) {
 	return (
 		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
 			<div
-				className={cn("bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8", customClasses)}
+				className={cn("bg-white min-h-[800px] max-w-5xl mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
 				onClick={() => setSelectedComponent("")}
+				onMouseMove={onMouseMove}
+				onMouseLeave={onMouseLeave}
 				{...attributes}
 				style={{
 					padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				}}
 			>
-				{currentPage.children.map((component) => {
+				{currentPage.children.map((component, childIndex) => {
 					if (typeof component === "string") return component
 
 					const { getComponentInfo } = require(".") as typeof import(".")
 					const meta = getComponentInfo(component.tag)
 					const Child = meta.EditModeComponent
-					return (<Child key={component.attributes.id} {...props} component={component} />)
+					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />)
 				})}
 
 				<div className={cn(

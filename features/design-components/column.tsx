@@ -31,25 +31,30 @@ const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" 
 const _ViewModeComponent = (props: ViewModeProps) => {
 	const { component } = props
 	const { "custom-classes": _, ...attributes } = component.attributes
+	const { childClassName } = props
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
+	const slotClassName = "flex-1 basis-0 min-h-0 self-stretch"
 
-	const childComponents = component.children.map((child) => {
+	const childComponents = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
 		const meta = getComponentInfo(child.tag)
 		const ChildComponent = meta.ViewModeComponent
 
 		return (
-			<span className="flex-1 self-stretch h-full w-full items-stretch" key={child.attributes.id}>
-				<ChildComponent {...props} component={child} />
-			</span>
+			<ChildComponent
+				{...props}
+				key={`${child.attributes.id}-${childIndex}`}
+				component={child}
+				childClassName={slotClassName}
+			/>
 		)
 	})
 
 	return (
 		<div
-			className={cn("min-h-[50px] flex flex-col justify-center", "p-0 gap-0", customClasses)}
+			className={cn("min-h-[50px] flex flex-col justify-center", "p-0 gap-0", customClasses, childClassName)}
 			{...attributes}
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
@@ -81,6 +86,7 @@ const EmptyColumnContent = ({
 const _EditModeComponent = (props: EditModeProps) => {
 	const { component } = props
 	const { "custom-classes": _, ...attributes } = component.attributes
+	const { childClassName, onMouseMove, onMouseLeave } = props
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
@@ -101,6 +107,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: attributes.id, index: childIndex })
 	}, [addComponent, attributes.id])
+	const slotClassName = "flex-1 basis-0 min-h-0 self-stretch"
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -108,13 +115,14 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const ChildComponent = meta.EditModeComponent
 
 		return (
-			<span className="flex-1 self-stretch h-full w-full items-stretch"
-				key={child.attributes.id}
+			<ChildComponent
+				{...props}
+				key={`${child.attributes.id}-${childIndex}`}
+				component={child}
+				childClassName={slotClassName}
 				onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 				onMouseLeave={() => handleChildMouseLeave(childIndex)}
-			>
-				<ChildComponent {...props} component={child} />
-			</span>
+			/>
 		)
 	})
 
@@ -138,7 +146,10 @@ const _EditModeComponent = (props: EditModeProps) => {
 				"p-0 gap-0",
 				"border border-dashed border-gray-300",
 				customClasses,
+				childClassName,
 			)}
+			onMouseMove={onMouseMove}
+			onMouseLeave={onMouseLeave}
 			{...attributes}
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,

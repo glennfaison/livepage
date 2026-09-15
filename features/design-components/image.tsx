@@ -69,13 +69,14 @@ const Icon = <ImageIcon className="h-4 w-4" />
 const Component = (props: Props) => {
 	const { src, alt, fallbackSrc, "custom-classes": _, ...restAttributes } = props.component.attributes
 	const customClasses = readCustomClasses(props.component.attributes)
+	const { childClassName } = props
 
 	return (
 		// eslint-disable-next-line @next/next/no-img-element
 		<img
 			src={src || fallbackSrc}
 			alt={alt}
-			className={cn("max-w-full h-auto", readCustomClasses(props.component.attributes))}
+			className={cn("max-w-full h-auto", customClasses, childClassName)}
 			{...restAttributes}
 		/>
 	)

@@ -187,15 +187,23 @@ export type Props = Readonly<{
   component: AppNode
   selectedComponentId: string
   selectedComponentAncestors: ReadonlyArray<AppNode>
+  childClassName?: string
 }>
 
 export type EditModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "edit">
+  onMouseMove?: React.MouseEventHandler<HTMLElement>
+  onMouseLeave?: React.MouseEventHandler<HTMLElement>
 }>
 
 export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "preview">
 }>
+
+export type ChildProps = Readonly<
+  Pick<Props, "childClassName"> &
+  Pick<EditModeProps, "onMouseMove" | "onMouseLeave">
+>
 
 export interface Metadata {
   readonly tag: string

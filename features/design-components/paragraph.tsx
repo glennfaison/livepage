@@ -49,10 +49,10 @@ const Component = (props: Props) => {
 	const children = readTextArrayChildren(props.component)
 	const renderedChildren = children.length ? children : attributesMap.content.defaultValue
 	const customClasses = readCustomClasses(props.component.attributes)
-	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
 
 	return (
-		<p className={cn("py-2", customClasses)} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
+		<p className={cn("py-2", customClasses, childClassName)} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
 	)
 }
 
