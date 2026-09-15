@@ -69,6 +69,40 @@ describe("container child props", () => {
 		expect(container.querySelector("span")).toBeNull()
 	})
 
+	it("lets a paragraph determine the row height through a column", () => {
+		const component: AppNode = {
+			tag: "row",
+			attributes: { id: "row-1" },
+			children: [
+				{
+					tag: "column",
+					attributes: { id: "column-1" },
+					children: [
+						{
+							tag: "paragraph",
+							attributes: { id: "paragraph-1" },
+							children: ["A paragraph that must remain visible below the row's minimum height."],
+						},
+					],
+				},
+			],
+		}
+
+		const Component = getComponentInfo("row").EditModeComponent
+		const { container } = renderWithQueryClient(
+			<Component
+				pageBuilderMode="edit"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+
+		const paragraph = screen.getByText(/A paragraph that must remain visible/)
+		expect(paragraph.closest("span")).not.toHaveClass("min-h-0")
+		expect(container.firstElementChild).toContainElement(paragraph)
+	})
+
 	it("applies childClassName to the page surface", () => {
 		const component: AppNode = {
 			tag: "page",

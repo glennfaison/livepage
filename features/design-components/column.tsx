@@ -35,7 +35,7 @@ const _ViewModeComponent = (props: ViewModeProps) => {
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
-	const slotClassName = "flex-1 basis-0 min-h-0 self-stretch"
+	const slotClassName = "flex-1 basis-0 self-stretch"
 
 	const childComponents = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -107,7 +107,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: attributes.id, index: childIndex })
 	}, [addComponent, attributes.id])
-	const slotClassName = "flex-1 basis-0 min-h-0 self-stretch"
+	const slotClassName = "flex-1 basis-0 self-stretch"
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
