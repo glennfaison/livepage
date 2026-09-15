@@ -1,10 +1,10 @@
-# LivePage
+# LivePage agent guidance
 
-LivePage is a page-builder app organized around a central app state and feature folders for domain-specific concerns.
+Use this file as the entry point for coding agents. Read the relevant linked guidance before changing related code.
 
-## Docs
-
-- [Agent context](./docs/CONTEXT.md)
-- [Glossary](./docs/GLOSSARY.md) — the dedicated domain-language reference
-- [Conventions](./docs/CONVENTIONS.md)
-- [Architecture decisions](./docs/adr/)
+- [Project context](./docs/CONTEXT.md) — app-state boundary, serializers, and compatibility posture
+- [Domain glossary](./docs/GLOSSARY.md) — canonical terms for entities and relationships
+- [Code conventions](./docs/CONVENTIONS.md) — validation, React, and component-structure conventions
+- [Architecture decisions](./docs/adr/) — accepted design decisions and their constraints
+- [README](./README.md) — setup and development entry points
+- [Scripts and dependencies](./package.json) — authoritative build, lint, and test commands

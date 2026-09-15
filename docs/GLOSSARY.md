@@ -8,6 +8,14 @@ This is the project glossary for LivePage: a dedicated reference for entities, r
 The shared in-memory representation of the current page builder document.
 _Avoid_: State, store, data model
 
+**App node**:
+The readonly tree node used to represent a page or nested design component, including its tag, string attributes, and child nodes.
+_Avoid_: Component instance, element
+
+**Design component**:
+A registered page-builder component with metadata, default content, settings fields, and separate edit-mode and preview-mode renderers.
+_Avoid_: Widget, block
+
 **App-state API**:
 The boundary for reading from and mutating app state through explicit commands and selectors.
 _Avoid_: Facade, helper layer
@@ -35,6 +43,8 @@ _Avoid_: Dynamic token
 ## Relationships
 
 - The **App-state API** operates on **App state**
+- **App state** is represented as a tree of **App nodes**
+- **Design components** are created from registered component metadata and stored as **App nodes**
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
 

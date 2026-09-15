@@ -11,5 +11,8 @@ LivePage is a page-builder app organized around a central app state and feature 
 
 ## Reference
 
+- [App-state API](../features/app-state/)
+- [Serializers](../features/serializers/)
+- [Placeholders](../features/placeholders/)
 - [Glossary](./GLOSSARY.md)
 - [Architecture decisions](./adr/)
