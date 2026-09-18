@@ -40,6 +40,10 @@ _Avoid_: Connection placeholder
 A placeholder whose value is derived at runtime, such as the current date.
 _Avoid_: Dynamic token
 
+**Standalone HTML export**:
+An exported page artifact that can be opened directly in a modern browser without running LivePage.
+_Avoid_: Static HTML snapshot
+
 ## Relationships
 
 - The **App-state API** operates on **App state**
@@ -47,6 +51,7 @@ _Avoid_: Dynamic token
 - **Design components** are created from registered component metadata and stored as **App nodes**
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
+- A **Standalone HTML export** contains serialized **App nodes** and resolves **Data sources** when opened
 
 ## Example dialogue
 
