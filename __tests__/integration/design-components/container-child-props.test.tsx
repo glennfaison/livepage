@@ -23,7 +23,7 @@ describe("container child props", () => {
 			attributes: { id: "row-1" },
 			children: [child],
 		}
-		const Component = getComponentInfo(tag).ViewModeComponent
+		const Component = getComponentInfo(tag).PreviewModeComponent
 
 		const { container } = renderWithQueryClient(
 			<Component
@@ -128,7 +128,7 @@ describe("container child props", () => {
 			attributes: { id: "page-1", title: "Page" },
 			children: [],
 		}
-		const Component = getComponentInfo("page").ViewModeComponent
+		const Component = getComponentInfo("page").PreviewModeComponent
 
 		const { container } = render(
 			<Component

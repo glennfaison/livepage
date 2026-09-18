@@ -1,10 +1,10 @@
-import { withDataSource } from "@/features/design-components/decorators/with-data-source"
+import { withDataSource } from "@/features/data-sources/with-data-source"
 import { Type } from "lucide-react"
 import React from "react"
-import { withEditorControls } from "./decorators/with-editor-controls"
-import { withTextEditing } from "./decorators/with-text-editing"
+import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
+import { withTextEditing } from "@/features/page-builder/decorators/with-text-editing"
 import type { Props, Metadata, SettingsField } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/features/design-component-runtime/shared/component-helpers"
 import { cn } from "@/lib/utils"
 
 const tag = "inline-text" as const
@@ -51,11 +51,12 @@ const Component = (props: Props) => {
 
 export const componentMetadata = {
 	tag,
+	htmlTag: "span",
 	label,
 	keywords,
 	defaultChildren,
 	attributes,
 	Icon,
-	ViewModeComponent: withDataSource(Component),
+	PreviewModeComponent: withDataSource(Component),
 	EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))),
 } as const satisfies Metadata

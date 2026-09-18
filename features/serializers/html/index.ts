@@ -1,4 +1,5 @@
 import type { AppNode } from "@/features/app-state"
+import { getComponentInfo } from "@/features/design-components"
 import { appSettings } from "@/app/app-settings"
 import { appNodeTreeSchema } from "../schema"
 
@@ -14,33 +15,24 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;")
 }
 
-function renderFallback(node: AppNode | string): string {
-  if (typeof node === "string") return escapeHtml(node)
-  const children = node.children.map(renderFallback).join("")
-  const classes = escapeHtml(node.attributes["custom-classes"] ?? "")
-  const classAttribute = classes ? ` class="${classes}"` : ""
-  const attrs = Object.entries(node.attributes)
-    .filter(([key]) => key !== dataSourceFieldName && key !== "custom-classes" && key !== "title" && (node.tag !== "image" || !["src", "alt", "fallbackSrc"].includes(key)))
-    .map(([key, value]) => ` ${key}="${escapeHtml(value)}"`)
-    .join("")
-
-  switch (node.tag) {
-    case "page":
-      return `<section${attrs}${classAttribute}><div class="livepage-container">${children}</div></section>`
-    case "header1": return `<h1${attrs}${classAttribute}>${children || "Header 1"}</h1>`
-    case "header2": return `<h2${attrs}${classAttribute}>${children || "Header 2"}</h2>`
-    case "header3": return `<h3${attrs}${classAttribute}>${children || "Header 3"}</h3>`
-    case "paragraph": return `<p${attrs}${classAttribute}>${children}</p>`
-    case "inline-text": return `<span${attrs}${classAttribute}>${children || "Inline text."}</span>`
-    case "button": return `<button type="button"${attrs}${classAttribute}>${children || "Button"}</button>`
-    case "image":
-      return `<img${attrs}${classAttribute} src="${escapeHtml(node.attributes.src || node.attributes.fallbackSrc || "")}" alt="${escapeHtml(node.attributes.alt || "")}">`
-    case "row": return `<div${attrs}${classAttribute} data-livepage-layout="row">${children}</div>`
-    case "column": return `<div${attrs}${classAttribute} data-livepage-layout="column">${children}</div>`
-    default: return children
+function renderNode(node: AppNode | string): string {
+  if (typeof node === "string") {
+    return escapeHtml(node)
   }
-}
 
+  const children = node.children.map(renderNode).join("")
+  const metadata = getComponentInfo(node.tag)
+  const tag = metadata.htmlTag ?? "div"
+  const className = metadata.htmlClassName ? ` class="${escapeHtml(metadata.htmlClassName)}"` : ""
+
+  if (tag === "img") {
+    const src = escapeHtml(node.attributes.src ?? node.attributes.fallbackSrc ?? "")
+    const alt = escapeHtml(node.attributes.alt ?? "")
+    return `<img src="${src}" alt="${alt}"${className} />`
+  }
+
+  return `<${tag}${className}>${children}</${tag}>`
+}
 // This is deliberately dependency-free. It is copied into the exported document so the
 // document remains useful after the builder (and its module graph) is no longer available.
 const browserRuntime = String.raw`
@@ -147,9 +139,10 @@ export function serializeAppStateAsHtml(componentTree: ReadonlyArray<AppNode>): 
   const page = tree[0]
   const title = escapeHtml(page?.attributes.title ?? "Untitled Page")
   const data = JSON.stringify(tree).replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("&", "\\u0026")
-  const fallback = tree.map(renderFallback).join("")
+  const fallback = tree.map(renderNode).join("")
 
-  return `<!DOCTYPE html>
+  return `
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
