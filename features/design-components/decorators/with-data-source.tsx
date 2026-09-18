@@ -4,6 +4,7 @@ import type { DataSourceId, Props } from "@/features/types"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"
 import { replaceDataSourceComponentProperties } from "@/features/placeholders"
+import { cn } from "@/lib/utils"
 
 const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
 
@@ -52,7 +53,11 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		}
 
 		if (Array.isArray(dataSourceData)) {
-			return <>{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}</>
+			return (
+				<div className={cn("block", props.childClassName)}>
+					{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}
+				</div>
+			)
 		} else {
 			return renderDataSourceComponent(dataSourceData)
 		}
