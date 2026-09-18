@@ -1,47 +1,46 @@
 import React, { useCallback } from "react"
-import { AlignHorizontalSpaceBetween, Plus } from "lucide-react"
+import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
 import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } from "@/features/types"
 import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
 import { Divider, useDividerVisibility } from "@/features/page-builder/layout-divider"
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
-import { componentTagList, getComponentInfo } from "."
-import { withDataSource } from "@/features/design-components/decorators/with-data-source"
+import { componentTagList } from "@/features/design-component-runtime/component-tags"
+import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
+import { withDataSource } from "@/features/data-sources/with-data-source"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
-import { withEditorControls } from "./decorators/with-editor-controls"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses } from "./shared/component-helpers"
+import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
 
-const tag = "row" as const
+const tag = "column" as const
 
-const label = "Row"
+const label = "Column"
 
-const keywords = ["row", "container", "layout", "horizontal"]
+const keywords = ["column", "col", "container", "layout", "vertical"]
 
-const attributes = [
+const attributes: SettingsField[] = [
 	createIdAttribute(),
 	createCustomClassesAttribute(),
 	...createSpacingAttributes("padding"),
 	...createSpacingAttributes("margin"),
-] as const satisfies ReadonlyArray<SettingsField>
+]
 
 const attributesMap = createAttributeMap(attributes)
 
-const Icon = <AlignHorizontalSpaceBetween className="size-4" />
+const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
-const _ViewModeComponent = (props: ViewModeProps) => {
+const _PreviewModeComponent = (props: ViewModeProps) => {
 	const { component } = props
 	const { "custom-classes": _, ...attributes } = component.attributes
 	const { childClassName } = props
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
-	const slotClassName = "flex-1 basis-0 min-w-0 self-stretch"
+	const slotClassName = "flex-1 basis-0 self-stretch"
 
-	const childComponents = props.component.children.map((child, childIndex) => {
+	const childComponents = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
-		const meta = getComponentInfo(child.tag)
-		const ChildComponent = meta.ViewModeComponent
-
+		const ChildComponent = getRegisteredComponentInfo(child.tag).PreviewModeComponent
 		return (
 			<ChildComponent
 				{...props}
@@ -54,8 +53,8 @@ const _ViewModeComponent = (props: ViewModeProps) => {
 
 	return (
 		<div
+			className={cn("min-h-[50px] flex flex-col justify-center", "p-0 gap-0", customClasses, childClassName)}
 			{...attributes}
-			className={cn("min-h-[50px] flex flex-row flex-nowrap justify-start items-stretch", "p-0 gap-0", customClasses, childClassName)}
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
@@ -93,7 +92,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
 	const {
-		visibleVerticalDividers,
+		visibleHorizontalDividers,
 		handleChildMouseMove,
 		handleChildMouseLeave,
 	} = useDividerVisibility()
@@ -107,12 +106,13 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: attributes.id, index: childIndex })
 	}, [addComponent, attributes.id])
-	const slotClassName = "flex-1 basis-0 min-w-0 self-stretch"
+	const slotClassName = "flex-1 basis-0 self-stretch"
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
-		const meta = getComponentInfo(child.tag)
+		const meta = getRegisteredComponentInfo(child.tag)
 		const ChildComponent = meta.EditModeComponent
+
 		return (
 			<ChildComponent
 				{...props}
@@ -129,10 +129,10 @@ const _EditModeComponent = (props: EditModeProps) => {
 		return item === null ? (
 			<Divider
 				key={`divider-${index}`}
-				orientation="vertical"
+				orientation="horizontal"
 				onAddComponent={handleAddAtIndex}
 				index={index}
-				isVisible={visibleVerticalDividers.has(index)} />
+				isVisible={visibleHorizontalDividers.has(index)} />
 		) : (
 			<React.Fragment key={index}>{item}</React.Fragment>
 		)
@@ -140,9 +140,8 @@ const _EditModeComponent = (props: EditModeProps) => {
 
 	return (
 		<div
-			{...attributes}
 			className={cn(
-				"min-h-[50px] flex flex-row flex-nowrap justify-start items-stretch",
+				"min-h-[50px] flex flex-col justify-center",
 				"p-0 gap-0",
 				"border border-dashed border-gray-300",
 				customClasses,
@@ -150,6 +149,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 			)}
 			onMouseMove={onMouseMove}
 			onMouseLeave={onMouseLeave}
+			{...attributes}
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
@@ -162,11 +162,13 @@ const _EditModeComponent = (props: EditModeProps) => {
 
 export const componentMetadata = {
 	tag,
+	htmlTag: "div",
+	htmlClassName: "column",
 	label,
 	keywords,
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent: withDataSource(_ViewModeComponent as React.ComponentType<Props>),
+	PreviewModeComponent: withDataSource(_PreviewModeComponent as React.ComponentType<Props>),
 	EditModeComponent: withEditorControls(withDataSource(_EditModeComponent as React.ComponentType<Props>)),
 } as const satisfies Metadata

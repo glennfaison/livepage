@@ -1,19 +1,20 @@
-import { withDataSource } from "@/features/design-components/decorators/with-data-source"
-import { Heading } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { withDataSource } from "@/features/data-sources/with-data-source"
+import { MousePointerClick } from "lucide-react"
 import React from "react"
-import { withEditorControls } from "./decorators/with-editor-controls"
-import { withTextEditing } from "./decorators/with-text-editing"
+import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
+import { withTextEditing } from "@/features/page-builder/decorators/with-text-editing"
 import type { Props, SettingsField, Metadata } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readTextChildren, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
 import { cn } from "@/lib/utils"
 
-const tag = "header2" as const
+const tag = "button" as const
 
-const label = "Header 2"
+const label = "Button"
 
-const keywords = ["h2", "title", "subtitle", "header", "heading", "medium"]
+const keywords = ["button", "click", "action", "btn"]
 
-const defaultChildren = ["Header 2"] as const
+const defaultChildren = ["Button"] as const
 
 const attributes: SettingsField[] = [
 	createIdAttribute(),
@@ -21,7 +22,7 @@ const attributes: SettingsField[] = [
 	createTextAttribute({
 		id: "content",
 		label: "Content",
-		placeholder: "Enter header text",
+		placeholder: "Enter button text",
 		defaultValue: "",
 		getValue: (component) => readTextChildren(component),
 		setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
@@ -30,7 +31,7 @@ const attributes: SettingsField[] = [
 
 const attributesMap = createAttributeMap(attributes)
 
-const Icon = <Heading className="h-4 w-4" />
+const Icon = <MousePointerClick className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
@@ -38,17 +39,18 @@ const Component = (props: Props) => {
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
 
 	return (
-		<h2 className={cn("text-3xl font-bold py-2", customClasses, childClassName)} {...filteredProps}>{children as React.ReactNode}</h2>
+		<Button className={cn(customClasses, childClassName)} {...filteredProps}>{children as React.ReactNode}</Button>
 	)
 }
 
 export const componentMetadata = {
 	tag,
+	htmlTag: "button",
 	label,
 	keywords,
 	defaultChildren,
 	attributes,
 	Icon,
-	ViewModeComponent: withDataSource(Component),
+	PreviewModeComponent: withDataSource(Component),
 	EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))),
 } as const satisfies Metadata

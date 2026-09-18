@@ -1,4 +1,5 @@
 import type { AppNode } from "@/features/app-state"
+import { getComponentInfo } from "@/features/design-components"
 
 function escapeHtml(value: string): string {
   return value
@@ -15,41 +16,25 @@ function renderNode(node: AppNode | string): string {
   }
 
   const children = node.children.map(renderNode).join("")
+  const metadata = getComponentInfo(node.tag)
+  const tag = metadata.htmlTag ?? "div"
+  const className = metadata.htmlClassName ? ` class="${escapeHtml(metadata.htmlClassName)}"` : ""
 
-  switch (node.tag) {
-    case "header1":
-      return `<h1>${children}</h1>`
-    case "header2":
-      return `<h2>${children}</h2>`
-    case "header3":
-      return `<h3>${children}</h3>`
-    case "paragraph":
-      return `<p>${children}</p>`
-    case "inline-text":
-      return `<span>${children}</span>`
-    case "image": {
-      const src = escapeHtml(node.attributes.src ?? "")
-      const alt = escapeHtml(node.attributes.alt ?? "")
-      return `<img src="${src}" alt="${alt}" />`
-    }
-    case "button":
-      return `<button>${children}</button>`
-    case "row":
-      return `<div class="row">${children}</div>`
-    case "column":
-      return `<div class="column">${children}</div>`
-    case "page":
-      return `<div class="column">${children}</div>`
-    default:
-      return children
+  if (tag === "img") {
+    const src = escapeHtml(node.attributes.src ?? node.attributes.fallbackSrc ?? "")
+    const alt = escapeHtml(node.attributes.alt ?? "")
+    return `<img src="${src}" alt="${alt}"${className} />`
   }
+
+  return `<${tag}${className}>${children}</${tag}>`
 }
 
 export function serializeAppStateAsHtml(componentTree: ReadonlyArray<AppNode>): string {
   const page = componentTree[0]
   const pageTitle = escapeHtml(page?.attributes.title ?? "Untitled Page")
 
-  return `<!DOCTYPE html>
+  return `
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">

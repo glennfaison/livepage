@@ -12,7 +12,7 @@ describe("Generated Data preview layout fixture", () => {
 		const input = readFileSync(join(process.cwd(), "__tests__/fixtures/shortcode/generated-data-preview-layout.txt"), "utf8")
 		expect(input).toContain("[#data.name#], [/inline-text]")
 		const [page] = deserializeAppStateFromShortcode(input)
-		const Page = getComponentInfo(page.tag).ViewModeComponent
+		const Page = getComponentInfo(page.tag).PreviewModeComponent
 		const queryClient = new QueryClient()
 
 		const { container } = render(

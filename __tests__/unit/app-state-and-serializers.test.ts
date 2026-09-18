@@ -48,4 +48,24 @@ describe("app-state selectors and serializers", () => {
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;")
     expect(html).not.toContain("<script>alert(1)</script>")
   })
+
+  it("uses registry metadata for nested HTML structure", () => {
+    const html = serializeAppStateAsHtml([
+      {
+        tag: "page",
+        attributes: { title: "Nested" },
+        children: [{
+          tag: "row",
+          attributes: {},
+          children: [{
+            tag: "column",
+            attributes: {},
+            children: [{ tag: "header1", attributes: {}, children: ["Title"] }],
+          }],
+        }],
+      },
+    ] as any)
+
+    expect(html).toContain('<div class="column"><div class="row"><div class="column"><h1>Title</h1></div></div></div>')
+  })
 })

@@ -1,12 +1,12 @@
 "use client"
 
 import React from "react"
-import { withDataSource } from "@/features/design-components/decorators/with-data-source"
+import { withDataSource } from "@/features/data-sources/with-data-source"
 import { ImageIcon } from "lucide-react"
-import { withEditorControls } from "./decorators/with-editor-controls"
+import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"
 import { cn } from "@/lib/utils"
-import { createCustomClassesAttribute, createIdAttribute, readCustomClasses } from "./shared/component-helpers"
+import { createCustomClassesAttribute, createIdAttribute, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
 
 const tag = "image" as const
 
@@ -84,11 +84,12 @@ const Component = (props: Props) => {
 
 export const componentMetadata = {
 	tag,
+	htmlTag: "img",
 	label,
 	keywords,
 	defaultChildren: [],
 	attributes,
 	Icon,
-	ViewModeComponent: withDataSource(Component),
+	PreviewModeComponent: withDataSource(Component),
 	EditModeComponent: withEditorControls(withDataSource(Component)),
 } as const satisfies Metadata

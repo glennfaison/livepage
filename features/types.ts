@@ -216,8 +216,12 @@ export interface Metadata {
   readonly defaultChildren: ReadonlyArray<AppNode | string>
   readonly defaultAttributes?: Readonly<Record<string, unknown>>
   readonly attributes: ReadonlyArray<SettingsField>
-  readonly ViewModeComponent: React.ComponentType<ViewModeProps>
+  /** Browser-safe renderer used by previews and nested component rendering. */
+  readonly PreviewModeComponent: React.ComponentType<ViewModeProps>
   readonly EditModeComponent: React.ComponentType<EditModeProps>
+  /** HTML element used by the format-neutral HTML serializer. */
+  readonly htmlTag?: string
+  readonly htmlClassName?: string
 }
 
 export type Operations = Readonly<{

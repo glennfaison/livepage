@@ -6,7 +6,8 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/features/types"
 import { cn } from "@/lib/utils"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "./shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
+import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 
 const tag = "page" as const
 
@@ -24,7 +25,7 @@ const attributes: SettingsField[] = [
 
 const attributesMap = createAttributeMap(attributes)
 
-function _ViewModeComponent(props: ViewModeProps) {
+function _PreviewModeComponent(props: ViewModeProps) {
 	const { component: currentPage } = props
 	const { "custom-classes": _, ...attributes } = currentPage.attributes
 	const { childClassName } = props
@@ -43,10 +44,8 @@ function _ViewModeComponent(props: ViewModeProps) {
 				{currentPage.children.map((component, childIndex) => {
 					if (typeof component === "string") return component
 
-					const { getComponentInfo } = require(".") as typeof import(".")
-					const meta = getComponentInfo(component.tag)
-					const Child = meta.ViewModeComponent
-					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />)
+					const Child = getRegisteredComponentInfo(component.tag).PreviewModeComponent
+					return <Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />
 				})}
 			</div>
 		</section>
@@ -80,8 +79,7 @@ function _EditModeComponent(props: EditModeProps) {
 				{currentPage.children.map((component, childIndex) => {
 					if (typeof component === "string") return component
 
-					const { getComponentInfo } = require(".") as typeof import(".")
-					const meta = getComponentInfo(component.tag)
+					const meta = getRegisteredComponentInfo(component.tag)
 					const Child = meta.EditModeComponent
 					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />)
 				})}
@@ -106,11 +104,13 @@ function _EditModeComponent(props: EditModeProps) {
 
 export const componentMetadata = {
 	tag,
+	htmlTag: "div",
+	htmlClassName: "column",
 	label: "Page",
 	keywords: [],
 	defaultChildren: [],
 	attributes,
 	Icon: null,
-	ViewModeComponent: _ViewModeComponent,
+	PreviewModeComponent: _PreviewModeComponent,
 	EditModeComponent: _EditModeComponent,
 } as const satisfies Metadata

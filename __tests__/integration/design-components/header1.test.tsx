@@ -37,7 +37,7 @@ describe("Header1 Component (metadata-based)", () => {
   }
 
   it("renders with the correct content", () => {
-    const Component = Header1.ViewModeComponent
+    const Component = Header1.PreviewModeComponent
     const qc = new QueryClient()
     render(
       <QueryClientProvider client={qc}>
@@ -66,7 +66,7 @@ describe("Header1 Component (metadata-based)", () => {
   })
 
   it("is not editable in preview mode", async () => {
-    const Component = Header1.ViewModeComponent
+    const Component = Header1.PreviewModeComponent
     const qc = new QueryClient()
     render(
       <QueryClientProvider client={qc}>

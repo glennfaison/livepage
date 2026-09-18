@@ -3,7 +3,8 @@
 import { Toolbar } from "@/features/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { componentMetadata as PageMeta } from "@/features/design-components/page-component"
+import { componentMetadata as PageMeta } from "@/features/design-components/definitions/page-component"
+import { PreviewRenderer } from "@/features/design-components"
 import { selectCurrentPage } from "@/features/app-state"
 import type { PageBuilderMode } from "@/features/app-state"
 import { ComponentOperationsContext } from "@/lib/component-operations-context"
@@ -183,7 +184,7 @@ export default function BuilderPage() {
           </div>
 
           {pageBuilderMode === "preview" ? (
-            <PageMeta.ViewModeComponent
+            <PreviewRenderer
               selectedComponentId={state.selectedComponentId}
               selectedComponentAncestors={state.selectedComponentAncestors}
               pageBuilderMode="preview"
