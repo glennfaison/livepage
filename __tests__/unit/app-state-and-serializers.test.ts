@@ -60,4 +60,14 @@ describe("app-state selectors and serializers", () => {
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;")
     expect(html).not.toContain("<script>alert(1)</script>")
   })
+
+  it("exports a browser runtime with the complete serialized tree", () => {
+    const html = serializeAppStateAsHtml(appState.componentTree as any)
+    expect(html).toContain('type="application/json"')
+    expect(html).toContain('id="livepage-root"')
+    expect(html).toContain("https://esm.sh/react@19.1.0")
+    expect(html).toContain("https://esm.sh/react-dom@19.1.0/client")
+    expect(html).toContain("function loadData")
+    expect(html).toContain("__datasource__")
+  })
 })
