@@ -37,6 +37,44 @@ export function useAppState() {
   return { state, dispatch }
 }
 
+export function validateImportedFile(file: File, uploadType: "json" | "shortcode") {
+  const expectedExtension = uploadType === "json" ? ".json" : ".txt"
+  const label = uploadType === "json" ? "JSON" : "shortcode"
+
+  if (!file) {
+    throw new Error("Please choose a file to import.")
+  }
+
+  if (file.size === 0) {
+    throw new Error("The selected file is empty. Please choose a valid LivePage export.")
+  }
+
+  if (!file.name.toLowerCase().endsWith(expectedExtension)) {
+    throw new Error(`Please choose a valid ${label} file (${expectedExtension}).`)
+  }
+
+  const trimmed = file.name.trim()
+  if (!trimmed) {
+    throw new Error("The selected file does not have a valid name.")
+  }
+}
+
+async function readTextFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result
+      if (typeof content !== "string") {
+        reject(new Error("Failed to read the selected file."))
+        return
+      }
+      resolve(content)
+    }
+    reader.onerror = () => reject(new Error("Failed to read the selected file."))
+    reader.readAsText(file)
+  })
+}
+
 export function usePageOperations(state: AppState) {
   const savePageAsJsonMutation = useMutation({
     mutationFn: async (componentTree: ReadonlyArray<AppNode>) => {
@@ -142,20 +180,15 @@ export function usePageOperations(state: AppState) {
 
   const loadPageFromJsonMutation = useMutation({
     mutationFn: async (file: File): Promise<typeof state.componentTree> => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          try {
-            const content = e.target?.result as string
-            const loadedPage = deserializeAppStateFromJson(content) as AppNode[]
-            resolve(loadedPage)
-          } catch (error) {
-            reject(new Error(`Invalid file format ${error}`))
-          }
-        }
-        reader.onerror = () => reject(new Error("Failed to read file"))
-        reader.readAsText(file)
-      })
+      validateImportedFile(file, "json")
+      const content = await readTextFile(file)
+
+      try {
+        return deserializeAppStateFromJson(content) as AppNode[]
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown parse error"
+        throw new Error(`This JSON file is not a valid LivePage export: ${message}`)
+      }
     },
     onSuccess: (loadedComponentTree) => {
       const page = loadedComponentTree[0] as unknown as AppNode | undefined
@@ -164,10 +197,10 @@ export function usePageOperations(state: AppState) {
         description: `${page?.attributes.title ?? "Untitled Page"} has been loaded successfully.`,
       })
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error loading page",
-        description: "The file format is invalid.",
+        description: error instanceof Error ? error.message : "The selected file could not be imported.",
         variant: "destructive",
       })
     },
@@ -175,20 +208,15 @@ export function usePageOperations(state: AppState) {
 
   const loadPageFromShortcodeMutation = useMutation({
     mutationFn: async (file: File): Promise<typeof state.componentTree> => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          try {
-            const content = e.target?.result as string
-            const pages = deserializeAppStateFromShortcode(content) as AppNode[]
-            resolve(pages)
-          } catch (error) {
-            reject(new Error(`Invalid file format ${error}`))
-          }
-        }
-        reader.onerror = () => reject(new Error("Failed to read file"))
-        reader.readAsText(file)
-      })
+      validateImportedFile(file, "shortcode")
+      const content = await readTextFile(file)
+
+      try {
+        return deserializeAppStateFromShortcode(content) as AppNode[]
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown parse error"
+        throw new Error(`This shortcode file is not a valid LivePage export: ${message}`)
+      }
     },
     onSuccess: (loadedComponentTree) => {
       const page = loadedComponentTree[0] as unknown as AppNode | undefined
@@ -197,10 +225,10 @@ export function usePageOperations(state: AppState) {
         description: `${page?.attributes.title ?? "Untitled Page"} has been loaded successfully.`,
       })
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error loading page",
-        description: "The file format is invalid.",
+        description: error instanceof Error ? error.message : "The selected file could not be imported.",
         variant: "destructive",
       })
     },

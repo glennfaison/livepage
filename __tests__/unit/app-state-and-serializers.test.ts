@@ -1,5 +1,6 @@
 import { selectCurrentPage } from "@/features/app-state"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/features/serializers"
+import { validateImportedFile } from "@/lib/store/hooks"
 
 describe("app-state selectors and serializers", () => {
   const appState = {
@@ -40,6 +41,17 @@ describe("app-state selectors and serializers", () => {
 
   it("rejects invalid shortcode payloads", () => {
     expect(() => deserializeAppStateFromShortcode("[unknown]content[/unknown]")).toThrow("Invalid component tag")
+  })
+
+  it("validates import files before parsing", () => {
+    const jsonFile = new File(["{}"], "page.json", { type: "application/json" })
+    expect(() => validateImportedFile(jsonFile, "json")).not.toThrow()
+
+    const wrongExtension = new File(["{}"], "page.txt", { type: "text/plain" })
+    expect(() => validateImportedFile(wrongExtension, "json")).toThrow("valid JSON file")
+
+    const emptyFile = new File([], "empty.json", { type: "application/json" })
+    expect(() => validateImportedFile(emptyFile, "json")).toThrow("empty")
   })
 
   it("escapes html output", () => {
