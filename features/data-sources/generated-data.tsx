@@ -7,6 +7,8 @@ const settings = [
 		type: "textarea",
 		label: "JavaScript function to generate your data",
 		placeholder: "Enter the function body",
+		variant: "function-body",
+		functionName: "generate",
 		defaultValue: [],
 	},
 ] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>

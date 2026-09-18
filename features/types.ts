@@ -109,6 +109,9 @@ type TextareaSettingsField = ValueSettingsField<
   Readonly<{
     rows?: number
     placeholder?: string
+    variant?: "function-body"
+    functionName?: string
+    functionParameters?: string
   }>
 >
 

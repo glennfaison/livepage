@@ -14,6 +14,9 @@ const settings = [
 		type: "textarea",
 		label: "JavaScript function to parse your results",
 		placeholder: "Enter the function body",
+		variant: "function-body",
+		functionName: "parse",
+		functionParameters: "data",
 		defaultValue: [],
 	},
 ] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>

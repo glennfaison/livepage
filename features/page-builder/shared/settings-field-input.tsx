@@ -38,6 +38,29 @@ export function SettingsFieldInput({
           />
         )
       case "textarea":
+        if (field.variant === "function-body") {
+          const functionName = field.functionName ?? "generate"
+          const functionParameters = field.functionParameters ?? ""
+          return (
+            <div className="overflow-hidden rounded-md border border-input bg-background text-foreground">
+              <div className="bg-muted px-3 py-2 font-mono text-xs leading-5 text-muted-foreground">
+                {`async function ${functionName}(${functionParameters}) {`}
+              </div>
+              <textarea
+                id={field.id}
+                className={cn(
+                  "block min-h-[160px] w-full resize-y border-0 bg-background py-2 pl-8 pr-3",
+                  "font-mono text-xs leading-5 text-foreground placeholder:text-muted-foreground",
+                  "focus-visible:outline-none focus-visible:ring-0",
+                )}
+                placeholder={field.placeholder}
+                value={typeof value === "string" ? value : Array.isArray(value) ? value.join("") : ""}
+                onChange={(event) => onChange(event.target.value)}
+              />
+              <div className="bg-muted px-3 py-2 font-mono text-xs leading-5 text-muted-foreground">{"}"}</div>
+            </div>
+          )
+        }
         return (
           <textarea
             id={field.id}
