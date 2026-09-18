@@ -18,6 +18,14 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## HTML exports
+
+HTML exports are single files that can be opened directly in a modern evergreen
+browser. They load the pinned React runtime from esm.sh, so the browser needs
+network access when the file is opened. REST data sources also need to allow
+requests from the browser through CORS. Image and other asset URLs are kept as
+references rather than embedded in the export.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

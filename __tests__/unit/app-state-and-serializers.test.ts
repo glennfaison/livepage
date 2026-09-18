@@ -1,5 +1,6 @@
 import { selectCurrentPage } from "@/features/app-state"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/features/serializers"
+import { validateImportedFile } from "@/lib/store/hooks"
 
 describe("app-state selectors and serializers", () => {
   const appState = {
@@ -42,6 +43,17 @@ describe("app-state selectors and serializers", () => {
     expect(() => deserializeAppStateFromShortcode("[unknown]content[/unknown]")).toThrow("Invalid component tag")
   })
 
+  it("validates import files before parsing", () => {
+    const jsonFile = new File(["{}"], "page.json", { type: "application/json" })
+    expect(() => validateImportedFile(jsonFile, "json")).not.toThrow()
+
+    const wrongExtension = new File(["{}"], "page.txt", { type: "text/plain" })
+    expect(() => validateImportedFile(wrongExtension, "json")).toThrow("valid JSON file")
+
+    const emptyFile = new File([], "empty.json", { type: "application/json" })
+    expect(() => validateImportedFile(emptyFile, "json")).toThrow("empty")
+  })
+
   it("escapes html output", () => {
     const html = serializeAppStateAsHtml(appState.componentTree as any)
     expect(html).toContain("&lt;Page&gt;")
@@ -67,5 +79,15 @@ describe("app-state selectors and serializers", () => {
     ] as any)
 
     expect(html).toContain('<div class="column"><div class="row"><div class="column"><h1>Title</h1></div></div></div>')
+  })
+
+  it("exports a browser runtime with the complete serialized tree", () => {
+    const html = serializeAppStateAsHtml(appState.componentTree as any)
+    expect(html).toContain('type="application/json"')
+    expect(html).toContain('id="livepage-root"')
+    expect(html).toContain("https://esm.sh/react@19.1.0")
+    expect(html).toContain("https://esm.sh/react-dom@19.1.0/client")
+    expect(html).toContain("function loadData")
+    expect(html).toContain("__datasource__")
   })
 })
