@@ -156,7 +156,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
         className={cn(
-          "relative border border-transparent transition-all",
+          "block relative border border-transparent transition-all",
           showControls && "border-primary",
           "hover:border-gray-300",
           childClassName,

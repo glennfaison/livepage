@@ -69,6 +69,25 @@ describe("container child props", () => {
 		expect(container.querySelector("span")).toBeNull()
 	})
 
+	it("keeps edit-mode component wrappers in block flow", () => {
+		const component: AppNode = {
+			tag: "row",
+			attributes: { id: "row-1" },
+			children: [],
+		}
+		const Component = getComponentInfo("row").EditModeComponent
+		const { container } = renderWithQueryClient(
+			<Component
+				pageBuilderMode="edit"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+
+		expect(container.firstElementChild).toHaveClass("block")
+	})
+
 	it("lets a paragraph determine the row height through a column", () => {
 		const component: AppNode = {
 			tag: "row",
