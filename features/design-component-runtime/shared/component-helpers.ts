@@ -74,6 +74,86 @@ export function createCustomClassesAttribute(): SettingsField {
   })
 }
 
+export function createSelectAttribute(config: Readonly<{
+  id: string
+  label: string
+  options: ReadonlyArray<string>
+  defaultValue: string
+  placeholder?: string
+  getValue?: (component: Readonly<AppNode>) => string
+  setValue?: (component: Readonly<Partial<AppNode>>, value: string) => AppNode
+}>): SettingsField {
+  return {
+    id: config.id,
+    type: "select",
+    label: config.label,
+    options: config.options,
+    placeholder: config.placeholder,
+    defaultValue: config.defaultValue,
+    getValue: config.getValue ?? ((component) => component.attributes[config.id] || config.defaultValue),
+    setValue: config.setValue ?? ((component, value) => ({
+      ...component,
+      attributes: { ...component.attributes, [config.id]: value },
+    }) as AppNode),
+  } satisfies SettingsField
+}
+
+export function createBooleanAttribute(config: Readonly<{
+  id: string
+  label: string
+  defaultValue: boolean
+  getValue?: (component: Readonly<AppNode>) => boolean
+  setValue?: (component: Readonly<Partial<AppNode>>, value: boolean) => AppNode
+}>): SettingsField {
+  return {
+    id: config.id,
+    type: "boolean",
+    label: config.label,
+    defaultValue: config.defaultValue,
+    getValue: config.getValue ?? ((component) => component.attributes[config.id] === "true"),
+    setValue: config.setValue ?? ((component, value) => ({
+      ...component,
+      attributes: { ...component.attributes, [config.id]: String(value) },
+    }) as AppNode),
+  } satisfies SettingsField
+}
+
+export function createColorAttribute(config: Readonly<{
+  id: string
+  label: string
+  defaultValue: string
+  getValue?: (component: Readonly<AppNode>) => string
+  setValue?: (component: Readonly<Partial<AppNode>>, value: string) => AppNode
+}>): SettingsField {
+  return {
+    id: config.id,
+    type: "color",
+    label: config.label,
+    defaultValue: config.defaultValue,
+    getValue: config.getValue ?? ((component) => component.attributes[config.id] || config.defaultValue),
+    setValue: config.setValue ?? ((component, value) => ({
+      ...component,
+      attributes: { ...component.attributes, [config.id]: value },
+    }) as AppNode),
+  } satisfies SettingsField
+}
+
+export function createGroupAttribute(config: Readonly<{
+  id: string
+  label: string
+  fields: ReadonlyArray<SettingsField>
+  collapsible?: boolean
+}>): SettingsField {
+  return {
+    id: config.id,
+    type: "group",
+    label: config.label,
+    fields: config.fields,
+    collapsible: config.collapsible,
+    defaultValue: undefined as never,
+  } satisfies SettingsField
+}
+
 export function createTextareaAttribute(config: Readonly<{
   id: string
   label: string

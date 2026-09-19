@@ -22,8 +22,8 @@ export function SettingsPopover({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0 z-50" side="bottom" align="end" sideOffset={8}>
-        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[550px] max-h-[600px] overflow-clip flex flex-col">
+      <PopoverContent className="w-96 p-0 z-50" side="bottom" align="end" sideOffset={8}>
+        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[600px] max-h-[600px] overflow-clip flex flex-col">
           <div className="bg-foreground text-background p-3 rounded-t-lg">
             <h2 className="text-sm font-semibold">{componentInfo.label}</h2>
           </div>

@@ -6,7 +6,7 @@ import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"
 import { cn } from "@/lib/utils"
-import { createCustomClassesAttribute, createIdAttribute, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
+import { createColorAttribute, createCustomClassesAttribute, createGroupAttribute, createIdAttribute, createSelectAttribute, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
 
 const tag = "image" as const
 
@@ -62,21 +62,19 @@ const attributes: SettingsField[] = [
 		getValue: (component) => component.attributes.fallbackSrc,
 		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, fallbackSrc: value } } as Props["component"]),
 	},
-	{
+	createGroupAttribute({
 		id: "presentation",
-		type: "group",
 		label: "Presentation",
 		collapsible: true,
 		fields: [
-			{
+			createSelectAttribute({
 				id: "objectFit",
-				type: "select",
 				label: "Object Fit",
 				options: ["fill", "contain", "cover", "none", "scale-down"],
 				defaultValue: "contain",
 				getValue: (component) => component.attributes.objectFit || "contain",
 				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, objectFit: value } } as Props["component"]),
-			},
+			}),
 			{
 				id: "objectPosition",
 				type: "text",
@@ -107,11 +105,9 @@ const attributes: SettingsField[] = [
 				setValue: (component, value: number) => ({ ...component, attributes: { ...component.attributes, opacity: String(value) } } as Props["component"]),
 			},
 		],
-		defaultValue: undefined as never,
-	},
-	{
+	}),
+	createGroupAttribute({
 		id: "border",
-		type: "group",
 		label: "Border",
 		collapsible: true,
 		fields: [
@@ -124,44 +120,35 @@ const attributes: SettingsField[] = [
 				getValue: (component) => component.attributes.borderWidth || "0",
 				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderWidth: value } } as Props["component"]),
 			},
-			{
+			createSelectAttribute({
 				id: "borderStyle",
-				type: "select",
 				label: "Style",
 				options: ["solid", "dashed", "dotted", "double"],
 				defaultValue: "solid",
 				getValue: (component) => component.attributes.borderStyle || "solid",
 				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderStyle: value } } as Props["component"]),
-			},
-			{
+			}),
+			createColorAttribute({
 				id: "borderColor",
-				type: "color",
 				label: "Color",
 				defaultValue: "#000000",
 				getValue: (component) => component.attributes.borderColor || "#000000",
 				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderColor: value } } as Props["component"]),
-			},
+			}),
 		],
-		defaultValue: undefined as never,
-	},
-	{
+	}),
+	createSelectAttribute({
 		id: "loading",
-		type: "select",
 		label: "Loading",
 		options: ["lazy", "eager"],
 		defaultValue: "lazy",
-		getValue: (component) => component.attributes.loading || "lazy",
-		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, loading: value } } as Props["component"]),
-	},
-	{
+	}),
+	createSelectAttribute({
 		id: "decoding",
-		type: "select",
 		label: "Decoding",
 		options: ["auto", "async", "sync"],
 		defaultValue: "async",
-		getValue: (component) => component.attributes.decoding || "async",
-		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, decoding: value } } as Props["component"]),
-	},
+	}),
 ]
 
 const Icon = <ImageIcon className="h-4 w-4" />
