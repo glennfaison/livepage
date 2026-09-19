@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Toggle } from "@/components/ui/toggle"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import type React from "react"
 import type { PrimitiveSettingsField, SettingsValue } from "@/features/types"
@@ -21,14 +21,12 @@ export function SettingsFieldInput({
     switch (field.type) {
       case "boolean":
         return (
-          <Toggle
+          <Switch
             id={field.id}
             aria-label={field.label}
-            pressed={value === true || value === "true"}
-            onPressedChange={onChange}
-          >
-            {value === true || value === "true" ? "On" : "Off"}
-          </Toggle>
+            checked={value === true || value === "true"}
+            onCheckedChange={onChange}
+          />
         )
       case "number":
         return (
@@ -125,6 +123,7 @@ export function SettingsFieldInput({
           <Input
             type={field.type === "color" ? "color" : "text"}
             id={field.id}
+            className={field.type === "color" ? "h-10 w-12 cursor-pointer p-1" : undefined}
             placeholder={field.placeholder}
             readOnly={field.readOnly}
             disabled={field.disabled}
@@ -136,8 +135,8 @@ export function SettingsFieldInput({
   })()
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor={field.id}>
+    <div className="w-full space-y-2">
+      <Label className="block" htmlFor={field.id}>
         {field.label ?? field.id}
         {field.required && <span className="text-destructive">*</span>}
       </Label>
