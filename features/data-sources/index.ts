@@ -1,6 +1,6 @@
 import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "@/features/types"
-import { dataSourceInfo as RestApi } from "./rest-api"
-import { dataSourceInfo as GeneratedData } from "./generated-data"
+import { dataSourceInfo as RestApi } from "./definitions/rest-api"
+import { dataSourceInfo as GeneratedData } from "./definitions/generated-data"
 
 export const dataSourceIdList = [
 	RestApi.id,
