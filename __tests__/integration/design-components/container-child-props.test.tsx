@@ -122,6 +122,45 @@ describe("container child props", () => {
 		expect(container.firstElementChild).toContainElement(paragraph)
 	})
 
+	it("does not reserve vertical space for an empty paragraph before an image", () => {
+		const component: AppNode = {
+			tag: "column",
+			attributes: { id: "column-1" },
+			children: [
+				{
+					tag: "paragraph",
+					attributes: { id: "paragraph-1" },
+					children: [],
+				},
+				{
+					tag: "image",
+					attributes: {
+						id: "image-1",
+						src: "https://example.com/image.jpg",
+						alt: "Image",
+						fallbackSrc: "",
+						width: "100%",
+						height: "auto",
+					},
+					children: [],
+				},
+			],
+		}
+		const Component = getComponentInfo("column").PreviewModeComponent
+
+		renderWithQueryClient(
+			<Component
+				pageBuilderMode="preview"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+
+		expect(screen.getByRole("img", { name: "Image" })).toBeInTheDocument()
+		expect(document.querySelector("p")).not.toHaveClass("py-2")
+	})
+
 	it("applies childClassName to the page surface", () => {
 		const component: AppNode = {
 			tag: "page",
