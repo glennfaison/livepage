@@ -62,12 +62,125 @@ const attributes: SettingsField[] = [
 		getValue: (component) => component.attributes.fallbackSrc,
 		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, fallbackSrc: value } } as Props["component"]),
 	},
+	{
+		id: "presentation",
+		type: "group",
+		label: "Presentation",
+		collapsible: true,
+		fields: [
+			{
+				id: "objectFit",
+				type: "select",
+				label: "Object Fit",
+				options: ["fill", "contain", "cover", "none", "scale-down"],
+				defaultValue: "contain",
+				getValue: (component) => component.attributes.objectFit || "contain",
+				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, objectFit: value } } as Props["component"]),
+			},
+			{
+				id: "objectPosition",
+				type: "text",
+				label: "Object Position",
+				placeholder: "e.g., center, top right",
+				defaultValue: "center",
+				getValue: (component) => component.attributes.objectPosition || "center",
+				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, objectPosition: value } } as Props["component"]),
+			},
+			{
+				id: "borderRadius",
+				type: "text",
+				label: "Corner Radius",
+				placeholder: "e.g., 8px or 50%",
+				defaultValue: "0",
+				getValue: (component) => component.attributes.borderRadius || "0",
+				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderRadius: value } } as Props["component"]),
+			},
+			{
+				id: "opacity",
+				type: "number",
+				label: "Opacity",
+				min: 0,
+				max: 1,
+				step: 0.1,
+				defaultValue: 1,
+				getValue: (component) => Number(component.attributes.opacity ?? 1),
+				setValue: (component, value: number) => ({ ...component, attributes: { ...component.attributes, opacity: String(value) } } as Props["component"]),
+			},
+		],
+		defaultValue: undefined as never,
+	},
+	{
+		id: "border",
+		type: "group",
+		label: "Border",
+		collapsible: true,
+		fields: [
+			{
+				id: "borderWidth",
+				type: "text",
+				label: "Width",
+				placeholder: "e.g., 1px",
+				defaultValue: "0",
+				getValue: (component) => component.attributes.borderWidth || "0",
+				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderWidth: value } } as Props["component"]),
+			},
+			{
+				id: "borderStyle",
+				type: "select",
+				label: "Style",
+				options: ["solid", "dashed", "dotted", "double"],
+				defaultValue: "solid",
+				getValue: (component) => component.attributes.borderStyle || "solid",
+				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderStyle: value } } as Props["component"]),
+			},
+			{
+				id: "borderColor",
+				type: "color",
+				label: "Color",
+				defaultValue: "#000000",
+				getValue: (component) => component.attributes.borderColor || "#000000",
+				setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, borderColor: value } } as Props["component"]),
+			},
+		],
+		defaultValue: undefined as never,
+	},
+	{
+		id: "loading",
+		type: "select",
+		label: "Loading",
+		options: ["lazy", "eager"],
+		defaultValue: "lazy",
+		getValue: (component) => component.attributes.loading || "lazy",
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, loading: value } } as Props["component"]),
+	},
+	{
+		id: "decoding",
+		type: "select",
+		label: "Decoding",
+		options: ["auto", "async", "sync"],
+		defaultValue: "async",
+		getValue: (component) => component.attributes.decoding || "async",
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, decoding: value } } as Props["component"]),
+	},
 ]
 
 const Icon = <ImageIcon className="h-4 w-4" />
 
 const Component = (props: Props) => {
-	const { src, alt, fallbackSrc, "custom-classes": _, ...restAttributes } = props.component.attributes
+	const {
+		src,
+		alt,
+		fallbackSrc,
+		objectFit: objectFitValue,
+		objectPosition,
+		borderRadius,
+		opacity,
+		borderWidth,
+		borderStyle,
+		borderColor,
+		"custom-classes": _,
+		...restAttributes
+	} = props.component.attributes
 	const customClasses = readCustomClasses(props.component.attributes)
 	const { childClassName } = props
 
@@ -77,6 +190,15 @@ const Component = (props: Props) => {
 			src={src || fallbackSrc}
 			alt={alt}
 			className={cn("max-w-full h-auto", customClasses, childClassName)}
+			style={{
+				objectFit: objectFitValue as React.CSSProperties["objectFit"],
+				objectPosition,
+				borderRadius,
+				opacity: opacity ? Number(opacity) : undefined,
+				borderWidth,
+				borderStyle,
+				borderColor,
+			}}
 			{...restAttributes}
 		/>
 	)

@@ -27,6 +27,32 @@ const attributes: SettingsField[] = [
 		getValue: (component) => readTextChildren(component),
 		setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
 	}),
+	{
+		id: "variant",
+		type: "select",
+		label: "Style",
+		options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
+		defaultValue: "default",
+		getValue: (component) => component.attributes.variant || "default",
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, variant: value } } as Props["component"]),
+	},
+	{
+		id: "size",
+		type: "select",
+		label: "Size",
+		options: ["default", "sm", "lg"],
+		defaultValue: "default",
+		getValue: (component) => component.attributes.size || "default",
+		setValue: (component, value: string) => ({ ...component, attributes: { ...component.attributes, size: value } } as Props["component"]),
+	},
+	{
+		id: "disabled",
+		type: "boolean",
+		label: "Disabled",
+		defaultValue: false,
+		getValue: (component) => component.attributes.disabled === "true",
+		setValue: (component, value: boolean) => ({ ...component, attributes: { ...component.attributes, disabled: String(value) } } as Props["component"]),
+	},
 ]
 
 const attributesMap = createAttributeMap(attributes)
@@ -35,12 +61,11 @@ const Icon = <MousePointerClick className="h-4 w-4" />
 
 const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
+	const { variant, size, disabled, "custom-classes": _customClasses, ...filteredAttributes } = props.component.attributes
 	const customClasses = readCustomClasses(props.component.attributes)
-	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName } = props
 
-	return (
-		<Button className={cn(customClasses, childClassName)} {...filteredProps}>{children as React.ReactNode}</Button>
-	)
+	return <Button variant={variant as "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | undefined} size={size as "default" | "sm" | "lg" | undefined} disabled={disabled === "true"} className={cn(customClasses, childClassName)} {...filteredAttributes}>{children as React.ReactNode}</Button>
 }
 
 export const componentMetadata = {

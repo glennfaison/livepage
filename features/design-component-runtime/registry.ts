@@ -28,11 +28,16 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
 
 function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unknown>> {
   const defaults: Record<string, unknown> = {}
-  for (const attribute of metadata.attributes) {
-    if (attribute.type !== "group" && attribute.type !== "divider" && attribute.id !== "content") {
-      defaults[attribute.id] = attribute.defaultValue
+  const collectDefaults = (attributes: ReadonlyArray<Metadata["attributes"][number]>) => {
+    for (const attribute of attributes) {
+      if (attribute.type === "group") {
+        collectDefaults(attribute.fields)
+      } else if (attribute.type !== "divider" && attribute.id !== "content") {
+        defaults[attribute.id] = attribute.defaultValue
+      }
     }
   }
+  collectDefaults(metadata.attributes)
   return defaults
 }
 
