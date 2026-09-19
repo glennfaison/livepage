@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Toggle } from "@/components/ui/toggle"
 import { cn } from "@/lib/utils"
 import type React from "react"
 import type { PrimitiveSettingsField, SettingsValue } from "@/features/types"
@@ -20,12 +21,14 @@ export function SettingsFieldInput({
     switch (field.type) {
       case "boolean":
         return (
-          <Input
+          <Toggle
             id={field.id}
-            type="checkbox"
-            checked={value === true || value === "true"}
-            onChange={(event) => onChange(event.target.checked)}
-          />
+            aria-label={field.label}
+            pressed={value === true || value === "true"}
+            onPressedChange={onChange}
+          >
+            {value === true || value === "true" ? "On" : "Off"}
+          </Toggle>
         )
       case "number":
         return (
