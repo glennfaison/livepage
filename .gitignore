@@ -20,6 +20,9 @@
 # production
 /build
 
+# generated standalone export runtime
+/features/serializers/html/generated/
+
 # misc
 .DS_Store
 *.pem

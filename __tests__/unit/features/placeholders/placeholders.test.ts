@@ -1,5 +1,4 @@
-import { appSettings } from "@/app/app-settings"
-import { replaceDataSourceComponentProperties } from "@/features/placeholders"
+import { replaceDataSourceComponentProperties } from "@/features/design-component-runtime/shared/browser-core"
 import { replaceCurrentDatePlaceholderInString } from "@/features/placeholders/current-date"
 import { replaceDataSourcePlaceholdersInString } from "@/features/placeholders/data-source"
 
@@ -31,7 +30,7 @@ describe("placeholders", () => {
       attributes: {
         id: "section-1",
         title: "Hello [#data.user.name#] on [#CURRENT_DATE#]",
-        [appSettings.dataSources.dataSourceFieldName]: "encoded-settings",
+        "__datasource__": "encoded-settings",
       },
       children: [
         "Body [#data.message#] [#CURRENT_DATE#]",
@@ -55,7 +54,7 @@ describe("placeholders", () => {
     expect(result.attributes.title).toBe("Hello Ada on 2026-06-22T23:08:03.059Z")
     expect(result.children[0]).toBe("Body world 2026-06-22T23:08:03.059Z")
     expect((result.children[1] as { attributes: { label: string } }).attributes.label).toBe("nested")
-    expect(result.attributes[appSettings.dataSources.dataSourceFieldName]).toBe("encoded-settings")
+    expect(result.attributes.__datasource__).toBe("encoded-settings")
   })
 
   it("composes the placeholder string helper", () => {
