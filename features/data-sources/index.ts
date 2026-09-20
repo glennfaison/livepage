@@ -1,15 +1,18 @@
 import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "@/features/types"
 import { dataSourceInfo as RestApi } from "./definitions/rest-api"
 import { dataSourceInfo as GeneratedData } from "./definitions/generated-data"
+import { dataSourceInfo as RssFeed } from "./definitions/rss-feed"
 
 export const dataSourceIdList = [
 	RestApi.id,
 	GeneratedData.id,
+	RssFeed.id,
 ] as const
 
 const dataSourceMap: DataSourceInfoMap = {
 	[RestApi.id]: RestApi,
 	[GeneratedData.id]: GeneratedData,
+	[RssFeed.id]: RssFeed,
 }
 
 export function getDataSourceInfo(connectionId: DataSourceId): DataSourceInfo | undefined {
