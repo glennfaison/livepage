@@ -1,3 +1,4 @@
+import type React from "react"
 import type { AppNode } from "@/features/app-state"
 import type { Props, SettingsField } from "@/features/types"
 
@@ -188,6 +189,31 @@ export function createSpacingAttributes(prefix: "padding" | "margin"): SettingsF
     placeholder: `${prefix[0].toUpperCase()}${prefix.slice(1)} ${suffix}`,
     defaultValue: "0",
   }))
+}
+
+export function createTextAppearanceAttributes(): SettingsField {
+  return createGroupAttribute({
+    id: "appearance",
+    label: "Appearance",
+    collapsible: true,
+    fields: [
+      createSelectAttribute({ id: "text-align", label: "Alignment", options: ["left", "center", "right", "justify"], defaultValue: "left" }),
+      createTextAttribute({ id: "font-size", label: "Font Size", placeholder: "e.g. 1.25rem", defaultValue: "" }),
+      createSelectAttribute({ id: "font-weight", label: "Font Weight", options: ["400", "500", "600", "700", "800"], defaultValue: "700" }),
+      createColorAttribute({ id: "text-color", label: "Text Color", defaultValue: "#111827" }),
+      createTextAttribute({ id: "line-height", label: "Line Height", placeholder: "e.g. 1.5", defaultValue: "" }),
+    ],
+  })
+}
+
+export function readTextAppearance(attributes: Readonly<Record<string, string>>): React.CSSProperties {
+  return {
+    textAlign: attributes["text-align"] as React.CSSProperties["textAlign"] || undefined,
+    fontSize: attributes["font-size"] || undefined,
+    fontWeight: attributes["font-weight"] ? Number(attributes["font-weight"]) : undefined,
+    color: attributes["text-color"] || undefined,
+    lineHeight: attributes["line-height"] || undefined,
+  }
 }
 
 export function readTextChildren(component: Readonly<AppNode>): string {
