@@ -71,11 +71,11 @@ const EmptyColumnContent = ({
 	onAddChildComponent: (tag: string) => void
 }>) => {
 	return (
-		<div className="flex items-center justify-center h-full w-full text-muted-foreground">
+		<div className="flex min-h-24 w-full flex-col items-center justify-center gap-2 rounded-sm bg-muted/30 px-4 text-muted-foreground">
 			<ComponentSelectorPopover onSelect={onAddChildComponent} componentTagList={componentTagList}>
 				<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
-					<Plus className="h-3 w-3" />
-					<span className="sr-only">Add component</span>
+					<Plus className="size-3.5" />
+					<span className="text-xs font-medium">Add component</span>
 				</Button>
 			</ComponentSelectorPopover>
 		</div>

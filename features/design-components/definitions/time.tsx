@@ -80,4 +80,3 @@ export const componentMetadata = {
 } as const satisfies Metadata
 
 export default componentMetadata
-
