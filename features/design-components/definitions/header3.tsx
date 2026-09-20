@@ -4,7 +4,7 @@ import React from "react"
 import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
 import { withTextEditing } from "@/features/page-builder/decorators/with-text-editing"
 import type { Props, SettingsField, Metadata } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/features/design-component-runtime/shared/component-helpers"
 import { cn } from "@/lib/utils"
 
 const tag = "header3" as const
@@ -26,6 +26,7 @@ const attributes: SettingsField[] = [
 		getValue: (component) => readTextChildren(component),
 		setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
 	}),
+	createTextAppearanceAttributes(),
 ]
 
 const attributesMap = createAttributeMap(attributes)
@@ -35,10 +36,11 @@ const Icon = <Heading className="h-4 w-4" />
 const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
 	const customClasses = readCustomClasses(props.component.attributes)
+	const textAppearance = readTextAppearance(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
 
 	return (
-		<h3 className={cn("text-2xl font-bold py-2", customClasses, childClassName)} {...filteredProps}>{children as React.ReactNode}</h3>
+		<h3 className={cn("text-2xl font-bold py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{children as React.ReactNode}</h3>
 	)
 }
 

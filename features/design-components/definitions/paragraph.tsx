@@ -4,7 +4,7 @@ import React from "react"
 import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
 import { withTextEditing } from "@/features/page-builder/decorators/with-text-editing"
 import type { Props, Metadata, SettingsField } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, createTextareaAttribute, readCustomClasses, readTextArrayChildren } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, createTextareaAttribute, readCustomClasses, readTextAppearance, readTextArrayChildren } from "@/features/design-component-runtime/shared/component-helpers"
 import { cn } from "@/lib/utils"
 
 const defaultChildren = [
@@ -39,6 +39,7 @@ const attributes: SettingsField[] = [
 		getValue: (component) => readTextArrayChildren(component),
 		setValue: (component, value) => ({ ...component, children: [...value] } as Props["component"]),
 	}),
+	createTextAppearanceAttributes(),
 ]
 
 const attributesMap = createAttributeMap(attributes)
@@ -49,9 +50,10 @@ const Component = (props: Props) => {
 	const children = readTextArrayChildren(props.component)
 	const renderedChildren = children.length ? children : (attributesMap.content.defaultValue as readonly string[])
 	const customClasses = readCustomClasses(props.component.attributes)
+	const textAppearance = readTextAppearance(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
 
-	return <p className={cn(renderedChildren.length > 0 && "py-2", customClasses, childClassName)} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
+	return <p className={cn(renderedChildren.length > 0 && "py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
 }
 
 export const componentMetadata = {
