@@ -13,6 +13,7 @@ import { componentMetadata as Badge } from "@/features/design-components/definit
 import { componentMetadata as Divider } from "@/features/design-components/definitions/divider"
 import { componentMetadata as Callout } from "@/features/design-components/definitions/callout"
 import { componentMetadata as Stat } from "@/features/design-components/definitions/stat"
+import { componentMetadata as Time } from "@/features/design-components/definitions/time"
 import { componentMetadata as Page } from "@/features/design-components/definitions/page-component"
 import { registerComponentLookup } from "./lookup"
 export { componentTagList } from "./component-tags"
@@ -31,6 +32,7 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   [Divider.tag]: Divider,
   [Callout.tag]: Callout,
   [Stat.tag]: Stat,
+  [Time.tag]: Time,
   [Page.tag]: Page,
 }
 
