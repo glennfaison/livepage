@@ -9,6 +9,8 @@ import { componentMetadata as Button } from "@/features/design-components/defini
 import { componentMetadata as Image } from "@/features/design-components/definitions/image"
 import { componentMetadata as Row } from "@/features/design-components/definitions/row"
 import { componentMetadata as Column } from "@/features/design-components/definitions/column"
+import { componentMetadata as Badge } from "@/features/design-components/definitions/badge"
+import { componentMetadata as Divider } from "@/features/design-components/definitions/divider"
 import { componentMetadata as Page } from "@/features/design-components/definitions/page-component"
 import { registerComponentLookup } from "./lookup"
 export { componentTagList } from "./component-tags"
@@ -23,6 +25,8 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   [Image.tag]: Image,
   [Row.tag]: Row,
   [Column.tag]: Column,
+  [Badge.tag]: Badge,
+  [Divider.tag]: Divider,
   [Page.tag]: Page,
 }
 
