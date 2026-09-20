@@ -31,8 +31,8 @@ export const Divider = ({
         "relative flex items-center justify-center transition-all duration-200 group",
         "cursor-pointer bg-transparent hover:bg-gray-400 hover:visible",
         isVisible ? "bg-gray-400" : "invisible",
-        orientation === "horizontal" ? "flex-row h-px w-full hover:h-2" : "flex-col w-px hover:w-2 self-stretch",
-        isVisible && (orientation === "horizontal" ? "h-1" : "w-1"),
+        orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
+        isVisible ? "bg-primary/45" : "bg-transparent hover:bg-primary/30",
       )}
     >
       <ComponentSelectorPopover onSelect={handleAddComponent} componentTagList={componentTagList}>
@@ -40,7 +40,8 @@ export const Divider = ({
           variant="ghost"
           size="icon"
           className={cn(
-            "absolute bg-background border shadow-sm transition-opacity z-20 h-6 w-6 rounded-full cursor-pointer",
+            "relative z-20 size-7 rounded-full border bg-background shadow-sm transition-transform hover:scale-110",
+            "text-primary hover:bg-primary hover:text-primary-foreground",
           )}
           onClick={(e) => {
             e.stopPropagation()

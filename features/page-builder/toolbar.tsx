@@ -39,14 +39,14 @@ export const Toolbar: React.FC<Readonly<{
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
-  const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
+  const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("horizontal")
 
   // Initialize position to right center
   useEffect(() => {
     const updatePosition = () => {
       if (typeof window !== "undefined") {
         setPosition({
-          x: window.innerWidth - 80, // 80px from right edge
+          x: window.innerWidth - 220, // Keep the full toolbar inside the viewport
           y: window.innerHeight / 2, // Vertically centered
         })
       }

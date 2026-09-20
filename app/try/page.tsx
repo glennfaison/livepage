@@ -9,7 +9,7 @@ import { selectCurrentPage } from "@/features/app-state"
 import type { PageBuilderMode } from "@/features/app-state"
 import { ComponentOperationsContext } from "@/lib/component-operations-context"
 import { useAppState, useComponentOperations, useHistoryOperations, usePageOperations } from "@/lib/store/hooks"
-import { ChevronDown, Download, Layers, Upload } from "lucide-react"
+import { ChevronDown, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -169,17 +169,32 @@ export default function BuilderPage() {
         </header>
 
         <main className="flex-1 overflow-hidden flex flex-col">
-          <div className="container py-4 border-b mx-auto">
-            <div className="flex justify-between items-center">
-              <Input
-                defaultValue={currentPage?.attributes.title}
-                onChange={updatePageTitle}
-                className="text-xl font-semibold w-auto max-w-xs"
-                id="page-title"
-                placeholder="Page Title"
-              />
-              {/* <div className="flex gap-2">
-          </div> */}
+          <div className="border-b bg-background">
+            <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <Pencil className="size-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Editing page</p>
+                  <Input
+                    key={currentPage?.attributes.id}
+                    defaultValue={currentPage?.attributes.title ?? ""}
+                    onChange={updatePageTitle}
+                    aria-label="Page title"
+                    className="h-8 w-full max-w-sm border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
+                    id="page-title"
+                    placeholder="Page Title"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
+                  {pageBuilderMode === "edit" ? <Pencil className="size-3.5" aria-hidden="true" /> : <MonitorPlay className="size-3.5" aria-hidden="true" />}
+                  {pageBuilderMode === "edit" ? "Edit mode" : "Preview mode"}
+                </span>
+                <span className="hidden sm:inline">Changes are saved to history</span>
+              </div>
             </div>
           </div>
 
