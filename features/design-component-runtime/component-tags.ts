@@ -10,4 +10,6 @@ export const componentTagList = [
 	"column",
 	"badge",
 	"divider",
+	"callout",
+	"stat",
 ] as const
