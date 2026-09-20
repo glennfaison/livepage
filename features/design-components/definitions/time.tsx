@@ -2,34 +2,67 @@ import { Clock3 } from "lucide-react"
 import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
 import { withTextEditing } from "@/features/page-builder/decorators/with-text-editing"
 import type { Metadata, Props, SettingsField } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/features/design-component-runtime/shared/component-helpers"
 import { cn } from "@/lib/utils"
 
 const tag = "time" as const
 const label = "Time"
-const keywords = ["time", "date", "timestamp", "relative", "clock"]
+const keywords = ["time", "date", "localized", "relative", "timestamp"]
 const attributes: SettingsField[] = [
   createIdAttribute(),
   createCustomClassesAttribute(),
-  createTextAttribute({ id: "datetime", label: "Date and time", placeholder: "2026-09-20T14:30:00Z", defaultValue: "2026-09-20T14:30:00Z" }),
-  createTextAttribute({ id: "display", label: "Readable text", placeholder: "Sep 20, 2026", defaultValue: "Sep 20, 2026" }),
+  createTextAttribute({
+    id: "dateTime",
+    label: "Date and time",
+    placeholder: "2026-09-20T12:00:00Z",
+    defaultValue: "2026-09-20T12:00:00Z",
+  }),
+  createTextAttribute({
+    id: "label",
+    label: "Label",
+    placeholder: "Updated",
+    defaultValue: "Updated",
+    getValue: readTextChildren,
+    setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
+  }),
 ]
 const attributesMap = createAttributeMap(attributes)
-const Icon = <Clock3 className="size-4" />
 
-function TimeComponent(props: Props) {
-  const datetime = String(props.component.attributes.datetime || attributesMap.datetime.defaultValue)
-  const display = String(props.component.attributes.display || attributesMap.display.defaultValue)
-  const customClasses = readCustomClasses(props.component.attributes)
+function formatRelativeTime(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  const seconds = Math.round((date.getTime() - Date.now()) / 1000)
+  const absoluteSeconds = Math.abs(seconds)
+  const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+    ["year", 31536000],
+    ["month", 2592000],
+    ["week", 604800],
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+  ]
+  for (const [unit, unitSeconds] of units) {
+    if (absoluteSeconds >= unitSeconds) {
+      return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(Math.round(seconds / unitSeconds), unit)
+    }
+  }
+  return "just now"
+}
 
+const Component = (props: Props) => {
+  const dateTime = String(props.component.attributes.dateTime || attributesMap.dateTime.defaultValue)
+  const labelText = readTextChildren(props.component) || attributesMap.label.defaultValue
+  const date = new Date(dateTime)
+  const fullDate = Number.isNaN(date.getTime()) ? dateTime : new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date)
   return (
     <time
-      dateTime={datetime}
-      title={datetime}
-      className={cn("inline-flex w-fit cursor-help items-center gap-1.5 rounded-md text-sm text-muted-foreground underline decoration-dotted underline-offset-4", customClasses, props.childClassName)}
+      dateTime={dateTime}
+      title={fullDate}
+      className={cn("inline-flex items-center gap-1.5 text-sm text-muted-foreground underline decoration-dotted underline-offset-4", readCustomClasses(props.component.attributes), props.childClassName)}
     >
       <Clock3 className="size-3.5" aria-hidden="true" />
-      {display}
+      <span>{labelText}</span>
+      <span className="text-xs">({formatRelativeTime(dateTime)})</span>
     </time>
   )
 }
@@ -38,11 +71,12 @@ export const componentMetadata = {
   tag,
   label,
   keywords,
-  defaultChildren: [],
+  defaultChildren: ["Updated"],
   attributes,
-  Icon,
+  Icon: <Clock3 className="size-4" />,
   htmlTag: "time",
-  PreviewModeComponent: TimeComponent,
-  EditModeComponent: withEditorControls(withTextEditing(TimeComponent)),
+  PreviewModeComponent: Component,
+  EditModeComponent: withEditorControls(withTextEditing(Component)),
 } as const satisfies Metadata
 
+export default componentMetadata
