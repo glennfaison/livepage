@@ -12,4 +12,5 @@ export const componentTagList = [
 	"divider",
 	"callout",
 	"stat",
+	"time",
 ] as const
