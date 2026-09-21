@@ -7,9 +7,17 @@ import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "
 import type { AppNodeTag } from "@/features/types"
 import { formatComponentLabel } from "./shared/component-label"
 
-function getComponentInfoSafe(componentTag: AppNodeTag) {
+export function getComponentInfoSafe(
+  componentTag: AppNodeTag,
+  getComponentInfo: (tag: AppNodeTag) => {
+    tag: AppNodeTag
+    label: string
+    keywords: ReadonlyArray<string>
+    Icon: React.ReactNode
+  } = getRegisteredComponentInfo,
+) {
   try {
-    return getRegisteredComponentInfo(componentTag)
+    return getComponentInfo(componentTag)
   } catch (error) {
     if (!(error instanceof ComponentLookupNotInitializedError)) {
       throw error
