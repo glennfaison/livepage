@@ -8,15 +8,9 @@ import type { AppNode } from "@/features/app-state"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
+import { formatComponentLabel } from "../shared/component-label"
 
 type ComponentSettingsInfo = Pick<Metadata, "label" | "attributes" | "defaultChildren" | "defaultAttributes">
-
-function formatComponentLabel(tag: string): string {
-  return tag
-    .replace(/-/g, " ")
-    .replace(/([a-z])([0-9])/g, "$1 $2")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-}
 
 function getComponentSettingsInfo(tag: string): ComponentSettingsInfo {
   try {

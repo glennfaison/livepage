@@ -5,13 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNodeTag } from "@/features/types"
-
-function formatComponentLabel(tag: string): string {
-  return tag
-    .replace(/-/g, " ")
-    .replace(/([a-z])([0-9])/g, "$1 $2")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-}
+import { formatComponentLabel } from "./shared/component-label"
 
 function getComponentInfoSafe(componentTag: AppNodeTag) {
   try {
