@@ -1,3 +1,5 @@
+import { ComponentLookupNotInitializedError } from "@/features/design-component-runtime/lookup"
+
 export function formatComponentLabel(tag: string): string {
   return tag
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
@@ -8,9 +10,5 @@ export function formatComponentLabel(tag: string): string {
 }
 
 export function isRecoverableComponentInfoError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false
-  }
-  return error.message.includes("Design component registry has not been initialized")
-    || error.message.includes("Unknown component tag:")
+  return error instanceof ComponentLookupNotInitializedError
 }
