@@ -78,5 +78,3 @@ export const componentMetadata = {
   PreviewModeComponent: Component,
   EditModeComponent: withEditorControls(withTextEditing(Component)),
 } as const satisfies Metadata
-
-export default componentMetadata

@@ -1,9 +1,11 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
+import "@/features/design-component-runtime/registry"
+import { ComponentLookupNotInitializedError } from "@/features/design-component-runtime/lookup"
+import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder/component-selector-popover"
 import { Button } from "@/components/ui/button"
-import { componentTagList } from "@/features/design-components"
+import { componentTagList } from "@/features/design-component-runtime/component-tags"
 
 describe("ComponentSelectorPopover", () => {
   const mockOnSelect = jest.fn()
@@ -95,5 +97,19 @@ describe("ComponentSelectorPopover", () => {
     await waitFor(() => {
       expect(screen.getByText("No components found")).toBeInTheDocument()
     })
+  })
+
+  it("falls back to formatted labels when lookup is not initialized", async () => {
+    expect(
+      getComponentInfoSafe("header1", () => {
+        throw new ComponentLookupNotInitializedError()
+      }).label,
+    ).toBe("Header 1")
+
+    expect(
+      getComponentInfoSafe("inline-text", () => {
+        throw new ComponentLookupNotInitializedError()
+      }).label,
+    ).toBe("Inline Text")
   })
 })

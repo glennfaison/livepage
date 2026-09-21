@@ -3,11 +3,36 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { getComponentInfo } from "@/features/design-components"
+import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNode } from "@/features/app-state"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
+import { formatComponentLabel } from "../shared/component-label"
+
+type ComponentSettingsInfo = Pick<Metadata, "label" | "attributes" | "defaultChildren" | "defaultAttributes">
+
+function getComponentSettingsInfo(tag: string): ComponentSettingsInfo {
+  try {
+    const metadata = getRegisteredComponentInfo(tag)
+    return {
+      label: metadata.label,
+      attributes: metadata.attributes,
+      defaultChildren: metadata.defaultChildren,
+      defaultAttributes: metadata.defaultAttributes,
+    }
+  } catch (error) {
+    if (!(error instanceof ComponentLookupNotInitializedError)) {
+      throw error
+    }
+    return {
+      label: formatComponentLabel(tag),
+      attributes: [],
+      defaultChildren: [],
+      defaultAttributes: undefined,
+    }
+  }
+}
 
 function isGroupAttribute(field: SettingsField): field is Extract<SettingsField, { type: "group" }> {
   return field.type === "group"
@@ -86,7 +111,7 @@ function resolveSaveValue(
   field: PrimitiveSettingsField,
   fieldId: string,
   value: SettingsValue,
-  componentInfo: Metadata,
+  componentInfo: ComponentSettingsInfo,
 ): SettingsValue {
   if (fieldId === "content" && componentInfo.defaultChildren.length > 0 && typeof value === "string" && value.trim() === "") {
     return componentInfo.defaultChildren.filter((entry): entry is string => typeof entry === "string")
@@ -184,7 +209,7 @@ function useComponentSettingsEditor({
   component: AppNode
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }>) {
-  const componentInfo = React.useMemo(() => getComponentInfo(component.tag), [component.tag])
+  const componentInfo = React.useMemo(() => getComponentSettingsInfo(component.tag), [component.tag])
   const settingsFields = React.useMemo(() => componentInfo.attributes, [componentInfo.attributes])
   const [formData, setFormData] = React.useState<SettingsFormData>({})
   const { updateComponent } = useComponentOperationsContext()

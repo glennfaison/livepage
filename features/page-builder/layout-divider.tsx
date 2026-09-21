@@ -1,4 +1,4 @@
-import { componentTagList } from "@/features/design-components"
+import { componentTagList } from "@/features/design-component-runtime/component-tags"
 import { cn } from "@/lib/utils"
 import { Plus } from "lucide-react"
 import React from "react"

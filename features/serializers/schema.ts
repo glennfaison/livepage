@@ -8,7 +8,7 @@ const appNodeTagSchema = z.string().refine((tag) => allowedAppNodeTags.has(tag),
   message: "Invalid component tag",
 })
 
-export const appNodeSchema: z.ZodType<AppNode> = z.lazy(() =>
+const appNodeSchema: z.ZodType<AppNode> = z.lazy(() =>
   z
     .object({
       tag: appNodeTagSchema,

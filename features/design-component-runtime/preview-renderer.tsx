@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import type { AppNode, ViewModeProps } from "@/features/types"
 import { getComponentInfo } from "@/features/design-component-runtime/registry"
 
-export function renderPreviewNode(
+function renderPreviewNode(
   node: AppNode | string,
   props: ViewModeProps,
   key?: string | number,
