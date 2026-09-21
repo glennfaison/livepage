@@ -47,7 +47,8 @@ jest.mock("@/lib/store/hooks", () => {
     usePageOperations: jest.fn(() => ({
       savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
       savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
-      loadPageMutation: { mutate: jest.fn(), isPending: false },
+      loadPageFromJsonMutation: { mutate: jest.fn(), isPending: false },
+      loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
       savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
     })),
     useComponentOperations: jest.fn(() => ({
@@ -89,6 +90,7 @@ describe("BuilderPage Integration", () => {
     // Action buttons
     expect(screen.getByRole("button", { name: /switch to edit mode/i })).toBeInTheDocument()
     expect(screen.getByPlaceholderText("Page Title")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /templates/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /import/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /export/i })).toBeInTheDocument()
     expect(screen.getByTestId("mock-toolbar")).toBeInTheDocument()
@@ -180,7 +182,8 @@ describe("BuilderPage Integration", () => {
       ; (usePageOperations as jest.Mock).mockReturnValue({
         savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
         savePageAsJsonMutation: mockSavePageAsJsonMutation,
-        loadPageMutation: { mutate: jest.fn(), isPending: false },
+        loadPageFromJsonMutation: { mutate: jest.fn(), isPending: false },
+        loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
         savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
       })
 
@@ -198,7 +201,8 @@ describe("BuilderPage Integration", () => {
       ; (usePageOperations as jest.Mock).mockReturnValue({
         savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
         savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
-        loadPageMutation: { mutate: jest.fn(), isPending: false },
+        loadPageFromJsonMutation: { mutate: jest.fn(), isPending: false },
+        loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
         savePageAsHtmlMutation: mockSavePageAsHtmlMutation,
       })
 
@@ -235,5 +239,41 @@ describe("BuilderPage Integration", () => {
       tag: "row",
       parentId: "page-1",
     })
+  })
+
+  it("applies the bundled CV template from the catalog", async () => {
+    const { useAppState } = jest.requireMock("@/lib/store/hooks")
+    const mockDispatch = jest.fn()
+    ; (useAppState as jest.Mock).mockReturnValue({
+      state: {
+        componentTree: [{ tag: "page", attributes: { id: "page-1", title: "Test Page" }, children: [] }],
+        activePage: "page-1",
+        selectedComponentId: "",
+        selectedComponentAncestors: [],
+        pageBuilderMode: "edit",
+        toolbarMinimized: false,
+        showToolbar: true,
+        history: [],
+        currentHistoryIndex: -1,
+        historyPreviewIndex: null,
+        originalHistoryState: null,
+      },
+      dispatch: mockDispatch,
+    })
+
+    render(<BuilderPage />)
+
+    await userEvent.click(screen.getByRole("button", { name: /templates/i }))
+    expect(await screen.findByText("Personal CV / Resume")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: /personal cv \/ resume/i }))
+
+    expect(mockDispatch.mock.calls.map(([action]: [{ type: string }]) => action.type)).toEqual([
+      "SET_PAGES",
+      "SET_ACTIVE_PAGE",
+      "SET_SELECTED_COMPONENT",
+      "SET_SELECTED_COMPONENT_ANCESTORS",
+      "ADD_TO_HISTORY",
+    ])
   })
 })
