@@ -6,6 +6,27 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNodeTag } from "@/features/types"
 
+function formatComponentLabel(tag: string): string {
+  return tag
+    .replace(/-/g, " ")
+    .replace(/([a-z])([0-9])/g, "$1 $2")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function getComponentInfoSafe(componentTag: AppNodeTag) {
+  try {
+    return getRegisteredComponentInfo(componentTag)
+  } catch {
+    const label = formatComponentLabel(componentTag)
+    return {
+      tag: componentTag,
+      label,
+      keywords: [componentTag, label.toLowerCase()],
+      Icon: null,
+    }
+  }
+}
+
 // Component selector popover
 export const ComponentSelectorPopover = ({
 	onSelect,
@@ -20,7 +41,7 @@ export const ComponentSelectorPopover = ({
   const [open, setOpen] = React.useState(false)
 
 	const filteredComponents = React.useMemo(() => {
-		const components = componentTagList.map((componentTag) => getRegisteredComponentInfo(componentTag))
+		const components = componentTagList.map((componentTag) => getComponentInfoSafe(componentTag))
 		if (!searchTerm.trim()) return components
 
 		const search = searchTerm.toLowerCase()
