@@ -157,6 +157,8 @@ const Component = (props: Props) => {
 	const {
 		src,
 		alt,
+		width,
+		height,
 		fallbackSrc,
 		objectFit: objectFitValue,
 		objectPosition,
@@ -176,8 +178,10 @@ const Component = (props: Props) => {
 		<img
 			src={src || fallbackSrc}
 			alt={alt}
-			className={cn("max-w-full h-auto", customClasses, childClassName)}
+			className={cn("block max-w-full h-auto", customClasses, childClassName)}
 			style={{
+				width: width || undefined,
+				height: height || undefined,
 				objectFit: objectFitValue as React.CSSProperties["objectFit"],
 				objectPosition,
 				borderRadius,

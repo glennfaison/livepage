@@ -36,7 +36,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
-	const slotClassName = "flex-1 basis-0 self-stretch"
+	const slotClassName = ""
 
 	const childComponents = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -53,7 +53,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 
 	return (
 		<div
-			className={cn("min-h-[50px] flex flex-col justify-center", "p-0 gap-0", customClasses, childClassName)}
+			className={cn("min-h-[50px] flex flex-col justify-start", "p-0 gap-0", customClasses, childClassName)}
 			{...attributes}
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
@@ -106,7 +106,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: attributes.id, index: childIndex })
 	}, [addComponent, attributes.id])
-	const slotClassName = "flex-1 basis-0 self-stretch"
+	const slotClassName = ""
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -141,7 +141,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 	return (
 		<div
 			className={cn(
-				"min-h-[50px] flex flex-col justify-center",
+				"min-h-[50px] flex flex-col justify-start",
 				"p-0 gap-0",
 				"border border-dashed border-gray-300",
 				customClasses,

@@ -116,13 +116,17 @@ export const cvResumePersonalTemplate = {
     pages: [
       node("page", "cv-template-page", {
         title: "Avery Johnson — Personal CV",
-        "custom-classes": "border-0 shadow-none bg-slate-50",
+        "custom-classes": "border-0 bg-[#f3f5f4] shadow-none",
       }, [
         node("row", "cv-shell", {
-          "custom-classes": "items-start gap-8 flex-wrap xl:flex-nowrap",
+          "custom-classes": "mx-auto max-w-[1180px] items-start gap-8 py-8 xl:flex-nowrap",
         }, [
           node("column", "cv-sidebar", {
-            "custom-classes": "basis-[20rem] flex-none rounded-[2rem] bg-slate-900 p-8 text-white shadow-sm gap-5 xl:sticky xl:top-8",
+            "padding-top": "1.75rem",
+            "padding-right": "1.75rem",
+            "padding-bottom": "1.75rem",
+            "padding-left": "1.75rem",
+            "custom-classes": "basis-[21rem] flex-none overflow-hidden rounded-[2rem] bg-[#0f172a] text-white shadow-[0_18px_44px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/60 gap-6 xl:sticky xl:top-8",
           }, [
             node("image", "cv-profile-photo", {
               alt: "Avery Johnson portrait placeholder",
@@ -132,45 +136,46 @@ export const cvResumePersonalTemplate = {
               height: "320px",
               objectFit: "cover",
               objectPosition: "center",
-              borderRadius: "24px",
+              borderRadius: "22px",
               loading: "lazy",
               decoding: "async",
-              "custom-classes": "w-full overflow-hidden bg-slate-800",
+              "custom-classes": "w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-800",
             }),
             text("badge", "cv-hero-status", "Open to staff product and design leadership roles", {
               variant: "warning",
+              "custom-classes": "w-fit rounded-full border border-amber-200/80 bg-amber-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-900",
             }),
             text("header1", "cv-hero-name", "Avery Johnson", {
-              "custom-classes": "py-0 text-4xl font-semibold tracking-tight text-white",
+              "custom-classes": "py-0 text-[2.6rem] font-semibold leading-none tracking-[-0.06em] text-white",
             }),
             text("paragraph", "cv-hero-headline", "Product designer and front-end engineer building accessible healthcare and education products.", {
-              "custom-classes": "py-0 text-base leading-7 text-slate-300",
+              "custom-classes": "py-1 text-base leading-7 text-slate-300",
             }),
             node("divider", "cv-sidebar-divider-1", {
               color: "#334155",
               style: "solid",
             }),
             text("header3", "cv-contact-heading", "Contact", {
-              "custom-classes": "py-0 text-lg text-white",
+              "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-300",
             }),
             text("paragraph", "cv-contact-primary", "avery@example.com • +1 (555) 123-4567", {
-              "custom-classes": "py-0 text-sm leading-6 text-slate-300",
+              "custom-classes": "py-1 text-sm leading-6 text-slate-200",
             }),
             text("paragraph", "cv-contact-secondary", "Based in Atlanta, GA • Available for remote collaboration", {
-              "custom-classes": "py-0 text-sm leading-6 text-slate-300",
+              "custom-classes": "py-1 text-sm leading-6 text-slate-300",
             }),
             text("paragraph", "cv-contact-links", "linkedin.com/in/averyjohnson • github.com/averycodes • averyjohnson.design", {
-              "custom-classes": "py-0 text-sm leading-6 text-slate-300",
+              "custom-classes": "py-1 text-sm leading-6 text-slate-300",
             }),
             node("divider", "cv-sidebar-divider-2", {
               color: "#334155",
               style: "solid",
             }),
             text("header3", "cv-skills-heading", "Skills", {
-              "custom-classes": "py-0 text-lg text-white",
+              "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-300",
             }),
             node("column", "cv-skills-list", {
-              "custom-classes": "gap-2",
+              "custom-classes": "flex-row flex-wrap items-start gap-2 pt-1",
             }, [
               text("badge", "cv-skill-1", "Design systems", { variant: "secondary" }),
               text("badge", "cv-skill-2", "Product strategy", { variant: "secondary" }),
@@ -184,46 +189,50 @@ export const cvResumePersonalTemplate = {
               style: "solid",
             }),
             text("header3", "cv-languages-heading", "Languages", {
-              "custom-classes": "py-0 text-lg text-white",
+              "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-300",
             }),
-            text("paragraph", "cv-languages-copy", "English (native), Spanish (professional working proficiency)", {
-              "custom-classes": "py-0 text-sm leading-6 text-slate-300",
+            text("paragraph", "cv-languages-copy", "English (native)\nSpanish (professional working proficiency)", {
+              "custom-classes": "whitespace-pre-line py-0 text-sm leading-6 text-slate-300",
             }),
           ]),
           node("column", "cv-main", {
-            "custom-classes": "min-w-0 gap-6 rounded-[2rem] bg-white p-8 shadow-sm",
+            "padding-top": "2rem",
+            "padding-right": "2rem",
+            "padding-bottom": "2rem",
+            "padding-left": "2rem",
+            "custom-classes": "min-w-0 flex-1 gap-6 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.04)]",
           }, [
             text("header2", "cv-about-heading", "About", {
-              "custom-classes": "py-0 text-2xl text-slate-900",
+              "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500",
             }),
             text("paragraph", "cv-about-copy", "I design and ship polished digital experiences for teams that care deeply about clarity, trust, and measurable outcomes. Over the last eight years I have led end-to-end product design, partnered closely with engineering, and built front-end prototypes that accelerated launches across regulated industries.", {
-              "custom-classes": "py-0 text-base leading-8 text-slate-600",
+              "custom-classes": "py-0 text-[1.02rem] leading-8 text-slate-600",
             }),
             node("row", "cv-stat-row", {
-              "custom-classes": "gap-4 flex-wrap md:flex-nowrap",
+              "custom-classes": "mt-2 gap-3",
             }, [
               node("column", "cv-stat-col-1", {
-                "custom-classes": "basis-0 min-w-[12rem]",
+                "custom-classes": "min-w-0",
               }, [
                 node("stat", "cv-stat-1", {
                   value: "8+",
-                  "custom-classes": "border-slate-200 shadow-none",
+                  "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none",
                 }, ["Years building digital products"]),
               ]),
               node("column", "cv-stat-col-2", {
-                "custom-classes": "basis-0 min-w-[12rem]",
+                "custom-classes": "min-w-0",
               }, [
                 node("stat", "cv-stat-2", {
                   value: "14",
-                  "custom-classes": "border-slate-200 shadow-none",
+                  "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none",
                 }, ["Cross-functional launches"]),
               ]),
               node("column", "cv-stat-col-3", {
-                "custom-classes": "basis-0 min-w-[12rem]",
+                "custom-classes": "min-w-0",
               }, [
                 node("stat", "cv-stat-3", {
                   value: "5",
-                  "custom-classes": "border-slate-200 shadow-none",
+                  "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none",
                 }, ["Teams mentored through design systems work"]),
               ]),
             ]),
@@ -232,7 +241,7 @@ export const cvResumePersonalTemplate = {
               style: "solid",
             }),
             text("header2", "cv-experience-heading", "Experience", {
-              "custom-classes": "py-0 text-2xl text-slate-900",
+              "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500",
             }),
             node("column", "cv-experience-list", {
               "custom-classes": "gap-4",
@@ -241,10 +250,10 @@ export const cvResumePersonalTemplate = {
                 "custom-classes": "rounded-3xl border border-slate-200 bg-slate-50 p-6 gap-3",
               }, [
                 text("header3", "cv-experience-1-title", "Senior Product Designer · Northstar Health", {
-                  "custom-classes": "py-0 text-xl text-slate-900",
+                  "custom-classes": "py-0 text-xl font-semibold text-slate-900",
                 }),
                 text("paragraph", "cv-experience-1-meta", "Remote • 2023 — Present", {
-                  "custom-classes": "py-0 text-sm uppercase tracking-[0.18em] text-slate-500",
+                  "custom-classes": "py-0 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500",
                 }),
                 text("paragraph", "cv-experience-1-copy-1", "Led the redesign of a patient onboarding journey that improved activation by 28% across web and mobile.", {
                   "custom-classes": "py-0 text-base leading-7 text-slate-600",
