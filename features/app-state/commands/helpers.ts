@@ -1,4 +1,3 @@
-import { createDesignComponentInstance } from "@/features/design-components"
 import type { AppNode } from "@/features/types"
 
 function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
