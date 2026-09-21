@@ -8,7 +8,7 @@ import type { AppNode } from "@/features/app-state"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
-import { formatComponentLabel } from "../shared/component-label"
+import { formatComponentLabel, isRecoverableComponentInfoError } from "../shared/component-label"
 
 type ComponentSettingsInfo = Pick<Metadata, "label" | "attributes" | "defaultChildren" | "defaultAttributes">
 
@@ -21,7 +21,10 @@ function getComponentSettingsInfo(tag: string): ComponentSettingsInfo {
       defaultChildren: metadata.defaultChildren,
       defaultAttributes: metadata.defaultAttributes,
     }
-  } catch {
+  } catch (error) {
+    if (!isRecoverableComponentInfoError(error)) {
+      throw error
+    }
     return {
       label: formatComponentLabel(tag),
       attributes: [],
