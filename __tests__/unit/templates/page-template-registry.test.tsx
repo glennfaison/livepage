@@ -8,8 +8,10 @@ import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinition
 
 describe("page template registry", () => {
   it("validates the bundled CV template definition", () => {
-    expect(pageTemplateRegistry).toHaveLength(1)
-    expect(() => pageTemplateDefinitionSchema.parse(pageTemplateRegistry[0])).not.toThrow()
+    expect(pageTemplateRegistry).toHaveLength(3)
+    for (const template of pageTemplateRegistry) {
+      expect(() => pageTemplateDefinitionSchema.parse(template)).not.toThrow()
+    }
   })
 
   it("renders the bundled CV template through the existing preview renderer", () => {
@@ -49,11 +51,98 @@ describe("page template registry", () => {
     await user.click(trigger)
 
     expect(await screen.findByText("Template catalog")).toBeInTheDocument()
-    expect(screen.getByText("Best for resume")).toBeInTheDocument()
+    expect(screen.getAllByText("Best for resume")).toHaveLength(3)
+    expect(screen.getByRole("dialog")).toHaveClass("max-h-[min(80vh,48rem)]", "overflow-hidden")
+    expect(screen.getByRole("region", { name: "Available templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden")
 
     const applyButton = screen.getByRole("button", { name: /apply personal cv \/ resume template/i })
     await user.click(applyButton)
     expect(onApplyTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
+    expect(screen.queryByText("Template catalog")).not.toBeInTheDocument()
+  })
+
+  it("renders semantic links and same-page navigation in the engineer CV", () => {
+    const template = getPageTemplateById("cv-resume-engineer-dark")
+    expect(template).toBeDefined()
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={cloneTemplatePages(template!)[0]}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByRole("link", { name: "Experience" })).toHaveAttribute("href", "#experience")
+    expect(screen.getByRole("link", { name: "jordan@example.com" })).toHaveAttribute("href", "mailto:jordan@example.com")
+    expect(document.getElementById("experience")).toBeInTheDocument()
+  })
+
+  it("adds opener protection only to links targeting a new tab", () => {
+    const queryClient = new QueryClient()
+    const link = {
+      tag: "link",
+      attributes: { id: "external-link", href: "https://example.com", target: "_blank" },
+      children: ["External"],
+    } as const
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={link}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByRole("link", { name: "External" })).toHaveAttribute("target", "_blank")
+    expect(screen.getByRole("link", { name: "External" })).toHaveAttribute("rel", "noopener noreferrer")
+  })
+
+  it("opens modal-target links in an accessible dialog", async () => {
+    const user = userEvent.setup()
+    const queryClient = new QueryClient()
+    const link = {
+      tag: "link",
+      attributes: { id: "modal-link", href: "https://example.com/details", target: "modal" },
+      children: ["Details"],
+    } as const
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={link}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    await user.click(screen.getByRole("link", { name: "Details" }))
+    expect(screen.getByRole("dialog", { name: "Details" })).toBeInTheDocument()
+    expect(screen.getByTitle("Details")).toHaveAttribute("src", "https://example.com/details")
+
+    await user.click(screen.getByRole("button", { name: "Close dialog" }))
+    expect(screen.queryByRole("dialog", { name: "Details" })).not.toBeInTheDocument()
+  })
+
+  it("filters templates by metadata", async () => {
+    const user = userEvent.setup()
+    render(<TemplateCatalogPopover templates={pageTemplateRegistry} onApplyTemplate={jest.fn()} />)
+
+    await user.click(screen.getByRole("button", { name: /templates/i }))
+    const search = screen.getByRole("textbox", { name: /search templates/i })
+    await user.type(search, "dark")
+
+    expect(screen.getByRole("button", { name: /apply engineer cv \/ dark template/i })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /apply engineer cv \/ light template/i })).not.toBeInTheDocument()
   })
 
   it("applies the template using existing page actions and can restore the previous page from history", () => {

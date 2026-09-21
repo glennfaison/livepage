@@ -10,7 +10,7 @@ import { getRegisteredComponentInfo } from "@/features/design-component-runtime/
 import { withDataSource } from "@/features/data-sources/with-data-source"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-component-runtime/shared/component-helpers"
 
 const tag = "column" as const
 
@@ -21,6 +21,7 @@ const keywords = ["column", "col", "container", "layout", "vertical"]
 const attributes: SettingsField[] = [
 	createIdAttribute(),
 	createCustomClassesAttribute(),
+	...createLayoutAttributes(),
 	...createSpacingAttributes("padding"),
 	...createSpacingAttributes("margin"),
 ]
@@ -36,6 +37,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
+	const layoutStyles = readLayoutStyles(component.attributes)
 	const slotClassName = ""
 
 	const childComponents = component.children.map((child, childIndex) => {
@@ -58,6 +60,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
+				...layoutStyles,
 			}}
 		>
 			{childComponents}
@@ -89,6 +92,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
+	const layoutStyles = readLayoutStyles(component.attributes)
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
 	const {
@@ -153,6 +157,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
+				...layoutStyles,
 			}}
 		>
 			{hasChildren ? WrappedChildren : <EmptyColumnContent onAddChildComponent={onAddChildComponent} />}

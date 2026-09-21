@@ -200,6 +200,7 @@ export function createTextAppearanceAttributes(): SettingsField {
       createSelectAttribute({ id: "text-align", label: "Alignment", options: ["left", "center", "right", "justify"], defaultValue: "left" }),
       createTextAttribute({ id: "font-size", label: "Font Size", placeholder: "e.g. 1.25rem", defaultValue: "" }),
       createSelectAttribute({ id: "font-weight", label: "Font Weight", options: ["400", "500", "600", "700", "800"], defaultValue: "700" }),
+      createSelectAttribute({ id: "font-style", label: "Font Style", options: ["normal", "italic"], defaultValue: "normal" }),
       createColorAttribute({ id: "text-color", label: "Text Color", defaultValue: "#111827" }),
       createTextAttribute({ id: "line-height", label: "Line Height", placeholder: "e.g. 1.5", defaultValue: "" }),
     ],
@@ -211,6 +212,7 @@ export function readTextAppearance(attributes: Readonly<Record<string, string>>)
     textAlign: attributes["text-align"] as React.CSSProperties["textAlign"] || undefined,
     fontSize: attributes["font-size"] || undefined,
     fontWeight: attributes["font-weight"] ? Number(attributes["font-weight"]) : undefined,
+    fontStyle: attributes["font-style"] as React.CSSProperties["fontStyle"] || undefined,
     color: attributes["text-color"] || undefined,
     lineHeight: attributes["line-height"] || undefined,
   }
@@ -264,4 +266,39 @@ export function readBoxSpacing(
 export function readCustomClasses(attributes: Readonly<Record<string, unknown>>): string {
   const value = attributes["custom-classes"]
   return typeof value === "string" ? value : ""
+}
+
+export function createLayoutAttributes(): SettingsField[] {
+  return [
+    createSelectAttribute({
+      id: "align-items",
+      label: "Align Items",
+      options: ["inherit", "start", "center", "end", "stretch", "baseline"],
+      defaultValue: "inherit",
+    }),
+    createSelectAttribute({
+      id: "justify-content",
+      label: "Justify Content",
+      options: ["inherit", "start", "center", "end", "between", "around"],
+      defaultValue: "inherit",
+    }),
+    createTextAttribute({
+      id: "gap",
+      label: "Gap",
+      placeholder: "e.g. 1rem",
+      defaultValue: "",
+    }),
+  ]
+}
+
+export function readLayoutStyles(attributes: Readonly<Record<string, unknown>>): React.CSSProperties {
+  const alignItems = isString(attributes["align-items"]) && attributes["align-items"] !== "inherit"
+    ? attributes["align-items"].replace("start", "flex-start").replace("end", "flex-end")
+    : undefined
+  const justifyContent = isString(attributes["justify-content"]) && attributes["justify-content"] !== "inherit"
+    ? attributes["justify-content"].replace("start", "flex-start").replace("end", "flex-end").replace("between", "space-between").replace("around", "space-around")
+    : undefined
+  const gap = isString(attributes.gap) && attributes.gap !== "" ? attributes.gap : undefined
+
+  return { alignItems, justifyContent, gap }
 }

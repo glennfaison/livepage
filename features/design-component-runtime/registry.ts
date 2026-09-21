@@ -5,6 +5,7 @@ import { componentMetadata as Header2 } from "@/features/design-components/defin
 import { componentMetadata as Header3 } from "@/features/design-components/definitions/header3"
 import { componentMetadata as Paragraph } from "@/features/design-components/definitions/paragraph"
 import { componentMetadata as InlineText } from "@/features/design-components/definitions/inline-text"
+import { componentMetadata as Link } from "@/features/design-components/definitions/link"
 import { componentMetadata as Button } from "@/features/design-components/definitions/button"
 import { componentMetadata as Image } from "@/features/design-components/definitions/image"
 import { componentMetadata as Row } from "@/features/design-components/definitions/row"
@@ -24,6 +25,7 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   [Header3.tag]: Header3,
   [Paragraph.tag]: Paragraph,
   [InlineText.tag]: InlineText,
+  [Link.tag]: Link,
   [Button.tag]: Button,
   [Image.tag]: Image,
   [Row.tag]: Row,

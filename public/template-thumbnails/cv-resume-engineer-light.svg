@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#f8fafc"/>
+  <path d="M120 120h560M120 165h420M120 210h520" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="120" y="285" fill="#0f172a" font-family="sans-serif" font-size="42" font-weight="700">Jordan Lee</text>
+  <text x="120" y="325" fill="#2563eb" font-family="monospace" font-size="14">SENIOR BACKEND ENGINEER</text>
+  <path d="M120 380h560M120 425h560M120 470h380" stroke="#e2e8f0" stroke-width="3"/>
+</svg>

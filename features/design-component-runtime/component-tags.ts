@@ -4,6 +4,7 @@ export const componentTagList = [
 	"header3",
 	"paragraph",
 	"inline-text",
+	"link",
 	"button",
 	"image",
 	"row",

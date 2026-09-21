@@ -39,7 +39,7 @@ To add another template:
 3. Validate the definition through `pageTemplateDefinitionSchema` and register it in `features/templates/registry.ts`.
 4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids/fields.
 
-The bundled CV / resume template includes LinkedIn-shaped mapping notes in its `dataMapping` block. There is no dedicated link component yet, so contact URLs are represented with existing text components for now.
+The bundled CV / resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks. The engineer variants demonstrate dark and light minimalist layouts, shared text appearance settings, semantic links, and same-page navigation through component `id` attributes.
 
 ## Learn More
 

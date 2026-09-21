@@ -1,9 +1,11 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { PageTemplateDefinition } from "@/features/templates/schema"
 import { LayoutTemplate } from "lucide-react"
+import { useMemo, useState } from "react"
 
 export function TemplateCatalogPopover({
   templates,
@@ -12,29 +14,58 @@ export function TemplateCatalogPopover({
   templates: ReadonlyArray<PageTemplateDefinition>
   onApplyTemplate: (templateId: string) => void
 }>) {
+  const [open, setOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+  const filteredTemplates = useMemo(() => {
+    if (!normalizedSearchTerm) return templates
+    return templates.filter((template) => [
+      template.metadata.name,
+      template.metadata.description,
+      template.metadata.category,
+      ...template.metadata.tags,
+    ].some((value) => value.toLowerCase().includes(normalizedSearchTerm)))
+  }, [normalizedSearchTerm, templates])
+
+  const handleApplyTemplate = (templateId: string) => {
+    onApplyTemplate(templateId)
+    setOpen(false)
+  }
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <LayoutTemplate className="h-4 w-4" />
           Templates
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[28rem] p-4">
-        <div className="space-y-4">
+      <PopoverContent align="end" className="w-[min(52rem,calc(100vw-2rem))] max-h-[min(80vh,48rem)] overflow-hidden p-4">
+        <div className="flex max-h-[calc(min(80vh,48rem)-2rem)] min-h-0 flex-col gap-4">
           <div className="space-y-1.5">
             <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Template catalog</h2>
             <p className="text-sm text-muted-foreground">Choose a starting point tailored to the kind of page you want to build.</p>
           </div>
-          <div className="space-y-3">
-            {templates.map((template) => {
+          <Input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search templates by name, tag, or category"
+            aria-label="Search templates"
+          />
+          <div
+            className="min-h-0 overflow-y-auto overflow-x-hidden pr-1"
+            role="region"
+            aria-label="Available templates"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredTemplates.map((template) => {
               const primaryTag = template.metadata.tags[0] ?? template.metadata.category
 
               return (
                 <button
                   key={template.id}
                   type="button"
-                  onClick={() => onApplyTemplate(template.id)}
+                  onClick={() => handleApplyTemplate(template.id)}
                   aria-label={`Apply ${template.metadata.name} template`}
                   className="group w-full rounded-2xl border border-border bg-background p-3 text-left transition-all duration-150 hover:border-foreground/20 hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
@@ -69,6 +100,12 @@ export function TemplateCatalogPopover({
                 </button>
               )
             })}
+            </div>
+            {filteredTemplates.length === 0 && (
+              <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+                No templates match your search.
+              </p>
+            )}
           </div>
         </div>
       </PopoverContent>

@@ -10,7 +10,7 @@ import { getRegisteredComponentInfo } from "@/features/design-component-runtime/
 import { withDataSource } from "@/features/data-sources/with-data-source"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-component-runtime/shared/component-helpers"
 
 const tag = "row" as const
 
@@ -21,6 +21,13 @@ const keywords = ["row", "container", "layout", "horizontal"]
 const attributes = [
 	createIdAttribute(),
 	createCustomClassesAttribute(),
+	...createLayoutAttributes(),
+	createSelectAttribute({
+		id: "child-sizing",
+		label: "Child Sizing",
+		options: ["equal", "natural"],
+		defaultValue: "equal",
+	}),
 	...createSpacingAttributes("padding"),
 	...createSpacingAttributes("margin"),
 ] as const satisfies ReadonlyArray<SettingsField>
@@ -36,7 +43,10 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
-	const slotClassName = "flex-1 basis-0 min-w-0 self-stretch"
+	const layoutStyles = readLayoutStyles(component.attributes)
+	const slotClassName = component.attributes["child-sizing"] === "natural"
+		? "self-stretch"
+		: "flex-1 basis-0 min-w-0 self-stretch"
 
 	const childComponents = props.component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -58,6 +68,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
+				...layoutStyles,
 			}}
 		>
 			{childComponents}
@@ -89,6 +100,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 	const customClasses = readCustomClasses(component.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
+	const layoutStyles = readLayoutStyles(component.attributes)
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
 	const {
@@ -106,7 +118,9 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: attributes.id, index: childIndex })
 	}, [addComponent, attributes.id])
-	const slotClassName = "flex-1 basis-0 min-w-0 self-stretch"
+	const slotClassName = component.attributes["child-sizing"] === "natural"
+		? "self-stretch"
+		: "flex-1 basis-0 min-w-0 self-stretch"
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -152,6 +166,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
+				...layoutStyles,
 			}}
 		>
 			{hasChildren ? WrappedChildren : <EmptyColumnContent onAddChildComponent={onAddChildComponent} />}
