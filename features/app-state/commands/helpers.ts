@@ -232,7 +232,3 @@ export function replaceComponent({
     }
   })
 }
-
-export function createNewComponent(tag: string, id: string): AppNode {
-  return createDesignComponentInstance(tag, id) as AppNode
-}

@@ -203,11 +203,6 @@ export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "preview">
 }>
 
-export type ChildProps = Readonly<
-  Pick<Props, "childClassName"> &
-  Pick<EditModeProps, "onMouseMove" | "onMouseLeave">
->
-
 export interface Metadata {
   readonly tag: string
   readonly label: string

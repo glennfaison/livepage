@@ -1,9 +1,10 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import "@/features/design-component-runtime/registry"
 import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
 import { Button } from "@/components/ui/button"
-import { componentTagList } from "@/features/design-components"
+import { componentTagList } from "@/features/design-component-runtime/component-tags"
 
 describe("ComponentSelectorPopover", () => {
   const mockOnSelect = jest.fn()

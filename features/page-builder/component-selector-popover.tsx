@@ -3,7 +3,7 @@ import React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { getComponentInfo } from "@/features/design-components"
+import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNodeTag } from "@/features/types"
 
 // Component selector popover
@@ -20,7 +20,7 @@ export const ComponentSelectorPopover = ({
   const [open, setOpen] = React.useState(false)
 
 	const filteredComponents = React.useMemo(() => {
-		const components = componentTagList.map((componentTag) => getComponentInfo(componentTag))
+		const components = componentTagList.map((componentTag) => getRegisteredComponentInfo(componentTag))
 		if (!searchTerm.trim()) return components
 
 		const search = searchTerm.toLowerCase()

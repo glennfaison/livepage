@@ -3,7 +3,7 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { getComponentInfo } from "@/features/design-components"
+import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNode } from "@/features/app-state"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
@@ -184,7 +184,7 @@ function useComponentSettingsEditor({
   component: AppNode
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }>) {
-  const componentInfo = React.useMemo(() => getComponentInfo(component.tag), [component.tag])
+  const componentInfo = React.useMemo(() => getRegisteredComponentInfo(component.tag), [component.tag])
   const settingsFields = React.useMemo(() => componentInfo.attributes, [componentInfo.attributes])
   const [formData, setFormData] = React.useState<SettingsFormData>({})
   const { updateComponent } = useComponentOperationsContext()
