@@ -3,8 +3,7 @@
 import type React from "react"
 
 import { useMutation } from "@tanstack/react-query"
-import { useReducer, useEffect, useCallback } from "react"
-import { appReducer, initialState } from "@/features/app-state/commands/reducer"
+import { useCallback } from "react"
 import type { AppState, AppAction } from "@/features/app-state"
 import { toast } from "@/components/ui/use-toast"
 import type { AppNode } from "@/features/app-state"
@@ -16,26 +15,6 @@ import {
   serializeAppStateAsJson,
   serializeAppStateAsShortcode,
 } from "@/features/serializers"
-
-export function useAppState() {
-  const [state, dispatch] = useReducer(appReducer, initialState)
-
-  // Initialize history when pages are first loaded
-  useEffect(() => {
-    if (state.componentTree.length > 0 && state.history.length === 0) {
-      dispatch({
-        type: "ADD_TO_HISTORY",
-        payload: {
-          action: "Page created",
-          pageState: state.componentTree,
-        },
-      })
-      dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: 0 })
-    }
-  }, [state.componentTree, state.history])
-
-  return { state, dispatch }
-}
 
 export function validateImportedFile(file: File, uploadType: "json" | "shortcode") {
   const expectedExtension = uploadType === "json" ? ".json" : ".txt"

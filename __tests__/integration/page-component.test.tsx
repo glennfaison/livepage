@@ -13,7 +13,7 @@ const mockAddComponent = jest.fn()
 const mockSetSelectedComponent = jest.fn()
 const mockUpdateComponent = jest.fn()
 
-jest.mock("@/lib/component-operations-context", () => ({
+jest.mock("@/features/page-builder/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     addComponent: mockAddComponent,
     setSelectedComponent: mockSetSelectedComponent,

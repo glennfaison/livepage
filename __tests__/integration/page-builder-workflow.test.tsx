@@ -3,13 +3,10 @@ import userEvent from "@testing-library/user-event"
 import BuilderPage from "@/app/try/page"
 // Do not import jest; it is available globally in the Jest environment
 
-// Mock the hooks
-jest.mock("@/lib/store/hooks", () => {
-  const originalModule = jest.requireActual("@/lib/store/hooks")
-
-  return {
-    ...originalModule,
-    useAppState: jest.fn(() => ({
+// Mock the app-state hook
+jest.mock("@/features/app-state", () => ({
+  ...jest.requireActual("@/features/app-state"),
+  useAppState: jest.fn(() => ({
       state: {
         componentTree: [
           {
@@ -42,32 +39,33 @@ jest.mock("@/lib/store/hooks", () => {
         originalHistoryState: null,
       },
       dispatch: jest.fn(),
-    })),
+  })),
+}))
 
-    usePageOperations: jest.fn(() => ({
-      savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
-      savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
-      loadPageFromJsonMutation: { mutate: jest.fn(), isPending: false },
-      loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
-      savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
-    })),
-    useComponentOperations: jest.fn(() => ({
-      addComponent: jest.fn(),
-      updateComponent: jest.fn(),
-      removeComponent: jest.fn(),
-      duplicateComponent: jest.fn(),
-      replaceComponent: jest.fn(),
-      findComponentById: jest.fn(),
-      setSelectedComponent: jest.fn(),
-    })),
-    useHistoryOperations: jest.fn(() => ({
-      handleSelectHistory: jest.fn(),
-      handleHistoryAccept: jest.fn(),
-      handleHistoryDiscard: jest.fn(),
-      handleDiscard: jest.fn(),
-    })),
-  }
-})
+jest.mock("@/features/page-builder/hooks", () => ({
+  usePageOperations: jest.fn(() => ({
+    savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+    savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
+    loadPageFromJsonMutation: { mutate: jest.fn(), isPending: false },
+    loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
+    savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
+  })),
+  useComponentOperations: jest.fn(() => ({
+    addComponent: jest.fn(),
+    updateComponent: jest.fn(),
+    removeComponent: jest.fn(),
+    duplicateComponent: jest.fn(),
+    replaceComponent: jest.fn(),
+    findComponentById: jest.fn(),
+    setSelectedComponent: jest.fn(),
+  })),
+  useHistoryOperations: jest.fn(() => ({
+    handleSelectHistory: jest.fn(),
+    handleHistoryAccept: jest.fn(),
+    handleHistoryDiscard: jest.fn(),
+    handleDiscard: jest.fn(),
+  })),
+}))
 
 // Mock the page-builder toolbar (page rendering is handled by the real components in tests)
 jest.mock("@/features/page-builder/toolbar", () => ({
@@ -97,7 +95,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("toggles preview mode when Edit Mode button is clicked", async () => {
-    const { useAppState } = jest.requireMock("@/lib/store/hooks")
+    const { useAppState } = jest.requireMock("@/features/app-state")
     const mockDispatch = jest.fn()
       ; (useAppState as jest.Mock).mockReturnValue({
         state: {
@@ -126,7 +124,8 @@ describe("BuilderPage Integration", () => {
   })
 
   it("updates page title when input changes", async () => {
-    const { useAppState, useComponentOperations } = jest.requireMock("@/lib/store/hooks")
+    const { useAppState } = jest.requireMock("@/features/app-state")
+    const { useComponentOperations } = jest.requireMock("@/features/page-builder/hooks")
     const mockUpdateComponent = jest.fn()
       ; (useComponentOperations as jest.Mock).mockReturnValue({
         addComponent: jest.fn(),
@@ -177,7 +176,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("triggers save as JSON when Download as JSON is clicked", async () => {
-    const { usePageOperations } = jest.requireMock("@/lib/store/hooks")
+    const { usePageOperations } = jest.requireMock("@/features/page-builder/hooks")
     const mockSavePageAsJsonMutation = { mutate: jest.fn(), isPending: false }
       ; (usePageOperations as jest.Mock).mockReturnValue({
         savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
@@ -196,7 +195,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("triggers export as HTML when Download as HTML is clicked", async () => {
-    const { usePageOperations } = jest.requireMock("@/lib/store/hooks")
+    const { usePageOperations } = jest.requireMock("@/features/page-builder/hooks")
     const mockSavePageAsHtmlMutation = { mutate: jest.fn(), isPending: false }
       ; (usePageOperations as jest.Mock).mockReturnValue({
         savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
@@ -215,7 +214,8 @@ describe("BuilderPage Integration", () => {
   })
 
   it("adds a row component when Add Row button is clicked", async () => {
-    const { useAppState, useComponentOperations } = jest.requireMock("@/lib/store/hooks")
+    const { useAppState } = jest.requireMock("@/features/app-state")
+    const { useComponentOperations } = jest.requireMock("@/features/page-builder/hooks")
     // Ensure page is in edit mode so the Add Row button is visible
     ; (useAppState as jest.Mock).mockReturnValue({ state: { componentTree: [{ tag: "page", attributes: { id: "page-1", title: "Test Page" }, children: [] }], activePage: "page-1", pageBuilderMode: "edit", selectedComponentId: null, selectedComponentAncestors: [], toolbarMinimized: false, showToolbar: true, history: [], currentHistoryIndex: -1, historyPreviewIndex: null, originalHistoryState: null }, dispatch: jest.fn() })
 
@@ -242,7 +242,7 @@ describe("BuilderPage Integration", () => {
   })
 
   it("applies the bundled CV template from the catalog", async () => {
-    const { useAppState } = jest.requireMock("@/lib/store/hooks")
+    const { useAppState } = jest.requireMock("@/features/app-state")
     const mockDispatch = jest.fn()
     ; (useAppState as jest.Mock).mockReturnValue({
       state: {

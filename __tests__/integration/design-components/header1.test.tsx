@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import "@testing-library/jest-dom"
 
 // Mock the component operations context used by connected components
-jest.mock("@/lib/component-operations-context", () => ({
+jest.mock("@/features/page-builder/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     setSelectedComponent: jest.fn(),
     updateComponent: jest.fn(),

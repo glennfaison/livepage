@@ -8,7 +8,7 @@ import { encodeDataSourceSettings } from "@/features/data-sources"
 
 const mockUpdateComponent = jest.fn()
 
-jest.mock("@/lib/component-operations-context", () => ({
+jest.mock("@/features/page-builder/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     updateComponent: mockUpdateComponent,
     setSelectedComponent: jest.fn(),

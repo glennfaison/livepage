@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
 import type { EditModeProps } from "@/features/types";
-import { useComponentOperationsContext } from "@/lib/component-operations-context";
+import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context";
 import React from "react";
 import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup";
 

@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import type { EditModeProps } from "@/features/types"
-import { useComponentOperationsContext } from "@/lib/component-operations-context"
+import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context"
 import { appSettings } from "@/app/app-settings"
 
 interface WrappedComponentProps extends React.HTMLAttributes<HTMLElement> {

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { appSettings } from "@/app/app-settings"
 import { decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo, dataSourceIdList } from "@/features/data-sources"
 import type { AppNode, DataSourceInfo, DataSourceSettings, PrimitiveSettingsField, SettingsFormData, SettingsValue } from "@/features/types"
-import { useComponentOperationsContext } from "@/lib/component-operations-context"
+import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
 
 function useDataSourceSettingsEditor({

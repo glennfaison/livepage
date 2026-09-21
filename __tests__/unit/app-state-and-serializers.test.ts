@@ -1,6 +1,6 @@
 import { selectCurrentPage } from "@/features/app-state"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/features/serializers"
-import { validateImportedFile } from "@/lib/store/hooks"
+import { validateImportedFile } from "@/features/page-builder/hooks"
 
 describe("app-state selectors and serializers", () => {
   const appState = {
