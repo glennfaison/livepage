@@ -122,7 +122,7 @@ export const cvResumePersonalTemplate = {
           "custom-classes": "mx-auto max-w-[1180px] items-start gap-8 py-8 xl:flex-nowrap",
         }, [
           node("column", "cv-sidebar", {
-            "custom-classes": "basis-[21rem] flex-none rounded-[2rem] bg-[#0f172a] p-7 text-white shadow-[0_18px_44px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/60 gap-5 xl:sticky xl:top-8",
+            "custom-classes": "basis-[21rem] flex-none rounded-[2rem] bg-[#0f172a] px-7 py-7 text-white shadow-[0_18px_44px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/60 gap-5 xl:sticky xl:top-8",
           }, [
             node("image", "cv-profile-photo", {
               alt: "Avery Johnson portrait placeholder",
@@ -135,7 +135,7 @@ export const cvResumePersonalTemplate = {
               borderRadius: "22px",
               loading: "lazy",
               decoding: "async",
-              "custom-classes": "w-full overflow-hidden border border-white/10 bg-slate-800",
+              "custom-classes": "-mx-7 w-[calc(100%+3.5rem)] overflow-hidden border border-white/10 bg-slate-800",
             }),
             text("badge", "cv-hero-status", "Open to staff product and design leadership roles", {
               variant: "warning",
@@ -171,7 +171,7 @@ export const cvResumePersonalTemplate = {
               "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-300",
             }),
             node("column", "cv-skills-list", {
-              "custom-classes": "gap-2",
+              "custom-classes": "flex-row flex-wrap items-start gap-2",
             }, [
               text("badge", "cv-skill-1", "Design systems", { variant: "secondary" }),
               text("badge", "cv-skill-2", "Product strategy", { variant: "secondary" }),
@@ -187,12 +187,12 @@ export const cvResumePersonalTemplate = {
             text("header3", "cv-languages-heading", "Languages", {
               "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-300",
             }),
-            text("paragraph", "cv-languages-copy", "English (native), Spanish (professional working proficiency)", {
-              "custom-classes": "py-0 text-sm leading-6 text-slate-300",
+            text("paragraph", "cv-languages-copy", "English (native)\nSpanish (professional working proficiency)", {
+              "custom-classes": "whitespace-pre-line py-0 text-sm leading-6 text-slate-300",
             }),
           ]),
           node("column", "cv-main", {
-            "custom-classes": "min-w-0 flex-1 gap-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_12px_40px_rgba(15,23,42,0.04)]",
+            "custom-classes": "min-w-0 flex-1 gap-6 rounded-[2rem] border border-slate-200 bg-white px-8 py-8 shadow-[0_12px_40px_rgba(15,23,42,0.04)]",
           }, [
             text("header2", "cv-about-heading", "About", {
               "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500",
@@ -201,7 +201,7 @@ export const cvResumePersonalTemplate = {
               "custom-classes": "py-0 text-[1.02rem] leading-8 text-slate-600",
             }),
             node("row", "cv-stat-row", {
-              "custom-classes": "mt-2 grid gap-3 md:grid-cols-3",
+              "custom-classes": "mt-2 gap-3",
             }, [
               node("column", "cv-stat-col-1", {
                 "custom-classes": "min-w-0",
