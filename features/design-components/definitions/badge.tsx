@@ -25,12 +25,12 @@ const Component = (props: Props) => {
   const variant = props.component.attributes.variant || "default"
   const customClasses = readCustomClasses(props.component.attributes)
   const variantClasses = {
-    default: "bg-foreground text-background",
-    secondary: "bg-secondary text-secondary-foreground",
-    outline: "border border-border text-foreground",
+    default: "bg-slate-900 text-white",
+    secondary: "bg-slate-200 text-slate-700",
+    outline: "border border-slate-300 bg-white text-slate-700",
     success: "bg-emerald-100 text-emerald-800",
     warning: "bg-amber-100 text-amber-900",
-  }[variant] || "bg-foreground text-background"
+  }[variant] || "bg-slate-900 text-white"
   return <span className={cn("inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-medium", variantClasses, customClasses, props.childClassName)}>{content as React.ReactNode}</span>
 }
 

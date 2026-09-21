@@ -19,10 +19,10 @@ const attributes: SettingsField[] = [
 const attributesMap = createAttributeMap(attributes)
 const Icon = <Megaphone className="size-4" />
 const tones = {
-  neutral: "border-border bg-muted text-foreground",
-  info: "border-sky-200 bg-sky-50 text-sky-950",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-950",
-  warning: "border-amber-200 bg-amber-50 text-amber-950",
+  neutral: "border-slate-200 bg-slate-100 text-slate-700",
+  info: "border-sky-200 bg-sky-50 text-sky-900",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  warning: "border-amber-200 bg-amber-100 text-amber-900",
 }
 
 const Component = (props: Props) => {
