@@ -9,6 +9,7 @@ import { selectCurrentPage } from "@/features/app-state"
 import type { PageBuilderMode } from "@/features/app-state"
 import { ComponentOperationsContext } from "@/lib/component-operations-context"
 import { useAppState, useComponentOperations, useHistoryOperations, usePageOperations } from "@/lib/store/hooks"
+import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/features/templates"
 import { ChevronDown, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useRef, useState } from "react"
@@ -61,6 +62,17 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
+  const applyTemplate = (templateId: string) => {
+    const template = getPageTemplateById(templateId)
+    if (!template) {
+      return
+    }
+
+    for (const action of createApplyTemplateActions(template)) {
+      dispatch(action)
+    }
+  }
+
   // Load a page from a file
   const loadPage = (event: React.ChangeEvent<HTMLInputElement>, uploadType: "json" | "shortcode") => {
     const file = event.target.files?.[0]
@@ -101,6 +113,7 @@ export default function BuilderPage() {
               </Link>
             </div>
             <div className="flex items-center gap-4">
+              <TemplateCatalogPopover templates={pageTemplateRegistry} onApplyTemplate={applyTemplate} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">

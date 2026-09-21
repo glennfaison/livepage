@@ -28,6 +28,19 @@ references rather than embedded in the export.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Bundled templates
+
+Bundled page templates live in [`features/templates/`](./features/templates/). Each template definition is versioned (`schema` + `version`), keeps catalog metadata separate from the `content.pages` payload, and stores the editable page as the same `AppNode` tree used everywhere else in the editor.
+
+To add another template:
+
+1. Create a new definition in `features/templates/definitions/` using only supported design-component tags.
+2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
+3. Validate the definition through `pageTemplateDefinitionSchema` and register it in `features/templates/registry.ts`.
+4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids/fields.
+
+The bundled CV / resume template includes LinkedIn-shaped mapping notes in its `dataMapping` block. There is no dedicated link component yet, so contact URLs are represented with existing text components for now.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
