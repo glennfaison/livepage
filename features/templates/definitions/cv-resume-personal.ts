@@ -1,11 +1,17 @@
 import type { PageTemplateDefinition } from "@/features/templates/schema"
 
+type TemplateNode = Readonly<{
+  tag: string
+  attributes: Readonly<Record<string, string>>
+  children: ReadonlyArray<TemplateNode | string>
+}>
+
 function node(
   tag: string,
   id: string,
   attributes: Readonly<Record<string, string>> = {},
-  children: ReadonlyArray<ReturnType<typeof node> | string> = [],
-) {
+  children: ReadonlyArray<TemplateNode | string> = [],
+): TemplateNode {
   return {
     tag,
     attributes: {

@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { PreviewRenderer } from "@/features/design-components"
 import { appReducer, initialState } from "@/features/app-state/commands/reducer"
+import type { AppNode, AppState } from "@/features/app-state"
 import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages } from "@/features/templates"
 
 describe("page template registry", () => {
@@ -37,7 +38,7 @@ describe("page template registry", () => {
     const template = getPageTemplateById("cv-resume-personal-website")
     expect(template).toBeDefined()
 
-    const existingPageState = [
+    const existingPageState: ReadonlyArray<AppNode> = [
       {
         tag: "page",
         attributes: { id: "page-1", title: "Before Template" },
@@ -49,9 +50,9 @@ describe("page template registry", () => {
           },
         ],
       },
-    ] as const
+    ]
 
-    let state = {
+    let state: AppState = {
       ...initialState,
       componentTree: existingPageState,
       activePage: "page-1",
