@@ -3,15 +3,15 @@ import React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
+import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNodeTag } from "@/features/types"
-import { formatComponentLabel, isRecoverableComponentInfoError } from "./shared/component-label"
+import { formatComponentLabel } from "./shared/component-label"
 
 function getComponentInfoSafe(componentTag: AppNodeTag) {
   try {
     return getRegisteredComponentInfo(componentTag)
   } catch (error) {
-    if (!isRecoverableComponentInfoError(error)) {
+    if (!(error instanceof ComponentLookupNotInitializedError)) {
       throw error
     }
     const label = formatComponentLabel(componentTag)

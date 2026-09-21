@@ -3,12 +3,12 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
+import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import type { AppNode } from "@/features/app-state"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/lib/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
-import { formatComponentLabel, isRecoverableComponentInfoError } from "../shared/component-label"
+import { formatComponentLabel } from "../shared/component-label"
 
 type ComponentSettingsInfo = Pick<Metadata, "label" | "attributes" | "defaultChildren" | "defaultAttributes">
 
@@ -22,7 +22,7 @@ function getComponentSettingsInfo(tag: string): ComponentSettingsInfo {
       defaultAttributes: metadata.defaultAttributes,
     }
   } catch (error) {
-    if (!isRecoverableComponentInfoError(error)) {
+    if (!(error instanceof ComponentLookupNotInitializedError)) {
       throw error
     }
     return {
