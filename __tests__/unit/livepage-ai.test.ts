@@ -306,6 +306,23 @@ describe("LivePageAI contracts and service", () => {
       expect(result.actions).toEqual([])
     })
 
+    it("requires confirmation before workflow mutation phases", async () => {
+      fetchMock.mockResolvedValueOnce(response({ answers: { is_page_building: { type: "noul", noul: 0.9 } } }))
+
+      const result = await planLivePageAI({
+        sessionId: "00000000-0000-4000-8000-000000000001",
+        prompt: "Build a portfolio site for a photographer",
+        currentPage: initialPage,
+        transcript: [],
+        historyIndex: 0,
+        workflow: { phase: "next", confirmed: false, completedActionCount: 0 },
+      })
+
+      expect(result.status).toBe("needs_clarification")
+      expect(result.workflow?.phase).toBe("confirmation")
+      expect(result.actions).toEqual([])
+    })
+
     it("decides to add the next missing component and reports evaluation progress", async () => {
       fetchMock.mockResolvedValueOnce(response({ answers: { is_page_building: { type: "noul", noul: 0.9 } } }))
 

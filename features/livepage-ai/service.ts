@@ -404,7 +404,7 @@ async function planWorkflow(input: LivePageAIRequest): Promise<LivePageAIRespons
       },
     })
   }
-  if (workflow.phase === "understanding" && !workflow.confirmed) {
+  if (workflow.phase !== "start" && !workflow.confirmed) {
     return livePageAIResponseSchema.parse({
       status: "needs_clarification",
       message: "Before I change the page, please confirm this shared understanding.",
