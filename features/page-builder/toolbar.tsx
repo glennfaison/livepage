@@ -4,7 +4,7 @@ import { HistoryPopover } from "@/features/page-builder/history-popover"
 import { Button } from "@/components/ui/button"
 import type { PageBuilderMode } from "@/features/app-state"
 import { cn } from "@/lib/utils"
-import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, Sparkles, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/features/types"
@@ -21,6 +21,7 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory: (index: number) => void
   onDiscardHistory: () => void
   historyPreviewIndex: number | null
+  onOpenAI: () => void
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -33,6 +34,7 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory,
   onDiscardHistory,
   historyPreviewIndex,
+  onOpenAI,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -150,6 +152,9 @@ export const Toolbar: React.FC<Readonly<{
             >
               <Settings className="h-4 w-4" />
             </Button>
+            <Button variant="outline" size="sm" onClick={onOpenAI} title="Open LivePageAI">
+              <Sparkles className="h-4 w-4" />
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -197,6 +202,9 @@ export const Toolbar: React.FC<Readonly<{
             title="Maximize"
           >
             <Maximize className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onOpenAI} title="Open LivePageAI">
+            <Sparkles className="h-4 w-4" />
           </Button>
 
           <div

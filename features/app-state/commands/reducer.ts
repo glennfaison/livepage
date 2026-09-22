@@ -56,10 +56,20 @@ function withHistory(
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case "APPLY_AI_ACTION":
+      if (action.payload.expectedHistoryIndex !== state.currentHistoryIndex) return state
+      return appReducer(state, action.payload.action)
     case "INSERT_COMPONENT": {
-      const { newComponentTag, parentId, index } = action.payload
-      const componentId = generateId()
-      const newComponent = createDesignComponentInstance(newComponentTag, componentId)
+      const { newComponentTag, newComponentId, parentId, index, initialChildren, initialAttributes } = action.payload
+      // Reuse a caller-supplied ID (e.g. from the AI adapter) so repeated/simulated calls
+      // with the same action stay deterministic instead of minting a fresh ID each time.
+      const componentId = newComponentId ?? generateId()
+      const instance = createDesignComponentInstance(newComponentTag, componentId)
+      const newComponent = {
+        ...instance,
+        ...(initialChildren ? { children: [...initialChildren] } : {}),
+        ...(initialAttributes ? { attributes: { ...instance.attributes, ...initialAttributes } } : {}),
+      }
       return withHistory(
         {
         ...state,

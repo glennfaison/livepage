@@ -41,6 +41,19 @@ if (typeof window !== "undefined") {
   window.URL.revokeObjectURL = jest.fn()
 }
 
+// jsdom doesn't implement crypto.randomUUID; polyfill it so components (like
+// LivePageAIChat) that generate a session id on mount don't crash in tests.
+if (typeof globalThis.crypto === "undefined") {
+  globalThis.crypto = /** @type {Crypto} */ ({})
+}
+if (typeof globalThis.crypto.randomUUID !== "function") {
+  let counter = 0
+  globalThis.crypto.randomUUID = () => {
+    counter += 1
+    return `00000000-0000-4000-8000-${String(counter).padStart(12, "0")}`
+  }
+}
+
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),

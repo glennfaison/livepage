@@ -39,6 +39,37 @@ To add another template:
 3. Validate the definition through `pageTemplateDefinitionSchema` and register it in `features/templates/registry.ts`.
 4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids/fields.
 
+## LivePageAI
+
+The builder's LivePageAI integration calls TypeSafe Jev from the server through
+`/api/livepage-ai`. Configure the provider credential in the server environment
+only:
+
+```bash
+TYPESAFE_API_KEY=your-typesafe-key
+```
+
+Do not use a `NEXT_PUBLIC_` variable or commit the credential. LivePageAI keeps
+chat memory in the current browser session, uses an opaque session identifier
+only for request correlation, and accepts only bounded page-building actions.
+Responses also include a bounded, validated `progress` list describing scope
+evaluation and proposed mutations. A mutation names the exact design-component
+`componentTag`, its `parentId` or `componentId` (or `page root` location),
+`content`/`value`, and a terminal `signal` (`completed` or
+`needs_clarification`). This makes each response independently actionable and
+safe to retry: only the closed action set crosses the app-state API boundary,
+and stale history indices are rejected by the reducer. Provider credentials
+are never included in transcripts or progress events.
+
+For broad build requests, the chat uses a resumable workflow: it evaluates
+scope, presents a shared understanding for confirmation, announces one next
+component and its target at a time, applies it through the reducer, and sends a
+fresh tree/history snapshot for verification before continuing. The client
+also records a bounded DOM observation (existence, rendering, and geometry);
+failed verification can produce a repair decision instead of silently moving
+on. The workflow is ephemeral to the current chat and stops after a bounded
+number of component decisions.
+
 The bundled CV / resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks. The engineer variants demonstrate dark and light minimalist layouts, shared text appearance settings, semantic links, and same-page navigation through component `id` attributes.
 
 ## Learn More

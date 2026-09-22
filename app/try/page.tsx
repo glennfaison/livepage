@@ -15,6 +15,7 @@ import { ChevronDown, Download, Layers, MonitorPlay, Pencil, Upload } from "luci
 import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
+import { LivePageAIChat } from "@/features/livepage-ai/chat"
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
@@ -38,6 +39,7 @@ export default function BuilderPage() {
   const shortcodeFileInputRef = useRef<HTMLInputElement>(null)
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false)
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
 
   // Get the current active page
   const currentPage = selectCurrentPage(state) ?? state.componentTree[0]
@@ -241,7 +243,9 @@ export default function BuilderPage() {
           onAcceptHistory={handleHistoryAccept}
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
+          onOpenAI={() => setAiOpen(true)}
         />
+        <LivePageAIChat state={state} dispatch={dispatch} open={aiOpen && pageBuilderMode === "edit"} onOpenChange={setAiOpen} />
       </div>
     </ComponentOperationsContext.Provider>
   )

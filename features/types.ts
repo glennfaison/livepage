@@ -39,7 +39,7 @@ export type AppAction =
   | Readonly<{ type: "SET_ACTIVE_PAGE"; payload: string }>
   | Readonly<{
       type: "INSERT_COMPONENT"
-      payload: Readonly<{ newComponentTag: AppNodeTag; parentId?: string; index?: number }>
+      payload: Readonly<{ newComponentTag: AppNodeTag; newComponentId?: string; parentId?: string; index?: number; initialChildren?: ReadonlyArray<AppNode["children"][number]>; initialAttributes?: Readonly<Record<string, string>> }>
     }>
   | Readonly<{ type: "UPDATE_COMPONENT"; payload: Readonly<{ componentId: string; updates: Partial<AppNode> }> }>
   | Readonly<{ type: "REMOVE_COMPONENT"; payload: Readonly<{ componentId: string }> }>
@@ -56,6 +56,10 @@ export type AppAction =
   | Readonly<{ type: "SET_ORIGINAL_HISTORY_STATE"; payload: ReadonlyArray<AppNode> | null }>
   | Readonly<{ type: "RESTORE_FROM_HISTORY"; payload: Readonly<{ historyIndex: number }> }>
   | Readonly<{ type: "DISCARD_CHANGES" }>
+  | Readonly<{
+      type: "APPLY_AI_ACTION"
+      payload: Readonly<{ action: AppAction; expectedHistoryIndex: number }>
+    }>
 
 export type SettingsValue = string | number | boolean | ReadonlyArray<string>
 export type SettingsFormData = Readonly<Record<string, SettingsValue>>

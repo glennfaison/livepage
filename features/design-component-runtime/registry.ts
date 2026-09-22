@@ -45,7 +45,13 @@ function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unkno
       if (attribute.type === "group") {
         collectDefaults(attribute.fields)
       } else if (attribute.type !== "divider" && attribute.id !== "content") {
-        defaults[attribute.id] = attribute.defaultValue
+        // AppNode attributes are always strings, but boolean/number settings fields (e.g.
+        // button's "disabled") carry a typed defaultValue. Stringify it here so freshly
+        // created components satisfy that contract instead of leaking a raw boolean/number
+        // into `attributes`, which previously failed the LivePageAI request schema the first
+        // time a "button" component's defaults were ever sent to the server.
+        const value = attribute.defaultValue
+        defaults[attribute.id] = typeof value === "boolean" || typeof value === "number" ? String(value) : value
       }
     }
   }
@@ -68,6 +74,28 @@ export const getComponentInfo = function (tag: string): Metadata {
     ),
   }
 
+}
+
+function fieldsForMetadata(metadata: Metadata): ReadonlyArray<Metadata["attributes"][number]> {
+  return metadata.attributes.flatMap((field) =>
+    field.type === "group" ? [field, ...fieldsForMetadata({ ...metadata, attributes: field.fields })] : [field],
+  )
+}
+
+export const componentFieldIdList = Array.from(
+  new Set(
+    Object.values(componentMap).flatMap((metadata) =>
+      fieldsForMetadata(metadata)
+        .filter((field): field is Exclude<typeof field, { type: "divider" }> => field.type !== "divider")
+        .map((field) => field.id),
+    ),
+  ),
+) as [string, ...string[]]
+
+export function getComponentField(tag: string, fieldId: string): Metadata["attributes"][number] | undefined {
+  const metadata = componentMap[tag]
+  if (!metadata) return undefined
+  return fieldsForMetadata(metadata).find((field) => field.type !== "divider" && field.id === fieldId)
 }
 
 export function createDesignComponentInstance(
