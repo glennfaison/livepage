@@ -176,7 +176,7 @@ export function LivePageAIChat({ state, dispatch, open, onOpenChange }: Readonly
         setCurrentStep(response.workflow?.currentStep ?? "")
       }
       setApplyingMutation(null)
-      setWorkflow(nextWorkflow)
+      setWorkflow(response.workflow?.phase === "complete" ? { phase: "start", confirmed: false, completedActionCount: 0 } : nextWorkflow)
       setCompletion(response.workflow?.phase === "complete" ? "The page is complete. Job done." : response.message)
       if (response.workflow?.phase === "complete") {
         workflowPromptRef.current = ""
