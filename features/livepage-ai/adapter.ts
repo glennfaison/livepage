@@ -36,6 +36,7 @@ export function createValidatedAiAction(
   let reducerAction: AppAction
   switch (action.type) {
     case "add_component":
+      if (action.parentId && !hasComponent(state.componentTree, action.parentId)) return null
       reducerAction = {
         type: "INSERT_COMPONENT",
         payload: {
