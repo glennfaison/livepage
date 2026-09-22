@@ -202,11 +202,15 @@ export function LivePageAIChat({ state, dispatch, open, onOpenChange }: Readonly
     <section
       className={cn(
         "fixed bottom-4 right-4 z-[60] flex w-[min(100vw-2rem,24rem)] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl",
-        minimized ? "h-12" : "min-h-[28rem] max-h-[calc(100vh-2rem)]",
+        // Minimized mode only ever renders the header, so let it size to the
+        // header's natural (padding + icon-button) height instead of a fixed
+        // h-12 that clipped the h-10 icon buttons and misaligned them against
+        // the title text.
+        !minimized && "min-h-[28rem] max-h-[calc(100vh-2rem)]",
       )}
       aria-label="LivePageAI chat"
     >
-      <header className="flex items-center justify-between border-b px-4 py-3">
+      <header className={cn("flex items-center justify-between px-4 py-3", !minimized && "border-b")}>
         <div className="flex items-center gap-2 font-semibold">
           <Sparkles className="size-4 text-primary" />
           LivePageAI
