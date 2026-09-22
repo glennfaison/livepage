@@ -100,7 +100,7 @@ export function LivePageAIChat({ state, dispatch, open, onOpenChange }: Readonly
       }
       let nextWorkflow: WorkflowRequest = { ...workflow, ...(confirm ? { phase: "understanding" as const, confirmed: true } : {}) }
       let response = await sendLivePageAiMessage({
-          sessionId, message: workflowPromptRef.current || text, componentTree: stateRef.current.componentTree, historyIndex: requestHistoryIndex,
+          sessionId, message: workflowPromptRef.current || text, componentTree: stateRef.current.componentTree, activePageId: stateRef.current.activePage, historyIndex: requestHistoryIndex,
           transcript, workflow: nextWorkflow,
         })
       if (isConversationalReply(response)) {
@@ -134,13 +134,15 @@ export function LivePageAIChat({ state, dispatch, open, onOpenChange }: Readonly
         if (action) {
           const validated = createValidatedAiAction(action, projectedState, projectedState.currentHistoryIndex)
           if (validated) {
+            if (stateRef.current.currentHistoryIndex !== projectedState.currentHistoryIndex) {
+              throw new Error("The page changed while LivePageAI was working. Please retry the request.")
+            }
             const nextState = appReducer(projectedState, validated)
             if (nextState !== projectedState) {
               setApplyingMutation(0)
-              await new Promise((resolve) => setTimeout(resolve, 0))
               dispatch(validated)
+              await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
               projectedState = nextState
-              stateRef.current = nextState
               const componentId = nextState.selectedComponentId
               const element = typeof document !== "undefined" && componentId ? document.getElementById(componentId) : null
               nextWorkflow = {
@@ -148,6 +150,12 @@ export function LivePageAIChat({ state, dispatch, open, onOpenChange }: Readonly
                 confirmed: true,
                 completedActionCount: nextWorkflow.completedActionCount + 1,
                 lastAction: action,
+                ...(action.type === "add_component" ? {
+                  createdComponentIds: [
+                    ...(nextWorkflow.createdComponentIds ?? []),
+                    componentId,
+                  ].slice(-20),
+                } : {}),
                 observation: {
                   componentId,
                   exists: Boolean(componentId && findNode(nextState.componentTree, componentId)),
@@ -167,7 +175,7 @@ export function LivePageAIChat({ state, dispatch, open, onOpenChange }: Readonly
           workflowPromptRef.current = `${workflowPromptRef.current} ${guidance}`.trim()
         }
         response = await sendLivePageAiMessage({
-          sessionId, message: workflowPromptRef.current || text, componentTree: projectedState.componentTree, historyIndex: projectedState.currentHistoryIndex,
+          sessionId, message: workflowPromptRef.current || text, componentTree: projectedState.componentTree, activePageId: stateRef.current.activePage, historyIndex: projectedState.currentHistoryIndex,
           transcript, workflow: nextWorkflow,
         })
         if (isConversationalReply(response)) {

@@ -200,10 +200,20 @@ function findPageRootNode(currentPage: unknown, pageRootId?: string): EvaluatedN
   return candidates.find((node) => node.attributes.id === pageRootId) ?? candidates[0]
 }
 
-function topLevelComponents(currentPage: unknown, pageRootId?: string): EvaluatedNode[] {
+function descendants(currentPage: unknown, pageRootId?: string): EvaluatedNode[] {
   const root = findPageRootNode(currentPage, pageRootId)
   if (!root) return []
-  return root.children.filter((child): child is EvaluatedNode => typeof child !== "string")
+  const result: EvaluatedNode[] = []
+  const visit = (node: EvaluatedNode) => {
+    node.children.forEach((child) => {
+      if (typeof child !== "string") {
+        result.push(child)
+        visit(child)
+      }
+    })
+  }
+  visit(root)
+  return result
 }
 
 function textContent(component: EvaluatedNode): string {
@@ -218,14 +228,18 @@ function textContent(component: EvaluatedNode): string {
 function evaluatePage(prompt: string, currentPage: unknown, pageRootId?: string) {
   const rawActions = fallbackActions(prompt)
   const plan = buildPlan(prompt, pageRootId)
-  const presentTags = topLevelComponents(currentPage, pageRootId).map((component) => component.tag)
-  const consumedCounts = new Map<string, number>()
+  const presentComponents = descendants(currentPage, pageRootId)
+  const consumed = new Set<number>()
   const missingIndexes: number[] = []
   plan.forEach((step, index) => {
-    const tag = step.componentTag
-    const used = consumedCounts.get(tag) ?? 0
-    const available = presentTags.filter((candidate) => candidate === tag).length
-    if (used < available) consumedCounts.set(tag, used + 1)
+    const rawAction = rawActions[index]
+    const expectedContent = rawAction.type === "add_component" ? rawAction.content ?? rawAction.text : undefined
+    const match = presentComponents.findIndex((component, componentIndex) =>
+      !consumed.has(componentIndex) &&
+      component.tag === step.componentTag &&
+      (!expectedContent || textContent(component) === expectedContent),
+    )
+    if (match >= 0) consumed.add(match)
     else missingIndexes.push(index)
   })
   return { plan, rawActions, missingIndexes, meetsRequirements: missingIndexes.length === 0 }
@@ -234,19 +248,20 @@ function evaluatePage(prompt: string, currentPage: unknown, pageRootId?: string)
 /** Finds a component the plan expects that was added but never given content. */
 function findEmptyPlannedComponent(currentPage: unknown, pageRootId: string | undefined, plan: ReadonlyArray<LivePageAIPlanStep>): EvaluatedNode | undefined {
   const plannedTags = new Set<string>(plan.map((step) => step.componentTag))
-  return topLevelComponents(currentPage, pageRootId).find(
+  return descendants(currentPage, pageRootId).find(
     (component) => plannedTags.has(component.tag) && textContent(component) === "",
   )
 }
 
 /** Finds an exact duplicate (same tag and text) so it can be safely removed. */
-function findDuplicateComponent(currentPage: unknown, pageRootId?: string): EvaluatedNode | undefined {
+function findDuplicateComponent(currentPage: unknown, createdComponentIds: ReadonlyArray<string>, pageRootId?: string): EvaluatedNode | undefined {
+  const created = new Set(createdComponentIds)
   const seen = new Set<string>()
-  for (const component of topLevelComponents(currentPage, pageRootId)) {
+  for (const component of descendants(currentPage, pageRootId)) {
     const text = textContent(component)
     if (!text) continue
     const key = `${component.tag}::${text}`
-    if (seen.has(key)) return component
+    if (seen.has(key) && created.has(component.attributes.id)) return component
     seen.add(key)
   }
   return undefined
@@ -296,7 +311,7 @@ function decideNextStep(prompt: string, currentPage: unknown, workflow: Workflow
     }
   }
 
-  const duplicate = findDuplicateComponent(currentPage, pageRoot)
+  const duplicate = findDuplicateComponent(currentPage, workflow.createdComponentIds ?? [], pageRoot)
   if (duplicate) {
     return {
       kind: "act",
@@ -306,18 +321,6 @@ function decideNextStep(prompt: string, currentPage: unknown, workflow: Workflow
   }
 
   const evaluation = evaluatePage(prompt, currentPage, pageRoot)
-  if (evaluation.missingIndexes.length > 0) {
-    const index = evaluation.missingIndexes[0]
-    const rawAction = evaluation.rawActions[index]
-    const action: LivePageAIAction = rawAction.type === "add_component" && pageRoot ? { ...rawAction, parentId: pageRoot } : rawAction
-    return {
-      kind: "act",
-      action,
-      currentStep: action.type === "add_component" ? `Deciding to add a ${action.tag} for ${evaluation.plan[index].description.toLowerCase()}` : "Deciding on the next safe page change.",
-      evaluation,
-    }
-  }
-
   const emptyComponent = findEmptyPlannedComponent(currentPage, pageRoot, evaluation.plan)
   if (emptyComponent) {
     const matchingRaw = evaluation.rawActions.find((action) => action.type === "add_component" && action.tag === emptyComponent.tag)
@@ -336,6 +339,18 @@ function decideNextStep(prompt: string, currentPage: unknown, workflow: Workflow
     }
   }
 
+  if (evaluation.missingIndexes.length > 0) {
+    const index = evaluation.missingIndexes[0]
+    const rawAction = evaluation.rawActions[index]
+    const action: LivePageAIAction = rawAction.type === "add_component" && pageRoot ? { ...rawAction, parentId: pageRoot } : rawAction
+    return {
+      kind: "act",
+      action,
+      currentStep: action.type === "add_component" ? `Deciding to add a ${action.tag} for ${evaluation.plan[index].description.toLowerCase()}` : "Deciding on the next safe page change.",
+      evaluation,
+    }
+  }
+
   return { kind: "complete", currentStep: "Confirming the page meets your request.", evaluation }
 }
 
@@ -343,7 +358,7 @@ async function planWorkflow(input: LivePageAIRequest): Promise<LivePageAIRespons
   const request = livePageAIRequestSchema.parse(input)
   const key = apiKey()
   const workflow = request.workflow ?? { phase: "start", confirmed: false, completedActionCount: 0 }
-  const pageRoot = nodes(request.currentPage ?? []).find((node) => node.tag === "page")?.id
+  const pageRoot = request.activePageId ?? nodes(request.currentPage ?? []).find((node) => node.tag === "page")?.id
 
   // Scope is only ambiguous before a plan exists: once the user has confirmed a plan and
   // LivePageAI is executing it step by step, re-asking "is this a page-building request?"
@@ -404,7 +419,7 @@ async function planWorkflow(input: LivePageAIRequest): Promise<LivePageAIRespons
       },
     })
   }
-  if (workflow.phase !== "start" && !workflow.confirmed) {
+  if (!workflow.confirmed) {
     return livePageAIResponseSchema.parse({
       status: "needs_clarification",
       message: "Before I change the page, please confirm this shared understanding.",

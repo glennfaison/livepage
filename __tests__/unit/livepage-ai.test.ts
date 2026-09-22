@@ -390,7 +390,7 @@ describe("LivePageAI contracts and service", () => {
         currentPage: pageWithDuplicate,
         transcript: [],
         historyIndex: 0,
-        workflow: { phase: "next", confirmed: true, completedActionCount: 1 },
+        workflow: { phase: "next", confirmed: true, completedActionCount: 1, createdComponentIds: ["header-1-dup"] },
       })
 
       expect(result.actions).toEqual([
@@ -406,11 +406,11 @@ describe("LivePageAI contracts and service", () => {
         attributes: { id: "page-1", title: "Welcome" },
         children: [
           { tag: "header1", attributes: { id: "id-1" }, children: ["Welcome"] },
-          { tag: "paragraph", attributes: { id: "id-2" }, children: ["Introduction"] },
+          { tag: "paragraph", attributes: { id: "id-2" }, children: ["I'm a designer and developer who loves building thoughtful, functional experiences. Take a look at my work below, and feel free to reach out if you'd like to collaborate."] },
           { tag: "header2", attributes: { id: "id-3" }, children: ["Featured Work"] },
-          { tag: "paragraph", attributes: { id: "id-4" }, children: ["Featured work and services"] },
+          { tag: "paragraph", attributes: { id: "id-4" }, children: ["A selection of recent projects spanning product design, front-end development, and brand identity — each crafted with an eye for detail and a focus on real user needs."] },
           { tag: "header2", attributes: { id: "id-5" }, children: ["About"] },
-          { tag: "paragraph", attributes: { id: "id-6" }, children: ["About this business or creator"] },
+          { tag: "paragraph", attributes: { id: "id-6" }, children: ["I bring a blend of creative and technical skills to every project, with a passion for solving problems and building products people genuinely enjoy using."] },
           { tag: "button", attributes: { id: "id-7" }, children: ["Get in touch"] },
         ],
       }]

@@ -3,11 +3,20 @@ import { componentTagList } from "@/features/design-component-runtime/component-
 
 const componentTags = componentTagList
 
+const MAX_PAGE_COUNT = 10
+const MAX_CHILDREN_PER_NODE = 50
+const MAX_TREE_DEPTH = 12
+const MAX_TREE_ATTRIBUTES = 40
+const MAX_TREE_PAYLOAD_BYTES = 100_000
+
 const appNodeSchema: z.ZodType = z.lazy(() =>
   z.object({
     tag: z.union([z.literal("page"), z.enum(componentTags)]),
-    attributes: z.record(z.string(), z.string()),
-    children: z.array(z.union([z.string(), appNodeSchema])),
+    attributes: z.record(z.string().max(80), z.string().max(1_000)).refine(
+      (attributes) => Object.keys(attributes).length <= MAX_TREE_ATTRIBUTES,
+      "Too many node attributes",
+    ),
+    children: z.array(z.union([z.string().max(4_000), appNodeSchema])).max(MAX_CHILDREN_PER_NODE),
   }),
 )
 
@@ -29,12 +38,14 @@ export const livePageAIRequestSchema = z
     sessionId: z.string().uuid(),
     prompt: z.string().trim().min(1).max(4_000),
     currentPage: z.array(appNodeSchema).optional(),
+    activePageId: componentIdSchema.optional(),
     transcript: z.array(livePageAIMessageSchema).max(LIVE_PAGE_AI_MAX_TRANSCRIPT_MESSAGES).default([]),
     historyIndex: z.number().int(),
     workflow: z.object({
       phase: z.enum(["start", "understanding", "next", "verify", "complete"]),
       confirmed: z.boolean().default(false),
       completedActionCount: z.number().int().min(0).max(20).default(0),
+      createdComponentIds: z.array(componentIdSchema).max(20).default([]),
       lastAction: z.unknown().optional(),
       guidance: z.string().trim().min(1).max(2_000).optional(),
       observation: z.object({
@@ -48,6 +59,32 @@ export const livePageAIRequestSchema = z
     }).optional(),
   })
   .strict()
+  .superRefine((request, context) => {
+    if (request.currentPage && request.currentPage.length > MAX_PAGE_COUNT) {
+      context.addIssue({ code: "custom", path: ["currentPage"], message: "Too many pages" })
+    }
+    if (request.currentPage) {
+      let nodeCount = 0
+      const visit = (node: unknown, depth: number) => {
+        nodeCount += 1
+        if (depth > MAX_TREE_DEPTH) {
+          context.addIssue({ code: "custom", path: ["currentPage"], message: "Page tree is too deep" })
+        }
+        if (node && typeof node === "object" && "children" in node && Array.isArray(node.children)) {
+          node.children.forEach((child: unknown) => {
+            if (typeof child !== "string") visit(child, depth + 1)
+          })
+        }
+      }
+      request.currentPage.forEach((page) => visit(page, 0))
+      if (nodeCount > MAX_PAGE_COUNT * MAX_CHILDREN_PER_NODE) {
+        context.addIssue({ code: "custom", path: ["currentPage"], message: "Page tree is too large" })
+      }
+      if (JSON.stringify(request.currentPage).length > MAX_TREE_PAYLOAD_BYTES) {
+        context.addIssue({ code: "custom", path: ["currentPage"], message: "Page tree payload is too large" })
+      }
+    }
+  })
 
 const actionBase = z.object({ reason: z.string().trim().min(1).max(500) }).strict()
 

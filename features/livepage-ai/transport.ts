@@ -12,12 +12,14 @@ export async function sendLivePageAiMessage(input: Readonly<{
   sessionId: string
   message: string
   componentTree: ReadonlyArray<AppNode>
+  activePageId?: string
   historyIndex: number
   transcript: ReadonlyArray<LivePageAIMessage>
   workflow?: {
     phase: "start" | "understanding" | "next" | "verify" | "complete"
     confirmed: boolean
     completedActionCount: number
+    createdComponentIds?: ReadonlyArray<string>
     lastAction?: unknown
     guidance?: string
     observation?: {
@@ -38,6 +40,7 @@ export async function sendLivePageAiMessage(input: Readonly<{
       sessionId: input.sessionId,
       prompt: input.message,
       currentPage: input.componentTree,
+      activePageId: input.activePageId,
       historyIndex: input.historyIndex,
       transcript: input.transcript.slice(-LIVE_PAGE_AI_MAX_TRANSCRIPT_MESSAGES),
       ...(input.workflow ? { workflow: input.workflow } : {}),
