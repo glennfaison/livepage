@@ -1,15 +1,12 @@
 import React, { useCallback } from "react"
 import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
 import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } from "@/features/types"
-import { ComponentSelectorPopover } from "@/features/page-builder/component-selector-popover"
-import { Divider, useDividerVisibility } from "@/features/page-builder/layout-divider"
+import { ComponentSelectorPopover, Divider, useDividerVisibility, useComponentOperationsContext, withEditorControls } from "@/features/page-builder/editor-controls"
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
 import { componentTagList } from "@/features/design-component-runtime/component-tags"
 import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
 import { withDataSource } from "@/features/data-sources/with-data-source"
-import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context"
-import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-component-runtime/shared/component-helpers"
 
 const tag = "column" as const

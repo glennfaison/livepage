@@ -1,6 +1,5 @@
 "use client"
 
-import { Toolbar } from "@/features/page-builder/toolbar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { componentMetadata as PageMeta } from "@/features/design-components/definitions/page-component"
@@ -8,8 +7,13 @@ import { PreviewRenderer } from "@/features/design-components"
 import { selectCurrentPage } from "@/features/app-state"
 import type { PageBuilderMode } from "@/features/app-state"
 import { useAppState } from "@/features/app-state"
-import { ComponentOperationsContext } from "@/features/page-builder/component-operations-context"
-import { useComponentOperations, useHistoryOperations, usePageOperations } from "@/features/page-builder/hooks"
+import {
+  ComponentOperationsContext,
+  Toolbar,
+  useComponentOperations,
+  useHistoryOperations,
+  usePageOperations,
+} from "@/features/page-builder"
 import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/features/templates"
 import { ChevronDown, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"

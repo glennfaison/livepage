@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@/features/design-component-runtime/registry"
 import { ComponentLookupNotInitializedError } from "@/features/design-component-runtime/lookup"
-import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder/component-selector-popover"
+import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder"
 import { Button } from "@/components/ui/button"
 import { componentTagList } from "@/features/design-component-runtime/component-tags"
 
