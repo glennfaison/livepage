@@ -3,7 +3,7 @@ import { Heading } from "lucide-react"
 import React from "react"
 import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/features/design-component-runtime/primitives"
 import { cn } from "@/lib/utils"
 
 const tag = "header1" as const

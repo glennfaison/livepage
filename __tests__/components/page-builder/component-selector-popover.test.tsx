@@ -1,11 +1,10 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@/features/design-component-runtime/registry"
-import { ComponentLookupNotInitializedError } from "@/features/design-component-runtime/lookup"
+import "@/features/design-component-runtime"
+import { ComponentLookupNotInitializedError, componentTagList } from "@/features/design-component-runtime/primitives"
 import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder"
 import { Button } from "@/components/ui/button"
-import { componentTagList } from "@/features/design-component-runtime/component-tags"
 
 describe("ComponentSelectorPopover", () => {
   const mockOnSelect = jest.fn()

@@ -1,4 +1,4 @@
-import { componentTagList } from "@/features/design-component-runtime/component-tags"
+import { componentTagList } from "@/features/design-component-runtime/primitives"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNode, AppNodeTag } from "@/features/types"
 import type React from "react"
