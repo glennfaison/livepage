@@ -5,7 +5,7 @@ import { MousePointerClick } from "lucide-react"
 import React from "react"
 import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"
-import { createAttributeMap, createBooleanAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readTextChildren, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"
+import { createAttributeMap, createBooleanAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readTextChildren, readCustomClasses } from "@/features/design-component-runtime/primitives"
 import { cn } from "@/lib/utils"
 
 const tag = "button" as const

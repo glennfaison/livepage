@@ -3,7 +3,7 @@ import React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup"
+import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "@/features/design-component-runtime/primitives"
 import type { AppNodeTag } from "@/features/types"
 import { formatComponentLabel } from "./shared/component-label"
 

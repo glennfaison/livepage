@@ -1,4 +1,4 @@
-import { replaceDataSourceComponentProperties } from "@/features/design-component-runtime/shared/browser-core"
+import { replaceDataSourceComponentProperties } from "@/features/design-component-runtime/primitives"
 import { replaceCurrentDatePlaceholderInString } from "@/features/placeholders/current-date"
 import { replaceDataSourcePlaceholdersInString } from "@/features/placeholders/data-source"
 

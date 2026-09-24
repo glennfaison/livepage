@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import type { EditModeProps } from "@/features/types";
 import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context";
 import React from "react";
-import { getRegisteredComponentInfo } from "@/features/design-component-runtime/lookup";
+import { getRegisteredComponentInfo } from "@/features/design-component-runtime/primitives";
 
 function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
