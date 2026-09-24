@@ -3,7 +3,7 @@
 import React from "react"
 import { withDataSource } from "@/features/data-sources/with-data-source"
 import { ImageIcon } from "lucide-react"
-import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
+import { withEditorControls } from "@/features/page-builder/editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"
 import { cn } from "@/lib/utils"
 import { createColorAttribute, createCustomClassesAttribute, createGroupAttribute, createIdAttribute, createSelectAttribute, readCustomClasses } from "@/features/design-component-runtime/shared/component-helpers"

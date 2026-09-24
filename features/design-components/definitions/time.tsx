@@ -1,6 +1,5 @@
 import { Clock3 } from "lucide-react"
-import { withEditorControls } from "@/features/page-builder/decorators/with-editor-controls"
-import { withTextEditing } from "@/features/page-builder/decorators/with-text-editing"
+import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"
 import type { Metadata, Props, SettingsField } from "@/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/features/design-component-runtime/shared/component-helpers"
 import { cn } from "@/lib/utils"
