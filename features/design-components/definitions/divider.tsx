@@ -1,6 +1,6 @@
 import React from "react"
 import { Minus } from "lucide-react"
-import { withDataSource } from "@/features/data-sources/with-data-source"
+import { withDataSource } from "@/features/data-sources"
 import { withEditorControls } from "@/features/page-builder/editor-controls"
 import type { Metadata, Props, SettingsField } from "@/features/types"
 import { createColorAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, readCustomClasses } from "@/features/design-component-runtime/primitives"

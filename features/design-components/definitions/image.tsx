@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { withDataSource } from "@/features/data-sources/with-data-source"
+import { withDataSource } from "@/features/data-sources"
 import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "@/features/page-builder/editor-controls"
 import type { Props, SettingsField, Metadata } from "@/features/types"

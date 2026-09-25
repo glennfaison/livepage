@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button"
 import type { VariantProps } from "class-variance-authority"
-import { withDataSource } from "@/features/data-sources/with-data-source"
+import { withDataSource } from "@/features/data-sources"
 import { MousePointerClick } from "lucide-react"
 import React from "react"
 import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"

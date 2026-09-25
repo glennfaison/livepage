@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { decodeDataSourceSettings, getDataSourceInfo } from "@/features/data-sources"
+import { decodeDataSourceSettings, getDataSourceInfo } from "./registry"
 import type { DataSourceId, Props } from "@/features/types"
 import { appSettings } from "@/app/app-settings"
 import { useQuery } from "@tanstack/react-query"

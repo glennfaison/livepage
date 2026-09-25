@@ -1,4 +1,4 @@
-import { withDataSource } from "@/features/data-sources/with-data-source"
+import { withDataSource } from "@/features/data-sources"
 import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"
