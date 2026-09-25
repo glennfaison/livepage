@@ -5,7 +5,7 @@ import { ComponentSelectorPopover, Divider, useDividerVisibility, useComponentOp
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
 import { componentTagList, getRegisteredComponentInfo, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-component-runtime/primitives"
-import { withDataSource } from "@/features/data-sources/with-data-source"
+import { withDataSource } from "@/features/data-sources"
 
 const tag = "column" as const
 
