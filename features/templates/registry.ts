@@ -4,6 +4,11 @@ import { cvResumePersonalTemplate } from "@/features/templates/definitions/cv-re
 import { cvResumeEngineerDarkTemplate, cvResumeEngineerLightTemplate } from "@/features/templates/definitions/cv-resume-engineer"
 import { portfolioPersonalSiteTemplate } from "@/features/templates/definitions/portfolio-personal-site"
 import { linkInBioTemplate } from "@/features/templates/definitions/link-in-bio-page"
+import { landingPageSaasTemplate } from "@/features/templates/definitions/landing-page-saas"
+import { blogArticlePageTemplate } from "@/features/templates/definitions/blog-article-page"
+import { agencyHomepageTemplate } from "@/features/templates/definitions/agency-homepage"
+import { eventConferencePageTemplate } from "@/features/templates/definitions/event-conference-page"
+import { contactAboutPageTemplate } from "@/features/templates/definitions/contact-about-page"
 import { parsePageTemplateDefinition, type PageTemplateDefinition } from "@/features/templates/schema"
 
 export const pageTemplateRegistry = [
@@ -12,6 +17,11 @@ export const pageTemplateRegistry = [
   parsePageTemplateDefinition(cvResumeEngineerLightTemplate),
   parsePageTemplateDefinition(portfolioPersonalSiteTemplate),
   parsePageTemplateDefinition(linkInBioTemplate),
+  parsePageTemplateDefinition(landingPageSaasTemplate),
+  parsePageTemplateDefinition(blogArticlePageTemplate),
+  parsePageTemplateDefinition(agencyHomepageTemplate),
+  parsePageTemplateDefinition(eventConferencePageTemplate),
+  parsePageTemplateDefinition(contactAboutPageTemplate),
 ] as const
 
 export function getPageTemplateById(id: string): PageTemplateDefinition | undefined {
