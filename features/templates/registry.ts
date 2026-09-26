@@ -2,12 +2,16 @@ import type { AppAction, AppNode } from "@/features/app-state"
 import { appNodeTreeSchema } from "@/features/serializers/schema"
 import { cvResumePersonalTemplate } from "@/features/templates/definitions/cv-resume-personal"
 import { cvResumeEngineerDarkTemplate, cvResumeEngineerLightTemplate } from "@/features/templates/definitions/cv-resume-engineer"
+import { portfolioPersonalSiteTemplate } from "@/features/templates/definitions/portfolio-personal-site"
+import { linkInBioTemplate } from "@/features/templates/definitions/link-in-bio-page"
 import { parsePageTemplateDefinition, type PageTemplateDefinition } from "@/features/templates/schema"
 
 export const pageTemplateRegistry = [
   parsePageTemplateDefinition(cvResumePersonalTemplate),
   parsePageTemplateDefinition(cvResumeEngineerDarkTemplate),
   parsePageTemplateDefinition(cvResumeEngineerLightTemplate),
+  parsePageTemplateDefinition(portfolioPersonalSiteTemplate),
+  parsePageTemplateDefinition(linkInBioTemplate),
 ] as const
 
 export function getPageTemplateById(id: string): PageTemplateDefinition | undefined {
