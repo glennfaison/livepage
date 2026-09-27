@@ -1,3 +1,5 @@
+"use client"
+
 import { withDataSource } from "@/features/data-sources"
 import { ExternalLink } from "lucide-react"
 import React from "react"

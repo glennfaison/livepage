@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { componentTagList } from "@/features/design-components"
+import { componentTagList } from "@/features/design-component-runtime/component-tags"
 import type { AppNode } from "@/features/app-state"
 
 const allowedAppNodeTags = new Set([...componentTagList, "page"])
