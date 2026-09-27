@@ -16,6 +16,7 @@ import {
 } from "@/features/page-builder"
 import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/features/templates"
 import { CommandPalette } from "@/features/command-palette"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useEffect, useRef, useState } from "react"
@@ -210,6 +211,7 @@ export default function BuilderPage() {
               >
                 {pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}
               </Button>
+              <ThemeToggle />
             </div>
           </div>
         </header>
