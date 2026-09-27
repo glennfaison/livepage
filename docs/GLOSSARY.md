@@ -44,6 +44,18 @@ _Avoid_: Dynamic token
 An exported page artifact that can be opened directly in a modern browser without running LivePage.
 _Avoid_: Static HTML snapshot
 
+**Page brief**:
+The tone, color, name, and headline hints extracted from a prompt-assist chat message, used to rank and fill in a template.
+_Avoid_: Intent, parsed prompt
+
+**Template match**:
+The template chosen for a Page brief — resolved deterministically by keyword overlap, or, when the top candidates are close, by a Jev Choice decision from TypeSafe.
+_Avoid_: Recommendation, suggestion
+
+**Prompt assist chat**:
+The minimizable, Messenger-style chatbox where a user describes a page in their own words and reviews a Template match and drafted copy before applying it.
+_Avoid_: Chatbot, AI assistant
+
 ## Relationships
 
 - The **App-state API** operates on **App state**
@@ -52,8 +64,13 @@ _Avoid_: Static HTML snapshot
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
 - A **Standalone HTML export** contains serialized **App nodes** and resolves **Data sources** when opened
+- A **Prompt assist chat** message turns into a **Page brief**, which resolves to a **Template match**
+- Applying a **Template match** customizes cloned **App nodes** through the **App-state API**, the same as any other template application
 
 ## Example dialogue
 
 > **Dev:** "Should this JSON loader live in the **App-state API**?"
 > **Domain expert:** "No — the API owns commands and selectors. The JSON loader is a **Serializer** that feeds it."
+
+> **Dev:** "Why doesn't the prompt-assist chat call an LLM to pick the template?"
+> **Domain expert:** "It only calls Jev when the deterministic ranking can't confidently produce a **Template match** on its own — Jev answers a narrow Choice question, it doesn't generate text."
