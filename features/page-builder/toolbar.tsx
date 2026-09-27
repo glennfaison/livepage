@@ -4,7 +4,7 @@ import { HistoryPopover } from "@/features/page-builder/history-popover"
 import { Button } from "@/components/ui/button"
 import type { PageBuilderMode } from "@/features/app-state"
 import { cn } from "@/lib/utils"
-import { GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/features/types"
@@ -21,6 +21,8 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory: (index: number) => void
   onDiscardHistory: () => void
   historyPreviewIndex: number | null
+  /** Optional: renders a command-palette trigger button when provided. */
+  onOpenCommandPalette?: () => void
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -33,6 +35,7 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory,
   onDiscardHistory,
   historyPreviewIndex,
+  onOpenCommandPalette,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -73,10 +76,6 @@ export const Toolbar: React.FC<Readonly<{
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (isDragging && toolbarRef.current) {
-        // const toolbarRect = toolbarRef.current.getBoundingClientRect()
-        // const toolbarCenterX = toolbarRect.left + toolbarRect.width / 2
-        // const toolbarCenterY = toolbarRect.top + toolbarRect.height / 2
-
         setPosition({
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y,
@@ -127,6 +126,11 @@ export const Toolbar: React.FC<Readonly<{
           </div>
 
           <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
+            {onOpenCommandPalette ? (
+              <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette (⌘K)">
+                <Command className="h-4 w-4" />
+              </Button>
+            ) : null}
             <HistoryPopover
               isOpen={historyPopoverOpen}
               onOpenChange={setHistoryPopoverOpen}

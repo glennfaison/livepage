@@ -15,9 +15,10 @@ import {
   usePageOperations,
 } from "@/features/page-builder"
 import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/features/templates"
-import { ChevronDown, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { CommandPalette } from "@/features/command-palette"
+import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 
 export default function BuilderPage() {
@@ -42,6 +43,23 @@ export default function BuilderPage() {
   const shortcodeFileInputRef = useRef<HTMLInputElement>(null)
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false)
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+
+  // Global ⌘K / Ctrl+K shortcut for the command palette, available in both
+  // edit and preview mode (the floating Toolbar hides itself in preview mode,
+  // so this listener is the only way to reach the palette there).
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      if (isModifierPressed && event.key.toLowerCase() === "k") {
+        event.preventDefault()
+        setCommandPaletteOpen((open) => !open)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   // Get the current active page
   const currentPage = selectCurrentPage(state) ?? state.componentTree[0]
@@ -118,6 +136,16 @@ export default function BuilderPage() {
               </Link>
             </div>
             <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setCommandPaletteOpen(true)}
+                title="Command palette (⌘K)"
+              >
+                <Command className="h-4 w-4" />
+                <span className="hidden sm:inline">Command</span>
+              </Button>
               <TemplateCatalogPopover templates={pageTemplateRegistry} onApplyTemplate={applyTemplate} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
@@ -245,6 +273,23 @@ export default function BuilderPage() {
           onAcceptHistory={handleHistoryAccept}
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+        />
+
+        <CommandPalette
+          open={commandPaletteOpen}
+          onOpenChange={setCommandPaletteOpen}
+          state={state}
+          dispatch={dispatch}
+          componentOperations={componentOperations}
+          templates={pageTemplateRegistry}
+          onApplyTemplate={applyTemplate}
+          onSaveAsJson={saveAsJSON}
+          onSaveAsShortcode={saveAsShortcode}
+          onSaveAsHtml={saveAsHTML}
+          onImportJson={() => jsonFileInputRef.current?.click()}
+          onImportShortcode={() => shortcodeFileInputRef.current?.click()}
+          onDiscardChanges={handleDiscard}
         />
       </div>
     </ComponentOperationsContext.Provider>

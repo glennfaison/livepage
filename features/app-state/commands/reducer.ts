@@ -34,23 +34,47 @@ export const initialState: AppState = {
   originalHistoryState: null,
 }
 
+/**
+ * Appends a new history entry, discarding any "future" entries left over
+ * from an earlier undo first.
+ *
+ * Both call sites used to append onto `state.history` unconditionally and
+ * set `currentHistoryIndex` from the *old* array length / index. After an
+ * undo (currentHistoryIndex pointing before the end of `history`), that left
+ * the abandoned "future" entries in the array and pointed `currentHistoryIndex`
+ * at the wrong slot, so a later redo could land on a stale, orphaned branch
+ * instead of the edit that was just made. Slicing history down to the current
+ * position before appending is the standard undo/redo-stack fix.
+ */
+function appendHistoryEntry(
+  state: AppState,
+  pageState: AppState["componentTree"],
+  historyAction: string,
+): Pick<AppState, "history" | "currentHistoryIndex"> {
+  const newEntry: HistoryEntry = {
+    id: generateId(),
+    action: historyAction,
+    timestamp: new Date(),
+    pageState: JSON.parse(JSON.stringify(pageState)),
+  }
+
+  const historyUpToCurrent = state.history.slice(0, state.currentHistoryIndex + 1)
+
+  return {
+    history: [...historyUpToCurrent, newEntry],
+    currentHistoryIndex: historyUpToCurrent.length,
+  }
+}
+
 function withHistory(
   state: AppState,
   componentTree: AppState["componentTree"],
   historyAction: string,
 ): AppState {
-  const newEntry: HistoryEntry = {
-    id: generateId(),
-    action: historyAction,
-    timestamp: new Date(),
-    pageState: JSON.parse(JSON.stringify(componentTree)),
-  }
-
   return {
     ...state,
     componentTree,
-    history: [...state.history, newEntry],
-    currentHistoryIndex: state.history.length,
+    ...appendHistoryEntry(state, componentTree, historyAction),
   }
 }
 
@@ -215,17 +239,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case "ADD_TO_HISTORY": {
       const { action: historyAction, pageState } = action.payload
-      const newEntry: HistoryEntry = {
-        id: generateId(),
-        action: historyAction,
-        timestamp: new Date(),
-        pageState: JSON.parse(JSON.stringify(pageState)),
-      }
-
       return {
         ...state,
-        history: [...state.history, newEntry],
-        currentHistoryIndex: state.currentHistoryIndex + 1,
+        ...appendHistoryEntry(state, pageState, historyAction),
       }
     }
 
