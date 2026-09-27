@@ -15,6 +15,9 @@ import { componentMetadata as Divider } from "@/features/design-components/defin
 import { componentMetadata as Callout } from "@/features/design-components/definitions/callout"
 import { componentMetadata as Stat } from "@/features/design-components/definitions/stat"
 import { componentMetadata as Time } from "@/features/design-components/definitions/time"
+import { componentMetadata as LineChart } from "@/features/design-components/definitions/line-chart"
+import { componentMetadata as MetricCard } from "@/features/design-components/definitions/metric-card"
+import { componentMetadata as DataTable } from "@/features/design-components/definitions/data-table"
 import { componentMetadata as Page } from "@/features/design-components/definitions/page-component"
 import { registerComponentLookup } from "./lookup"
 export { componentTagList } from "./component-tags"
@@ -35,6 +38,9 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   [Callout.tag]: Callout,
   [Stat.tag]: Stat,
   [Time.tag]: Time,
+  [LineChart.tag]: LineChart,
+  [MetricCard.tag]: MetricCard,
+  [DataTable.tag]: DataTable,
   [Page.tag]: Page,
 }
 
