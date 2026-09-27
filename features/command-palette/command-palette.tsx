@@ -23,7 +23,11 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/features/app-state"
 import { selectCurrentPage } from "@/features/app-state"
-import { getComponentInfoSafe } from "@/features/page-builder/component-selector-popover"
+// Import through the public page-builder barrel (not the internal
+// component-selector-popover module) so this module respects the same
+// import boundary page-builder's own definitions rely on. See the header
+// comment in features/page-builder/editor-controls.ts.
+import { getComponentInfoSafe } from "@/features/page-builder"
 import { componentTagList } from "@/features/design-component-runtime/primitives"
 import type { PageTemplateDefinition } from "@/features/templates"
 import { cn } from "@/lib/utils"
@@ -111,6 +115,11 @@ export const CommandPalette: React.FC<
       const wasUndo = index < state.currentHistoryIndex
       dispatch({ type: "SET_PAGES", payload: JSON.parse(JSON.stringify(entry.pageState)) })
       dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: index })
+      // Clear any in-flight preview from the History popover (RESTORE_FROM_HISTORY
+      // sets these two fields without committing). Leaving them stale would let a
+      // later "Discard" in that popover silently revert this undo/redo.
+      dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
+      dispatch({ type: "SET_ORIGINAL_HISTORY_STATE", payload: null })
       toast({ title: wasUndo ? "Undid last change" : "Redid change" })
     },
     [dispatch, state.currentHistoryIndex, state.history],
@@ -247,7 +256,6 @@ export const CommandPalette: React.FC<
         : []
 
     return [...actionCommands, ...insertCommands, ...templateCommands, ...jumpCommands]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.pageBuilderMode,
     state.selectedComponentId,
@@ -258,6 +266,15 @@ export const CommandPalette: React.FC<
     currentPage,
     componentOperations,
     templates,
+    dispatch,
+    jumpToHistory,
+    onApplyTemplate,
+    onDiscardChanges,
+    onSaveAsHtml,
+    onSaveAsJson,
+    onSaveAsShortcode,
+    onImportJson,
+    onImportShortcode,
   ])
 
   const filteredCommands = useMemo(() => {
@@ -270,6 +287,15 @@ export const CommandPalette: React.FC<
       return haystack.includes(term)
     })
   }, [commands, search])
+
+  // Precompute id -> index once per filter pass instead of calling
+  // filteredCommands.indexOf(command) inside the render loop (O(n) per row,
+  // O(n^2) per render on every keystroke).
+  const commandIndexById = useMemo(() => {
+    const map = new Map<string, number>()
+    filteredCommands.forEach((command, index) => map.set(command.id, index))
+    return map
+  }, [filteredCommands])
 
   const groupedCommands = useMemo(() => {
     const groups = new Map<string, PaletteCommand[]>()
@@ -309,9 +335,15 @@ export const CommandPalette: React.FC<
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="grid h-[min(70vh,34rem)] w-[min(90vw,36rem)] grid-rows-[auto_1fr_auto] p-0">
+      <DialogContent
+        aria-describedby="command-palette-description"
+        className="grid h-[min(70vh,34rem)] w-[min(90vw,36rem)] grid-rows-[auto_1fr_auto] p-0"
+      >
         <DialogHeader className="border-b-0">
           <DialogTitle className="sr-only">Command palette</DialogTitle>
+          <p id="command-palette-description" className="sr-only">
+            Search actions, components, and templates, then press Enter to run the highlighted command.
+          </p>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -335,7 +367,7 @@ export const CommandPalette: React.FC<
                   {group}
                 </p>
                 {groupCommands.map((command) => {
-                  const index = filteredCommands.indexOf(command)
+                  const index = commandIndexById.get(command.id) ?? 0
                   const isActive = index === activeIndex
                   return (
                     <button

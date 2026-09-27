@@ -148,6 +148,69 @@ describe("App Reducer", () => {
     const result = appReducer(state, action)
     expect(result.pageBuilderMode).toBe("preview")
   })
+
+  describe("history truncation after an undo", () => {
+    function insertHeader(currentState: AppState, index: number): AppState {
+      return appReducer(currentState, {
+        type: "INSERT_COMPONENT",
+        payload: { newComponentTag: "header1", parentId: "page-1", index },
+      })
+    }
+
+    it("drops abandoned future entries when a new edit follows an undo (INSERT_COMPONENT)", () => {
+      const afterFirstEdit = insertHeader(state, 0)
+      const afterSecondEdit = insertHeader(afterFirstEdit, 0)
+      expect(afterSecondEdit.history).toHaveLength(2)
+      expect(afterSecondEdit.currentHistoryIndex).toBe(1)
+
+      // Simulate "Undo" (as the command palette does): jump back to index 0
+      // without going through the reducer's own history-append path.
+      const afterUndo: AppState = {
+        ...afterSecondEdit,
+        componentTree: afterSecondEdit.history[0].pageState,
+        currentHistoryIndex: 0,
+      }
+
+      // A brand new edit made after the undo should overwrite the abandoned
+      // "future" entry (the old index-1 entry) rather than pile up after it.
+      const afterThirdEdit = insertHeader(afterUndo, 0)
+
+      expect(afterThirdEdit.history).toHaveLength(2)
+      expect(afterThirdEdit.currentHistoryIndex).toBe(1)
+      expect(afterThirdEdit.history[1].action).toBe("Inserted header1")
+      // The abandoned entry from afterSecondEdit must not still be present.
+      expect(afterThirdEdit.history[1].id).not.toBe(afterSecondEdit.history[1].id)
+    })
+
+    it("drops abandoned future entries when a new edit follows an undo (ADD_TO_HISTORY)", () => {
+      const afterFirstEdit = insertHeader(state, 0)
+      const afterSecondEdit = insertHeader(afterFirstEdit, 0)
+
+      const afterUndo: AppState = {
+        ...afterSecondEdit,
+        componentTree: afterSecondEdit.history[0].pageState,
+        currentHistoryIndex: 0,
+      }
+
+      const afterManualEntry = appReducer(afterUndo, {
+        type: "ADD_TO_HISTORY",
+        payload: { action: "Applied template: Test", pageState: afterUndo.componentTree },
+      })
+
+      expect(afterManualEntry.history).toHaveLength(2)
+      expect(afterManualEntry.currentHistoryIndex).toBe(1)
+      expect(afterManualEntry.history[1].action).toBe("Applied template: Test")
+    })
+
+    it("still appends normally when there is no earlier undo", () => {
+      const afterFirstEdit = insertHeader(state, 0)
+      const afterSecondEdit = insertHeader(afterFirstEdit, 0)
+
+      expect(afterSecondEdit.history).toHaveLength(2)
+      expect(afterSecondEdit.currentHistoryIndex).toBe(1)
+      expect(afterSecondEdit.history[0].id).toBe(afterFirstEdit.history[0].id)
+    })
+  })
 })
 
 describe("insertComponent", () => {
