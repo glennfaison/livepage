@@ -1,57 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LivePage
 
-## Getting Started
+LivePage is a visual page builder. You compose a page from design components in an in-browser editor, connect components to data sources, and export the result as JSON, shortcode, or a standalone HTML file.
 
-First, run the development server:
+> **Status:** early development (`0.1.0`). Formats and APIs can change without notice.
+
+## Features
+
+- **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, and callouts. Includes undo/redo history and a command palette.
+- **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, or generated data through placeholders.
+- **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, and contact/about.
+- **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
+
+## Getting started
+
+You need Node.js 18.18 or newer and npm.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) for the landing page, or go straight to the builder at [http://localhost:3000/try](http://localhost:3000/try).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | Run ESLint through `next lint` |
+| `npm test` | Run the Jest suite |
+| `npm run test:watch` | Run Jest in watch mode |
+| `npm run test:coverage` | Run Jest with coverage |
+| `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
+
+The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `features/serializers/html/generated/`, which is git-ignored.
+
+The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
+
+## Project layout
+
+Application code lives in [`features/`](./features/), with one folder per domain concern (app state, serializers, design components, data sources, templates, and so on). Routes are in [`app/`](./app/) and shared UI primitives are in [`components/ui/`](./components/ui/). [`docs/CONTEXT.md`](./docs/CONTEXT.md) has the full module map.
 
 ## HTML exports
 
-HTML exports are single files that can be opened directly in a modern evergreen
-browser. They load the pinned React runtime from esm.sh, so the browser needs
-network access when the file is opened. REST data sources also need to allow
-requests from the browser through CORS. Image and other asset URLs are kept as
-references rather than embedded in the export.
+An HTML export is a single file that opens directly in a modern browser, with no LivePage server needed. Keep these limits in mind:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- The file loads pinned React and ReactDOM builds from [esm.sh](https://esm.sh), so the browser needs network access when it opens the file.
+- The export runtime supports the generated-data and REST API data sources. REST endpoints must allow the page's origin through CORS.
+- Image and other asset URLs stay as references. They are not embedded.
 
 ## Bundled templates
 
-Bundled page templates live in [`features/templates/`](./features/templates/). Each template definition is versioned (`schema` + `version`), keeps catalog metadata separate from the `content.pages` payload, and stores the editable page as the same `AppNode` tree used everywhere else in the editor.
+Templates live in [`features/templates/definitions/`](./features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
 
-To add another template:
+To add a template:
 
-1. Create a new definition in `features/templates/definitions/` using only supported design-component tags.
+1. Create a definition in `features/templates/definitions/` using only supported design-component tags.
 2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
-3. Validate the definition through `pageTemplateDefinitionSchema` and register it in `features/templates/registry.ts`.
-4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids/fields.
+3. Validate it with `pageTemplateDefinitionSchema` and register it in `features/templates/registry.ts`.
+4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
 
-The bundled CV / resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks. The engineer variants demonstrate dark and light minimalist layouts, shared text appearance settings, semantic links, and same-page navigation through component `id` attributes.
+The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.
 
-## Learn More
+## Documentation
 
-To learn more about Next.js, take a look at the following resources:
+- [Project context](./docs/CONTEXT.md) and [architecture decisions](./docs/adr/)
+- [Code conventions](./docs/CONVENTIONS.md)
+- [Glossary](./docs/GLOSSARY.md)
+- [AGENTS.md](./AGENTS.md) and the [agent workflow](./docs/AGENT-WORKFLOW.md) for coding agents
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Security and conduct
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Report vulnerabilities privately as described in [SECURITY.md](./SECURITY.md). Participation in this project is governed by the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT](./LICENSE)

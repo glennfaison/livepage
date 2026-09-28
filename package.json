@@ -2,6 +2,7 @@
   "name": "livepage",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "build:html-runtime": "node scripts/build-html-runtime.mjs",
     "predev": "npm run build:html-runtime",
