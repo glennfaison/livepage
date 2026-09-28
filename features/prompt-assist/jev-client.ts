@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { consumeProviderBudget } from "./rate-limit"
 
 /**
  * Server-only HTTP client for TypeSafe's System One API ("Jev"), used to
@@ -53,6 +54,10 @@ export async function callJevChoice(params: Readonly<{
   const apiKey = process.env.TYPESAFE_API_KEY
   if (!apiKey) {
     throw new JevUnavailableError("TYPESAFE_API_KEY is not configured")
+  }
+
+  if (!consumeProviderBudget("jev")) {
+    throw new JevUnavailableError("Jev call budget for this minute is exhausted")
   }
 
   const baseUrl = process.env.TYPESAFE_BASE_URL ?? DEFAULT_BASE_URL

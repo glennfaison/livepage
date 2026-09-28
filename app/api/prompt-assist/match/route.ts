@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { pageTemplateRegistry } from "@/features/templates"
-import { decideTemplateMatch, extractPageBrief, matchRequestSchema, matchResponseSchema } from "@/features/prompt-assist/server"
+import {
+  checkClientRateLimit,
+  decideTemplateMatch,
+  extractPageBrief,
+  matchRequestSchema,
+  matchResponseSchema,
+  rateLimitedResponse,
+} from "@/features/prompt-assist/server"
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkClientRateLimit(request, "match")
+  if (!rateLimit.allowed) return rateLimitedResponse(rateLimit)
+
   const body = await request.json().catch(() => null)
   const parsedRequest = matchRequestSchema.safeParse(body)
   if (!parsedRequest.success) {

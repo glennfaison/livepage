@@ -8,6 +8,8 @@
  * features/prompt-assist/server.ts instead, which route handlers import.
  */
 
+import { consumeProviderBudget } from "./rate-limit"
+
 export class CopyGenerationUnavailableError extends Error {}
 
 // Drafting a few short fields is a small, low-stakes generation task, so a
@@ -25,6 +27,10 @@ export async function callOpenAiJson(params: Readonly<{ system: string; user: st
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
     throw new CopyGenerationUnavailableError("OPENAI_API_KEY is not configured")
+  }
+
+  if (!consumeProviderBudget("openai")) {
+    throw new CopyGenerationUnavailableError("OpenAI call budget for this minute is exhausted")
   }
 
   const model = process.env.OPENAI_MODEL ?? DEFAULT_MODEL

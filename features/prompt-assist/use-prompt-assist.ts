@@ -89,6 +89,18 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: text }),
         })
+        if (response.status === 429) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: generateId(),
+              role: "assistant",
+              kind: "error",
+              text: "You're sending prompts too quickly. Wait a moment and try again.",
+            },
+          ])
+          return
+        }
         if (!response.ok) throw new Error(`Request failed with ${response.status}`)
         const json = matchResponseSchema.parse(await response.json())
 
