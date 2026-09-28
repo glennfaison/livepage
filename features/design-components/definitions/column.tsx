@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useCallback } from "react"
 import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
 import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } from "@/features/types"

@@ -64,7 +64,7 @@ export function AssistChat(props: Readonly<{ dispatch: (action: AppAction) => vo
         </button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-3">
+      <div ref={scrollRef} role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto p-3">
         {messages.length === 0 && (
           <p className="text-xs text-muted-foreground">
             Describe the page you want — for example, &ldquo;a dark, minimal résumé site for a backend engineer named

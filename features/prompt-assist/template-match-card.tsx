@@ -13,6 +13,8 @@ const DECISION_LABEL: Readonly<Record<MatchMessage["match"]["decidedBy"], string
   deterministic: "Matched by keyword",
   jev: "Matched by Jev",
   "jev-unavailable": "Best guess",
+  fallback: "No close match",
+  user: "Your pick",
 }
 
 export function TemplateMatchCard(
@@ -25,8 +27,11 @@ export function TemplateMatchCard(
 ) {
   const { message, onSelectCandidate, onUpdateDraftField, onApply } = props
   const template = getPageTemplateById(message.match.templateId)
+  // When nothing overlapped the prompt every score is 0; still offer
+  // alternatives so the person isn't stuck with an arbitrary template.
+  const anyScored = message.candidates.some((candidate) => candidate.score > 0)
   const alternates = message.candidates.filter(
-    (candidate) => candidate.templateId !== message.match.templateId && candidate.score > 0,
+    (candidate) => candidate.templateId !== message.match.templateId && (!anyScored || candidate.score > 0),
   )
 
   return (
@@ -37,8 +42,12 @@ export function TemplateMatchCard(
           <p className="font-medium leading-tight">{template?.metadata.name ?? "Unknown template"}</p>
           <p className="text-xs text-muted-foreground">
             {template?.metadata.category} · {DECISION_LABEL[message.match.decidedBy]}
-            {" · "}
-            {Math.round(message.match.confidence * 100)}% confidence
+            {message.match.decidedBy === "fallback" || message.match.decidedBy === "user" ? null : (
+              <>
+                {" · "}
+                {Math.round(message.match.confidence * 100)}% confidence
+              </>
+            )}
           </p>
         </div>
       </div>

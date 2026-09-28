@@ -53,7 +53,11 @@ export async function generateCopyDraft(
         summary: parsed.summary,
       },
     }
-  } catch {
+  } catch (error) {
+    // A missing key is the expected "not configured" path; anything else
+    // (HTTP 4xx/5xx, bad JSON, schema mismatch) is a real problem that
+    // would otherwise be invisible because we silently degrade.
+    if (process.env.OPENAI_API_KEY) console.warn("[prompt-assist] copy draft failed, using fallback:", error)
     return { source: "fallback", draft: fallbackDraft(brief) }
   }
 }

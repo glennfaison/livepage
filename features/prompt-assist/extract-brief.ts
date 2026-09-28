@@ -55,15 +55,21 @@ function findAllPresent(text: string, words: ReadonlyArray<string>): string[] {
 }
 
 // "called X" / "named X" / a quoted span -> a candidate name.
+// Unicode-aware so names like "José García" or "Zoë" work; a bare
+// "called X and ..." stops at the first conjunction instead of swallowing
+// the rest of the sentence.
 const NAME_PATTERNS: ReadonlyArray<RegExp> = [
-  /(?:called|named)\s+["“']?([A-Za-z0-9][\w .,'-]{1,40}?)["”']?(?=[,.;!?]|$)/i,
+  /(?:called|named)\s+["“']?([\p{L}\p{N}][\p{L}\p{N} .'’-]{1,40}?)["”']?(?=[,;!?]|\.(?:\s|$)|\s+(?:and|who|that|which|with)\b|$)/iu,
   /["“']([^"”']{2,40})["”']/,
 ]
 
 // "I'm a X" / "I am a X" / "for a/an/my X" -> a candidate headline/profession.
+// The capture stops before "named X" / "called X" so that
+// "for a backend engineer named Priya" yields "backend engineer".
+const HEADLINE_END = String.raw`(?=[,;!?]|\.(?:\s|$)|\s+(?:named|called|who|that|which|with|and)\b|$)`
 const HEADLINE_PATTERNS: ReadonlyArray<RegExp> = [
-  /(?:i'?m|i am)\s+(?:a|an)\s+([a-z][\w .,'-]{2,60}?)(?=[,.;!?]|$)/i,
-  /(?:for|about)\s+(?:a|an|my)\s+([a-z][\w .,'-]{2,60}?)(?=[,.;!?]|$)/i,
+  new RegExp(String.raw`(?:i'?m|i am)\s+(?:a|an)\s+([a-z][\w .'-]{2,60}?)` + HEADLINE_END, "i"),
+  new RegExp(String.raw`(?:for|about)\s+(?:a|an|my)\s+([a-z][\w .'-]{2,60}?)` + HEADLINE_END, "i"),
 ]
 
 function firstMatch(text: string, patterns: ReadonlyArray<RegExp>): string | undefined {

@@ -1,10 +1,13 @@
-import { pageTemplateRegistry, getPageTemplateById, cloneTemplatePages } from "@/features/templates"
+import { pageTemplateRegistry, getPageTemplateById, cloneTemplatePages, createApplyTemplateActions } from "@/features/templates"
 import {
   extractPageBrief,
   rankTemplateCandidates,
   pickConfidentMatch,
   applyPromptFieldValues,
   createApplyPromptTemplateActions,
+  matchRequestSchema,
+  draftRequestSchema,
+  promptDraftSchema,
 } from "@/features/prompt-assist"
 import { decideTemplateMatch, generateCopyDraft } from "@/features/prompt-assist/server"
 
@@ -120,5 +123,68 @@ describe("generateCopyDraft (server) without an OpenAI key", () => {
     expect(result.source).toBe("fallback")
     expect(result.draft.name).toBe("Priya Shah")
     expect(result.draft.headline).toBe("backend engineer")
+  })
+})
+
+describe("extractPageBrief regressions", () => {
+  it("stops the headline before 'named X' (README example)", () => {
+    const brief = extractPageBrief("a dark, minimal résumé site for a backend engineer named Priya")
+    expect(brief.name).toBe("Priya")
+    expect(brief.headline).toBe("backend engineer")
+  })
+
+  it("keeps non-ASCII names intact", () => {
+    expect(extractPageBrief("a page named José García, I am a designer").name).toBe("José García")
+  })
+
+  it("does not swallow the rest of the sentence into the name", () => {
+    expect(extractPageBrief("a site called Acme Corp and it sells shoes online").name).toBe("Acme Corp")
+  })
+})
+
+describe("prompt-assist schemas", () => {
+  it("rejects whitespace-only prompts at the boundary instead of failing later", () => {
+    expect(matchRequestSchema.safeParse({ prompt: "   " }).success).toBe(false)
+    expect(draftRequestSchema.safeParse({ prompt: "  ", templateId: "x" }).success).toBe(false)
+  })
+
+  it("does not accept a client-supplied brief on the draft request", () => {
+    const parsed = draftRequestSchema.parse({ prompt: "a resume", templateId: "x", brief: { rawPrompt: "evil" } })
+    expect(parsed).not.toHaveProperty("brief")
+  })
+
+  it("caps model-written draft fields", () => {
+    expect(promptDraftSchema.safeParse({ summary: "x".repeat(10_000) }).success).toBe(false)
+  })
+})
+
+describe("ranking without overlap", () => {
+  it("reports an arbitrary match as a zero-confidence fallback, not a keyword match", async () => {
+    delete process.env.TYPESAFE_API_KEY
+    const brief = extractPageBrief("xyzzy plugh")
+    const { match } = await decideTemplateMatch(brief, pageTemplateRegistry)
+    expect(match).toMatchObject({ decidedBy: "fallback", confidence: 0 })
+  })
+
+  it("ignores stop words so 'a website for my ...' alone can't win a template", () => {
+    const candidates = rankTemplateCandidates(extractPageBrief("I want a website for my"), pageTemplateRegistry)
+    expect(candidates.every((candidate) => candidate.score === 0)).toBe(true)
+  })
+
+  it("does not report a minimum-margin win as 100% confident", async () => {
+    delete process.env.TYPESAFE_API_KEY
+    const brief = extractPageBrief("I need a dark resume site for a software engineer")
+    const { match } = await decideTemplateMatch(brief, pageTemplateRegistry)
+    expect(match.decidedBy).toBe("deterministic")
+    expect(match.confidence).toBeLessThan(1)
+  })
+})
+
+describe("createApplyTemplateActions options", () => {
+  it("applies a custom history label and page customization", () => {
+    const template = getPageTemplateById("landing-page-saas")!
+    const actions = createApplyTemplateActions(template, { historyLabel: "Custom", customizePages: (pages) => pages.slice(0, 1) })
+    const history = actions.find((action) => action.type === "ADD_TO_HISTORY")
+    expect(history).toMatchObject({ payload: { action: "Custom" } })
   })
 })

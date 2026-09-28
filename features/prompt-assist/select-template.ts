@@ -44,8 +44,18 @@ const SYNONYMS: Readonly<Record<string, ReadonlyArray<string>>> = {
   about: ["contact"],
 }
 
+/**
+ * Words that appear in almost every prompt and template description. Left
+ * in, they dominate the score (and the tie-break margin) instead of the
+ * words that actually distinguish templates.
+ */
+const STOP_WORDS: ReadonlySet<string> = new Set([
+  "a", "an", "the", "and", "or", "of", "for", "to", "in", "on", "with", "my", "me", "i", "we", "our", "your",
+  "is", "are", "be", "it", "its", "that", "this", "want", "need", "make", "build", "create", "page", "site", "website",
+])
+
 function tokenize(text: string): ReadonlyArray<string> {
-  return text.toLowerCase().match(/[a-z0-9]+/g) ?? []
+  return (text.toLowerCase().match(/\p{L}[\p{L}\p{N}]*|\p{N}+/gu) ?? []).filter((token) => !STOP_WORDS.has(token))
 }
 
 function expandSynonyms(tokens: ReadonlyArray<string>): ReadonlySet<string> {
@@ -72,9 +82,13 @@ export function rankTemplateCandidates(
   const colorTokens = new Set(brief.colorHints.flatMap((hint) => tokenize(hint)))
 
   const scored = templates.map((template): TemplateCandidate => {
-    const haystack = tokenize(
-      [template.metadata.category, template.metadata.name, template.metadata.description, ...template.metadata.tags].join(
-        " ",
+    // Unique tokens: a word repeated across name/description/tags must not
+    // count several times, or longer metadata would always outscore shorter.
+    const haystack = new Set(
+      tokenize(
+        [template.metadata.category, template.metadata.name, template.metadata.description, ...template.metadata.tags].join(
+          " ",
+        ),
       ),
     )
 

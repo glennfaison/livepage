@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { pageTemplateRegistry } from "@/features/templates"
-import { matchRequestSchema, matchResponseSchema } from "@/features/prompt-assist"
-import { decideTemplateMatch, extractPageBrief } from "@/features/prompt-assist/server"
+import { decideTemplateMatch, extractPageBrief, matchRequestSchema, matchResponseSchema } from "@/features/prompt-assist/server"
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)

@@ -52,6 +52,10 @@ _Avoid_: Intent, parsed prompt
 The template chosen for a Page brief — resolved deterministically by keyword overlap, or, when the top candidates are close, by a Jev Choice decision from TypeSafe.
 _Avoid_: Recommendation, suggestion
 
+**Prompt draft**:
+The name, headline, and summary copy proposed for a Template match, editable in the chat before it is applied. Comes from a model when one is configured, otherwise from the Page brief.
+_Avoid_: Generated content, AI copy
+
 **Prompt assist chat**:
 The minimizable, Messenger-style chatbox where a user describes a page in their own words and reviews a Template match and drafted copy before applying it.
 _Avoid_: Chatbot, AI assistant
@@ -64,7 +68,7 @@ _Avoid_: Chatbot, AI assistant
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
 - A **Standalone HTML export** contains serialized **App nodes** and resolves **Data sources** when opened
-- A **Prompt assist chat** message turns into a **Page brief**, which resolves to a **Template match**
+- A **Prompt assist chat** message turns into a **Page brief**, which resolves to a **Template match** and a **Prompt draft**
 - Applying a **Template match** customizes cloned **App nodes** through the **App-state API**, the same as any other template application
 
 ## Example dialogue

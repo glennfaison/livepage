@@ -10,11 +10,10 @@
 
 export class CopyGenerationUnavailableError extends Error {}
 
-// The cheapest OpenAI model as of September 2026: $0.05/M input tokens and
-// $0.40/M output tokens, undercutting the older GPT-4.1 nano. Body copy for
-// a page brief is a small, low-stakes generation task, so cost beats
-// capability here. Override with OPENAI_MODEL if that changes.
+// Drafting a few short fields is a small, low-stakes generation task, so a
+// small low-cost model is the default. Override with OPENAI_MODEL.
 const DEFAULT_MODEL = "gpt-5-nano"
+const REQUEST_TIMEOUT_MS = 15000
 
 /**
  * Sends a system/user message pair with response_format: json_object and
@@ -41,12 +40,15 @@ export async function callOpenAiJson(params: Readonly<{ system: string; user: st
       body: JSON.stringify({
         model,
         response_format: { type: "json_object" },
-        temperature: 0.7,
+        // No `temperature`: the GPT-5 family rejects any value except the
+        // default with a 400, and this must work for whatever model
+        // OPENAI_MODEL points at.
         messages: [
           { role: "system", content: params.system },
           { role: "user", content: params.user },
         ],
       }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
   } catch (cause) {
     throw new CopyGenerationUnavailableError(`Failed to reach OpenAI: ${(cause as Error).message}`)

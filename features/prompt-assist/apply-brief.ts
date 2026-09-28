@@ -1,5 +1,5 @@
 import type { AppAction, AppNode } from "@/features/app-state"
-import { cloneTemplatePages, type PageTemplateDefinition } from "@/features/templates"
+import { createApplyTemplateActions, type PageTemplateDefinition } from "@/features/templates"
 
 /**
  * Text values for the semantic field names every bundled template already
@@ -60,25 +60,18 @@ export function applyPromptFieldValues(
 
 /**
  * Builds the action batch for applying a template customized with prompt
- * field values, mirroring createApplyTemplateActions in
- * features/templates/registry.ts but folding the text customization into
- * the same SET_PAGES + single ADD_TO_HISTORY entry, so an "apply from chat"
- * click produces one history entry instead of one per customized field.
+ * field values. Delegates to createApplyTemplateActions so the
+ * SET_PAGES / selection-reset / single ADD_TO_HISTORY sequence lives in one
+ * place; an "apply from chat" click still produces one history entry
+ * instead of one per customized field.
  */
 export function createApplyPromptTemplateActions(
   template: PageTemplateDefinition,
   fieldValues: PromptFieldValues,
   historyLabel: string,
 ): ReadonlyArray<AppAction> {
-  const clonedPages = cloneTemplatePages(template)
-  const pages = applyPromptFieldValues(clonedPages, template, fieldValues)
-  const activePageId = pages[0]?.attributes.id ?? ""
-
-  return [
-    { type: "SET_PAGES", payload: pages },
-    { type: "SET_ACTIVE_PAGE", payload: activePageId },
-    { type: "SET_SELECTED_COMPONENT", payload: "" },
-    { type: "SET_SELECTED_COMPONENT_ANCESTORS", payload: "" },
-    { type: "ADD_TO_HISTORY", payload: { action: historyLabel, pageState: pages } },
-  ]
+  return createApplyTemplateActions(template, {
+    customizePages: (pages) => applyPromptFieldValues(pages, template, fieldValues),
+    historyLabel,
+  })
 }

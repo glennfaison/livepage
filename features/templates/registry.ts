@@ -32,8 +32,16 @@ export function cloneTemplatePages(template: PageTemplateDefinition): ReadonlyAr
   return appNodeTreeSchema.parse(JSON.parse(JSON.stringify(template.content.pages)))
 }
 
-export function createApplyTemplateActions(template: PageTemplateDefinition): ReadonlyArray<AppAction> {
-  const pages = cloneTemplatePages(template)
+export function createApplyTemplateActions(
+  template: PageTemplateDefinition,
+  options: Readonly<{
+    /** Customize the cloned pages (e.g. fill in copy) before they are applied. */
+    customizePages?: (pages: ReadonlyArray<AppNode>) => ReadonlyArray<AppNode>
+    historyLabel?: string
+  }> = {},
+): ReadonlyArray<AppAction> {
+  const clonedPages = cloneTemplatePages(template)
+  const pages = options.customizePages ? options.customizePages(clonedPages) : clonedPages
   const activePageId = pages[0]?.attributes.id ?? ""
 
   return [
@@ -44,7 +52,7 @@ export function createApplyTemplateActions(template: PageTemplateDefinition): Re
     {
       type: "ADD_TO_HISTORY",
       payload: {
-        action: `Applied template: ${template.metadata.name}`,
+        action: options.historyLabel ?? `Applied template: ${template.metadata.name}`,
         pageState: pages,
       },
     },

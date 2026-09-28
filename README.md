@@ -48,10 +48,10 @@ The `/try` editor has a minimizable chatbox (bottom-right, closed by default) wh
 1. **Extract** — `extract-brief.ts` deterministically pulls tone/color hints and a candidate name/headline out of the prompt. No network call, in the spirit of [ector](https://github.com/Sanix-Darker/ector): fast, offline, dictionary-based extraction instead of an AI call for everything.
 2. **Select** — `select-template.ts` ranks the bundled templates by keyword overlap with each template's own metadata (category, name, description, tags), bridged by a small synonym dictionary. If one template clearly wins, that's the match.
 3. **Disambiguate (optional)** — when the top candidates are close, `jev-decision.ts` asks [TypeSafe's Jev](https://docs.typesafe.ai) a single Choice question over the shortlist. Jev returns a typed answer with a probability, not generated text, so it's used only for this one narrow judgment call — not for drafting copy. Without a `TYPESAFE_API_KEY`, this step is skipped and the top deterministic candidate is used instead.
-4. **Draft copy** — `copy-draft.ts` asks OpenAI (`gpt-5-nano` by default) to fill in the template's `name` / `headline` / `summary` fields from the prompt. Without an `OPENAI_API_KEY`, the chat falls back to the prompt-derived name/headline with no summary.
-5. **Apply** — the chat shows a preview card with editable fields; clicking "Apply to canvas" writes the values onto the template's existing `dataMapping.fields` targets (the same fields used for LinkedIn-profile import) and adds one history entry.
+4. **Draft copy** — `copy-draft.ts` asks OpenAI (a small, low-cost model — `gpt-5-nano` by default) to fill in the template's `name` / `headline` / `summary` fields from the prompt. Without an `OPENAI_API_KEY`, the chat falls back to the prompt-derived name/headline with no summary.
+5. **Apply** — the chat shows a preview card with editable fields (and a "Use … instead" chip for each alternate template); clicking "Apply to canvas" writes the values onto the template's existing `dataMapping.fields` targets (the same fields used for LinkedIn-profile import) and adds one history entry.
 
-Both API keys are optional — see [`.env.example`](./.env.example). The feature is fully usable with neither configured.
+Both API keys are optional — see [`.env.example`](./.env.example). The feature is fully usable with neither configured. When a key is set, the prompt text is sent to that provider (TypeSafe for step 3, OpenAI for step 4). Route handlers under `app/api/prompt-assist/` import from [`features/prompt-assist/server.ts`](./features/prompt-assist/server.ts), never from the client barrel.
 
 ## Learn More
 

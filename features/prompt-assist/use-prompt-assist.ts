@@ -33,10 +33,12 @@ export type AssistMessage =
       applied: boolean
     }>
 
+type MatchMessage = Extract<AssistMessage, { kind: "match" }>
+
 function updateMatchMessage(
   messages: ReadonlyArray<AssistMessage>,
   id: string,
-  update: (message: Extract<AssistMessage, { kind: "match" }>) => Extract<AssistMessage, { kind: "match" }>,
+  update: (message: MatchMessage) => MatchMessage,
 ): ReadonlyArray<AssistMessage> {
   return messages.map((message) => (message.id === id && message.kind === "match" ? update(message) : message))
 }
@@ -47,31 +49,29 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
   const [isSending, setIsSending] = useState(false)
 
   const loadDraft = useCallback(async (messageId: string, brief: PageBrief, templateId: string, prompt: string) => {
+    // A slower response for a template the person has already moved away
+    // from must not overwrite the draft for the template now selected.
+    const applyIfCurrent = (update: (message: MatchMessage) => MatchMessage) =>
+      setMessages((prev) =>
+        updateMatchMessage(prev, messageId, (message) => (message.match.templateId === templateId ? update(message) : message)),
+      )
+
     try {
       const response = await fetch("/api/prompt-assist/draft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, brief, templateId }),
+        body: JSON.stringify({ prompt, templateId }),
       })
       if (!response.ok) throw new Error(`Request failed with ${response.status}`)
       const json = draftResponseSchema.parse(await response.json())
-      setMessages((prev) =>
-        updateMatchMessage(prev, messageId, (message) => ({
-          ...message,
-          draft: json.draft,
-          draftSource: json.source,
-          draftLoading: false,
-        })),
-      )
+      applyIfCurrent((message) => ({ ...message, draft: json.draft, draftSource: json.source, draftLoading: false }))
     } catch {
-      setMessages((prev) =>
-        updateMatchMessage(prev, messageId, (message) => ({
-          ...message,
-          draft: { name: brief.name, headline: brief.headline },
-          draftSource: "fallback",
-          draftLoading: false,
-        })),
-      )
+      applyIfCurrent((message) => ({
+        ...message,
+        draft: { name: brief.name, headline: brief.headline },
+        draftSource: "fallback",
+        draftLoading: false,
+      }))
     }
   }, [])
 
@@ -130,20 +130,22 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
 
   const selectCandidate = useCallback(
     (messageId: string, templateId: string) => {
-      setMessages((prev) => {
-        const message = prev.find((candidate) => candidate.id === messageId)
-        if (!message || message.kind !== "match") return prev
-        const nextMessages = updateMatchMessage(prev, messageId, (current) => ({
+      const message = messages.find((candidate) => candidate.id === messageId)
+      if (!message || message.kind !== "match") return
+
+      setMessages((prev) =>
+        updateMatchMessage(prev, messageId, (current) => ({
           ...current,
-          match: { templateId, confidence: 1, decidedBy: "deterministic" },
+          match: { templateId, confidence: 1, decidedBy: "user" },
           draft: null,
+          draftSource: null,
           draftLoading: true,
-        }))
-        void loadDraft(messageId, message.brief, templateId, message.prompt)
-        return nextMessages
-      })
+          applied: false,
+        })),
+      )
+      void loadDraft(messageId, message.brief, templateId, message.prompt)
     },
-    [loadDraft],
+    [loadDraft, messages],
   )
 
   const updateDraftField = useCallback((messageId: string, field: keyof PromptDraft, value: string) => {

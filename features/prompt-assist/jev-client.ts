@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 /**
  * Server-only HTTP client for TypeSafe's System One API ("Jev"), used to
  * disambiguate a template match when the deterministic ranking in
@@ -15,24 +17,33 @@ export type JevChoiceQuestion = Readonly<{
   criteria: Readonly<Record<string, string | null>>
 }>
 
-export type JevChoiceAnswer = Readonly<{
-  type: "choice"
-  choice: string
-  probabilities: Readonly<Record<string, number>>
-  confidence: number
-}>
+const jevChoiceAnswerSchema = z.object({
+  type: z.literal("choice"),
+  choice: z.string(),
+  // Validated but tolerant: a malformed number must not fail the whole
+  // request, so anything outside [0, 1] is clamped and a non-number
+  // becomes 0 rather than throwing downstream in matchResponseSchema.
+  confidence: z
+    .number()
+    .catch(0)
+    .transform((value) => Math.min(1, Math.max(0, value))),
+})
+export type JevChoiceAnswer = Readonly<z.infer<typeof jevChoiceAnswerSchema>>
+
+const jevResponseSchema = z.object({ answers: z.record(z.string(), z.unknown()) })
 
 export class JevUnavailableError extends Error {}
 
 const DEFAULT_BASE_URL = "https://api.typesafe.ai"
 const DEFAULT_MODEL = "jev-latest"
+const REQUEST_TIMEOUT_MS = 8000
 
 /**
  * Calls POST {baseUrl}/v1/systemone with a single named Choice question.
  * Throws JevUnavailableError (never a raw fetch/parse error) whenever the
- * key is missing, the network call fails, or the response doesn't look
- * like a Jev answer, so callers can fall back to the deterministic ranking
- * without special-casing every failure mode.
+ * key is missing, the network call fails or times out, or the response
+ * doesn't look like a Jev answer, so callers can fall back to the
+ * deterministic ranking without special-casing every failure mode.
  */
 export async function callJevChoice(params: Readonly<{
   questionId: string
@@ -60,6 +71,7 @@ export async function callJevChoice(params: Readonly<{
         state: params.state,
         questions: { [params.questionId]: params.question },
       }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
   } catch (cause) {
     throw new JevUnavailableError(`Failed to reach TypeSafe: ${(cause as Error).message}`)
@@ -76,15 +88,13 @@ export async function callJevChoice(params: Readonly<{
     throw new JevUnavailableError(`TypeSafe response was not JSON: ${(cause as Error).message}`)
   }
 
-  const answer = (payload as { answers?: Record<string, unknown> } | null)?.answers?.[params.questionId]
-  if (
-    !answer ||
-    typeof answer !== "object" ||
-    (answer as { type?: unknown }).type !== "choice" ||
-    typeof (answer as { choice?: unknown }).choice !== "string"
-  ) {
+  const parsedResponse = jevResponseSchema.safeParse(payload)
+  const parsedAnswer = parsedResponse.success
+    ? jevChoiceAnswerSchema.safeParse(parsedResponse.data.answers[params.questionId])
+    : null
+  if (!parsedAnswer?.success) {
     throw new JevUnavailableError("TypeSafe response did not include the expected choice answer")
   }
 
-  return answer as JevChoiceAnswer
+  return parsedAnswer.data
 }
