@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { askJev, isJevConfigured, JevUnavailableError, type JevChoiceAnswer } from "@/features/jev"
-import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/features/openai"
+import { askJev, isJevConfigured, JevUnavailableError, type JevChoiceAnswer } from "@/lib/jev"
+import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/lib/openai"
 import { describeTemplateCatalog, type TemplateSummary } from "@/features/templates"
 import { describeRequest } from "./request"
 import { MAX_CLARIFICATIONS, type MatchResponse, type PageRequest, type TemplateCandidate } from "./schema"

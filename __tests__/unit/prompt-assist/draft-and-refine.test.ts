@@ -3,11 +3,11 @@ import { cloneTemplatePages, getPageTemplateById, listTemplateTextFields } from 
 
 import { mockAskJev, mockCompleteJson, mockIsJevConfigured, mockIsOpenAiConfigured, resetProviderMocks } from "../../utils/ai-provider-mocks"
 
-jest.mock("@/features/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
-jest.mock("@/features/openai", () => jest.requireActual("../../utils/ai-provider-mocks").openAiModuleMock)
+jest.mock("@/lib/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
+jest.mock("@/lib/openai", () => jest.requireActual("../../utils/ai-provider-mocks").openAiModuleMock)
 
-import { JevUnavailableError } from "@/features/jev"
-import { OpenAiUnavailableError } from "@/features/openai"
+import { JevUnavailableError } from "@/lib/jev"
+import { OpenAiUnavailableError } from "@/lib/openai"
 import { describePage } from "@/features/prompt-assist"
 import { draftCopy, refineDesign } from "@/features/prompt-assist/server"
 

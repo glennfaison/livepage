@@ -39,7 +39,7 @@ Rules for how code in this repository is written. For how to scope and verify a 
 - If a consumer needs something that is not exported yet, add it to the module's entry point. Do not add a deep-import exception, even for one case.
 - Before restructuring a module's public API, audit existing cross-module imports (for example `rg 'from "@/features/<module>/'` outside that module's folder) and fix every violation in the same change.
 
-- **Server-only modules.** A module that reads secrets (for example [`jev`](../features/jev/) and [`openai`](../features/openai/)) imports `server-only` and has no client barrel. If a feature has both client and server halves, give it two entry points: `index.ts` (client-safe) and `server.ts`. Route handlers import only the server entry.
+- **Server-only modules.** A module that reads secrets (for example [`lib/jev`](../lib/jev/) and [`lib/openai`](../lib/openai/)) imports `server-only` and has no client barrel. If a feature has both client and server halves, give it two entry points: `index.ts` (client-safe) and `server.ts`. Route handlers import only the server entry.
 - **State-free entry points.** [`features/app-state/tree.ts`](../features/app-state/tree.ts) exposes pure tree helpers without the reducer, so low-level modules such as `templates` can use them without loading the editor.
 - **Route handlers and the component registry.** The registry loads React component definitions and cannot be imported into a route handler. Derive anything the server needs from the registry in the browser and send the result.
 

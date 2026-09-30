@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { askJev, isJevConfigured, JevUnavailableError } from "@/features/jev"
-import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/features/openai"
+import { askJev, isJevConfigured, JevUnavailableError } from "@/lib/jev"
+import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/lib/openai"
 import { describeRequest } from "./request"
 import { designEditSchema, type DesignEdit, type PageDescription, type PageRequest, type RefineResponse } from "./schema"
 import { filterDesignEdits } from "./setting-values"

@@ -17,10 +17,19 @@ LivePage is a page builder. The document being edited is a single **app state**,
 | [`templates`](../features/templates/) | Bundled page templates and the template catalog |
 | [`command-palette`](../features/command-palette/) | Command palette for the builder |
 | [`prompt-assist`](../features/prompt-assist/) | Chat that turns a prose request into a template, copy, and design edits |
-| [`jev`](../features/jev/) | Server-only client for TypeSafe's Jev decision model (Choice, Noul) |
-| [`openai`](../features/openai/) | Server-only client for OpenAI chat completions with schema-validated JSON replies |
 
 Use [the glossary](./GLOSSARY.md) for the precise meaning of these terms.
+
+## Shared libraries
+
+Code with no domain knowledge lives in [`lib/`](../lib/) and can be used by any feature or route handler.
+
+| Library | Responsibility |
+| --- | --- |
+| [`jev`](../lib/jev/) | Server-only client for TypeSafe's Jev decision model (Choice, Noul) |
+| [`openai`](../lib/openai/) | Server-only client for OpenAI chat completions with schema-validated JSON replies |
+| [`rate-limit.ts`](../lib/rate-limit.ts) | In-memory rate limiting and client identification |
+| [`utils.ts`](../lib/utils.ts) | Small general helpers |
 
 ## Posture
 
@@ -40,7 +49,7 @@ The chat on `/try` turns "describe the page you want" into a proposal the person
 
 The design loop runs step by step from the browser because the component registry loads React components and cannot be bundled into a route handler. The server sees only the request and the page description.
 
-Both providers are optional; see [`.env.example`](../.env.example). `jev` and `openai` read secrets, import `server-only`, and are reusable by any server code. Route handlers use `prompt-assist/server.ts`, never the client barrel.
+Both providers are optional; see [`.env.example`](../.env.example). [`lib/jev`](../lib/jev/) and [`lib/openai`](../lib/openai/) read secrets, import `server-only`, and are reusable by any server code. Route handlers use `prompt-assist/server.ts`, never the client barrel.
 
 ## Before you change things
 

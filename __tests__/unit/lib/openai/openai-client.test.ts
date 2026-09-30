@@ -1,6 +1,6 @@
 /** @jest-environment node */
 import { z } from "zod"
-import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/features/openai"
+import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/lib/openai"
 
 const originalFetch = global.fetch
 const originalEnv = { ...process.env }

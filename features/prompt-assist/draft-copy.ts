@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/features/openai"
+import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/lib/openai"
 import { listTemplateTextFields, type PageTemplateDefinition } from "@/features/templates"
 import { describeRequest } from "./request"
 import type { DraftResponse, PageRequest } from "./schema"

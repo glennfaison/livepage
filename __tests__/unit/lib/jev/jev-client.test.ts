@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { askJev, isJevConfigured, JevUnavailableError } from "@/features/jev"
+import { askJev, isJevConfigured, JevUnavailableError } from "@/lib/jev"
 
 const originalFetch = global.fetch
 const originalEnv = { ...process.env }
