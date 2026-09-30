@@ -1,22 +1,50 @@
-# LivePage Conventions
+# Code conventions
+
+Rules for how code in this repository is written. For how to scope and verify a task, see [the agent workflow](./AGENT-WORKFLOW.md).
+
+## Design principles
+
+- **Generalize instead of special-casing.** When a new requirement looks like a one-off, first look for the more general rule that covers it and its existing special cases. Extend or replace the existing mechanism rather than adding another branch. Do not add a conditional for a specific tag, template, or caller if a data-driven or parameterized approach handles it.
+- **Build deep modules.** A module or class should hide substantial functionality behind a small, general-purpose interface. Expose as few methods and properties as possible, and make each one broadly useful rather than tailored to one caller. The Unix file API is the model: `open`, `close`, `seek`, `read`, and `write` hide buffering, devices, permissions, and filesystems. Design from the top down: decide the interface a consumer would want first, then put the complexity behind it. Split modules along purposeful boundaries, not just to make files smaller.
+- **Use guard clauses.** Handle invalid, empty, and edge cases first with an early `return`, `continue`, or `throw`, so the main path stays at the top indentation level. Avoid nested `if` statements and nested loops where an early exit or an extracted function flattens them.
+
+## Validation and serialization
 
 - Prefer Zod for runtime validation and parsing when the same object-shape checks repeat across call sites.
-- For parallel agents or sub-agents, use the lowest-cost model that still meets the task's quality and context requirements; upgrade only if needed.
-- Use `useEffect` only to synchronize with external systems, such as subscriptions, timers, DOM APIs, or network requests. Derive data during render or handle it in event handlers. (Reference: https://react.dev/learn/you-might-not-need-an-effect)
-- Split complex UI into presentational components, orchestrator components, and custom hooks. Avoid components that combine data fetching, state coordination, and rendering in one file.
-- Register design components through metadata in [`features/design-components/definitions/`](../features/design-components/definitions/) rather than adding tag-specific switch statements to consumers.
-- When improving UI, prefer to add or modify the design component's settings/attributes (for example spacing, variants, or other configuration) before hard-coding styling into a single template or component implementation. Use custom classes only for one-off layout adjustments that cannot be represented by the component model, and avoid baking template-specific fixes into the default design component unless the component is genuinely rendering incorrectly by default.
-- Keep the component tree as readonly `AppNode` data; create and update nodes through the app-state API and dispatch actions exposed by [`features/app-state/`](../features/app-state/). Editor-facing operations belong to [`features/page-builder/`](../features/page-builder/) and are consumed via its public entry points ([`features/page-builder/index.ts`](../features/page-builder/index.ts), [`features/page-builder/editor-controls.ts`](../features/page-builder/editor-controls.ts)), not the internal `hooks.ts`/`decorators/` files directly.
-- Compose cross-cutting behavior with decorators in the owning feature: data-source resolution via [`features/data-sources/`](../features/data-sources/)'s public API, and text editing/editor controls via [`features/page-builder/editor-controls.ts`](../features/page-builder/editor-controls.ts) (design-components definitions must not import `features/page-builder/decorators/*` or `features/page-builder/hooks.ts` directly, to avoid a design-components -> page-builder -> app-state -> design-components import cycle).
-- Design-component metadata assembly lives in [`features/design-component-runtime/`](../features/design-component-runtime/), split into two entry points: [`index.ts`](../features/design-component-runtime/index.ts) (registry, `createDesignComponentInstance`, `PreviewRenderer`) for consumers outside the assembly cycle, and [`primitives.ts`](../features/design-component-runtime/primitives.ts) (attribute-builder helpers, the registered-component lookup, `componentTagList`, browser-safe data-source property substitution) for [`features/design-components/definitions/`](../features/design-components/definitions/) and `features/page-builder/editor-controls.ts`'s dependents, which must not import the full `index.ts` to avoid re-entering the design-component-runtime -> design-components -> page-builder cycle.
-- Keep format-specific parsing and serialization in [`features/serializers/`](../features/serializers/); validate external app-node trees with the shared Zod schema.
-- Treat explicit layout and DOM-structure requirements as binding. Preserve existing decorator structure unless a broader redesign is requested; in particular, keep editor controls simple and do not replace a requested `display: contents` wrapper with a semantic wrapper or a new overlay architecture.
-- For editor controls, decorators, and other positioned UI, validate real geometry after scroll and resize and check client-only or portal rendering for SSR/hydration safety, not just TypeScript output.
-- Always restart the development server before performing browser tests so the browser validates the current application state.
-- Run the narrowest relevant Jest selector (for example, `npm test -- --runInBand path/to/test.test.tsx`) before broader checks. Record known baseline failures separately and do not treat unrelated user-modified expectations as regressions.
-- Do not create an ADR or planning artifact for a focused implementation task unless the user explicitly requests one.
-- In every conversation or session, check whether the changes introduce or rename entities, relationships, or domain terms, and update [`docs/GLOSSARY.md`](./GLOSSARY.md) accordingly before finishing.
-- Treat each folder under [`features/`](../features/) as a module boundary. Every module must expose its public surface through a top-level `index.ts` (or a small number of deliberately named entry files, e.g. [`features/page-builder/editor-controls.ts`](../features/page-builder/editor-controls.ts)); other modules must import only from that entry point, never by reaching into a sibling module's internal files, definitions, or component/hook internals directly. If a module has no `index.ts` yet, add one before adding new cross-module consumers of it, rather than deep-importing.
-- When a consumer needs something a module doesn't yet export publicly, add the export to that module's entry point instead of importing the internal file directly, even for "just this one case." Prefer expanding or refining a module's public API over creating a new deep-import exception.
-- When consolidating a module's exports into a barrel, check for import cycles before merging: if any export in the barrel transitively depends on a module that itself depends back on the current module (directly or via another feature), split the barrel into narrower entry points (e.g. a state/hook-free surface vs. a state-aware surface) instead of forcing everything through one file. Verify with the narrowest relevant Jest selector, since eager circular `require`/`import` evaluation can throw at runtime even when `tsc` reports no errors.
-- Before restructuring a module's public API, audit existing cross-module imports (for example `grep`/`rg` for `from "@/features/<module>/` outside that module's own folder) to find current boundary violations, and fix all of them as part of the same change rather than leaving a mix of old deep imports and new public-API imports.
+- Keep format-specific parsing and serialization in [`features/serializers/`](../features/serializers/). Validate external app-node trees with the shared Zod schema in [`features/serializers/schema.ts`](../features/serializers/schema.ts).
+
+## State
+
+- Keep the component tree as readonly `AppNode` data. Create and update nodes through the app-state API and the actions exposed by [`features/app-state/`](../features/app-state/).
+- Editor-facing operations belong to [`features/page-builder/`](../features/page-builder/). Consume them through its public entry points, [`index.ts`](../features/page-builder/index.ts) and [`editor-controls.ts`](../features/page-builder/editor-controls.ts), not through the internal `hooks.ts` or `decorators/` files.
+
+## React
+
+- Avoid `useEffect`. Before writing or keeping one, read [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) and choose an approach that does not need one: derive data during render, compute it with `useMemo`, handle it in an event handler, or reset state with a `key`. Use `useEffect` only to synchronize with external systems such as subscriptions, timers, DOM APIs, or network requests.
+- When you touch a component that has an unnecessary `useEffect`, refactor it away. When an effect is genuinely needed but is more than a few lines, extract it into a named custom hook.
+- Pair presentational components with custom hooks. A presentational component receives props and returns markup. A custom hook owns the state, data fetching, and computation behind it. Do not let one component combine several hooks and non-trivial computation with its JSX. Where a screen needs wiring, use a thin orchestrator component that calls the hook and passes the result to the presentational component.
+- Compose cross-cutting behavior with decorators in the owning feature: data-source resolution through the [`features/data-sources/`](../features/data-sources/) public API, and text editing and editor controls through [`features/page-builder/editor-controls.ts`](../features/page-builder/editor-controls.ts).
+
+## Design components and styling
+
+- Register design components through metadata in [`features/design-components/definitions/`](../features/design-components/definitions/), not through tag-specific switch statements in consumers.
+- When improving UI, first add or change the component's settings or attributes (spacing, variants, other configuration).
+  - Use custom classes only for one-off layout adjustments the component model cannot express.
+  - Do not bake template-specific fixes into a default component unless it renders incorrectly by default.
+
+## Module boundaries
+
+- Treat each folder under [`features/`](../features/) as a module boundary. Expose its public surface through a top-level `index.ts`, or through a few deliberately named entry files such as [`editor-controls.ts`](../features/page-builder/editor-controls.ts). Other modules import only from those entry points, never from a sibling's internal files, definitions, components, or hooks.
+- If a module has no `index.ts`, add one before adding new cross-module consumers.
+- If a consumer needs something that is not exported yet, add it to the module's entry point. Do not add a deep-import exception, even for one case.
+- Before restructuring a module's public API, audit existing cross-module imports (for example `rg 'from "@/features/<module>/'` outside that module's folder) and fix every violation in the same change.
+
+### Import cycles
+
+Avoid the following cycles by keeping these boundaries:
+
+- **`design-components` → `page-builder` → `app-state` → `design-components`.** Definitions in `features/design-components/definitions/` must not import `features/page-builder/decorators/*` or `features/page-builder/hooks.ts`. Use `editor-controls.ts` instead.
+- **`design-component-runtime` → `design-components` → `page-builder` → `design-component-runtime`.** [`features/design-component-runtime/`](../features/design-component-runtime/) has two entry points:
+  - [`index.ts`](../features/design-component-runtime/index.ts) exposes the registry, `createDesignComponentInstance`, and `PreviewRenderer`. It is for consumers outside the assembly cycle.
+  - [`primitives.ts`](../features/design-component-runtime/primitives.ts) exposes the attribute-builder helpers, the registered-component lookup, `componentTagList`, and browser-safe data-source property substitution. Definitions in `features/design-components/definitions/`, and the dependents of `features/page-builder/editor-controls.ts`, import from here and must not import the full `index.ts`.
+- **When consolidating exports into a barrel**, check that no export transitively depends on a module that depends back on the current one, directly or through another feature. If one does, split the barrel into narrower entry points (for example a state-free surface and a state-aware surface) instead of forcing everything through one file.

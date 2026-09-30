@@ -44,6 +44,14 @@ review.
   malformed-input behavior.
 - Preserve explicit DOM/layout requirements, including existing decorator
   structure and `display: contents` where required.
+- Check changed code against the design principles and React rules in
+  `docs/CONVENTIONS.md`: special cases that a more general mechanism would
+  absorb, shallow modules with wide interfaces, nested conditionals or loops
+  that guard clauses would flatten, unnecessary `useEffect`, large effects not
+  extracted into custom hooks, and components that mix several hooks and
+  computations with markup.
+- Check that the change follows the redesign rule in `docs/AGENT-WORKFLOW.md`:
+  flag patches that work around the old shape instead of restructuring it.
 - Use the project's canonical terms from `docs/GLOSSARY.md` in findings.
 
 ## Finding standard
@@ -65,8 +73,11 @@ Every finding must include:
 - the concrete problem and why it can occur;
 - the smallest practical remediation direction.
 
-Do not present stylistic preferences, hypothetical concerns without a failure
-path, or a summary disguised as a finding.
+Do not present personal stylistic preferences, hypothetical concerns without a
+failure path, or a summary disguised as a finding. Violations of the documented
+conventions above are not personal preferences: report them as Low, or Medium
+when they add real maintenance risk. For these, the remediation direction may be
+the structural fix rather than the smallest patch.
 
 ## Response format
 
