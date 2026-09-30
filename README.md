@@ -9,6 +9,7 @@ LivePage is a visual page builder. You compose a page from design components in 
 - **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, and callouts. Includes undo/redo history and a command palette.
 - **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, or generated data through placeholders.
 - **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, and contact/about.
+- **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Needs an AI provider key, see [Optional: page assistant](#optional-page-assistant).
 - **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
 
 ## Getting started
@@ -21,6 +22,10 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) for the landing page, or go straight to the builder at [http://localhost:3000/try](http://localhost:3000/try).
+
+### Optional: page assistant
+
+The builder's chat bubble (bottom-right of `/try`) uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`docs/CONTEXT.md`](./docs/CONTEXT.md#prompt-assist).
 
 ## Development
 

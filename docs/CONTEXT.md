@@ -16,6 +16,9 @@ LivePage is a page builder. The document being edited is a single **app state**,
 | [`page-builder`](../features/page-builder/) | Editor UI, toolbar, and editor controls |
 | [`templates`](../features/templates/) | Bundled page templates and the template catalog |
 | [`command-palette`](../features/command-palette/) | Command palette for the builder |
+| [`prompt-assist`](../features/prompt-assist/) | Chat that turns a prose request into a template, copy, and design edits |
+| [`jev`](../features/jev/) | Server-only client for TypeSafe's Jev decision model (Choice, Noul) |
+| [`openai`](../features/openai/) | Server-only client for OpenAI chat completions with schema-validated JSON replies |
 
 Use [the glossary](./GLOSSARY.md) for the precise meaning of these terms.
 
@@ -25,6 +28,19 @@ Use [the glossary](./GLOSSARY.md) for the precise meaning of these terms.
 - Keep public feature-facing types deeply readonly.
 - Backward compatibility is not a priority yet. Prefer clean refactors over shims.
 - Placeholders are runtime tokens embedded in component strings and resolved before rendering.
+
+## Prompt assist
+
+The chat on `/try` turns "describe the page you want" into a proposal the person reviews before it is applied in one history entry. Nothing in it hard-codes templates, tags, or settings; each step reads them from the module that owns them.
+
+1. **Match.** The catalog comes from [`templates`](../features/templates/) (`describeTemplateCatalog`) and is given to Jev as state for one Choice question, with a no-match option. Jev's probabilities decide; a close call or no-match makes OpenAI ask one clarifying question (at most two), and OpenAI is the fallback judge when Jev is unavailable.
+2. **Copy.** OpenAI fills the free-text slots the template declares in its own `dataMapping` (`listTemplateTextFields`), whatever they are named.
+3. **Design loop.** The browser describes the page from the component registry (`describePage`), then loops: Jev answers a Noul question ("does the page satisfy the request?"); if not, OpenAI proposes edits to settings the registry exposes (`describeEditableSettings`). Every edit passes one validator (`filterDesignEdits`), on the server against the description and in the browser against the live registry, before it is applied. The loop stops when Jev is satisfied, when a step changes nothing, or after a fixed number of steps.
+4. **Apply.** The proposal is composed from the template, copy, and edits, and dispatched through `createApplyTemplateActions`.
+
+The design loop runs step by step from the browser because the component registry loads React components and cannot be bundled into a route handler. The server sees only the request and the page description.
+
+Both providers are optional; see [`.env.example`](../.env.example). `jev` and `openai` read secrets, import `server-only`, and are reusable by any server code. Route handlers use `prompt-assist/server.ts`, never the client barrel.
 
 ## Before you change things
 
