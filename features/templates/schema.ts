@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { findComponentById } from "@/features/app-state/tree"
 import { appNodeTreeSchema } from "@/features/serializers/schema"
 
 const templateFieldTargetSchema = z.object({
@@ -32,7 +33,19 @@ export const pageTemplateDefinitionSchema = z.object({
     source: z.literal("linkedin-profile"),
     fields: z.array(templateFieldMappingSchema).min(1),
   }),
-}).strict()
+}).strict().superRefine((template, context) => {
+  // A mapping that points at a component the page does not contain would silently write nowhere.
+  for (const [fieldIndex, field] of template.dataMapping.fields.entries()) {
+    for (const [targetIndex, target] of field.targets.entries()) {
+      if (findComponentById(template.content.pages, target.componentId)) continue
+      context.addIssue({
+        code: "custom",
+        path: ["dataMapping", "fields", fieldIndex, "targets", targetIndex, "componentId"],
+        message: `dataMapping target "${target.componentId}" does not exist in content.pages`,
+      })
+    }
+  }
+})
 
 export type PageTemplateDefinition = z.infer<typeof pageTemplateDefinitionSchema>
 

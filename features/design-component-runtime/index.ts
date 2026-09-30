@@ -12,3 +12,4 @@
 export * from "./primitives"
 export { getComponentInfo, createDesignComponentInstance } from "./registry"
 export { PreviewRenderer } from "./preview-renderer"
+export { applySettingValue, describeEditableSettings, readSettingValue } from "./settings-catalog"

@@ -231,3 +231,16 @@ export function replaceComponent({
     }
   })
 }
+
+/**
+ * Pure counterpart of the UPDATE_COMPONENT command for callers that batch
+ * several edits into one action (for example applying a template with
+ * customizations). Returns the tree unchanged when `componentId` is absent.
+ */
+export function patchComponent(
+  components: ReadonlyArray<AppNode>,
+  componentId: string,
+  updates: Partial<AppNode>,
+): ReadonlyArray<AppNode> {
+  return updateComponent({ components, componentId, updates, updated: { value: false } })
+}

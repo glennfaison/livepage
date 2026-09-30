@@ -49,7 +49,7 @@ export const agencyHomepageTemplate = {
       {
         source: "summary",
         description: "Reused as the agency's about/positioning copy.",
-        targets: [{ componentId: "agency-about-copy", kind: "text", field: "children" }],
+        targets: [{ componentId: "agency-hero-copy", kind: "text", field: "children" }],
       },
       {
         source: "skills",

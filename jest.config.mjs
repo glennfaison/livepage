@@ -10,6 +10,7 @@ const customJestConfig = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
+    "^server-only$": "<rootDir>/__tests__/utils/server-only.ts",
     // Handle module aliases (this will be automatically configured for you soon)
     "^@/components/(.*)$": "<rootDir>/components/$1",
     "^@/features/(.*)$": "<rootDir>/features/$1",

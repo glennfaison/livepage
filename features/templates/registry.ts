@@ -28,6 +28,26 @@ export function getPageTemplateById(id: string): PageTemplateDefinition | undefi
   return pageTemplateRegistry.find((template) => template.id === id)
 }
 
+/** The catalog-facing metadata of a template, without its page payload. */
+export type TemplateSummary = Readonly<{
+  id: string
+  name: string
+  category: string
+  description: string
+  tags: ReadonlyArray<string>
+}>
+
+/** Describes every registered template from its own metadata, so selection logic never hard-codes the catalog. */
+export function describeTemplateCatalog(): ReadonlyArray<TemplateSummary> {
+  return pageTemplateRegistry.map(({ id, metadata }) => ({
+    id,
+    name: metadata.name,
+    category: metadata.category,
+    description: metadata.description,
+    tags: metadata.tags,
+  }))
+}
+
 export function cloneTemplatePages(template: PageTemplateDefinition): ReadonlyArray<AppNode> {
   return appNodeTreeSchema.parse(JSON.parse(JSON.stringify(template.content.pages)))
 }
