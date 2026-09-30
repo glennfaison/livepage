@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import type { z } from "zod"
 import { createEnvRateLimiter, getClientKey, rateLimitedResponse } from "@/lib/rate-limit"
+import { isPromptAssistEnabled } from "./feature-flag"
 
 // Server-only entry point of the prompt-assist module. ./index is the
 // client-safe barrel; route handlers under app/api/prompt-assist/** import
@@ -19,8 +20,9 @@ const limiters = {
 }
 
 /**
- * Shared shape of every prompt-assist route: per-client rate limit, JSON body
- * validation, the handler, and a generic 500 that never leaks provider errors.
+ * Shared shape of every prompt-assist route: the feature flag (404 when off,
+ * before anything else runs), per-client rate limit, JSON body validation,
+ * the handler, and a generic 500 that never leaks provider errors.
  */
 export async function handlePromptAssistRequest<S extends z.ZodType, R>(
   request: NextRequest,
@@ -31,6 +33,8 @@ export async function handlePromptAssistRequest<S extends z.ZodType, R>(
     responseSchema: z.ZodType<R>
   }>,
 ): Promise<Response> {
+  if (!isPromptAssistEnabled()) return NextResponse.json({ error: "Not found" }, { status: 404 })
+
   const rateLimit = limiters[route.scope].check(getClientKey(request))
   if (!rateLimit.allowed) return rateLimitedResponse(rateLimit)
 

@@ -5,14 +5,16 @@ import { Suspense, useState } from "react"
 import type { AppAction } from "@/features/app-state"
 import { AssistPanel } from "./assist-panel"
 import { usePromptAssistEnabled } from "./availability"
+import { isPromptAssistEnabled } from "./feature-flag"
 import { usePromptAssist } from "./use-prompt-assist"
 
 /**
- * Entry point used by the builder page. Renders nothing unless the URL opts in
- * with `?prompt-assist=1`. The Suspense boundary is required because reading the
+ * Entry point used by the builder page. Renders nothing unless the deployment
+ * flag is on and the URL opts in with `?prompt-assist=1`. The Suspense boundary is required because reading the
  * query string opts a statically prerendered page into client-side rendering.
  */
 export function AssistChat(props: Readonly<{ dispatch: (action: AppAction) => void }>) {
+  if (!isPromptAssistEnabled()) return null
   return (
     <Suspense fallback={null}>
       <GatedAssistChat {...props} />

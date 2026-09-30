@@ -49,7 +49,7 @@ The chat on `/try` turns "describe the page you want" into a proposal the person
 
 The design loop runs step by step from the browser because the component registry loads React components and cannot be bundled into a route handler. The server sees only the request and the page description.
 
-The chat is opt-in per page load: it renders only when the builder is opened with `?prompt-assist=1` (`availability.ts`). That gates visibility only; the `/api/prompt-assist` routes remain reachable and are protected by the provider keys, validation and rate limits. Both providers are optional; see [`.env.example`](../.env.example). [`lib/jev`](../lib/jev/) and [`lib/openai`](../lib/openai/) read secrets, import `server-only`, and are reusable by any server code. Route handlers use `prompt-assist/server.ts`, never the client barrel.
+The feature is off unless `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` (`feature-flag.ts`). One flag serves both sides: the `/api/prompt-assist` routes answer 404 when it is off, and the chat never renders, so they cannot disagree. When on, the chat also appears only on pages opened with `?prompt-assist=1` (`availability.ts`). The flag is inlined at build time, so changing it needs a rebuild. Once enabled, the routes are protected by the provider keys, validation and rate limits. Both providers are optional; see [`.env.example`](../.env.example). [`lib/jev`](../lib/jev/) and [`lib/openai`](../lib/openai/) read secrets, import `server-only`, and are reusable by any server code. Route handlers use `prompt-assist/server.ts`, never the client barrel.
 
 ## Before you change things
 

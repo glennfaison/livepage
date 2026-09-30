@@ -21,11 +21,14 @@ function mockApi(handlers: Record<string, Handler>) {
 }
 
 const originalFetch = global.fetch
+const originalEnv = { ...process.env }
 beforeEach(() => {
   mockQuery = "prompt-assist=1"
+  process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
 })
 afterEach(() => {
   global.fetch = originalFetch
+  process.env = { ...originalEnv }
 })
 
 const openChat = async (dispatch = jest.fn<void, [AppAction]>()) => {
@@ -44,6 +47,16 @@ describe("AssistChat visibility", () => {
     "renders nothing with %s",
     (_label, query) => {
       mockQuery = query
+      const { container } = render(<AssistChat dispatch={jest.fn()} />)
+      expect(container).toBeEmptyDOMElement()
+    },
+  )
+
+  it.each([["unset", undefined], ["0", "0"], ["true", "true"]])(
+    "renders nothing even with ?prompt-assist=1 when the deployment flag is %s",
+    (_label, value) => {
+      if (value === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+      else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = value
       const { container } = render(<AssistChat dispatch={jest.fn()} />)
       expect(container).toBeEmptyDOMElement()
     },

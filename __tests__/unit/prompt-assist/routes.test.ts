@@ -10,6 +10,7 @@ const originalEnv = { ...process.env }
 const originalFetch = global.fetch
 
 beforeEach(() => {
+  process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
   delete process.env.TYPESAFE_API_KEY
   delete process.env.OPENAI_API_KEY
   process.env.PROMPT_ASSIST_RATE_LIMIT_PER_MINUTE = "0"
@@ -28,6 +29,39 @@ const post = (path: string, ip: string, body: unknown) =>
     headers: { "content-type": "application/json", "x-forwarded-for": ip },
     body: typeof body === "string" ? body : JSON.stringify(body),
   })
+
+describe("prompt-assist feature flag", () => {
+  const requests = () => [
+    () => matchPost(post("match", "5.5.5.5", { prompt: "a dark resume" })),
+    () => draftPost(post("draft", "5.5.5.5", { prompt: "x", templateId: "landing-page-saas" })),
+    () => refinePost(post("refine", "5.5.5.5", { prompt: "x", page: { nodes: [], settings: {} } })),
+  ]
+
+  it.each([["unset", undefined], ["empty", ""], ["0", "0"], ["true", "true"]])(
+    "answers 404 on every route when the flag is %s, before doing any work",
+    async (_label, value) => {
+      if (value === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+      else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = value
+      process.env.TYPESAFE_API_KEY = "k"
+      process.env.OPENAI_API_KEY = "k"
+      for (const send of requests()) {
+        const response = await send()
+        expect(response.status).toBe(404)
+        expect(await response.json()).toEqual({ error: "Not found" })
+      }
+      expect(global.fetch).not.toHaveBeenCalled()
+    },
+  )
+
+  it("does not spend rate-limit budget while off, and serves requests once on", async () => {
+    process.env.PROMPT_ASSIST_RATE_LIMIT_PER_MINUTE = "1"
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "0"
+    for (let i = 0; i < 3; i += 1) expect((await requests()[0]()).status).toBe(404)
+
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    expect((await requests()[0]()).status).toBe(200)
+  })
+})
 
 describe("prompt-assist routes", () => {
   it("match reports 'unavailable' when no provider is configured", async () => {

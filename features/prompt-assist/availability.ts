@@ -2,13 +2,12 @@
 
 import { useSearchParams } from "next/navigation"
 
-/** The chat is opt-in: it only appears on pages opened with `?prompt-assist=1`. */
+/** On top of the deployment flag (see ./feature-flag), the chat is opt-in per page load: it only appears when opened with `?prompt-assist=1`. */
 const PROMPT_ASSIST_QUERY_PARAM = "prompt-assist"
 
 /**
- * Whether the current URL opts in to prompt assist. Only visibility is gated:
- * the /api/prompt-assist routes stay reachable and are protected by provider
- * keys, input validation and rate limits, not by this flag.
+ * Whether the current URL opts in to prompt assist. This is only the per-visit
+ * switch: whether the feature exists at all is decided by the deployment flag.
  * Reads the query string, so callers must render inside a Suspense boundary.
  */
 export function usePromptAssistEnabled(): boolean {
