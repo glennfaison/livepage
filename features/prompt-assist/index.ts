@@ -1,6 +1,8 @@
-export * from "./schema"
-export { extractPageBrief } from "./extract-brief"
-export { rankTemplateCandidates, pickConfidentMatch, TOP_CANDIDATE_LIMIT } from "./select-template"
-export { applyPromptFieldValues, createApplyPromptTemplateActions, type PromptFieldValues } from "./apply-brief"
-export { usePromptAssist, type AssistMessage } from "./use-prompt-assist"
+// Client-safe public API of the prompt-assist module, used by app/try. It
+// must not import the server-only jev/openai clients. Route handlers use
+// ./server instead (see docs/CONVENTIONS.md on multiple entry points).
 export { AssistChat } from "./assist-chat"
+export { describePage } from "./page-description"
+export { applyDesignEdits, validateDesignEdits } from "./design-edits"
+export { refinePage, MAX_REFINE_STEPS } from "./refine-loop"
+export * from "./schema"

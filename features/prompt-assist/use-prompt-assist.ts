@@ -1,204 +1,162 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useReducer } from "react"
 import { toast } from "@/components/ui/use-toast"
 import type { AppAction } from "@/features/app-state"
-import { getPageTemplateById, type PageTemplateDefinition } from "@/features/templates"
-import { generateId } from "@/lib/utils"
-import { createApplyPromptTemplateActions, type PromptFieldValues } from "./apply-brief"
 import {
-  draftResponseSchema,
-  matchResponseSchema,
-  type PageBrief,
-  type PromptDraft,
-  type TemplateCandidate,
-  type TemplateMatch,
-} from "./schema"
+  applyTemplateFieldValues,
+  createApplyTemplateActions,
+  describeTemplateCatalog,
+  getPageTemplateById,
+  listTemplateTextFields,
+  type PageTemplateDefinition,
+} from "@/features/templates"
+import { generateId } from "@/lib/utils"
+import { promptAssistApi, RateLimitedError } from "./api"
+import { chatReducer, initialChatState, type AssistMessage, type Proposal } from "./chat-state"
+import { composePages } from "./compose-pages"
+import { applyDesignEdits } from "./design-edits"
+import { refinePage } from "./refine-loop"
+import type { PageRequest } from "./schema"
 
-export type AssistMessage =
-  | Readonly<{ id: string; role: "user"; kind: "text"; text: string }>
-  | Readonly<{ id: string; role: "assistant"; kind: "text"; text: string }>
-  | Readonly<{ id: string; role: "assistant"; kind: "error"; text: string }>
-  | Readonly<{
-      id: string
-      role: "assistant"
-      kind: "match"
-      prompt: string
-      brief: PageBrief
-      match: TemplateMatch
-      candidates: ReadonlyArray<TemplateCandidate>
-      draft: PromptDraft | null
-      draftSource: "openai" | "fallback" | null
-      draftLoading: boolean
-      applied: boolean
-    }>
+const catalog = describeTemplateCatalog()
 
-type MatchMessage = Extract<AssistMessage, { kind: "match" }>
+const assistantText = (text: string): AssistMessage => ({ id: generateId(), role: "assistant", kind: "text", text })
+const errorMessage = (error: unknown): AssistMessage => ({
+  id: generateId(),
+  role: "assistant",
+  kind: "error",
+  text:
+    error instanceof RateLimitedError
+      ? "You're sending requests too quickly. Wait a moment and try again."
+      : "Something went wrong while working on that. Try again, or describe the page a little differently.",
+})
 
-function updateMatchMessage(
-  messages: ReadonlyArray<AssistMessage>,
-  id: string,
-  update: (message: MatchMessage) => MatchMessage,
-): ReadonlyArray<AssistMessage> {
-  return messages.map((message) => (message.id === id && message.kind === "match" ? update(message) : message))
-}
-
+/**
+ * Owns the prompt-assist conversation: match a template (asking clarifying
+ * questions when needed), draft its copy, run the design loop, then hold the
+ * result as a proposal until the person applies it through the app-state
+ * actions in one history entry.
+ */
 export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction) => void }>) {
   const { dispatch } = params
-  const [messages, setMessages] = useState<ReadonlyArray<AssistMessage>>([])
-  const [isSending, setIsSending] = useState(false)
+  const [state, emit] = useReducer(chatReducer, initialChatState)
+  const busy = state.status.phase !== "idle"
 
-  const loadDraft = useCallback(async (messageId: string, brief: PageBrief, templateId: string, prompt: string) => {
-    // A slower response for a template the person has already moved away
-    // from must not overwrite the draft for the template now selected.
-    const applyIfCurrent = (update: (message: MatchMessage) => MatchMessage) =>
-      setMessages((prev) =>
-        updateMatchMessage(prev, messageId, (message) => (message.match.templateId === templateId ? update(message) : message)),
-      )
+  /** Drafts copy for `template`, then loops on design settings until the request is met. */
+  const buildProposal = useCallback(async (request: PageRequest, template: PageTemplateDefinition, origin: Pick<Proposal, "confidence" | "decidedBy" | "candidates">) => {
+    emit({ type: "status", status: { phase: "drafting" } })
+    const draft = await promptAssistApi.draft(request, template.id)
 
-    try {
-      const response = await fetch("/api/prompt-assist/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, templateId }),
-      })
-      if (!response.ok) throw new Error(`Request failed with ${response.status}`)
-      const json = draftResponseSchema.parse(await response.json())
-      applyIfCurrent((message) => ({ ...message, draft: json.draft, draftSource: json.source, draftLoading: false }))
-    } catch {
-      applyIfCurrent((message) => ({
-        ...message,
-        draft: { name: brief.name, headline: brief.headline },
-        draftSource: "fallback",
-        draftLoading: false,
-      }))
-    }
+    const basePages = composePages(template, draft.values, [])
+    // A failed design loop should not discard the template and copy that already worked.
+    const refinement = await refinePage({
+      pages: basePages,
+      requestStep: (pages) => promptAssistApi.refine(request, pages),
+      onStep: (step) => emit({ type: "status", status: { phase: "refining", step } }),
+    }).catch((error: unknown) => {
+      emit({ type: "message", message: assistantText("I couldn't finish tuning the design, so this uses the template's own styling. You can still adjust it after applying.") })
+      console.warn("[prompt-assist] design loop failed:", error)
+      return { edits: [], satisfaction: null }
+    })
+
+    emit({
+      type: "proposal",
+      proposal: {
+        ...origin,
+        templateId: template.id,
+        fields: listTemplateTextFields(template),
+        copy: draft.values,
+        edits: refinement.edits,
+        satisfaction: refinement.satisfaction,
+        applied: false,
+      },
+    })
   }, [])
 
-  const sendPrompt = useCallback(
-    async (rawText: string) => {
-      const text = rawText.trim()
-      if (!text || isSending) return
-
-      setMessages((prev) => [...prev, { id: generateId(), role: "user", kind: "text", text }])
-      setIsSending(true)
-
+  const run = useCallback(
+    async (request: PageRequest, pendingBuild?: Readonly<{ templateId: string }>) => {
       try {
-        const response = await fetch("/api/prompt-assist/match", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: text }),
-        })
-        if (response.status === 429) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: generateId(),
-              role: "assistant",
-              kind: "error",
-              text: "You're sending prompts too quickly. Wait a moment and try again.",
-            },
-          ])
+        if (pendingBuild) {
+          const template = getPageTemplateById(pendingBuild.templateId)
+          if (!template) throw new Error("Unknown template")
+          await buildProposal(request, template, { confidence: null, decidedBy: "user", candidates: [] })
           return
         }
-        if (!response.ok) throw new Error(`Request failed with ${response.status}`)
-        const json = matchResponseSchema.parse(await response.json())
 
-        const matchMessageId = generateId()
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: matchMessageId,
-            role: "assistant",
-            kind: "match",
-            prompt: text,
-            brief: json.brief,
-            match: json.match,
-            candidates: json.candidates,
-            draft: null,
-            draftSource: null,
-            draftLoading: true,
-            applied: false,
-          },
-        ])
+        emit({ type: "status", status: { phase: "matching" } })
+        const match = await promptAssistApi.match(request)
 
-        await loadDraft(matchMessageId, json.brief, json.match.templateId, text)
-      } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: generateId(),
-            role: "assistant",
-            kind: "error",
-            text: "I couldn't work out a template for that. Try describing the kind of page you want and its tone.",
-          },
-        ])
+        if (match.kind === "unavailable") {
+          emit({ type: "needs-manual-pick" })
+          emit({ type: "message", message: assistantText("No AI provider is configured on this server, so I can't choose a template for you. Pick one below to start from.") })
+          return
+        }
+        if (match.kind === "clarify") {
+          emit({ type: "request", request, pendingQuestion: match.question })
+          emit({ type: "message", message: { id: generateId(), role: "assistant", kind: "clarify", question: match.question, options: match.options } })
+          return
+        }
+
+        const template = getPageTemplateById(match.templateId)
+        if (!template) throw new Error("Matched an unknown template")
+        await buildProposal(request, template, { confidence: match.confidence, decidedBy: match.decidedBy, candidates: match.candidates })
+      } catch (error) {
+        emit({ type: "message", message: errorMessage(error) })
       } finally {
-        setIsSending(false)
+        emit({ type: "status", status: { phase: "idle" } })
       }
     },
-    [isSending, loadDraft],
+    [buildProposal],
   )
 
-  const selectCandidate = useCallback(
-    (messageId: string, templateId: string) => {
-      const message = messages.find((candidate) => candidate.id === messageId)
-      if (!message || message.kind !== "match") return
+  const send = useCallback(
+    (rawText: string) => {
+      const text = rawText.trim()
+      if (!text || busy) return
+      emit({ type: "message", message: { id: generateId(), role: "user", kind: "text", text } })
 
-      setMessages((prev) =>
-        updateMatchMessage(prev, messageId, (current) => ({
-          ...current,
-          match: { templateId, confidence: 1, decidedBy: "user" },
-          draft: null,
-          draftSource: null,
-          draftLoading: true,
-          applied: false,
-        })),
-      )
-      void loadDraft(messageId, message.brief, templateId, message.prompt)
+      const request: PageRequest =
+        state.request && state.pendingQuestion
+          ? { ...state.request, clarifications: [...state.request.clarifications, { question: state.pendingQuestion, answer: text }] }
+          : { prompt: text, clarifications: [] }
+      emit({ type: "request", request, pendingQuestion: null })
+      void run(request)
     },
-    [loadDraft, messages],
+    [busy, run, state.pendingQuestion, state.request],
   )
 
-  const updateDraftField = useCallback((messageId: string, field: keyof PromptDraft, value: string) => {
-    setMessages((prev) =>
-      updateMatchMessage(prev, messageId, (message) => ({
-        ...message,
-        draft: { ...(message.draft ?? {}), [field]: value },
-      })),
-    )
-  }, [])
-
-  const applyMatch = useCallback(
-    (messageId: string) => {
-      const message = messages.find((candidate) => candidate.id === messageId)
-      if (!message || message.kind !== "match") return
-
-      const template: PageTemplateDefinition | undefined = getPageTemplateById(message.match.templateId)
-      if (!template) {
-        toast({ title: "Couldn't apply that template", description: "It may have been removed from the catalog." })
-        return
-      }
-
-      const fieldValues: PromptFieldValues = {
-        name: message.draft?.name ?? message.brief.name,
-        headline: message.draft?.headline ?? message.brief.headline,
-        summary: message.draft?.summary,
-      }
-
-      for (const action of createApplyPromptTemplateActions(
-        template,
-        fieldValues,
-        `Applied "${template.metadata.name}" from prompt assist`,
-      )) {
-        dispatch(action)
-      }
-
-      toast({ title: "Template applied", description: template.metadata.name })
-      setMessages((prev) => updateMatchMessage(prev, messageId, (current) => ({ ...current, applied: true })))
+  /** The person chose a template themselves; rebuild the proposal around it. */
+  const pickTemplate = useCallback(
+    (templateId: string) => {
+      if (busy) return
+      const request = state.request ?? { prompt: `A page using the "${getPageTemplateById(templateId)?.metadata.name ?? templateId}" template`, clarifications: [] }
+      emit({ type: "request", request, pendingQuestion: null })
+      void run(request, { templateId })
     },
-    [dispatch, messages],
+    [busy, run, state.request],
   )
 
-  return { messages, isSending, sendPrompt, selectCandidate, updateDraftField, applyMatch }
+  const editCopy = useCallback((source: string, value: string) => emit({ type: "copy", source, value }), [])
+
+  const apply = useCallback(() => {
+    const { proposal } = state
+    const template = proposal ? getPageTemplateById(proposal.templateId) : undefined
+    if (!proposal || !template) {
+      toast({ title: "Couldn't apply that template", description: "It may have been removed from the catalog." })
+      return
+    }
+    for (const action of createApplyTemplateActions(template, {
+      customizePages: (pages) => applyDesignEdits(applyTemplateFieldValues(pages, template, proposal.copy), proposal.edits),
+      historyLabel: `Applied "${template.metadata.name}" from prompt assist`,
+    })) {
+      dispatch(action)
+    }
+    toast({ title: "Template applied", description: template.metadata.name })
+    emit({ type: "applied" })
+  }, [dispatch, state])
+
+  return { ...state, busy, catalog, send, pickTemplate, editCopy, apply }
 }
+
+export type PromptAssist = ReturnType<typeof usePromptAssist>

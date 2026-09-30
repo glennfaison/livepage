@@ -1,10 +1,9 @@
 import { z } from "zod"
 
 /**
- * Shared, deeply readonly request/response contracts for prompt assist.
- * Zod infers mutable types, so each exported type is wrapped in
- * `DeepReadonly` to satisfy the "feature-facing types are deeply readonly"
- * guidance in docs/CONTEXT.md.
+ * Deeply readonly request/response contracts for prompt assist. Zod infers
+ * mutable types, so each exported type is wrapped in `DeepReadonly`, per the
+ * "feature-facing types are deeply readonly" rule in docs/CONTEXT.md.
  */
 type DeepReadonly<T> = T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepReadonly<U>>
@@ -12,83 +11,116 @@ type DeepReadonly<T> = T extends ReadonlyArray<infer U>
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T
 
-export const MAX_PROMPT_LENGTH = 2000
-const MAX_FIELD_LENGTH = 200
-const MAX_SUMMARY_LENGTH = 600
+const MAX_PROMPT_LENGTH = 2000
+export const MAX_CLARIFICATIONS = 2
+const MAX_ANSWER_LENGTH = 500
+export const MAX_DESCRIBED_NODES = 150
+const MAX_DESCRIPTION_JSON_LENGTH = 200_000
 
 const promptSchema = z.string().trim().min(1).max(MAX_PROMPT_LENGTH)
 
-/**
- * The structured parameters extracted from a prompt-assist chat message.
- * See docs/GLOSSARY.md ("Page brief") for the canonical definition.
- */
-export const pageBriefSchema = z.object({
-  rawPrompt: z.string().max(MAX_PROMPT_LENGTH),
-  toneHints: z.array(z.string().max(MAX_FIELD_LENGTH)).max(32),
-  colorHints: z.array(z.string().max(MAX_FIELD_LENGTH)).max(32),
-  name: z.string().max(MAX_FIELD_LENGTH).optional(),
-  headline: z.string().max(MAX_FIELD_LENGTH).optional(),
+/** One question the assistant asked and the person's reply; together with the prompt they form the request. */
+const clarificationSchema = z.object({
+  question: z.string().trim().min(1).max(MAX_ANSWER_LENGTH),
+  answer: z.string().trim().min(1).max(MAX_ANSWER_LENGTH),
 })
-export type PageBrief = DeepReadonly<z.infer<typeof pageBriefSchema>>
+export type Clarification = DeepReadonly<z.infer<typeof clarificationSchema>>
 
-export const templateCandidateSchema = z.object({
+/** The person's description of the page, plus any clarifying answers so far. */
+const pageRequestShape = {
+  prompt: promptSchema,
+  clarifications: z.array(clarificationSchema).max(MAX_CLARIFICATIONS).default([]),
+}
+export type PageRequest = DeepReadonly<{ prompt: string; clarifications: ReadonlyArray<Clarification> }>
+
+const templateCandidateSchema = z.object({
   templateId: z.string(),
   name: z.string(),
-  category: z.string(),
-  score: z.number(),
+  probability: z.number().min(0).max(1),
 })
 export type TemplateCandidate = DeepReadonly<z.infer<typeof templateCandidateSchema>>
 
+export const matchRequestSchema = z.object(pageRequestShape)
+
 /**
- * How a Template match was reached:
- * - "deterministic": one template clearly won the keyword ranking
- * - "jev": Jev broke a tie between near-tied candidates
- * - "jev-unavailable": near-tied and Jev could not answer, so the top candidate is a best guess
- * - "fallback": nothing in the prompt overlapped any template; the match is arbitrary
- * - "user": the person picked this template themselves
+ * - "match": a template was chosen (`decidedBy` names the provider that judged it)
+ * - "clarify": the request is too ambiguous; ask the person one question first
+ * - "unavailable": no model provider is configured, so the person must pick a template
  */
-export const templateMatchSchema = z.object({
-  templateId: z.string(),
-  confidence: z.number().min(0).max(1),
-  decidedBy: z.enum(["deterministic", "jev", "jev-unavailable", "fallback", "user"]),
-})
-export type TemplateMatch = DeepReadonly<z.infer<typeof templateMatchSchema>>
-
-export const matchRequestSchema = z.object({ prompt: promptSchema })
-export type MatchRequest = DeepReadonly<z.infer<typeof matchRequestSchema>>
-
-export const matchResponseSchema = z.object({
-  brief: pageBriefSchema,
-  match: templateMatchSchema,
-  candidates: z.array(templateCandidateSchema),
-})
+export const matchResponseSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("match"),
+    templateId: z.string(),
+    confidence: z.number().min(0).max(1),
+    decidedBy: z.enum(["jev", "openai"]),
+    candidates: z.array(templateCandidateSchema),
+  }),
+  z.object({
+    kind: z.literal("clarify"),
+    question: z.string().min(1).max(MAX_ANSWER_LENGTH),
+    options: z.array(z.string().min(1).max(80)).max(4),
+  }),
+  z.object({ kind: z.literal("unavailable") }),
+])
 export type MatchResponse = DeepReadonly<z.infer<typeof matchResponseSchema>>
 
-/**
- * Draft copy for the "name" / "headline" / "summary" slots that every
- * bundled template already exposes through its `dataMapping.fields`.
- * Length caps are enforced here because model output is untrusted and is
- * written straight into the page.
- */
-export const promptDraftSchema = z.object({
-  name: z.string().max(MAX_FIELD_LENGTH).optional(),
-  headline: z.string().max(MAX_FIELD_LENGTH).optional(),
-  summary: z.string().max(MAX_SUMMARY_LENGTH).optional(),
-})
-export type PromptDraft = DeepReadonly<z.infer<typeof promptDraftSchema>>
+export const draftRequestSchema = z.object({ ...pageRequestShape, templateId: z.string().min(1).max(200) })
 
-/**
- * The server re-derives the Page brief from `prompt`, so the client never
- * supplies (and the server never trusts) a pre-built brief.
- */
-export const draftRequestSchema = z.object({
-  prompt: promptSchema,
-  templateId: z.string().min(1).max(MAX_FIELD_LENGTH),
-})
-export type DraftRequest = DeepReadonly<z.infer<typeof draftRequestSchema>>
-
+/** `values` is keyed by the template's `dataMapping.fields[].source`. Empty when no model is configured. */
 export const draftResponseSchema = z.object({
-  draft: promptDraftSchema,
-  source: z.enum(["openai", "fallback"]),
+  values: z.record(z.string(), z.string()),
+  source: z.enum(["openai", "none"]),
 })
 export type DraftResponse = DeepReadonly<z.infer<typeof draftResponseSchema>>
+
+/** A proposed change to one plain-attribute design-component setting. */
+export const designEditSchema = z.object({
+  componentId: z.string().min(1).max(200),
+  setting: z.string().min(1).max(100),
+  value: z.string().max(300),
+  reason: z.string().max(200),
+})
+export type DesignEdit = DeepReadonly<z.infer<typeof designEditSchema>>
+
+/** A design setting of a component tag, as a caller may read and write it. Mirrors the registry's field metadata. */
+const settingDescriptorSchema = z.object({
+  id: z.string().min(1).max(100),
+  label: z.string().max(100),
+  type: z.string().max(30),
+  options: z.array(z.string().max(100)).max(50).optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+})
+export type SettingDescriptor = DeepReadonly<z.infer<typeof settingDescriptorSchema>>
+
+const nodeSnapshotSchema = z.object({
+  id: z.string().max(200),
+  tag: z.string().min(1).max(50),
+  text: z.string().max(100).optional(),
+  settings: z.record(z.string(), z.string().max(300)),
+})
+
+/**
+ * What the design loop needs to know about a page: its components with current
+ * setting values, and which settings each tag exposes. It is derived in the
+ * browser from the component registry (see page-description.ts), so the server
+ * never loads React components or the registry.
+ */
+const pageDescriptionSchema = z
+  .object({
+    nodes: z.array(nodeSnapshotSchema).max(MAX_DESCRIBED_NODES),
+    settings: z.record(z.string(), z.array(settingDescriptorSchema).max(60)),
+  })
+  .refine((page) => JSON.stringify(page).length <= MAX_DESCRIPTION_JSON_LENGTH, "Page description is too large")
+export type PageDescription = DeepReadonly<z.infer<typeof pageDescriptionSchema>>
+
+export const refineRequestSchema = z.object({ ...pageRequestShape, page: pageDescriptionSchema })
+
+/** One refinement step: how well the page fits the request now, and the next bounded batch of edits. */
+export const refineResponseSchema = z.object({
+  /** Jev's probability that the page satisfies the request, or null when Jev did not judge. */
+  satisfaction: z.number().min(0).max(1).nullable(),
+  done: z.boolean(),
+  edits: z.array(designEditSchema).max(12),
+})
+export type RefineResponse = DeepReadonly<z.infer<typeof refineResponseSchema>>
