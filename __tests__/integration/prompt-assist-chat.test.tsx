@@ -3,6 +3,9 @@ import userEvent from "@testing-library/user-event"
 import type { AppAction } from "@/features/app-state"
 import { AssistChat } from "@/features/prompt-assist"
 
+let mockQuery = "prompt-assist=1"
+jest.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mockQuery) }))
+
 type Handler = (body: Record<string, unknown>) => { status?: number; body: unknown }
 
 function mockApi(handlers: Record<string, Handler>) {
@@ -18,6 +21,9 @@ function mockApi(handlers: Record<string, Handler>) {
 }
 
 const originalFetch = global.fetch
+beforeEach(() => {
+  mockQuery = "prompt-assist=1"
+})
 afterEach(() => {
   global.fetch = originalFetch
 })
@@ -32,6 +38,23 @@ const send = async (user: ReturnType<typeof userEvent.setup>, text: string) => {
   await user.type(screen.getByPlaceholderText(/describe the page/i), text)
   await user.click(screen.getByRole("button", { name: "Send" }))
 }
+
+describe("AssistChat visibility", () => {
+  it.each([["no query string", ""], ["another param", "tab=1"], ["the flag set to 0", "prompt-assist=0"], ["the flag set to true", "prompt-assist=true"]])(
+    "renders nothing with %s",
+    (_label, query) => {
+      mockQuery = query
+      const { container } = render(<AssistChat dispatch={jest.fn()} />)
+      expect(container).toBeEmptyDOMElement()
+    },
+  )
+
+  it("shows the launcher with ?prompt-assist=1, alongside other params", () => {
+    mockQuery = "tab=1&prompt-assist=1"
+    render(<AssistChat dispatch={jest.fn()} />)
+    expect(screen.getByRole("button", { name: /open page assistant/i })).toBeInTheDocument()
+  })
+})
 
 describe("AssistChat", () => {
   it("is closed by default, opens from the bubble and minimizes without losing the conversation", async () => {
