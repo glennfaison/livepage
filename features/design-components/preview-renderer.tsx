@@ -2,20 +2,14 @@ import type { ReactNode } from "react"
 import type { AppNode, ViewModeProps } from "@/features/types"
 import { getComponentInfo } from "./registry"
 
-function renderPreviewNode(
-  node: AppNode | string,
-  props: ViewModeProps,
-  key?: string | number,
-): ReactNode {
-  if (typeof node === "string") return node
+export function PreviewRenderer({
+  node,
+  ...props
+}: ViewModeProps & { node?: AppNode | string }): ReactNode {
+  const targetNode = node ?? props.component
+  if (typeof targetNode === "string") return targetNode
 
-  const PreviewModeComponent = getComponentInfo(node.tag).PreviewModeComponent
-  return <PreviewModeComponent {...props} component={node} key={key} />
+  const PreviewModeComponent = getComponentInfo(targetNode.tag).PreviewModeComponent
+  return <PreviewModeComponent {...props} component={targetNode} />
 }
 
-export function PreviewRenderer(
-  props: ViewModeProps & { node?: AppNode | string },
-) {
-  const { node = props.component, ...rendererProps } = props
-  return renderPreviewNode(node, rendererProps)
-}
