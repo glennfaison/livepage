@@ -44,6 +44,34 @@ _Avoid_: Dynamic token
 An exported page artifact that can be opened directly in a modern browser without running LivePage.
 _Avoid_: Static HTML snapshot
 
+**Prompt assist chat**:
+The minimizable chatbox on the builder where a person describes a page in their own words and reviews a Template match, Copy draft, and Design edits before applying them.
+_Avoid_: Chatbot, AI assistant
+
+**Template match**:
+The template chosen for a request from the template catalog, judged by Jev (or OpenAI as fallback) and reported with its probability.
+_Avoid_: Recommendation, suggestion
+
+**Clarifying question**:
+The single question the chat asks when a request is too ambiguous for a Template match; its answer is added to the request.
+_Avoid_: Follow-up, prompt
+
+**Copy draft**:
+Text for the free-text slots a template declares in its `dataMapping`, proposed from the request and editable before it is applied.
+_Avoid_: Generated content, AI copy
+
+**Page description**:
+The compact list of a page's components, their current design settings, and the settings each tag exposes, derived from the component registry and sent to the server for the Design loop.
+_Avoid_: Snapshot, page dump
+
+**Design edit**:
+One proposed change to a single design setting of one component, validated against that setting before it is applied.
+_Avoid_: Patch, tweak
+
+**Design loop**:
+The bounded cycle of judging whether the page satisfies the request and applying the next batch of Design edits until it does or stops changing.
+_Avoid_: Auto-design, agent loop
+
 ## Relationships
 
 - The **App-state API** operates on **App state**
@@ -52,8 +80,14 @@ _Avoid_: Static HTML snapshot
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
 - A **Standalone HTML export** contains serialized **App nodes** and resolves **Data sources** when opened
+- A **Prompt assist chat** request resolves to a **Template match**, possibly after one or more **Clarifying questions**
+- A **Template match** gets a **Copy draft**, then the **Design loop** refines its cloned **App nodes** through **Design edits** computed from a **Page description**
+- Applying the result goes through the **App-state API** like any other template application, as one history entry
 
 ## Example dialogue
 
 > **Dev:** "Should this JSON loader live in the **App-state API**?"
 > **Domain expert:** "No — the API owns commands and selectors. The JSON loader is a **Serializer** that feeds it."
+
+> **Dev:** "Why does the Design loop send a **Page description** instead of the page?"
+> **Domain expert:** "The server can't load the component registry, so the browser describes the page and validates every **Design edit** again against the real components before applying it."

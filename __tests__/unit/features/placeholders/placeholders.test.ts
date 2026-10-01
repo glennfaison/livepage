@@ -1,10 +1,9 @@
-import { replaceDataSourceComponentProperties } from "@/features/design-component-runtime/primitives"
-import { replaceCurrentDatePlaceholderInString } from "@/features/placeholders/current-date"
-import { replaceDataSourcePlaceholdersInString } from "@/features/placeholders/data-source"
-
-function replacePlaceholdersInString(str: string, data: unknown, now: Date = new Date()): string {
-  return replaceCurrentDatePlaceholderInString(replaceDataSourcePlaceholdersInString(str, data), now)
-}
+import { replaceDataSourceComponentProperties } from "@/client/features/design-components/primitives"
+import {
+  replaceCurrentDatePlaceholderInString,
+  replaceDataSourcePlaceholdersInString,
+  replacePlaceholdersInString,
+} from "@/client/features/placeholders"
 
 describe("placeholders", () => {
   it("replaces data-source expressions inside strings", () => {

@@ -4,8 +4,8 @@ import React from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 import "@testing-library/jest-dom"
-import { getComponentInfo } from "@/features/design-components"
-import { deserializeAppStateFromShortcode } from "@/features/serializers"
+import { getComponentInfo } from "@/client/features/design-components"
+import { deserializeAppStateFromShortcode } from "@/client/features/serializers"
 
 describe("Generated Data preview layout fixture", () => {
 	it("renders connected preview headers inside a block wrapper", async () => {

@@ -1,0 +1,60 @@
+name: Bug report
+description: Something in LivePage is broken or behaves unexpectedly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. For security problems, use the private link on the issue chooser instead of this form.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Editor / page builder
+        - Design components
+        - Data sources / placeholders
+        - Templates
+        - Import / export (JSON, shortcode)
+        - Standalone HTML export
+        - Command palette / theme
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open /try and apply the "..." template
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: page
+    attributes:
+      label: Page JSON or shortcode
+      description: A minimal page that reproduces the problem, if you have one.
+      render: text
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and version, OS, and the commit or deployment you tested.
+      placeholder: Firefox 130, macOS 15, main @ 9c9503f
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true

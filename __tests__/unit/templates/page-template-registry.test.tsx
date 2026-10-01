@@ -1,14 +1,16 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { PreviewRenderer } from "@/features/design-components"
-import { appReducer, initialState } from "@/features/app-state/commands/reducer"
-import type { AppNode, AppState } from "@/features/app-state"
-import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages, TemplateCatalogPopover } from "@/features/templates"
+import { PreviewRenderer } from "@/client/features/design-components"
+import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
+import type { AppNode, AppState } from "@/client/features/app-state"
+import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages, TemplateCatalogPopover } from "@/client/features/templates"
 
 describe("page template registry", () => {
-  it("validates the bundled CV template definition", () => {
-    expect(pageTemplateRegistry).toHaveLength(3)
+  it("validates every bundled template definition and keeps ids unique", () => {
+    // Deliberately not a hard-coded count: the catalog grows, and consumers read it from the registry.
+    expect(pageTemplateRegistry.length).toBeGreaterThan(0)
+    expect(new Set(pageTemplateRegistry.map((template) => template.id)).size).toBe(pageTemplateRegistry.length)
     for (const template of pageTemplateRegistry) {
       expect(() => pageTemplateDefinitionSchema.parse(template)).not.toThrow()
     }
@@ -35,6 +37,28 @@ describe("page template registry", () => {
     expect(screen.getByText("Avery Johnson")).toBeInTheDocument()
     expect(screen.getByText("Experience")).toBeInTheDocument()
     expect(screen.getByText("NN/g UX Certification")).toBeInTheDocument()
+  })
+
+  it("renders the patient dashboard with its registered chart, metric, and table components", () => {
+    const template = getPageTemplateById("patient-health-dashboard")
+    expect(template).toBeDefined()
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={cloneTemplatePages(template!)[0]}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByText("Diagnosis History")).toBeInTheDocument()
+    expect(screen.getByText("Blood Pressure")).toBeInTheDocument()
+    expect(screen.getByRole("table")).toBeInTheDocument()
+    expect(screen.getAllByText("Type 2 Diabetes")).toHaveLength(2)
   })
 
   it("renders a readable template catalog summary with an apply action", async () => {

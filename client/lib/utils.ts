@@ -1,0 +1,20 @@
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export const generateId = () =>
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {
+  if (originalArray.length === 0) {
+    return []
+  }
+  const result: (T | U)[] = originalArray.flatMap((element) => [itemToInsert, element])
+  result.push(itemToInsert)
+  return result
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}

@@ -1,0 +1,226 @@
+import type { AppNode } from "@/client/features/types"
+import { findComponentById } from "@/client/features/app-state/tree"
+export { findComponentById } from "@/client/features/app-state/tree"
+
+function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
+  const newId = `${component.attributes.id}${idSuffix}`
+  return {
+    ...component,
+    attributes: { ...component.attributes, id: newId },
+    children: component.children.map((child) => (typeof child === "string" ? child : cloneNodeWithNewIds(child, idSuffix))),
+  }
+}
+
+export function findComponentParentTree({
+  components,
+  componentId,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+}>): AppNode[] {
+  for (const component of components) {
+    if (typeof component === "string") {
+      continue
+    }
+
+    if (component.attributes.id === componentId) {
+      return [component]
+    }
+
+    const parentTree = findComponentParentTree({ components: component.children, componentId })
+    if (parentTree.length > 0) {
+      return [...parentTree, component]
+    }
+  }
+  return []
+}
+
+export function insertComponent({
+  components,
+  newComponent,
+  parentId,
+  index,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  newComponent: AppNode
+  parentId?: string
+  index?: number
+}>): AppNode[] {
+  if (components.length === 0 && (parentId === null || parentId === undefined)) {
+    return [newComponent]
+  }
+
+  return components.reduce<AppNode[]>((acc, component, idx) => {
+    if (typeof component === "string") {
+      return [...acc, component as never]
+    }
+
+    const siblingIndexIsValid = typeof index === "number" && -1 < index && index < components.length
+    const siblingIndex = siblingIndexIsValid ? index : components.length
+    if ((parentId === null || parentId === undefined) && idx === siblingIndex) {
+      return [...acc, newComponent, component]
+    }
+
+    if (component.attributes.id === parentId) {
+      const siblingChildIndexIsValid = typeof index === "number" && -1 < index && index < component.children.length
+      const siblingChildIndex = siblingChildIndexIsValid ? index : component.children.length
+      const parentComponent: AppNode = {
+        ...component,
+        children: [
+          ...component.children.slice(0, siblingChildIndex),
+          newComponent,
+          ...component.children.slice(siblingChildIndex),
+        ],
+      }
+      return [...acc, parentComponent]
+    }
+
+    return [
+      ...acc,
+      {
+        ...component,
+        children: insertComponent({
+          components: component.children,
+          newComponent,
+          parentId,
+          index,
+        }),
+      },
+    ]
+  }, [])
+}
+
+export function updateComponent({
+  components,
+  componentId,
+  updates,
+  updated,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+  updates: Partial<AppNode>
+  updated: { value: boolean }
+}>): AppNode[] {
+  return components.map((component) => {
+    if (typeof component === "string") {
+      return component as never
+    }
+
+    if (component.attributes.id === componentId) {
+      updated.value = true
+      return {
+        ...component,
+        attributes: { ...component.attributes, ...updates.attributes },
+        children: updates.children ?? component.children,
+      }
+    }
+
+    return {
+      ...component,
+      children: updateComponent({
+        components: component.children,
+        componentId,
+        updates,
+        updated,
+      }),
+    }
+  })
+}
+
+export function removeComponent({
+  components,
+  componentId,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+}>): AppNode[] {
+  return components.reduce<AppNode[]>((acc, component) => {
+    if (typeof component === "string") {
+      return [...acc, component as never]
+    }
+
+    if (component.attributes.id === componentId) {
+      return acc
+    }
+
+    const updatedChildren = removeComponent({
+      components: component.children,
+      componentId,
+    })
+
+    return [...acc, { ...component, children: updatedChildren }]
+  }, [])
+}
+
+export function duplicateComponent({
+  components,
+  componentId,
+}: {
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+}): AppNode[] {
+  return components.reduce<AppNode[]>((acc, component) => {
+    if (typeof component === "string") {
+      return [...acc, component as never]
+    }
+
+    if (component.attributes.id === componentId) {
+      const idSuffix = `-copy-${Date.now()}`
+      const duplicatedComponent = cloneNodeWithNewIds(component, idSuffix)
+      return [...acc, component, duplicatedComponent]
+    }
+
+    return [
+      ...acc,
+      {
+        ...component,
+        children: duplicateComponent({
+          components: component.children,
+          componentId,
+        }),
+      },
+    ]
+  }, [])
+}
+
+export function replaceComponent({
+  components,
+  oldComponentId,
+  newComponent,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  oldComponentId: string
+  newComponent: AppNode
+}>): AppNode[] {
+  return components.map((component) => {
+    if (typeof component === "string") {
+      return component as never
+    }
+
+    if (component.attributes.id === oldComponentId) {
+      return newComponent
+    }
+
+    return {
+      ...component,
+      children: replaceComponent({
+        components: component.children,
+        oldComponentId,
+        newComponent,
+      }),
+    }
+  })
+}
+
+/**
+ * Pure counterpart of the UPDATE_COMPONENT command for callers that batch
+ * several edits into one action (for example applying a template with
+ * customizations). Returns the tree unchanged when `componentId` is absent.
+ */
+export function patchComponent(
+  components: ReadonlyArray<AppNode>,
+  componentId: string,
+  updates: Partial<AppNode>,
+): ReadonlyArray<AppNode> {
+  return updateComponent({ components, componentId, updates, updated: { value: false } })
+}
