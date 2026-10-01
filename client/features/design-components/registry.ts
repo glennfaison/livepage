@@ -15,6 +15,9 @@ import { componentMetadata as Callout } from "./definitions/callout"
 import { componentMetadata as Stat } from "./definitions/stat"
 import { componentMetadata as Time } from "./definitions/time"
 import { componentMetadata as Page } from "./definitions/page-component"
+import { componentMetadata as LineChart } from "./definitions/line-chart"
+import { componentMetadata as MetricCard } from "./definitions/metric-card"
+import { componentMetadata as DataTable } from "./definitions/data-table"
 export { componentTagList } from "./component-tags"
 
 const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
@@ -33,6 +36,9 @@ const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
   [Callout.tag]: Callout,
   [Stat.tag]: Stat,
   [Time.tag]: Time,
+  [LineChart.tag]: LineChart,
+  [MetricCard.tag]: MetricCard,
+  [DataTable.tag]: DataTable,
   [Page.tag]: Page,
 }
 

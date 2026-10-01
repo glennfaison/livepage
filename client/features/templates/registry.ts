@@ -7,6 +7,7 @@ import { blogArticlePageTemplate } from "@/client/features/templates/definitions
 import { agencyHomepageTemplate } from "@/client/features/templates/definitions/agency-homepage"
 import { eventConferencePageTemplate } from "@/client/features/templates/definitions/event-conference-page"
 import { contactAboutPageTemplate } from "@/client/features/templates/definitions/contact-about-page"
+import { patientHealthDashboardTemplate } from "@/client/features/templates/definitions/patient-health-dashboard"
 import { parsePageTemplateDefinition, type PageTemplateDefinition } from "@/client/features/templates/schema"
 
 export const pageTemplateRegistry = [
@@ -20,6 +21,7 @@ export const pageTemplateRegistry = [
   parsePageTemplateDefinition(agencyHomepageTemplate),
   parsePageTemplateDefinition(eventConferencePageTemplate),
   parsePageTemplateDefinition(contactAboutPageTemplate),
+  parsePageTemplateDefinition(patientHealthDashboardTemplate),
 ] as const
 
 export function getPageTemplateById(id: string): PageTemplateDefinition | undefined {

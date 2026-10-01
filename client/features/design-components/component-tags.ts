@@ -14,4 +14,7 @@ export const componentTagList = [
   "callout",
   "stat",
   "time",
+  "line-chart",
+  "metric-card",
+  "data-table",
 ] as const

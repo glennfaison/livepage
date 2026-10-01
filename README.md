@@ -6,9 +6,9 @@ LivePage is a visual page builder. You compose a page from design components in 
 
 ## Features
 
-- **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, and callouts. Includes undo/redo history and a command palette.
+- **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, callouts, charts, metric cards, and data tables. Includes undo/redo history and a command palette.
 - **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, or generated data through placeholders.
-- **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, and contact/about.
+- **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
 - **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`, and even then hidden unless the page is opened with `?prompt-assist=1`; see [Optional: page assistant](#optional-page-assistant).
 - **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
 

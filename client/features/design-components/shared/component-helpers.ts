@@ -16,6 +16,29 @@ function isString(value: unknown): value is string {
   return typeof value === "string"
 }
 
+export type JsonSettingResult<T> =
+  | Readonly<{ ok: true; value: T }>
+  | Readonly<{ ok: false; error: string }>
+
+export function parseJsonSetting<T>(
+  value: unknown,
+  validate: (value: unknown) => value is T,
+  expected: string,
+): JsonSettingResult<T> {
+  if (typeof value !== "string") return { ok: false, error: "Enter valid JSON." }
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(value)
+  } catch (error) {
+    if (error instanceof SyntaxError) return { ok: false, error: "Enter valid JSON." }
+    throw error
+  }
+
+  if (!validate(parsed)) return { ok: false, error: `Expected ${expected}.` }
+  return { ok: true, value: parsed }
+}
+
 export function createAttributeMap(attributes: ReadonlyArray<SettingsField>): AttributeMap {
   return Object.fromEntries(attributes.map((attribute) => [attribute.id, attribute]))
 }

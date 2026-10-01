@@ -39,6 +39,28 @@ describe("page template registry", () => {
     expect(screen.getByText("NN/g UX Certification")).toBeInTheDocument()
   })
 
+  it("renders the patient dashboard with its registered chart, metric, and table components", () => {
+    const template = getPageTemplateById("patient-health-dashboard")
+    expect(template).toBeDefined()
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={cloneTemplatePages(template!)[0]}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByText("Diagnosis History")).toBeInTheDocument()
+    expect(screen.getByText("Blood Pressure")).toBeInTheDocument()
+    expect(screen.getByRole("table")).toBeInTheDocument()
+    expect(screen.getAllByText("Type 2 Diabetes")).toHaveLength(2)
+  })
+
   it("renders a readable template catalog summary with an apply action", async () => {
     const user = userEvent.setup()
     const onApplyTemplate = jest.fn()
