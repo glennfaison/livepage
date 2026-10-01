@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "./registry"
-import type { DataSourceId, Props } from "@/shared/features/types"
+import type { DataSourceId, Props } from "@/client/features/types"
 import { DATA_SOURCE_FIELD_NAME } from "./constants"
 import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/client/lib/utils"

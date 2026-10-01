@@ -1,6 +1,6 @@
 import { componentTagList } from "../primitives"
 import { ComponentSelectorPopover } from "./component-selector-popover"
-import type { AppNode, AppNodeTag } from "@/shared/features/types"
+import type { AppNode, AppNodeTag } from "@/client/features/types"
 import type React from "react"
 
 export const ReplaceWithPopover = ({

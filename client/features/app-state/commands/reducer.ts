@@ -1,5 +1,5 @@
-import type { AppAction, AppNode, AppState, HistoryEntry } from "@/shared/features/types"
-import { generateId } from "@/shared/lib/utils"
+import type { AppAction, AppNode, AppState, HistoryEntry } from "@/client/features/types"
+import { generateId } from "@/client/lib/utils"
 import {
   insertComponent,
   updateComponent,

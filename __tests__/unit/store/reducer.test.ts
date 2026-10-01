@@ -1,5 +1,5 @@
 import { createDesignComponentInstance } from "@/client/features/design-components"
-import { appReducer, initialState } from "@/shared/features/app-state/commands/reducer"
+import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
 import type { AppState, AppAction } from "@/client/features/app-state"
 import { generateId } from "@/client/lib/utils"
 
@@ -215,7 +215,7 @@ describe("App Reducer", () => {
 
 describe("insertComponent", () => {
   it("should insert a component at the root level if no parentId is provided", () => {
-    const { insertComponent } = require("@/shared/features/app-state/commands/helpers")
+    const { insertComponent } = require("@/client/features/app-state/commands/helpers")
     const state = { ...initialState, componentTree: [] }
     const component = createDesignComponentInstance("header1", generateId())
     const newComponents = insertComponent({ components: state.componentTree, newComponent: component })
@@ -225,7 +225,7 @@ describe("insertComponent", () => {
   })
 
   it("should insert a component as a child of a parent component", () => {
-    const { insertComponent } = require("@/shared/features/app-state/commands/helpers")
+    const { insertComponent } = require("@/client/features/app-state/commands/helpers")
     const parent = createDesignComponentInstance("row", generateId())
     const state = { ...initialState, componentTree: [parent] }
     const child = createDesignComponentInstance("header1", generateId())

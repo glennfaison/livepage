@@ -3,7 +3,7 @@
 import React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
-import type { AppNode } from "@/shared/features/types"
+import type { AppNode } from "@/client/features/types"
 import { ComponentSettingsTabContent, useComponentSettingsEditor } from "./design-component-settings"
 import { DataSourceListViewTabContent, useDataSourceSettingsEditor } from "./data-source-settings"
 

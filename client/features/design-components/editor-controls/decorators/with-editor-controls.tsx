@@ -4,7 +4,7 @@ import { Button } from "@/client/components/ui/button";
 import { cn } from "@/client/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import { useCallback } from "react";
-import type { EditModeProps } from "@/shared/features/types";
+import type { EditModeProps } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import React from "react";
 import { getComponentInfo } from "../../registry";

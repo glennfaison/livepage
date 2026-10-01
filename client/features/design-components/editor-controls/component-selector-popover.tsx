@@ -4,7 +4,7 @@ import { Input } from "@/client/components/ui/input"
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
 import { getComponentInfo } from "../registry"
-import type { AppNodeTag } from "@/shared/features/types"
+import type { AppNodeTag } from "@/client/features/types"
 
 // Component selector popover
 export const ComponentSelectorPopover = ({

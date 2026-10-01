@@ -1,5 +1,5 @@
 import React from "react"
-import type { AppNode, PageBuilderMode } from "@/shared/features/types"
+import type { AppNode, PageBuilderMode } from "@/client/features/types"
 import { getComponentInfo, PreviewRenderer } from "@/client/features/design-components"
 
 export type CanvasRendererProps = Readonly<{

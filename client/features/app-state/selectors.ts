@@ -1,4 +1,4 @@
-import type { AppNode, AppState } from "@/shared/features/types"
+import type { AppNode, AppState } from "@/client/features/types"
 
 function findPageById(componentTree: ReadonlyArray<AppNode>, pageId: string): AppNode | undefined {
   return componentTree.find((page) => page.attributes.id === pageId)

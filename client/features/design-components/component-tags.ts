@@ -1,1 +1,17 @@
-export { componentTagList } from "@/shared/features/design-components"
+export const componentTagList = [
+  "header1",
+  "header2",
+  "header3",
+  "paragraph",
+  "inline-text",
+  "link",
+  "button",
+  "image",
+  "row",
+  "column",
+  "badge",
+  "divider",
+  "callout",
+  "stat",
+  "time",
+] as const

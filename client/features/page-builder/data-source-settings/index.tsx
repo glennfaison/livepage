@@ -6,7 +6,7 @@ import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Label } from "@/client/components/ui/label"
 import { decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo, dataSourceIdList, DATA_SOURCE_FIELD_NAME } from "@/client/features/data-sources"
-import type { AppNode, DataSourceInfo, DataSourceSettings, PrimitiveSettingsField, SettingsFormData, SettingsValue } from "@/shared/features/types"
+import type { AppNode, DataSourceInfo, DataSourceSettings, PrimitiveSettingsField, SettingsFormData, SettingsValue } from "@/client/features/types"
 import { useComponentOperationsContext } from "@/client/features/page-builder/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
 

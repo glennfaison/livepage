@@ -1,9 +1,15 @@
 import { z } from "zod"
 import { askJev, isJevConfigured, JevUnavailableError, type JevChoiceAnswer } from "@/server/services/jev"
 import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/server/services/openai"
-import { describeTemplateCatalog, type TemplateSummary } from "@/shared/features/templates/catalog"
 import { describeRequest } from "./request"
-import { MAX_CLARIFICATIONS, type MatchResponse, type PageRequest, type TemplateCandidate } from "@/shared/features/prompt-assist/contract/schema"
+import {
+  MAX_CLARIFICATIONS,
+  type MatchRequest,
+  type MatchResponse,
+  type PageRequest,
+  type TemplateCandidate,
+  type TemplateSummary,
+} from "@/shared/features/prompt-assist/contract/schema"
 
 const NO_MATCH = "none"
 const CANDIDATE_LIMIT = 4
@@ -15,7 +21,7 @@ const MIN_LEAD_OVER_RUNNER_UP = 0.2
 
 type Ranking = Readonly<{ candidates: ReadonlyArray<TemplateCandidate>; noMatch: boolean; decidedBy: "jev" | "openai" }>
 
-/** Jev picks among the catalog (serialized from the templates module) or abstains with "none". */
+/** Jev picks among the client-supplied catalog or abstains with "none". */
 async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<TemplateSummary>): Promise<Ranking> {
   const { template } = await askJev({
     state: { request: request.prompt, clarifications: request.clarifications, templates: catalog },
@@ -87,12 +93,12 @@ async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, cat
 
 /**
  * Chooses the template that best fits a request. Jev judges against the
- * catalog read from the templates module (OpenAI is the fallback judge); when
+ * validated catalog supplied by the client (OpenAI is the fallback judge); when
  * the judgment is ambiguous, OpenAI asks the person one clarifying question,
  * up to MAX_CLARIFICATIONS times, before settling for the best candidate.
  */
-export async function matchTemplate(request: PageRequest): Promise<MatchResponse> {
-  const catalog = describeTemplateCatalog()
+export async function matchTemplate(input: MatchRequest): Promise<MatchResponse> {
+  const { catalog, ...request } = input
   let ranking: Ranking | null = null
 
   if (isJevConfigured()) {

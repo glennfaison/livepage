@@ -1,4 +1,4 @@
-import type { AppNode, PrimitiveSettingsField, SettingsField } from "@/shared/features/types"
+import type { AppNode, PrimitiveSettingsField, SettingsField } from "@/client/features/types"
 import { getComponentInfo } from "./registry"
 
 // Content is stored in children and edited in place, and id is the node's identity;

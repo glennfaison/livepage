@@ -1,7 +1,7 @@
-import type { AppNode } from "@/shared/features/types"
+import type { AppNode } from "@/client/features/types"
 import { getComponentInfo } from "@/client/features/design-components"
 import browserRuntime from "./generated/browser-runtime.js"
-import { appNodeTreeSchema } from "@/shared/features/serializers/schema"
+import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 
 function escapeHtml(value: string): string {
   return value

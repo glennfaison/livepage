@@ -3,7 +3,7 @@ import { Type } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Props, Metadata, SettingsField } from "@/shared/features/types"
+import type { Props, Metadata, SettingsField } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, createTextareaAttribute, readCustomClasses, readTextAppearance, readTextArrayChildren } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 

@@ -1,4 +1,4 @@
-import { DATA_SOURCE_FIELD_NAME } from "@/shared/features/data-sources/constants"
+import { DATA_SOURCE_FIELD_NAME } from "@/client/features/data-sources/constants"
 
 export const appSettings = {
 	dataSources: {

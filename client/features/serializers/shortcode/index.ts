@@ -1,7 +1,7 @@
-import type { AppNode } from "@/shared/features/types"
-import * as ShortcodeParser from "@/shared/features/shortcode-parser/parser"
-import type { Node as ShortcodeNode } from "@/shared/features/shortcode-parser/parser"
-import { appNodeTreeSchema } from "@/shared/features/serializers/schema"
+import type { AppNode } from "@/client/features/types"
+import * as ShortcodeParser from "@/client/features/shortcode-parser/parser"
+import type { Node as ShortcodeNode } from "@/client/features/shortcode-parser/parser"
+import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 
 export function serializeAppStateAsShortcode(componentTree: ReadonlyArray<AppNode>): string {
   return ShortcodeParser.stringify([...componentTree] as ShortcodeNode[])

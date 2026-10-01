@@ -7,7 +7,7 @@ import { cn } from "@/client/lib/utils"
 import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { HistoryEntry } from "@/shared/features/types"
+import type { HistoryEntry } from "@/client/features/types"
 
 export const Toolbar: React.FC<Readonly<{
   toolbarMinimized: boolean

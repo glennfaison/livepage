@@ -46,7 +46,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
   /** Drafts copy for `template`, then loops on design settings until the request is met. */
   const buildProposal = useCallback(async (request: PageRequest, template: PageTemplateDefinition, origin: Pick<Proposal, "confidence" | "decidedBy" | "candidates">) => {
     emit({ type: "status", status: { phase: "drafting" } })
-    const draft = await promptAssistApi.draft(request, template.id)
+    const draft = await promptAssistApi.draft(request, template)
 
     const basePages = composePages(template, draft.values, [])
     // A failed design loop should not discard the template and copy that already worked.
@@ -85,7 +85,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
         }
 
         emit({ type: "status", status: { phase: "matching" } })
-        const match = await promptAssistApi.match(request)
+        const match = await promptAssistApi.match(request, catalog)
 
         if (match.kind === "unavailable") {
           emit({ type: "needs-manual-pick" })

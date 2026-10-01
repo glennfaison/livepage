@@ -34,13 +34,33 @@ const pageRequestShape = {
 export type PageRequest = DeepReadonly<{ prompt: string; clarifications: ReadonlyArray<Clarification> }>
 
 const templateCandidateSchema = z.object({
-  templateId: z.string(),
-  name: z.string(),
+  templateId: z.string().max(200),
+  name: z.string().max(120),
   probability: z.number().min(0).max(1),
 })
 export type TemplateCandidate = DeepReadonly<z.infer<typeof templateCandidateSchema>>
 
-export const matchRequestSchema = z.object(pageRequestShape)
+const templateSummarySchema = z.object({
+  id: z.string().min(1).max(200),
+  name: z.string().min(1).max(120),
+  category: z.string().min(1).max(80),
+  description: z.string().min(1).max(600),
+  tags: z.array(z.string().min(1).max(60)).max(20),
+}).strict()
+export type TemplateSummary = DeepReadonly<z.infer<typeof templateSummarySchema>>
+
+const templateCatalogSchema = z.array(templateSummarySchema).min(1).max(30).superRefine((catalog, context) => {
+  const ids = new Set<string>()
+  catalog.forEach((template, index) => {
+    if (ids.has(template.id)) {
+      context.addIssue({ code: "custom", path: [index, "id"], message: "Template ids must be unique" })
+    }
+    ids.add(template.id)
+  })
+})
+
+export const matchRequestSchema = z.object({ ...pageRequestShape, catalog: templateCatalogSchema }).strict()
+export type MatchRequest = DeepReadonly<z.infer<typeof matchRequestSchema>>
 
 /**
  * - "match": a template was chosen (`decidedBy` names the provider that judged it)
@@ -64,7 +84,28 @@ export const matchResponseSchema = z.discriminatedUnion("kind", [
 ])
 export type MatchResponse = DeepReadonly<z.infer<typeof matchResponseSchema>>
 
-export const draftRequestSchema = z.object({ ...pageRequestShape, templateId: z.string().min(1).max(200) })
+const draftFieldSchema = z.object({
+  source: z.string().min(1).max(100),
+  description: z.string().min(1).max(300),
+}).strict()
+
+const draftTemplateSchema = z.object({
+  name: z.string().min(1).max(120),
+  description: z.string().min(1).max(600),
+  fields: z.array(draftFieldSchema).max(30).superRefine((fields, context) => {
+    const sources = new Set<string>()
+    fields.forEach((field, index) => {
+      if (sources.has(field.source)) {
+        context.addIssue({ code: "custom", path: [index, "source"], message: "Draft field sources must be unique" })
+      }
+      sources.add(field.source)
+    })
+  }),
+}).strict()
+export type DraftTemplate = DeepReadonly<z.infer<typeof draftTemplateSchema>>
+
+export const draftRequestSchema = z.object({ ...pageRequestShape, template: draftTemplateSchema }).strict()
+export type DraftRequest = DeepReadonly<z.infer<typeof draftRequestSchema>>
 
 /** `values` is keyed by the template's `dataMapping.fields[].source`. Empty when no model is configured. */
 export const draftResponseSchema = z.object({

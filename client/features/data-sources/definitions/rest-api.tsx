@@ -1,5 +1,5 @@
 import { Plug } from "lucide-react"
-import type { DataSourceInfo, DataSourceSettings } from "@/shared/features/types"
+import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
 
 const settings = [
 	{

@@ -1,5 +1,5 @@
-import type { AppNode } from "@/shared/features/types"
-import { appNodeTreeSchema } from "@/shared/features/serializers/schema"
+import type { AppNode } from "@/client/features/types"
+import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 
 export function serializeAppStateAsJson(componentTree: ReadonlyArray<AppNode>): string {
   return JSON.stringify(componentTree, null, 2)

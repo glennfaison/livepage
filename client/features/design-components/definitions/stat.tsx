@@ -3,7 +3,7 @@ import { TrendingUp } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Metadata, Props, SettingsField } from "@/shared/features/types"
+import type { Metadata, Props, SettingsField } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 

@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { cloneTemplatePages, getPageTemplateById, listTemplateTextFields } from "@/shared/features/templates/catalog"
+import { cloneTemplatePages, getPageTemplateById, listTemplateTextFields } from "@/client/features/templates"
 
 import { mockAskJev, mockCompleteJson, mockIsJevConfigured, mockIsOpenAiConfigured, resetProviderMocks } from "../../utils/ai-provider-mocks"
 
@@ -13,6 +13,11 @@ import { draftCopy, refineDesign } from "@/server/features/prompt-assist"
 
 const request = { prompt: "a bold dark resume", clarifications: [] }
 const template = getPageTemplateById("cv-resume-engineer-dark")!
+const draftTemplate = {
+  name: template.metadata.name,
+  description: template.metadata.description,
+  fields: listTemplateTextFields(template),
+}
 
 beforeEach(() => {
   resetProviderMocks()
@@ -21,9 +26,9 @@ beforeEach(() => {
 
 describe("draftCopy", () => {
   it("asks for exactly the template's own text slots", async () => {
-    const fields = listTemplateTextFields(template)
+    const fields = draftTemplate.fields
     mockCompleteJson.mockResolvedValue(Object.fromEntries(fields.map((field) => [field.source, `v-${field.source}`])))
-    const result = await draftCopy(request, template)
+    const result = await draftCopy(request, draftTemplate)
 
     expect(result.source).toBe("openai")
     const { schema, user } = mockCompleteJson.mock.calls[0][0]
@@ -34,11 +39,11 @@ describe("draftCopy", () => {
 
   it("leaves the template text alone without OpenAI, or when it fails", async () => {
     mockIsOpenAiConfigured.mockReturnValue(false)
-    expect(await draftCopy(request, template)).toEqual({ values: {}, source: "none" })
+    expect(await draftCopy(request, draftTemplate)).toEqual({ values: {}, source: "none" })
 
     mockIsOpenAiConfigured.mockReturnValue(true)
     mockCompleteJson.mockRejectedValue(new OpenAiUnavailableError("down"))
-    expect(await draftCopy(request, template)).toEqual({ values: {}, source: "none" })
+    expect(await draftCopy(request, draftTemplate)).toEqual({ values: {}, source: "none" })
   })
 })
 

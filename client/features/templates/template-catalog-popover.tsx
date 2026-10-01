@@ -3,7 +3,7 @@
 import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
-import type { PageTemplateDefinition } from "@/shared/features/templates/schema"
+import type { PageTemplateDefinition } from "@/client/features/templates/schema"
 import { LayoutTemplate } from "lucide-react"
 import { useMemo, useState } from "react"
 

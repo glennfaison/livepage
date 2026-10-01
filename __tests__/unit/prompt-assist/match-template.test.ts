@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { pageTemplateRegistry } from "@/shared/features/templates/catalog"
+import { describeTemplateCatalog, pageTemplateRegistry } from "@/client/features/templates/catalog"
 
 import { mockAskJev, mockCompleteJson, mockIsJevConfigured, mockIsOpenAiConfigured, resetProviderMocks } from "../../utils/ai-provider-mocks"
 
@@ -11,7 +11,8 @@ import { OpenAiUnavailableError } from "@/server/services/openai"
 import { matchTemplate } from "@/server/features/prompt-assist"
 
 const ids = pageTemplateRegistry.map((template) => template.id)
-const request = (extra: object = {}) => ({ prompt: "a dark resume site", clarifications: [], ...extra })
+const catalog = describeTemplateCatalog()
+const request = (extra: object = {}) => ({ prompt: "a dark resume site", clarifications: [], catalog, ...extra })
 
 /** A Jev choice answer spreading probability as given; everything else is spread evenly. */
 function jevChoice(choice: string, weights: Record<string, number>) {

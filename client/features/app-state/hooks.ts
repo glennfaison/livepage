@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useReducer } from "react"
-import { appReducer, initialState } from "@/shared/features/app-state/commands/reducer"
+import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
 
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)

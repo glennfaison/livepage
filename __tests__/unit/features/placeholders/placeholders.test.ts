@@ -3,7 +3,7 @@ import {
   replaceCurrentDatePlaceholderInString,
   replaceDataSourcePlaceholdersInString,
   replacePlaceholdersInString,
-} from "@/shared/features/placeholders"
+} from "@/client/features/placeholders"
 
 describe("placeholders", () => {
   it("replaces data-source expressions inside strings", () => {

@@ -1,4 +1,4 @@
-import type { PageTemplateDefinition } from "@/shared/features/templates/schema"
+import type { PageTemplateDefinition } from "@/client/features/templates/schema"
 
 type TemplateNode = Readonly<{
   tag: string

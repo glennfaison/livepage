@@ -11,13 +11,13 @@ Rules for how code in this repository is written. For how to scope and verify a 
 ## Validation and serialization
 
 - Prefer Zod for runtime validation and parsing when the same object-shape checks repeat across call sites.
-- Keep format-specific parsing and serialization in [`client/features/serializers/`](../client/features/serializers/). Validate external app-node trees with the shared Zod schema in [`shared/features/serializers/schema.ts`](../shared/features/serializers/schema.ts).
+- Keep format-specific parsing and serialization in [`client/features/serializers/`](../client/features/serializers/). Validate external app-node trees with the Zod schema in [`client/features/serializers/schema.ts`](../client/features/serializers/schema.ts).
 
 ## State
 
-- Keep the component tree as readonly `AppNode` data. Create and update nodes through the shared app-state API and actions in [`shared/features/app-state/`](../shared/features/app-state/); use [`client/features/app-state/`](../client/features/app-state/) for its React hook facade.
+- Keep the component tree as readonly `AppNode` data. Create and update nodes through the client app-state API in [`client/features/app-state/`](../client/features/app-state/), including pure tree lookups.
 - Editor-facing operations and canvas rendering belong to [`client/features/page-builder/`](../client/features/page-builder/). Consume them through its public entry points, [`index.ts`](../client/features/page-builder/index.ts) (including `CanvasRenderer`, `Toolbar`, and operational hooks) and [`editor-controls.ts`](../client/features/page-builder/editor-controls.ts), not through internal hooks, decorators, or component definitions.
-- Domain features must not import upward from the application shell (`app/*`). Shared domain constants (such as data-source attribute keys) belong in `shared/features/`.
+- Domain features must not import upward from the application shell (`app/*`). Runtime-specific constants belong with their owning client or server feature; move a constant to `shared/` only when both runtimes use it.
 
 ## React
 
@@ -36,20 +36,20 @@ Rules for how code in this repository is written. For how to scope and verify a 
 ## Runtime and module boundaries
 
 - [`client/`](../client/), [`server/`](../server/), and [`shared/`](../shared/) are runtime boundaries. Client and server code may both depend on shared code, but they must never import from each other.
-- Keep `shared/` runtime-neutral: no React components, browser APIs, secrets, `server-only`, or server framework dependencies. Put reusable domain code under `shared/features/<domain>/`, cross-runtime helpers under `shared/lib/`, browser features under `client/features/`, and backend features under `server/features/`.
+- Keep `shared/` runtime-neutral and minimal: no React components, browser APIs, secrets, `server-only`, or server framework dependencies. Put browser features under `client/features/`, backend features under `server/features/`, and keep code in `shared/features/` only when both runtimes consume the same contract or data.
 - Treat each feature folder as a module boundary. Expose its public surface through `index.ts`, or a few deliberate entry files such as [`client/features/page-builder/editor-controls.ts`](../client/features/page-builder/editor-controls.ts). Other features import those entry points rather than sibling internals.
-- If a feature has browser and server behavior, keep the implementations in the corresponding runtime tree and put only their shared contracts or pure logic in `shared/`. The prompt-assist client entry is [`client/features/prompt-assist/index.ts`](../client/features/prompt-assist/index.ts), the server entry is [`server/features/prompt-assist/index.ts`](../server/features/prompt-assist/index.ts), and shared contracts are in [`shared/features/prompt-assist/contract/`](../shared/features/prompt-assist/contract/).
+- If a feature has browser and server behavior, keep the implementations in the corresponding runtime tree and put only their shared contracts in `shared/`. The prompt-assist client entry is [`client/features/prompt-assist/index.ts`](../client/features/prompt-assist/index.ts), the server entry is [`server/features/prompt-assist/index.ts`](../server/features/prompt-assist/index.ts), and shared contracts are in [`shared/features/prompt-assist/contract/`](../shared/features/prompt-assist/contract/). Server handlers must receive validated, bounded data rather than importing client-owned features.
 - Server-only integrations and infrastructure live in [`server/`](../server/), import `server-only` when they access secrets or otherwise must not enter a client bundle, and expose no client barrel.
 - Keep pages and API route handlers in Next.js's supported [`app/`](../app/) route tree. Page modules call into `client/`; API route files are thin backend adapters that call into `server/`.
 - The component registry loads React definitions and cannot be imported into a route handler. Derive anything the server needs from the registry in the browser and send the result.
-- The pure tree API [`shared/features/app-state/tree.ts`](../shared/features/app-state/tree.ts) exposes helpers without the React hook facade, so shared modules can use it without loading client code.
+- App-state helpers, types, and validation are client-owned; the server must not depend on them.
 
 ### Module Decoupling and DAG Rules
 
 Maintain a strict Directed Acyclic Graph across runtime and domain modules:
 
-- **`shared/features/app-state` has zero UI dependencies.** It never imports from `client/`, `design-components`, or `page-builder`. Component creation occurs in the caller (`client/features/page-builder/hooks.ts`) and is passed to `INSERT_COMPONENT` or `REPLACE_COMPONENT`.
-- **Data-source constants and shared types** live in `shared/features/`; browser behavior belongs to `client/features/data-sources/`.
+- **`client/features/app-state` owns editor state behavior.** App-state commands, types, tree lookup, and component creation remain in the client.
+- **Data-source constants** live in `client/features/data-sources/`; only types or constants needed by both runtimes belong in `shared/features/`.
 - **`client/features/design-components` is self-contained.** Component definitions, preview rendering, and edit-mode controls (`withEditorControls`, `withTextEditing`, divider, settings popovers) live there and do not import from `client/features/page-builder`.
-- **`client/features/page-builder` is a one-way consumer.** It consumes shared app-state and client design components, orchestrating the visual workspace.
+- **`client/features/page-builder` is a one-way consumer.** It consumes client app-state and design components, orchestrating the visual workspace.
 - **Entry point discipline.** Each feature exposes its public API through `index.ts`. Runtime-specific feature entry points stay in their matching tree; server routes must not import client barrels.

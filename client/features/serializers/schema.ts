@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { componentTagList } from "@/shared/features/design-components"
-import type { AppNode } from "@/shared/features/types"
+import { componentTagList } from "@/client/features/design-components"
+import type { AppNode } from "@/client/features/types"
 
 const allowedAppNodeTags = new Set([...componentTagList, "page"])
 

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import type { EditModeProps } from "@/shared/features/types"
+import type { EditModeProps } from "@/client/features/types"
 import { useComponentOperationsContext } from "../component-operations-context"
 import { DATA_SOURCE_FIELD_NAME } from "@/client/features/data-sources"
 

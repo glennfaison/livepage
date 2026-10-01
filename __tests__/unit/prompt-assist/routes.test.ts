@@ -4,10 +4,17 @@ import { POST as matchPost } from "@/app/api/prompt-assist/match/route"
 import { POST as draftPost } from "@/app/api/prompt-assist/draft/route"
 import { POST as refinePost } from "@/app/api/prompt-assist/refine/route"
 import { describePage } from "@/client/features/prompt-assist"
-import { cloneTemplatePages, getPageTemplateById } from "@/shared/features/templates/catalog"
+import { cloneTemplatePages, describeTemplateCatalog, getPageTemplateById, listTemplateTextFields } from "@/client/features/templates"
 
 const originalEnv = { ...process.env }
 const originalFetch = global.fetch
+const catalog = describeTemplateCatalog()
+const template = getPageTemplateById("landing-page-saas")!
+const draftTemplate = {
+  name: template.metadata.name,
+  description: template.metadata.description,
+  fields: listTemplateTextFields(template),
+}
 
 beforeEach(() => {
   process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
@@ -32,8 +39,8 @@ const post = (path: string, ip: string, body: unknown) =>
 
 describe("prompt-assist feature flag", () => {
   const requests = () => [
-    () => matchPost(post("match", "5.5.5.5", { prompt: "a dark resume" })),
-    () => draftPost(post("draft", "5.5.5.5", { prompt: "x", templateId: "landing-page-saas" })),
+    () => matchPost(post("match", "5.5.5.5", { prompt: "a dark resume", catalog })),
+    () => draftPost(post("draft", "5.5.5.5", { prompt: "x", template: draftTemplate })),
     () => refinePost(post("refine", "5.5.5.5", { prompt: "x", page: { nodes: [], settings: {} } })),
   ]
 
@@ -65,15 +72,15 @@ describe("prompt-assist feature flag", () => {
 
 describe("prompt-assist routes", () => {
   it("match reports 'unavailable' when no provider is configured", async () => {
-    const response = await matchPost(post("match", "1.1.1.1", { prompt: "a dark resume" }))
+    const response = await matchPost(post("match", "1.1.1.1", { prompt: "a dark resume", catalog }))
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({ kind: "unavailable" })
   })
 
   it.each([
-    ["match", matchPost, { prompt: "   " }],
+    ["match", matchPost, { prompt: "   ", catalog }],
     ["match", matchPost, "not json"],
-    ["match", matchPost, { prompt: "x", clarifications: [1, 2, 3].map((n) => ({ question: `q${n}`, answer: "a" })) }],
+    ["match", matchPost, { prompt: "x", catalog, clarifications: [1, 2, 3].map((n) => ({ question: `q${n}`, answer: "a" })) }],
     ["draft", draftPost, { prompt: "x" }],
     ["refine", refinePost, { prompt: "x" }],
     ["refine", refinePost, { prompt: "x", page: { nodes: Array.from({ length: 151 }, (_, i) => ({ id: `n${i}`, tag: "row", settings: {} })), settings: {} } }],
@@ -81,10 +88,23 @@ describe("prompt-assist routes", () => {
     expect((await handler(post(path, "1.1.1.2", body))).status).toBe(400)
   })
 
-  it("draft returns 404 for an unknown template and no copy without OpenAI", async () => {
-    expect((await draftPost(post("draft", "1.1.1.3", { prompt: "x", templateId: "nope" }))).status).toBe(404)
-    const ok = await draftPost(post("draft", "1.1.1.3", { prompt: "x", templateId: "landing-page-saas" }))
+  it("rejects duplicate template ids and draft field sources", async () => {
+    const duplicateCatalog = [...catalog, catalog[0]]
+    const duplicateFields = {
+      ...draftTemplate,
+      fields: [draftTemplate.fields[0], draftTemplate.fields[0]],
+    }
+
+    expect((await matchPost(post("match", "1.1.1.5", { prompt: "x", catalog: duplicateCatalog }))).status).toBe(400)
+    expect((await draftPost(post("draft", "1.1.1.6", { prompt: "x", template: duplicateFields }))).status).toBe(400)
+  })
+
+  it("draft uses bounded client-supplied field metadata and returns no copy without OpenAI", async () => {
+    const ok = await draftPost(post("draft", "1.1.1.3", { prompt: "x", template: draftTemplate }))
     expect(await ok.json()).toEqual({ values: {}, source: "none" })
+
+    const oversized = { ...draftTemplate, fields: Array.from({ length: 31 }, (_, index) => ({ source: `f${index}`, description: "field" })) }
+    expect((await draftPost(post("draft", "1.1.1.3", { prompt: "x", template: oversized }))).status).toBe(400)
   })
 
   it("refine takes a page description and, with no providers, returns done", async () => {
@@ -95,7 +115,7 @@ describe("prompt-assist routes", () => {
 
   it("returns 429 with Retry-After past the per-minute limit, per client and per route", async () => {
     process.env.PROMPT_ASSIST_RATE_LIMIT_PER_MINUTE = "2"
-    const send = (ip: string) => matchPost(post("match", ip, { prompt: "a dark resume" }))
+    const send = (ip: string) => matchPost(post("match", ip, { prompt: "a dark resume", catalog }))
 
     expect((await send("9.9.9.9")).status).toBe(200)
     expect((await send("9.9.9.9")).status).toBe(200)
@@ -104,7 +124,7 @@ describe("prompt-assist routes", () => {
     expect(Number(limited.headers.get("retry-after"))).toBeGreaterThan(0)
 
     expect((await send("8.8.8.8")).status).toBe(200)
-    expect((await draftPost(post("draft", "9.9.9.9", { prompt: "x", templateId: "landing-page-saas" }))).status).toBe(200)
+    expect((await draftPost(post("draft", "9.9.9.9", { prompt: "x", template: draftTemplate }))).status).toBe(200)
   })
 
   it("never leaks provider or internal errors to the client", async () => {
@@ -112,7 +132,7 @@ describe("prompt-assist routes", () => {
     jest.spyOn(console, "error").mockImplementation(() => undefined)
     jest.spyOn(console, "warn").mockImplementation(() => undefined)
     global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => { throw new Error("secret-detail") } }) as unknown as typeof fetch
-    const response = await matchPost(post("match", "7.7.7.7", { prompt: "a dark resume" }))
+    const response = await matchPost(post("match", "7.7.7.7", { prompt: "a dark resume", catalog }))
     expect(JSON.stringify(await response.json())).not.toContain("secret-detail")
   })
 })

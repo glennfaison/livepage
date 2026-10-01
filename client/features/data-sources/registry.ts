@@ -1,4 +1,4 @@
-import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "@/shared/features/types"
+import type { DataSourceId, DataSourceInfo, DataSourceInfoMap, DataSourceSettings } from "@/client/features/types"
 import { dataSourceInfo as RestApi } from "./definitions/rest-api"
 import { dataSourceInfo as GeneratedData } from "./definitions/generated-data"
 import { dataSourceInfo as RssFeed } from "./definitions/rss-feed"

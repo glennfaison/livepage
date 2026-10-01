@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { AppNode, ViewModeProps } from "@/shared/features/types"
+import type { AppNode, ViewModeProps } from "@/client/features/types"
 import { getComponentInfo } from "./registry"
 
 export function PreviewRenderer({

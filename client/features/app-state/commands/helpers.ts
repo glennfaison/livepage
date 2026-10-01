@@ -1,4 +1,6 @@
-import type { AppNode } from "@/shared/features/types"
+import type { AppNode } from "@/client/features/types"
+import { findComponentById } from "@/client/features/app-state/tree"
+export { findComponentById } from "@/client/features/app-state/tree"
 
 function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
   const newId = `${component.attributes.id}${idSuffix}`
@@ -31,28 +33,6 @@ export function findComponentParentTree({
     }
   }
   return []
-}
-
-export function findComponentById(
-  components: ReadonlyArray<AppNode | string>,
-  componentId: string,
-): AppNode | null {
-  for (const component of components) {
-    if (typeof component === "string") {
-      continue
-    }
-
-    if (component.attributes.id === componentId) {
-      return component
-    }
-
-    const found = findComponentById(component.children, componentId)
-    if (found) {
-      return found
-    }
-  }
-
-  return null
 }
 
 export function insertComponent({

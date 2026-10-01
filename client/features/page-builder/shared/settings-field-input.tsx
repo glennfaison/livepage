@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/client/components/ui/switch"
 import { cn } from "@/client/lib/utils"
 import type React from "react"
-import type { PrimitiveSettingsField, SettingsValue } from "@/shared/features/types"
+import type { PrimitiveSettingsField, SettingsValue } from "@/client/features/types"
 
 export function SettingsFieldInput({
   field,

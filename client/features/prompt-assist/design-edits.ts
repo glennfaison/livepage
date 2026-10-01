@@ -1,5 +1,6 @@
 import type { AppNode } from "@/client/features/app-state"
-import { findComponentById, patchComponent } from "@/shared/features/app-state/tree"
+import { findComponentById } from "@/client/features/app-state/tree"
+import { patchComponent } from "@/client/features/app-state/commands/helpers"
 import { applySettingValue, describeEditableSettings, readSettingValue } from "@/client/features/design-components"
 import { toSettingDescriptor } from "./page-description"
 import type { DesignEdit } from "@/shared/features/prompt-assist/contract/schema"

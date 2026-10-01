@@ -139,7 +139,9 @@ describe("AssistChat", () => {
     await screen.findByRole("button", { name: /apply to canvas/i })
 
     await user.selectOptions(screen.getByLabelText("Template"), "landing-page-saas")
-    await waitFor(() => expect(calls.filter((call) => call.path === "draft").at(-1)?.body.templateId).toBe("landing-page-saas"))
+    await waitFor(() =>
+      expect((calls.filter((call) => call.path === "draft").at(-1)?.body.template as { name: string }).name).toBe("Landing Page / SaaS"),
+    )
     expect(await screen.findByLabelText("Template")).toHaveValue("landing-page-saas")
   })
 

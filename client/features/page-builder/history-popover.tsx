@@ -6,7 +6,7 @@ import { cn } from "@/client/lib/utils"
 import { Check, GripVertical, RotateCcw, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { HistoryEntry } from "@/shared/features/types"
+import type { HistoryEntry } from "@/client/features/types"
 
 export const HistoryPopover: React.FC<Readonly<{
   isOpen: boolean

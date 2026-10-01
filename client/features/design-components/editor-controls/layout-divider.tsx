@@ -4,7 +4,7 @@ import { Plus } from "lucide-react"
 import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
-import type { AppNodeTag } from "@/shared/features/types"
+import type { AppNodeTag } from "@/client/features/types"
 
 export const Divider = ({
   orientation,

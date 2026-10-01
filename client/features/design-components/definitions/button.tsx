@@ -5,7 +5,7 @@ import { MousePointerClick } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Props, SettingsField, Metadata } from "@/shared/features/types"
+import type { Props, SettingsField, Metadata } from "@/client/features/types"
 import { createAttributeMap, createBooleanAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readTextChildren, readCustomClasses } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 

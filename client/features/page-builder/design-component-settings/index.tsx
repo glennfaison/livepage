@@ -5,7 +5,7 @@ import { Button } from "@/client/components/ui/button"
 import { Label } from "@/client/components/ui/label"
 import { getComponentInfo } from "@/client/features/design-components"
 import type { AppNode } from "@/client/features/app-state"
-import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/shared/features/types"
+import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/client/features/types"
 import { useComponentOperationsContext } from "@/client/features/page-builder/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
 

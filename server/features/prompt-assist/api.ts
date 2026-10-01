@@ -36,11 +36,7 @@ export async function handlePromptAssistRequest<S extends z.ZodType, R>(
   try {
     return NextResponse.json(route.responseSchema.parse(await route.handle(parsed.data)))
   } catch (error) {
-    if (error instanceof NotFoundError) return NextResponse.json({ error: error.message }, { status: 404 })
     console.error(`[prompt-assist] ${route.scope} failed:`, error)
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
 }
-
-/** Thrown by route handlers when a referenced resource (such as a template id) does not exist. */
-export class NotFoundError extends Error {}

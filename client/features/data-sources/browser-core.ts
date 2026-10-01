@@ -1,5 +1,5 @@
-import type { AppNode } from "@/shared/features/types"
-import { replacePlaceholdersInString } from "@/shared/features/placeholders"
+import type { AppNode } from "@/client/features/types"
+import { replacePlaceholdersInString } from "@/client/features/placeholders"
 
 export type DataSourceSettings = Readonly<{
   id: string
