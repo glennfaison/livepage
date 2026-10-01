@@ -1,6 +1,6 @@
-import type { AppNode } from "@/features/app-state"
-import { applyDesignEdits, describePage, validateDesignEdits, type DesignEdit } from "@/features/prompt-assist"
-import { filterDesignEdits } from "@/features/prompt-assist/setting-values"
+import type { AppNode } from "@/client/features/app-state"
+import { applyDesignEdits, describePage, validateDesignEdits, type DesignEdit } from "@/client/features/prompt-assist"
+import { filterDesignEdits } from "@/shared/features/prompt-assist/contract"
 
 const pages: ReadonlyArray<AppNode> = [
   {

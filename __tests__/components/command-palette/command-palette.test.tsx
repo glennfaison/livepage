@@ -1,11 +1,11 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@/features/design-components"
-import { CommandPalette } from "@/features/command-palette"
-import type { AppState, Operations } from "@/features/app-state"
+import "@/client/features/design-components"
+import { CommandPalette } from "@/client/features/command-palette"
+import type { AppState, Operations } from "@/client/features/app-state"
 
-jest.mock("@/components/ui/use-toast", () => ({
+jest.mock("@/client/components/ui/use-toast", () => ({
   toast: jest.fn(),
 }))
 

@@ -1,5 +1,5 @@
-// Shared jest doubles for the server-only lib/jev and lib/openai modules. A test file mocks a module with
-//   jest.mock("@/lib/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
+// Shared Jest doubles for the server-only provider modules. Tests mock a module with
+//   jest.mock("@/server/services/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
 // and drives the doubles through the exports below.
 export const mockAskJev = jest.fn()
 export const mockIsJevConfigured = jest.fn()

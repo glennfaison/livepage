@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { SettingsPopover } from "@/features/page-builder"
-import { Button } from "@/components/ui/button"
-import { createDesignComponentInstance, getComponentInfo } from "@/features/design-components"
-import { encodeDataSourceSettings, DATA_SOURCE_FIELD_NAME } from "@/features/data-sources"
+import { SettingsPopover } from "@/client/features/page-builder"
+import { Button } from "@/client/components/ui/button"
+import { createDesignComponentInstance, getComponentInfo } from "@/client/features/design-components"
+import { encodeDataSourceSettings, DATA_SOURCE_FIELD_NAME } from "@/client/features/data-sources"
 
 const mockUpdateComponent = jest.fn()
 
-jest.mock("@/features/page-builder/component-operations-context", () => ({
+jest.mock("@/client/features/page-builder/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     updateComponent: mockUpdateComponent,
     setSelectedComponent: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock("@/features/page-builder/component-operations-context", () => ({
     findComponentById: jest.fn(),
   }),
 }))
-jest.mock("@/features/design-components/editor-controls/component-operations-context", () => ({
+jest.mock("@/client/features/design-components/editor-controls/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     updateComponent: mockUpdateComponent,
     setSelectedComponent: jest.fn(),

@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
-import { getComponentInfo } from "@/features/design-components"
+import { getComponentInfo } from "@/client/features/design-components"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { AppNode } from "@/features/app-state"
+import { AppNode } from "@/client/features/app-state"
 
 
 // features/design-components/page-component.test.tsx
@@ -13,14 +13,14 @@ const mockAddComponent = jest.fn()
 const mockSetSelectedComponent = jest.fn()
 const mockUpdateComponent = jest.fn()
 
-jest.mock("@/features/page-builder/component-operations-context", () => ({
+jest.mock("@/client/features/page-builder/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     addComponent: mockAddComponent,
     setSelectedComponent: mockSetSelectedComponent,
     updateComponent: mockUpdateComponent,
   }),
 }))
-jest.mock("@/features/design-components/editor-controls/component-operations-context", () => ({
+jest.mock("@/client/features/design-components/editor-controls/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     addComponent: mockAddComponent,
     setSelectedComponent: mockSetSelectedComponent,

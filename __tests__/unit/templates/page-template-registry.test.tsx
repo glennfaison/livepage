@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { PreviewRenderer } from "@/features/design-components"
-import { appReducer, initialState } from "@/features/app-state/commands/reducer"
-import type { AppNode, AppState } from "@/features/app-state"
-import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages, TemplateCatalogPopover } from "@/features/templates"
+import { PreviewRenderer } from "@/client/features/design-components"
+import { appReducer, initialState } from "@/shared/features/app-state/commands/reducer"
+import type { AppNode, AppState } from "@/client/features/app-state"
+import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages, TemplateCatalogPopover } from "@/client/features/templates"
 
 describe("page template registry", () => {
   it("validates every bundled template definition and keeps ids unique", () => {

@@ -1,139 +1,77 @@
 # LivePage project context
 
-LivePage is a page builder. The document being edited is a single **app state**, a tree of readonly **app nodes**, and each domain concern lives in its own folder under [`features/`](../features/).
+LivePage is a page builder. The document being edited is a single **app state**, a tree of readonly **app nodes**. Source code is organized first by runtime (`client/`, `server/`, and `shared/`), then by domain under each runtime's `features/` folder.
 
-## Module map
+## Runtime and module map
 
-| Module | Responsibility |
+| Area | Responsibility |
 | --- | --- |
-| [`app-state`](../features/app-state/) | Pure state machine & selector API over the document tree (zero UI dependencies) |
-| [`serializers`](../features/serializers/) | JSON, shortcode, and standalone HTML import/export |
-| [`shortcode-parser`](../features/shortcode-parser/) | Parser used by the shortcode serializer |
-| [`design-components`](../features/design-components/) | Self-contained component system: definitions, preview/edit renderers, settings catalog, and editor controls |
-| [`data-sources`](../features/data-sources/) | Data-source registry, `withDataSource` HOC, and browser data loader |
-| [`placeholders`](../features/placeholders/) | Runtime tokens resolved inside component strings |
-| [`page-builder`](../features/page-builder/) | Visual studio shell: canvas orchestrator, toolbar, history, and operation hooks |
-| [`templates`](../features/templates/) | Bundled page templates and the template catalog |
-| [`command-palette`](../features/command-palette/) | Command palette for the builder |
-| [`prompt-assist`](../features/prompt-assist/) | Chat that turns a prose request into a template, copy, and design edits |
+| [`app/`](../app/) | Next.js App Router pages and thin API route adapters; keep these in Next's required route tree |
+| [`client/features/app-state/`](../client/features/app-state/) | Client hook facade over the shared app-state API |
+| [`shared/features/app-state/`](../shared/features/app-state/) | Pure state transitions, selectors, tree helpers, and history |
+| [`client/features/page-builder/`](../client/features/page-builder/) | Visual studio shell: canvas orchestrator, toolbar, history, and operation hooks |
+| [`client/features/design-components/`](../client/features/design-components/) | Component definitions, preview/edit renderers, settings catalog, and editor controls |
+| [`client/features/data-sources/`](../client/features/data-sources/) | Browser data-source registry, decorators, and browser data loader |
+| [`shared/features/placeholders/`](../shared/features/placeholders/) | Runtime tokens resolved inside component strings |
+| [`client/features/serializers/`](../client/features/serializers/) | JSON, shortcode, and standalone HTML import/export operations |
+| [`shared/features/serializers/schema.ts`](../shared/features/serializers/schema.ts) | Shared runtime validation for serialized app-node trees |
+| [`shared/features/shortcode-parser/`](../shared/features/shortcode-parser/) | Parser used by the shortcode serializer |
+| [`shared/features/templates/`](../shared/features/templates/) | Template definitions, catalog, schema, and data mapping |
+| [`client/features/templates/`](../client/features/templates/) | Template picker UI |
+| [`client/features/command-palette/`](../client/features/command-palette/) | Command palette for the builder |
+| [`client/features/prompt-assist/`](../client/features/prompt-assist/) | Browser chat, page description, and design refinement loop |
+| [`server/features/prompt-assist/`](../server/features/prompt-assist/) | Provider orchestration and prompt-assist request handling |
+| [`shared/features/prompt-assist/contract/`](../shared/features/prompt-assist/contract/) | Runtime-neutral prompt-assist schemas, flag, and edit validation |
+| [`shared/features/types.ts`](../shared/features/types.ts) | Shared readonly app-state and feature-facing types |
+| [`client/components/`](../client/components/) | Browser providers, theme controls, and UI primitives |
+| [`server/services/`](../server/services/) | Server-only provider clients such as Jev and OpenAI |
+| [`server/lib/`](../server/lib/) | Server-only infrastructure such as rate limiting |
+| [`shared/lib/`](../shared/lib/) | Runtime-neutral utilities used by client and server code |
+| [`client/lib/`](../client/lib/) | Browser/UI utilities such as class-name merging |
 
-Use [the glossary](./GLOSSARY.md) for the precise meaning of these terms.
-
-## Architecture & Module Layers
-
-The codebase is structured as a strict Directed Acyclic Graph (DAG) across 5 distinct architectural layers:
-
-```mermaid
-graph TD
-  subgraph Layer5["Layer 5: Application Shell & Routes"]
-    AppPage["app/page.tsx"]
-    TryPage["app/try/page.tsx"]
-    ApiRoutes["app/api/prompt-assist/*"]
-  end
-
-  subgraph Layer4["Layer 4: High-Level Feature Modules"]
-    PageBuilder["features/page-builder"]
-    PromptAssist["features/prompt-assist"]
-    CommandPalette["features/command-palette"]
-    Templates["features/templates"]
-    Serializers["features/serializers"]
-  end
-
-  subgraph Layer3["Layer 3: Domain Services & Models"]
-    AppState["features/app-state"]
-    DesignComponents["features/design-components"]
-    DataSources["features/data-sources"]
-  end
-
-  subgraph Layer2["Layer 2: Core Domain Primitives"]
-    Placeholders["features/placeholders"]
-    ShortcodeParser["features/shortcode-parser"]
-    JevLib["lib/jev"]
-    OpenAILib["lib/openai"]
-  end
-
-  subgraph Layer1["Layer 1: Foundation & Shared Infrastructure"]
-    Types["features/types.ts"]
-    Utils["lib/utils.ts"]
-    RateLimit["lib/rate-limit.ts"]
-    UI["components/ui/*"]
-  end
-
-  %% Inter-layer relationships
-  TryPage --> PageBuilder
-  TryPage --> PromptAssist
-  TryPage --> CommandPalette
-  ApiRoutes --> PromptAssist
-
-  PageBuilder --> AppState
-  PageBuilder --> DesignComponents
-  PageBuilder --> Templates
-  PageBuilder --> Serializers
-
-  PromptAssist --> Templates
-  PromptAssist --> DesignComponents
-  PromptAssist --> AppState
-  PromptAssist --> JevLib
-  PromptAssist --> OpenAILib
-
-  CommandPalette --> AppState
-
-  Templates --> Serializers
-  Templates --> AppState
-  Serializers --> ShortcodeParser
-  Serializers --> Types
-
-  DesignComponents --> DataSources
-  DesignComponents --> Types
-  DesignComponents --> UI
-  DesignComponents --> Utils
-
-  DataSources --> Placeholders
-  DataSources --> Types
-  DataSources --> Utils
-
-  AppState --> Types
-  AppState --> Utils
+```text
+app/                         # Next.js pages and API route adapters
+client/
+  components/
+  features/
+  lib/
+server/
+  features/
+  lib/
+  services/
+shared/
+  features/
+  lib/
 ```
 
-### Layer Constraints
-1. **Unidirectional flow**: Higher layers depend only on lower layers. No layer may import from a layer above it.
-2. **Pure `app-state`**: `app-state` is a pure tree state machine that handles immutable state transitions and history. It does not import any UI, React components, or design component registries.
-3. **Self-contained `design-components`**: `design-components` encapsulates all component definitions, attribute types, preview rendering, and edit-mode controls. It does not depend on `page-builder`.
-4. **Decoupled `data-sources`**: `data-sources` depends on `placeholders` and `types`, with zero dependencies on `design-components`.
-5. **Orchestrating `page-builder`**: `page-builder` acts as the studio orchestrator, consuming `app-state` and `design-components` without cyclic back-references.
+## Dependency rule
 
-## Shared libraries
+The folder layout expresses the import boundary:
 
-Code with no domain knowledge lives in [`lib/`](../lib/) and can be used by any feature or route handler.
+```text
+client ──► shared
+server ──► shared
+app page ──► client
+app API route ──► server
+```
 
-| Library | Responsibility |
-| --- | --- |
-| [`jev`](../lib/jev/) | Server-only client for TypeSafe's Jev decision model (Choice, Noul) |
-| [`openai`](../lib/openai/) | Server-only client for OpenAI chat completions with schema-validated JSON replies |
-| [`rate-limit.ts`](../lib/rate-limit.ts) | In-memory rate limiting and client identification |
-| [`utils.ts`](../lib/utils.ts) | Small general helpers |
+Client and server code must not import each other. Code used by both belongs in `shared/`; keep it free of React components, browser APIs, secrets, and server-only dependencies. Server modules that access secrets or otherwise cannot enter a browser bundle import `server-only`. API route files remain in `app/api/**/route.ts` because Next.js discovers routes from that location; route implementations belong in `server/`.
 
-## Posture
-
-- Prefer the app-state API and serializers over direct state mutation.
-- Keep public feature-facing types deeply readonly.
-- Backward compatibility is not a priority yet. Prefer clean refactors over shims.
-- Placeholders are runtime tokens embedded in component strings and resolved before rendering.
+The shared design-component vocabulary (`shared/features/design-components/`) contains only the tag list needed for app-node validation. React renderers and component definitions remain under `client/features/design-components/`.
 
 ## Prompt assist
 
 The chat on `/try` turns "describe the page you want" into a proposal the person reviews before it is applied in one history entry. Nothing in it hard-codes templates, tags, or settings; each step reads them from the module that owns them.
 
-1. **Match.** The catalog comes from [`templates`](../features/templates/) (`describeTemplateCatalog`) and is given to Jev as state for one Choice question, with a no-match option. Jev's probabilities decide; a close call or no-match makes OpenAI ask one clarifying question (at most two), and OpenAI is the fallback judge when Jev is unavailable.
+1. **Match.** The server reads the catalog from `shared/features/templates/` and gives it to Jev as state for one Choice question, with a no-match option. Jev's probabilities decide; a close call or no-match makes OpenAI ask one clarifying question (at most two), and OpenAI is the fallback judge when Jev is unavailable.
 2. **Copy.** OpenAI fills the free-text slots the template declares in its own `dataMapping` (`listTemplateTextFields`), whatever they are named.
 3. **Design loop.** The browser describes the page from the component registry (`describePage`), then loops: Jev answers a Noul question ("does the page satisfy the request?"); if not, OpenAI proposes edits to settings the registry exposes (`describeEditableSettings`). Every edit passes one validator (`filterDesignEdits`), on the server against the description and in the browser against the live registry, before it is applied. The loop stops when Jev is satisfied, when a step changes nothing, or after a fixed number of steps.
 4. **Apply.** The proposal is composed from the template, copy, and edits, and dispatched through `createApplyTemplateActions`.
 
-The design loop runs step by step from the browser because the component registry loads React components and cannot be bundled into a route handler. The server sees only the request and the page description.
+The design loop runs step by step from the browser because the component registry loads React components and cannot be bundled into a route handler. The server sees only the request and page description.
 
-The feature is off unless `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` (`feature-flag.ts`). One flag serves both sides: the `/api/prompt-assist` routes answer 404 when it is off, and the chat never renders, so they cannot disagree. When on, the chat also appears only on pages opened with `?prompt-assist=1` (`availability.ts`). The flag is inlined at build time, so changing it needs a rebuild. Once enabled, the routes are protected by the provider keys, validation and rate limits. Both providers are optional; see [`.env.example`](../.env.example). [`lib/jev`](../lib/jev/) and [`lib/openai`](../lib/openai/) read secrets, import `server-only`, and are reusable by any server code. Route handlers use `prompt-assist/server.ts`, never the client barrel.
+The feature is off unless `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` (`shared/features/prompt-assist/contract/feature-flag.ts`). One flag serves both sides: the `/api/prompt-assist` routes answer 404 when it is off, and the chat never renders, so the two cannot disagree. When on, the chat also appears only on pages opened with `?prompt-assist=1` (`client/features/prompt-assist/availability.ts`). The flag is inlined at build time, so changing it needs a rebuild. Once enabled, routes are protected by provider keys, validation, and rate limits. Both providers are optional; see [`.env.example`](../.env.example). [`server/services/jev/`](../server/services/jev/) and [`server/services/openai/`](../server/services/openai/) read secrets and import `server-only`. Route handlers use the server feature entry point, never the client barrel.
 
 ## Before you change things
 
-Read this file, [the conventions](./CONVENTIONS.md), [the glossary](./GLOSSARY.md), and any relevant [ADR](./adr/) before changing cross-cutting component behavior. [The agent workflow](./AGENT-WORKFLOW.md) covers how to scope and finish a task.
+Read [the conventions](./CONVENTIONS.md), [the glossary](./GLOSSARY.md), and any relevant [ADR](./adr/) before changing cross-cutting component behavior. [The agent workflow](./AGENT-WORKFLOW.md) covers how to scope and finish a task.

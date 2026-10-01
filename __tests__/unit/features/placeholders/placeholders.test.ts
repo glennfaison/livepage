@@ -1,9 +1,9 @@
-import { replaceDataSourceComponentProperties } from "@/features/design-components/primitives"
+import { replaceDataSourceComponentProperties } from "@/client/features/design-components/primitives"
 import {
   replaceCurrentDatePlaceholderInString,
   replaceDataSourcePlaceholdersInString,
   replacePlaceholdersInString,
-} from "@/features/placeholders"
+} from "@/shared/features/placeholders"
 
 describe("placeholders", () => {
   it("replaces data-source expressions inside strings", () => {

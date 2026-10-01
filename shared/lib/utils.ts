@@ -1,0 +1,15 @@
+// Generate a collision-resistant ID for components
+export const generateId = () =>
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+// Helper function to intersperse and append items
+export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {
+  if (originalArray.length === 0) {
+    return []
+  }
+  const result: (T | U)[] = originalArray.flatMap((element) => [itemToInsert, element])
+  result.push(itemToInsert)
+  return result
+}

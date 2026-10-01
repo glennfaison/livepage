@@ -4,10 +4,10 @@
 
 Preview rendering is defined by a browser-safe component registry and shared
 `PreviewModeComponent` implementations. Component definitions live under
-`features/design-components/definitions/`; registry and preview-runtime code
-lives under `features/design-components/`. Data-source behavior belongs
-to `features/data-sources/`, while editor-only decorators belong to
-`features/page-builder/decorators/`.
+`client/features/design-components/definitions/`; registry and preview-runtime
+code lives under `client/features/design-components/`. Data-source behavior
+belongs to `client/features/data-sources/`, while editor-only decorators
+belong to `client/features/page-builder/decorators/`.
 
 The editor may wrap shared preview components with selection, editing, and
 layout controls, while other consumers use the shared preview layer; this

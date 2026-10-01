@@ -3,8 +3,8 @@ import { NextRequest } from "next/server"
 import { POST as matchPost } from "@/app/api/prompt-assist/match/route"
 import { POST as draftPost } from "@/app/api/prompt-assist/draft/route"
 import { POST as refinePost } from "@/app/api/prompt-assist/refine/route"
-import { describePage } from "@/features/prompt-assist"
-import { cloneTemplatePages, getPageTemplateById } from "@/features/templates"
+import { describePage } from "@/client/features/prompt-assist"
+import { cloneTemplatePages, getPageTemplateById } from "@/shared/features/templates/catalog"
 
 const originalEnv = { ...process.env }
 const originalFetch = global.fetch

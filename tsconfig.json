@@ -19,6 +19,10 @@
       }
     ],
     "paths": {
+      "@/client/*": ["./client/*"],
+      "@/server/*": ["./server/*"],
+      "@/shared/*": ["./shared/*"],
+      "@/app/*": ["./app/*"],
       "@/*": ["./*"]
     }
   },

@@ -1,10 +1,10 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { selectCurrentPage } from "@/features/app-state"
-import type { PageBuilderMode } from "@/features/app-state"
-import { useAppState } from "@/features/app-state"
+import { Button } from "@/client/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/client/components/ui/dropdown-menu"
+import { selectCurrentPage } from "@/client/features/app-state"
+import type { PageBuilderMode } from "@/client/features/app-state"
+import { useAppState } from "@/client/features/app-state"
 import {
   CanvasRenderer,
   ComponentOperationsContext,
@@ -12,15 +12,15 @@ import {
   useComponentOperations,
   useHistoryOperations,
   usePageOperations,
-} from "@/features/page-builder"
-import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/features/templates"
-import { CommandPalette } from "@/features/command-palette"
-import { AssistChat } from "@/features/prompt-assist"
-import { ThemeToggle } from "@/components/theme-toggle"
+} from "@/client/features/page-builder"
+import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/client/features/templates"
+import { CommandPalette } from "@/client/features/command-palette"
+import { AssistChat } from "@/client/features/prompt-assist"
+import { ThemeToggle } from "@/client/components/theme-toggle"
 import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useEffect, useRef, useState } from "react"
-import { Input } from "@/components/ui/input"
+import { Input } from "@/client/components/ui/input"
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()

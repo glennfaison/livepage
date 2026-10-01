@@ -1,12 +1,12 @@
 import type { NextRequest } from "next/server"
-import { getPageTemplateById } from "@/features/templates"
+import { getPageTemplateById } from "@/shared/features/templates/catalog"
 import {
   draftCopy,
   draftRequestSchema,
   draftResponseSchema,
   handlePromptAssistRequest,
   NotFoundError,
-} from "@/features/prompt-assist/server"
+} from "@/server/features/prompt-assist"
 
 export const POST = (request: NextRequest) =>
   handlePromptAssistRequest(request, {

@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import type { AppAction } from "@/features/app-state"
-import { AssistChat } from "@/features/prompt-assist"
+import type { AppAction } from "@/client/features/app-state"
+import { AssistChat } from "@/client/features/prompt-assist"
 
 let mockQuery = "prompt-assist=1"
 jest.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mockQuery) }))

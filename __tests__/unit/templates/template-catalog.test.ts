@@ -1,5 +1,5 @@
-import { cloneTemplatePages, describeTemplateCatalog, getPageTemplateById, pageTemplateRegistry } from "@/features/templates"
-import { applyTemplateFieldValues, listTemplateTextFields } from "@/features/templates"
+import { cloneTemplatePages, describeTemplateCatalog, getPageTemplateById, pageTemplateRegistry } from "@/client/features/templates"
+import { applyTemplateFieldValues, listTemplateTextFields } from "@/client/features/templates"
 
 describe("describeTemplateCatalog", () => {
   it("describes every registered template from its own metadata, without page content", () => {

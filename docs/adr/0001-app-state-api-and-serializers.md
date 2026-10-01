@@ -6,10 +6,10 @@ We are organizing the builder around a central **app state** boundary with a com
 
 ## Implementation
 
-- The app-state API is implemented in [`features/app-state/`](../../features/app-state/), with commands, reducer helpers, and selectors.
-- Serializers are implemented in [`features/serializers/`](../../features/serializers/), with separate JSON, shortcode, and HTML modules.
-- Runtime validation for serialized app-node trees is centralized in [`features/serializers/schema.ts`](../../features/serializers/schema.ts).
-- Shared readonly app-state and feature-facing types are defined in [`features/types.ts`](../../features/types.ts).
+- The app-state API is implemented in [`shared/features/app-state/`](../../shared/features/app-state/), with commands, reducer helpers, and selectors. The React hook facade lives in [`client/features/app-state/`](../../client/features/app-state/).
+- Serializers are implemented in [`client/features/serializers/`](../../client/features/serializers/), with separate JSON, shortcode, and HTML modules.
+- Runtime validation for serialized app-node trees is centralized in [`shared/features/serializers/schema.ts`](../../shared/features/serializers/schema.ts).
+- Shared readonly app-state and feature-facing types are defined in [`shared/features/types.ts`](../../shared/features/types.ts).
 
 ## Standalone HTML export
 

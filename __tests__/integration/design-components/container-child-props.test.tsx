@@ -2,8 +2,8 @@ import React from "react"
 import "@testing-library/jest-dom"
 import { render, screen } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { getComponentInfo } from "@/features/design-components"
-import type { AppNode } from "@/features/app-state"
+import { getComponentInfo } from "@/client/features/design-components"
+import type { AppNode } from "@/client/features/app-state"
 
 function renderWithQueryClient(ui: React.ReactElement) {
 	const queryClient = new QueryClient()

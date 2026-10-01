@@ -1,5 +1,5 @@
-import type { AppNode } from "@/features/app-state"
-import { refinePage, MAX_REFINE_STEPS, type DesignEdit } from "@/features/prompt-assist"
+import type { AppNode } from "@/client/features/app-state"
+import { refinePage, MAX_REFINE_STEPS, type DesignEdit } from "@/client/features/prompt-assist"
 
 const pages: ReadonlyArray<AppNode> = [
   { tag: "page", attributes: { id: "p" }, children: [{ tag: "callout", attributes: { id: "c", tone: "neutral" }, children: ["Hi"] }] },

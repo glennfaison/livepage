@@ -9,7 +9,7 @@
 ## Checklist
 
 - [ ] `npm run lint` and the relevant `npm test` selectors pass
-- [ ] No new deep imports across `features/*` module boundaries (see [conventions](../docs/CONVENTIONS.md))
+- [ ] Imports follow the `client`/`server`/`shared` runtime boundary and feature entry points (see [conventions](../docs/CONVENTIONS.md))
 - [ ] [Glossary](../docs/GLOSSARY.md) updated if this adds or renames a domain term
 - [ ] UI changes were checked in a browser against a freshly restarted dev server; screenshots attached where useful
 - [ ] Docs updated if behavior, commands, or formats changed

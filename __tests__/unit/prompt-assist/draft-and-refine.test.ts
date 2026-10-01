@@ -1,15 +1,15 @@
 /** @jest-environment node */
-import { cloneTemplatePages, getPageTemplateById, listTemplateTextFields } from "@/features/templates"
+import { cloneTemplatePages, getPageTemplateById, listTemplateTextFields } from "@/shared/features/templates/catalog"
 
 import { mockAskJev, mockCompleteJson, mockIsJevConfigured, mockIsOpenAiConfigured, resetProviderMocks } from "../../utils/ai-provider-mocks"
 
-jest.mock("@/lib/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
-jest.mock("@/lib/openai", () => jest.requireActual("../../utils/ai-provider-mocks").openAiModuleMock)
+jest.mock("@/server/services/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
+jest.mock("@/server/services/openai", () => jest.requireActual("../../utils/ai-provider-mocks").openAiModuleMock)
 
-import { JevUnavailableError } from "@/lib/jev"
-import { OpenAiUnavailableError } from "@/lib/openai"
-import { describePage } from "@/features/prompt-assist"
-import { draftCopy, refineDesign } from "@/features/prompt-assist/server"
+import { JevUnavailableError } from "@/server/services/jev"
+import { OpenAiUnavailableError } from "@/server/services/openai"
+import { describePage } from "@/client/features/prompt-assist"
+import { draftCopy, refineDesign } from "@/server/features/prompt-assist"
 
 const request = { prompt: "a bold dark resume", clarifications: [] }
 const template = getPageTemplateById("cv-resume-engineer-dark")!

@@ -11,15 +11,16 @@ const customJestConfig = {
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
     "^server-only$": "<rootDir>/__tests__/utils/server-only.ts",
-    // Handle module aliases (this will be automatically configured for you soon)
-    "^@/components/(.*)$": "<rootDir>/components/$1",
-    "^@/features/(.*)$": "<rootDir>/features/$1",
-    "^@/lib/(.*)$": "<rootDir>/lib/$1",
+    "^@/client/(.*)$": "<rootDir>/client/$1",
+    "^@/shared/(.*)$": "<rootDir>/shared/$1",
+    "^@/server/(.*)$": "<rootDir>/server/$1",
     "^@/app/(.*)$": "<rootDir>/app/$1",
+    "^@/(.*)$": "<rootDir>/$1",
   },
   collectCoverageFrom: [
-    "components/**/*.{js,jsx,ts,tsx}",
-    "lib/**/*.{js,jsx,ts,tsx}",
+    "client/**/*.{js,jsx,ts,tsx}",
+    "shared/**/*.{js,jsx,ts,tsx}",
+    "server/**/*.{js,jsx,ts,tsx}",
     "app/**/*.{js,jsx,ts,tsx}",
     "!**/*.d.ts",
     "!**/node_modules/**",

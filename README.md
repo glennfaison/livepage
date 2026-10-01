@@ -40,13 +40,13 @@ The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and reb
 | `npm run test:coverage` | Run Jest with coverage |
 | `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
 
-The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `features/serializers/html/generated/`, which is git-ignored.
+The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
 The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
 
 ## Project layout
 
-Application code lives in [`features/`](./features/), with one folder per domain concern (app state, serializers, design components, data sources, templates, and so on). Routes are in [`app/`](./app/) and shared UI primitives are in [`components/ui/`](./components/ui/). [`docs/CONTEXT.md`](./docs/CONTEXT.md) has the full module map.
+Application code is organized by runtime: browser features and UI live in [`client/`](./client/), backend features and integrations in [`server/`](./server/), and runtime-neutral models and contracts in [`shared/`](./shared/). Each runtime groups domain code in its own `features/` subfolder. The Next.js route tree stays in [`app/`](./app/); page files import client features, while API route files are thin adapters to server features. UI primitives live in [`client/components/ui/`](./client/components/ui/). [`docs/CONTEXT.md`](./docs/CONTEXT.md) has the module map and import-boundary rule.
 
 ## HTML exports
 
@@ -58,13 +58,13 @@ An HTML export is a single file that opens directly in a modern browser, with no
 
 ## Bundled templates
 
-Templates live in [`features/templates/definitions/`](./features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
+Templates live in [`shared/features/templates/definitions/`](./shared/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
 
 To add a template:
 
-1. Create a definition in `features/templates/definitions/` using only supported design-component tags.
+1. Create a definition in `shared/features/templates/definitions/` using only supported design-component tags.
 2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
-3. Validate it with `pageTemplateDefinitionSchema` and register it in `features/templates/registry.ts`.
+3. Validate it with `pageTemplateDefinitionSchema` and register it in `shared/features/templates/registry.ts`.
 4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
 
 The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.

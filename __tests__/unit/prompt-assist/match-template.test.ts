@@ -1,14 +1,14 @@
 /** @jest-environment node */
-import { pageTemplateRegistry } from "@/features/templates"
+import { pageTemplateRegistry } from "@/shared/features/templates/catalog"
 
 import { mockAskJev, mockCompleteJson, mockIsJevConfigured, mockIsOpenAiConfigured, resetProviderMocks } from "../../utils/ai-provider-mocks"
 
-jest.mock("@/lib/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
-jest.mock("@/lib/openai", () => jest.requireActual("../../utils/ai-provider-mocks").openAiModuleMock)
+jest.mock("@/server/services/jev", () => jest.requireActual("../../utils/ai-provider-mocks").jevModuleMock)
+jest.mock("@/server/services/openai", () => jest.requireActual("../../utils/ai-provider-mocks").openAiModuleMock)
 
-import { JevUnavailableError } from "@/lib/jev"
-import { OpenAiUnavailableError } from "@/lib/openai"
-import { matchTemplate } from "@/features/prompt-assist/server"
+import { JevUnavailableError } from "@/server/services/jev"
+import { OpenAiUnavailableError } from "@/server/services/openai"
+import { matchTemplate } from "@/server/features/prompt-assist"
 
 const ids = pageTemplateRegistry.map((template) => template.id)
 const request = (extra: object = {}) => ({ prompt: "a dark resume site", clarifications: [], ...extra })
