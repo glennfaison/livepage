@@ -3,7 +3,7 @@ import { Tag } from "lucide-react"
 import { withDataSource } from "@/features/data-sources"
 import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"
 import type { Metadata, Props, SettingsField } from "@/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/features/design-component-runtime/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/features/design-components/primitives"
 import { cn } from "@/lib/utils"
 
 const tag = "badge" as const

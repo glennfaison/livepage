@@ -3,8 +3,7 @@
 // renderers. Kept separate from `./index` (which also re-exports state-aware
 // hooks depending on app-state) so that design-components definitions can
 // depend on editor controls without re-entering app-state's dependency chain
-// (app-state -> design-components -> design-component-runtime -> these same
-// definitions) while it is still loading.
+// (app-state -> design-components -> these same definitions) while it is still loading.
 export { ComponentOperationsContext, useComponentOperationsContext } from "./component-operations-context"
 export { ComponentSelectorPopover, getComponentInfoSafe } from "./component-selector-popover"
 export { Divider, useDividerVisibility } from "./layout-divider"

@@ -5,7 +5,7 @@
 Preview rendering is defined by a browser-safe component registry and shared
 `PreviewModeComponent` implementations. Component definitions live under
 `features/design-components/definitions/`; registry and preview-runtime code
-lives under `features/design-component-runtime/`. Data-source behavior belongs
+lives under `features/design-components/`. Data-source behavior belongs
 to `features/data-sources/`, while editor-only decorators belong to
 `features/page-builder/decorators/`.
 

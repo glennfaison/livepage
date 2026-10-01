@@ -4,7 +4,7 @@ import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } fro
 import { ComponentSelectorPopover, Divider, useDividerVisibility, useComponentOperationsContext, withEditorControls } from "@/features/page-builder/editor-controls"
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
-import { componentTagList, getRegisteredComponentInfo, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-component-runtime/primitives"
+import { componentTagList, getRegisteredComponentInfo, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-components/primitives"
 import { withDataSource } from "@/features/data-sources"
 
 const tag = "row" as const

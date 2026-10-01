@@ -1,8 +1,8 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@/features/design-component-runtime"
-import { ComponentLookupNotInitializedError, componentTagList } from "@/features/design-component-runtime/primitives"
+import "@/features/design-components"
+import { ComponentLookupNotInitializedError, componentTagList } from "@/features/design-components/primitives"
 import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder"
 import { Button } from "@/components/ui/button"
 

@@ -1,7 +1,7 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@/features/design-component-runtime"
+import "@/features/design-components"
 import { CommandPalette } from "@/features/command-palette"
 import type { AppState, Operations } from "@/features/app-state"
 

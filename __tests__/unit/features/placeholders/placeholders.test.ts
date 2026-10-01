@@ -1,4 +1,4 @@
-import { replaceDataSourceComponentProperties } from "@/features/design-component-runtime/primitives"
+import { replaceDataSourceComponentProperties } from "@/features/design-components/primitives"
 import {
   replaceCurrentDatePlaceholderInString,
   replaceDataSourcePlaceholdersInString,

@@ -1,6 +1,6 @@
 import type { AppNode } from "@/features/app-state"
 import { findComponentById, patchComponent } from "@/features/app-state/tree"
-import { applySettingValue, describeEditableSettings, readSettingValue } from "@/features/design-component-runtime"
+import { applySettingValue, describeEditableSettings, readSettingValue } from "@/features/design-components"
 import { toSettingDescriptor } from "./page-description"
 import type { DesignEdit } from "./schema"
 import { filterDesignEdits } from "./setting-values"

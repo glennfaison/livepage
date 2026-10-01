@@ -1,5 +1,5 @@
 import type { AppNode, PrimitiveSettingsField } from "@/features/app-state"
-import { describeEditableSettings, readSettingValue } from "@/features/design-component-runtime"
+import { describeEditableSettings, readSettingValue } from "@/features/design-components"
 import { MAX_DESCRIBED_NODES, type PageDescription, type SettingDescriptor } from "./schema"
 
 const MAX_TEXT_PREVIEW = 60

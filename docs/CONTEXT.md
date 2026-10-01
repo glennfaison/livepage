@@ -9,8 +9,7 @@ LivePage is a page builder. The document being edited is a single **app state**,
 | [`app-state`](../features/app-state/) | Command/selector API over the app state |
 | [`serializers`](../features/serializers/) | JSON, shortcode, and standalone HTML import/export |
 | [`shortcode-parser`](../features/shortcode-parser/) | Parser used by the shortcode serializer |
-| [`design-components`](../features/design-components/) | Component definitions (metadata, settings, renderers) |
-| [`design-component-runtime`](../features/design-component-runtime/) | Registry, instance creation, and the shared preview renderer |
+| [`design-components`](../features/design-components/) | Component definitions, registry, instance creation, and the shared preview renderer |
 | [`data-sources`](../features/data-sources/) | Data-source definitions and resolution |
 | [`placeholders`](../features/placeholders/) | Runtime tokens resolved inside component strings |
 | [`page-builder`](../features/page-builder/) | Editor UI, toolbar, canvas renderer, and editor controls |

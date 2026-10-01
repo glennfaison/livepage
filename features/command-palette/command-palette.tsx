@@ -28,7 +28,7 @@ import { selectCurrentPage } from "@/features/app-state"
 // import boundary page-builder's own definitions rely on. See the header
 // comment in features/page-builder/editor-controls.ts.
 import { getComponentInfoSafe } from "@/features/page-builder"
-import { componentTagList } from "@/features/design-component-runtime/primitives"
+import { componentTagList } from "@/features/design-components"
 import type { PageTemplateDefinition } from "@/features/templates"
 import { cn } from "@/lib/utils"
 

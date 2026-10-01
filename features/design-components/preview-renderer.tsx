@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { AppNode, ViewModeProps } from "@/features/types"
-import { getComponentInfo } from "@/features/design-component-runtime/registry"
+import { getComponentInfo } from "./registry"
 
 function renderPreviewNode(
   node: AppNode | string,

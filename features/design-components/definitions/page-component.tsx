@@ -6,7 +6,7 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/features/types"
 import { cn } from "@/lib/utils"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses, getRegisteredComponentInfo } from "@/features/design-component-runtime/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses, getRegisteredComponentInfo } from "@/features/design-components/primitives"
 
 const tag = "page" as const
 
