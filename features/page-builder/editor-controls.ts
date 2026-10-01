@@ -3,11 +3,9 @@ export {
   ComponentOperationsContext,
   useComponentOperationsContext,
   ComponentSelectorPopover,
-  getComponentInfoSafe,
   Divider,
   useDividerVisibility,
   SettingsPopover,
   withEditorControls,
   withTextEditing,
 } from "@/features/design-components/editor-controls"
-

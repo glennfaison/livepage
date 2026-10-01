@@ -9,7 +9,6 @@ import {
   LayoutTemplate,
   MonitorPlay,
   Pencil,
-  Plus,
   Redo2,
   RotateCcw,
   Search,
@@ -23,12 +22,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/features/app-state"
 import { selectCurrentPage } from "@/features/app-state"
-// Import through the public page-builder barrel (not the internal
-// component-selector-popover module) so this module respects the same
-// import boundary page-builder's own definitions rely on. See the header
-// comment in features/page-builder/editor-controls.ts.
-import { getComponentInfoSafe } from "@/features/page-builder"
-import { componentTagList } from "@/features/design-components"
+import { componentTagList, getComponentInfo } from "@/features/design-components"
 import type { PageTemplateDefinition } from "@/features/templates"
 import { cn } from "@/lib/utils"
 
@@ -213,14 +207,14 @@ export const CommandPalette: React.FC<
 
     const insertParentId = state.selectedComponentId || currentPage?.attributes.id
     const insertCommands: PaletteCommand[] = componentTagList.map((tag) => {
-      const info = getComponentInfoSafe(tag)
+      const info = getComponentInfo(tag)
       return {
         id: `insert-${tag}`,
         group: "Insert component",
         label: `Insert ${info.label}`,
         description: state.selectedComponentId ? "Inside the selected component" : "Onto the current page",
         keywords: [tag, ...info.keywords],
-        icon: info.Icon ?? <Plus className="h-4 w-4" />,
+        icon: info.Icon,
         onSelect: () => componentOperations.addComponent({ tag, parentId: insertParentId }),
       }
     })
@@ -241,7 +235,7 @@ export const CommandPalette: React.FC<
     const jumpCommands: PaletteCommand[] =
       state.pageBuilderMode === "edit" && currentPage
         ? flattenPageTree(currentPage).map(({ node, depth }) => {
-            const info = getComponentInfoSafe(node.tag)
+            const info = getComponentInfo(node.tag)
             const preview = previewText(node)
             return {
               id: `jump-${node.attributes.id}`,
@@ -249,7 +243,7 @@ export const CommandPalette: React.FC<
               label: `${"  ".repeat(depth)}${info.label}`,
               description: preview ? `“${preview}”` : node.attributes.id,
               keywords: [node.tag, node.attributes.id, preview ?? ""],
-              icon: info.Icon ?? undefined,
+              icon: info.Icon,
               onSelect: () => componentOperations.setSelectedComponent(node.attributes.id),
             }
           })

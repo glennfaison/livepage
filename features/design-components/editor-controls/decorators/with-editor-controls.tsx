@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import type { EditModeProps } from "@/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import React from "react";
-import { getRegisteredComponentInfo } from "../../primitives";
+import { getComponentInfo } from "../../registry";
 
 function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
@@ -51,7 +51,7 @@ function AncestorTags(props: EditModeProps) {
             style={{ width: `${100 + 10 * idx}%` }}
             onClick={(e) => selectAncestor(e, component.attributes.id)}
           >
-            {getRegisteredComponentInfo(component.tag).label}
+            {getComponentInfo(component.tag).label}
           </div>
         )
       })}
@@ -61,7 +61,7 @@ function AncestorTags(props: EditModeProps) {
 
 function EditorControls(props: EditModeProps) {
   const { component } = props
-  const { label } = getRegisteredComponentInfo(component.tag)
+  const { label } = getComponentInfo(component.tag)
   const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
 
   const handleReplace = useCallback((newType: string) => {

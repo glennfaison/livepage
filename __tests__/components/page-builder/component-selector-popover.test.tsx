@@ -1,9 +1,8 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@/features/design-components"
-import { ComponentLookupNotInitializedError, componentTagList } from "@/features/design-components/primitives"
-import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder"
+import { componentTagList, getComponentInfo } from "@/features/design-components"
+import { ComponentSelectorPopover } from "@/features/page-builder"
 import { Button } from "@/components/ui/button"
 
 describe("ComponentSelectorPopover", () => {
@@ -98,17 +97,7 @@ describe("ComponentSelectorPopover", () => {
     })
   })
 
-  it("falls back to formatted labels when lookup is not initialized", async () => {
-    expect(
-      getComponentInfoSafe("header1", () => {
-        throw new ComponentLookupNotInitializedError()
-      }).label,
-    ).toBe("Header 1")
-
-    expect(
-      getComponentInfoSafe("inline-text", () => {
-        throw new ComponentLookupNotInitializedError()
-      }).label,
-    ).toBe("Inline Text")
+  it("exposes registered component metadata from the public API", () => {
+    expect(getComponentInfo("header1").label).toBe("Header 1")
   })
 })

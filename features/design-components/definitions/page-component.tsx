@@ -6,7 +6,8 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/features/types"
 import { cn } from "@/lib/utils"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses, getRegisteredComponentInfo } from "@/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "@/features/design-components/primitives"
+import { getComponentInfo } from "../registry"
 
 const tag = "page" as const
 
@@ -43,7 +44,7 @@ function _PreviewModeComponent(props: ViewModeProps) {
 				{currentPage.children.map((component, childIndex) => {
 					if (typeof component === "string") return component
 
-					const Child = getRegisteredComponentInfo(component.tag).PreviewModeComponent
+					const Child = getComponentInfo(component.tag).PreviewModeComponent
 					return <Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />
 				})}
 			</div>
@@ -78,7 +79,7 @@ function _EditModeComponent(props: EditModeProps) {
 				{currentPage.children.map((component, childIndex) => {
 					if (typeof component === "string") return component
 
-					const meta = getRegisteredComponentInfo(component.tag)
+					const meta = getComponentInfo(component.tag)
 					const Child = meta.EditModeComponent
 					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />)
 				})}

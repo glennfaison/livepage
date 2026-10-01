@@ -15,7 +15,6 @@ import { componentMetadata as Callout } from "./definitions/callout"
 import { componentMetadata as Stat } from "./definitions/stat"
 import { componentMetadata as Time } from "./definitions/time"
 import { componentMetadata as Page } from "./definitions/page-component"
-import { registerComponentLookup } from "./lookup"
 export { componentTagList } from "./component-tags"
 
 const componentMap: Readonly<Record<Metadata["tag"], Metadata>> = {
@@ -81,5 +80,3 @@ export function createDesignComponentInstance(
     children: [...metadata.defaultChildren],
   }
 }
-
-registerComponentLookup(getComponentInfo)

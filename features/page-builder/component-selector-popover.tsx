@@ -1,1 +1,1 @@
-export { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/design-components/editor-controls"
+export { ComponentSelectorPopover } from "@/features/design-components/editor-controls"

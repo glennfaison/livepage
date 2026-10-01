@@ -3,34 +3,8 @@ import React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "../primitives"
+import { getComponentInfo } from "../registry"
 import type { AppNodeTag } from "@/features/types"
-import { formatComponentLabel } from "./shared/component-label"
-
-export function getComponentInfoSafe(
-  componentTag: AppNodeTag,
-  getComponentInfo: (tag: AppNodeTag) => {
-    tag: AppNodeTag
-    label: string
-    keywords: ReadonlyArray<string>
-    Icon: React.ReactNode
-  } = getRegisteredComponentInfo,
-) {
-  try {
-    return getComponentInfo(componentTag)
-  } catch (error) {
-    if (!(error instanceof ComponentLookupNotInitializedError)) {
-      throw error
-    }
-    const label = formatComponentLabel(componentTag)
-    return {
-      tag: componentTag,
-      label,
-      keywords: [componentTag, label.toLowerCase()],
-      Icon: null,
-    }
-  }
-}
 
 // Component selector popover
 export const ComponentSelectorPopover = ({
@@ -46,7 +20,7 @@ export const ComponentSelectorPopover = ({
   const [open, setOpen] = React.useState(false)
 
 	const filteredComponents = React.useMemo(() => {
-		const components = componentTagList.map((componentTag) => getComponentInfoSafe(componentTag))
+		const components = componentTagList.map((componentTag) => getComponentInfo(componentTag))
 		if (!searchTerm.trim()) return components
 
 		const search = searchTerm.toLowerCase()

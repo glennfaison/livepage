@@ -4,7 +4,8 @@ import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } fro
 import { ComponentSelectorPopover, Divider, useDividerVisibility, useComponentOperationsContext, withEditorControls } from "@/features/design-components/editor-controls"
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
-import { componentTagList, getRegisteredComponentInfo, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-components/primitives"
+import { componentTagList, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-components/primitives"
+import { getComponentInfo } from "../registry"
 import { withDataSource } from "@/features/data-sources"
 
 const tag = "row" as const
@@ -45,7 +46,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 
 	const childComponents = props.component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
-		const ChildComponent = getRegisteredComponentInfo(child.tag).PreviewModeComponent
+		const ChildComponent = getComponentInfo(child.tag).PreviewModeComponent
 		return (
 			<ChildComponent
 				{...props}
@@ -119,7 +120,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
-		const meta = getRegisteredComponentInfo(child.tag)
+		const meta = getComponentInfo(child.tag)
 		const ChildComponent = meta.EditModeComponent
 		return (
 			<ChildComponent

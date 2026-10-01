@@ -3,34 +3,21 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { ComponentLookupNotInitializedError, getRegisteredComponentInfo } from "@/features/design-components/primitives"
+import { getComponentInfo } from "@/features/design-components"
 import type { AppNode } from "@/features/app-state"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
-import { formatComponentLabel } from "../shared/component-label"
 
 type ComponentSettingsInfo = Pick<Metadata, "label" | "attributes" | "defaultChildren" | "defaultAttributes">
 
 function getComponentSettingsInfo(tag: string): ComponentSettingsInfo {
-  try {
-    const metadata = getRegisteredComponentInfo(tag)
-    return {
-      label: metadata.label,
-      attributes: metadata.attributes,
-      defaultChildren: metadata.defaultChildren,
-      defaultAttributes: metadata.defaultAttributes,
-    }
-  } catch (error) {
-    if (!(error instanceof ComponentLookupNotInitializedError)) {
-      throw error
-    }
-    return {
-      label: formatComponentLabel(tag),
-      attributes: [],
-      defaultChildren: [],
-      defaultAttributes: undefined,
-    }
+  const metadata = getComponentInfo(tag)
+  return {
+    label: metadata.label,
+    attributes: metadata.attributes,
+    defaultChildren: metadata.defaultChildren,
+    defaultAttributes: metadata.defaultAttributes,
   }
 }
 
