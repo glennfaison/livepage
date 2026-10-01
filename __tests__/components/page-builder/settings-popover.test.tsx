@@ -18,6 +18,17 @@ jest.mock("@/features/page-builder/component-operations-context", () => ({
     findComponentById: jest.fn(),
   }),
 }))
+jest.mock("@/features/design-components/editor-controls/component-operations-context", () => ({
+  useComponentOperationsContext: () => ({
+    updateComponent: mockUpdateComponent,
+    setSelectedComponent: jest.fn(),
+    addComponent: jest.fn(),
+    removeComponent: jest.fn(),
+    duplicateComponent: jest.fn(),
+    replaceComponent: jest.fn(),
+    findComponentById: jest.fn(),
+  }),
+}))
 
 describe("SettingsPopover", () => {
   beforeEach(() => {

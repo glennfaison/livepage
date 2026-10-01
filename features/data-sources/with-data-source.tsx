@@ -4,7 +4,7 @@ import type { DataSourceId, Props } from "@/features/types"
 import { DATA_SOURCE_FIELD_NAME } from "./constants"
 import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
-import { replaceDataSourceComponentProperties } from "@/features/design-components/primitives"
+import { replaceDataSourceComponentProperties } from "./browser-core"
 
 const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
 

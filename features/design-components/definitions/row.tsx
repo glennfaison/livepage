@@ -1,7 +1,7 @@
 import React, { useCallback } from "react"
 import { AlignHorizontalSpaceBetween, Plus } from "lucide-react"
 import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } from "@/features/types"
-import { ComponentSelectorPopover, Divider, useDividerVisibility, useComponentOperationsContext, withEditorControls } from "@/features/page-builder/editor-controls"
+import { ComponentSelectorPopover, Divider, useDividerVisibility, useComponentOperationsContext, withEditorControls } from "@/features/design-components/editor-controls"
 import { Button } from "@/components/ui/button"
 import { cn, intersperseAndAppend } from "@/lib/utils"
 import { componentTagList, getRegisteredComponentInfo, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/features/design-components/primitives"

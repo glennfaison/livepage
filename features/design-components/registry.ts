@@ -1,5 +1,4 @@
-import type { Props, Metadata } from "@/features/types"
-import type { AppNode } from "@/features/app-state"
+import type { Props, Metadata, AppNode } from "@/features/types"
 import { componentMetadata as Header1 } from "./definitions/header1"
 import { componentMetadata as Header2 } from "./definitions/header2"
 import { componentMetadata as Header3 } from "./definitions/header3"

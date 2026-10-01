@@ -20,6 +20,13 @@ jest.mock("@/features/page-builder/component-operations-context", () => ({
     updateComponent: mockUpdateComponent,
   }),
 }))
+jest.mock("@/features/design-components/editor-controls/component-operations-context", () => ({
+  useComponentOperationsContext: () => ({
+    addComponent: mockAddComponent,
+    setSelectedComponent: mockSetSelectedComponent,
+    updateComponent: mockUpdateComponent,
+  }),
+}))
 
 const componentInfo = getComponentInfo("page")
 const Component = componentInfo.EditModeComponent

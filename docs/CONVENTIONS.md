@@ -44,12 +44,13 @@ Rules for how code in this repository is written. For how to scope and verify a 
 - **State-free entry points.** [`features/app-state/tree.ts`](../features/app-state/tree.ts) exposes pure tree helpers without the reducer, so low-level modules such as `templates` can use them without loading the editor.
 - **Route handlers and the component registry.** The registry loads React component definitions and cannot be imported into a route handler. Derive anything the server needs from the registry in the browser and send the result.
 
-### Import cycles
+### Module Decoupling and DAG Rules
 
-Avoid the following cycles by keeping these boundaries:
+Maintain a strict Directed Acyclic Graph across modules:
 
-- **`design-components` → `page-builder` → `app-state` → `design-components`.** Definitions in `features/design-components/definitions/` must not import `features/page-builder/decorators/*` or `features/page-builder/hooks.ts`. Use `editor-controls.ts` instead.
-- **`design-components` entry points.** [`features/design-components/`](../features/design-components/) exposes two entry points:
-  - [`index.ts`](../features/design-components/index.ts) exposes the registry, `componentTagList`, `getComponentInfo`, `createDesignComponentInstance`, `PreviewRenderer`, and setting catalog helpers (`applySettingValue`, `describeEditableSettings`, `readSettingValue`). It is for consumers outside the assembly cycle.
-  - [`primitives.ts`](../features/design-components/primitives.ts) exposes the attribute-builder helpers, the registered-component lookup, `componentTagList`, and browser-safe data-source property substitution. Definitions in `features/design-components/definitions/`, and the dependents of `features/page-builder/editor-controls.ts`, import from here and must not import the full `index.ts`.
-- **When consolidating exports into a barrel**, check that no export transitively depends on a module that depends back on the current one, directly or through another feature. If one does, split the barrel into narrower entry points (for example a state-free surface and a state-aware surface) instead of forcing everything through one file.
+- **`app-state` has zero UI dependencies.** It never imports `design-components` or `page-builder`. Component creation occurs in the caller (`features/page-builder/hooks.ts`) and is passed to `INSERT_COMPONENT` or `REPLACE_COMPONENT`.
+- **`data-sources` has zero component dependencies.** It depends only on `features/placeholders` and `features/types`.
+- **`design-components` is self-contained.** Component definitions, preview rendering, and edit-mode controls (`withEditorControls`, `withTextEditing`, divider, settings popovers) live entirely inside `features/design-components/` and do not import from `features/page-builder`.
+- **`page-builder` is a one-way consumer.** It consumes `features/app-state` and `features/design-components`, orchestrating the visual workspace.
+- **Entry point discipline.** Each feature exposes its primary public API via `index.ts`. Client/server split features (`features/prompt-assist`) provide `index.ts` for client code and `server.ts` for server route handlers. Server routes must not import client barrels.
+

@@ -4,10 +4,11 @@ import type React from "react"
 
 import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
-import type { AppState, AppAction } from "@/features/app-state"
-import { toast } from "@/components/ui/use-toast"
-import type { AppNode } from "@/features/app-state"
+import type { AppState, AppAction, AppNode } from "@/features/app-state"
 import { selectCurrentPage } from "@/features/app-state"
+import { createDesignComponentInstance } from "@/features/design-components"
+import { generateId } from "@/lib/utils"
+import { toast } from "@/components/ui/use-toast"
 import {
   deserializeAppStateFromJson,
   deserializeAppStateFromShortcode,
@@ -248,9 +249,11 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
 
   // Add component
   const addComponent = useCallback(({ tag, parentId, index }: { tag: string, parentId?: string, index?: number }) => {
+    const componentId = generateId()
+    const newComponent = createDesignComponentInstance(tag, componentId)
     dispatch({
       type: "INSERT_COMPONENT",
-      payload: { newComponentTag: tag, parentId, index },
+      payload: { newComponent, newComponentTag: tag, parentId, index },
     })
 
     toast({
@@ -300,9 +303,11 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
   }, [dispatch])
 
   const replaceComponent = useCallback((oldComponentId: string, newComponentTag: string) => {
+    const componentId = generateId()
+    const newComponent = createDesignComponentInstance(newComponentTag, componentId)
     dispatch({
       type: "REPLACE_COMPONENT",
-      payload: { oldComponentId, newComponentTag },
+      payload: { oldComponentId, newComponent, newComponentTag },
     })
 
     toast({

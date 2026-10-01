@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { useComponentOperationsContext } from "@/features/page-builder/editor-controls"
+import { useComponentOperationsContext } from "@/features/design-components/editor-controls"
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/features/types"

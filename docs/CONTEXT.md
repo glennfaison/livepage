@@ -6,18 +6,102 @@ LivePage is a page builder. The document being edited is a single **app state**,
 
 | Module | Responsibility |
 | --- | --- |
-| [`app-state`](../features/app-state/) | Command/selector API over the app state |
+| [`app-state`](../features/app-state/) | Pure state machine & selector API over the document tree (zero UI dependencies) |
 | [`serializers`](../features/serializers/) | JSON, shortcode, and standalone HTML import/export |
 | [`shortcode-parser`](../features/shortcode-parser/) | Parser used by the shortcode serializer |
-| [`design-components`](../features/design-components/) | Component definitions, registry, instance creation, and the shared preview renderer |
-| [`data-sources`](../features/data-sources/) | Data-source definitions and resolution |
+| [`design-components`](../features/design-components/) | Self-contained component system: definitions, preview/edit renderers, settings catalog, and editor controls |
+| [`data-sources`](../features/data-sources/) | Data-source registry, `withDataSource` HOC, and browser data loader |
 | [`placeholders`](../features/placeholders/) | Runtime tokens resolved inside component strings |
-| [`page-builder`](../features/page-builder/) | Editor UI, toolbar, canvas renderer, and editor controls |
+| [`page-builder`](../features/page-builder/) | Visual studio shell: canvas orchestrator, toolbar, history, and operation hooks |
 | [`templates`](../features/templates/) | Bundled page templates and the template catalog |
 | [`command-palette`](../features/command-palette/) | Command palette for the builder |
 | [`prompt-assist`](../features/prompt-assist/) | Chat that turns a prose request into a template, copy, and design edits |
 
 Use [the glossary](./GLOSSARY.md) for the precise meaning of these terms.
+
+## Architecture & Module Layers
+
+The codebase is structured as a strict Directed Acyclic Graph (DAG) across 5 distinct architectural layers:
+
+```mermaid
+graph TD
+  subgraph Layer5["Layer 5: Application Shell & Routes"]
+    AppPage["app/page.tsx"]
+    TryPage["app/try/page.tsx"]
+    ApiRoutes["app/api/prompt-assist/*"]
+  end
+
+  subgraph Layer4["Layer 4: High-Level Feature Modules"]
+    PageBuilder["features/page-builder"]
+    PromptAssist["features/prompt-assist"]
+    CommandPalette["features/command-palette"]
+    Templates["features/templates"]
+    Serializers["features/serializers"]
+  end
+
+  subgraph Layer3["Layer 3: Domain Services & Models"]
+    AppState["features/app-state"]
+    DesignComponents["features/design-components"]
+    DataSources["features/data-sources"]
+  end
+
+  subgraph Layer2["Layer 2: Core Domain Primitives"]
+    Placeholders["features/placeholders"]
+    ShortcodeParser["features/shortcode-parser"]
+    JevLib["lib/jev"]
+    OpenAILib["lib/openai"]
+  end
+
+  subgraph Layer1["Layer 1: Foundation & Shared Infrastructure"]
+    Types["features/types.ts"]
+    Utils["lib/utils.ts"]
+    RateLimit["lib/rate-limit.ts"]
+    UI["components/ui/*"]
+  end
+
+  %% Inter-layer relationships
+  TryPage --> PageBuilder
+  TryPage --> PromptAssist
+  TryPage --> CommandPalette
+  ApiRoutes --> PromptAssist
+
+  PageBuilder --> AppState
+  PageBuilder --> DesignComponents
+  PageBuilder --> Templates
+  PageBuilder --> Serializers
+
+  PromptAssist --> Templates
+  PromptAssist --> DesignComponents
+  PromptAssist --> AppState
+  PromptAssist --> JevLib
+  PromptAssist --> OpenAILib
+
+  CommandPalette --> AppState
+
+  Templates --> Serializers
+  Templates --> AppState
+  Serializers --> ShortcodeParser
+  Serializers --> Types
+
+  DesignComponents --> DataSources
+  DesignComponents --> Types
+  DesignComponents --> UI
+  DesignComponents --> Utils
+
+  DataSources --> Placeholders
+  DataSources --> Types
+  DataSources --> Utils
+
+  AppState --> Types
+  AppState --> Utils
+```
+
+### Layer Constraints
+1. **Unidirectional flow**: Higher layers depend only on lower layers. No layer may import from a layer above it.
+2. **Pure `app-state`**: `app-state` is a pure tree state machine that handles immutable state transitions and history. It does not import any UI, React components, or design component registries.
+3. **Self-contained `design-components`**: `design-components` encapsulates all component definitions, attribute types, preview rendering, and edit-mode controls. It does not depend on `page-builder`.
+4. **Decoupled `data-sources`**: `data-sources` depends on `placeholders` and `types`, with zero dependencies on `design-components`.
+5. **Orchestrating `page-builder`**: `page-builder` acts as the studio orchestrator, consuming `app-state` and `design-components` without cyclic back-references.
 
 ## Shared libraries
 

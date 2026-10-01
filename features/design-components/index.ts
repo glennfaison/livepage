@@ -9,4 +9,6 @@ export {
   readSettingValue,
 } from "./settings-catalog"
 export * from "./primitives"
+export * from "./editor-controls"
+
 

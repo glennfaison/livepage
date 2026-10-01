@@ -1,6 +1,6 @@
 import React from "https://esm.sh/react@19.1.0"
 import { createRoot } from "https://esm.sh/react-dom@19.1.0/client"
-import { decodeBrowserDataSourceSettings, loadBrowserDataSource, replaceDataSourceComponentProperties } from "../../design-components/shared/browser-core.ts"
+import { decodeBrowserDataSourceSettings, loadBrowserDataSource, replaceDataSourceComponentProperties } from "../../data-sources/browser-core.ts"
 
 const e = React.createElement
 const dataSourceKey = "__datasource__"

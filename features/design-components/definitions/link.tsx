@@ -1,7 +1,7 @@
 import { withDataSource } from "@/features/data-sources"
 import { ExternalLink } from "lucide-react"
 import React from "react"
-import { withEditorControls, withTextEditing } from "@/features/page-builder/editor-controls"
+import { withEditorControls, withTextEditing } from "@/features/design-components/editor-controls"
 import type { Props, Metadata, SettingsField } from "@/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/features/design-components/primitives"
 import { cn } from "@/lib/utils"

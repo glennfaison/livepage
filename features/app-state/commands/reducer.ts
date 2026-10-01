@@ -1,5 +1,4 @@
-import { createDesignComponentInstance } from "@/features/design-components"
-import type { AppAction, AppState, HistoryEntry } from "@/features/types"
+import type { AppAction, AppNode, AppState, HistoryEntry } from "@/features/types"
 import { generateId } from "@/lib/utils"
 import {
   insertComponent,
@@ -81,17 +80,22 @@ function withHistory(
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case "INSERT_COMPONENT": {
-      const { newComponentTag, parentId, index } = action.payload
-      const componentId = generateId()
-      const newComponent = createDesignComponentInstance(newComponentTag, componentId)
+      const { newComponent: providedComponent, newComponentTag, parentId, index } = action.payload
+      const tag = (providedComponent?.tag ?? newComponentTag ?? "div") as string
+      const componentId = providedComponent?.attributes?.id ?? generateId()
+      const newComponent: AppNode = providedComponent ?? {
+        tag,
+        attributes: { id: componentId },
+        children: [],
+      }
       return withHistory(
         {
-        ...state,
-        componentTree: insertComponent({ components: state.componentTree, newComponent, parentId, index }),
-        selectedComponentId: newComponent.attributes.id,
+          ...state,
+          componentTree: insertComponent({ components: state.componentTree, newComponent, parentId, index }),
+          selectedComponentId: newComponent.attributes.id,
         },
         insertComponent({ components: state.componentTree, newComponent, parentId, index }),
-        `Inserted ${newComponentTag}`,
+        `Inserted ${tag}`,
       )
     }
 
@@ -152,20 +156,26 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     case "REPLACE_COMPONENT": {
-      const { oldComponentId, newComponentTag } = action.payload
+      const { oldComponentId, newComponent: providedComponent, newComponentTag } = action.payload
       if (!findComponentById(state.componentTree, oldComponentId)) {
         return state
       }
-      const newComponent = createDesignComponentInstance(newComponentTag, generateId())
+      const tag = (providedComponent?.tag ?? newComponentTag ?? "div") as string
+      const componentId = providedComponent?.attributes?.id ?? generateId()
+      const newComponent: AppNode = providedComponent ?? {
+        tag,
+        attributes: { id: componentId },
+        children: [],
+      }
       const newComponentTree = replaceComponent({ components: state.componentTree, oldComponentId, newComponent })
       return withHistory(
         {
-        ...state,
-        componentTree: newComponentTree,
-        selectedComponentId: newComponent.attributes.id,
+          ...state,
+          componentTree: newComponentTree,
+          selectedComponentId: newComponent.attributes.id,
         },
         newComponentTree,
-        `Replaced ${oldComponentId} with ${newComponentTag}`,
+        `Replaced ${oldComponentId} with ${tag}`,
       )
     }
 

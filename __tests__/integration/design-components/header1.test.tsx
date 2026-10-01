@@ -15,6 +15,16 @@ jest.mock("@/features/page-builder/component-operations-context", () => ({
     replaceComponent: jest.fn(),
   }),
 }))
+jest.mock("@/features/design-components/editor-controls/component-operations-context", () => ({
+  useComponentOperationsContext: () => ({
+    setSelectedComponent: jest.fn(),
+    updateComponent: jest.fn(),
+    removeComponent: jest.fn(),
+    addComponent: jest.fn(),
+    duplicateComponent: jest.fn(),
+    replaceComponent: jest.fn(),
+  }),
+}))
 
 describe("Header1 Component (metadata-based)", () => {
   const Header1 = getComponentInfo("header1")
