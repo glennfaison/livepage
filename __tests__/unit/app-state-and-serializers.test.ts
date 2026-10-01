@@ -1,6 +1,6 @@
-import { selectCurrentPage } from "@/features/app-state"
-import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/features/serializers"
-import { validateImportedFile } from "@/features/page-builder"
+import { selectCurrentPage } from "@/client/features/app-state"
+import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/client/features/serializers"
+import { validateImportedFile } from "@/client/features/page-builder"
 
 describe("app-state selectors and serializers", () => {
   const appState = {

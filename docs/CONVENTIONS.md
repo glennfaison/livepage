@@ -11,40 +11,45 @@ Rules for how code in this repository is written. For how to scope and verify a 
 ## Validation and serialization
 
 - Prefer Zod for runtime validation and parsing when the same object-shape checks repeat across call sites.
-- Keep format-specific parsing and serialization in [`features/serializers/`](../features/serializers/). Validate external app-node trees with the shared Zod schema in [`features/serializers/schema.ts`](../features/serializers/schema.ts).
+- Keep format-specific parsing and serialization in [`client/features/serializers/`](../client/features/serializers/). Validate external app-node trees with the Zod schema in [`client/features/serializers/schema.ts`](../client/features/serializers/schema.ts).
 
 ## State
 
-- Keep the component tree as readonly `AppNode` data. Create and update nodes through the app-state API and the actions exposed by [`features/app-state/`](../features/app-state/).
-- Editor-facing operations belong to [`features/page-builder/`](../features/page-builder/). Consume them through its public entry points, [`index.ts`](../features/page-builder/index.ts) and [`editor-controls.ts`](../features/page-builder/editor-controls.ts), not through the internal `hooks.ts` or `decorators/` files.
+- Keep the component tree as readonly `AppNode` data. Create and update nodes through the client app-state API in [`client/features/app-state/`](../client/features/app-state/), including pure tree lookups.
+- Editor-facing operations and canvas rendering belong to [`client/features/page-builder/`](../client/features/page-builder/). Consume them through its public entry points, [`index.ts`](../client/features/page-builder/index.ts) (including `CanvasRenderer`, `Toolbar`, and operational hooks) and [`editor-controls.ts`](../client/features/page-builder/editor-controls.ts), not through internal hooks, decorators, or component definitions.
+- Domain features must not import upward from the application shell (`app/*`). Runtime-specific constants belong with their owning client or server feature; move a constant to `shared/` only when both runtimes use it.
 
 ## React
 
 - Avoid `useEffect`. Before writing or keeping one, read [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) and choose an approach that does not need one: derive data during render, compute it with `useMemo`, handle it in an event handler, or reset state with a `key`. Use `useEffect` only to synchronize with external systems such as subscriptions, timers, DOM APIs, or network requests.
 - When you touch a component that has an unnecessary `useEffect`, refactor it away. When an effect is genuinely needed but is more than a few lines, extract it into a named custom hook.
 - Pair presentational components with custom hooks. A presentational component receives props and returns markup. A custom hook owns the state, data fetching, and computation behind it. Do not let one component combine several hooks and non-trivial computation with its JSX. Where a screen needs wiring, use a thin orchestrator component that calls the hook and passes the result to the presentational component.
-- Compose cross-cutting behavior with decorators in the owning feature: data-source resolution through the [`features/data-sources/`](../features/data-sources/) public API, and text editing and editor controls through [`features/page-builder/editor-controls.ts`](../features/page-builder/editor-controls.ts).
+- Compose cross-cutting behavior with decorators in the owning feature: data-source resolution through the [`client/features/data-sources/`](../client/features/data-sources/) public API, and text editing and editor controls through [`client/features/page-builder/editor-controls.ts`](../client/features/page-builder/editor-controls.ts).
 
 ## Design components and styling
 
-- Register design components through metadata in [`features/design-components/definitions/`](../features/design-components/definitions/), not through tag-specific switch statements in consumers.
+- Register design components through metadata in [`client/features/design-components/definitions/`](../client/features/design-components/definitions/), not through tag-specific switch statements in consumers.
 - When improving UI, first add or change the component's settings or attributes (spacing, variants, other configuration).
   - Use custom classes only for one-off layout adjustments the component model cannot express.
   - Do not bake template-specific fixes into a default component unless it renders incorrectly by default.
 
-## Module boundaries
+## Runtime and module boundaries
 
-- Treat each folder under [`features/`](../features/) as a module boundary. Expose its public surface through a top-level `index.ts`, or through a few deliberately named entry files such as [`editor-controls.ts`](../features/page-builder/editor-controls.ts). Other modules import only from those entry points, never from a sibling's internal files, definitions, components, or hooks.
-- If a module has no `index.ts`, add one before adding new cross-module consumers.
-- If a consumer needs something that is not exported yet, add it to the module's entry point. Do not add a deep-import exception, even for one case.
-- Before restructuring a module's public API, audit existing cross-module imports (for example `rg 'from "@/features/<module>/'` outside that module's folder) and fix every violation in the same change.
+- [`client/`](../client/), [`server/`](../server/), and [`shared/`](../shared/) are runtime boundaries. Client and server code may both depend on shared code, but they must never import from each other.
+- Keep `shared/` runtime-neutral and minimal: no React components, browser APIs, secrets, `server-only`, or server framework dependencies. Put browser features under `client/features/`, backend features under `server/features/`, and keep code in `shared/features/` only when both runtimes consume the same contract or data.
+- Treat each feature folder as a module boundary. Expose its public surface through `index.ts`, or a few deliberate entry files such as [`client/features/page-builder/editor-controls.ts`](../client/features/page-builder/editor-controls.ts). Other features import those entry points rather than sibling internals.
+- If a feature has browser and server behavior, keep the implementations in the corresponding runtime tree and put only their shared contracts in `shared/`. The prompt-assist client entry is [`client/features/prompt-assist/index.ts`](../client/features/prompt-assist/index.ts), the server entry is [`server/features/prompt-assist/index.ts`](../server/features/prompt-assist/index.ts), and shared contracts are in [`shared/features/prompt-assist/contract/`](../shared/features/prompt-assist/contract/). Server handlers must receive validated, bounded data rather than importing client-owned features.
+- Server-only integrations and infrastructure live in [`server/`](../server/), import `server-only` when they access secrets or otherwise must not enter a client bundle, and expose no client barrel.
+- Keep pages and API route handlers in Next.js's supported [`app/`](../app/) route tree. Page modules call into `client/`; API route files are thin backend adapters that call into `server/`.
+- The component registry loads React definitions and cannot be imported into a route handler. Derive anything the server needs from the registry in the browser and send the result.
+- App-state helpers, types, and validation are client-owned; the server must not depend on them.
 
-### Import cycles
+### Module Decoupling and DAG Rules
 
-Avoid the following cycles by keeping these boundaries:
+Maintain a strict Directed Acyclic Graph across runtime and domain modules:
 
-- **`design-components` → `page-builder` → `app-state` → `design-components`.** Definitions in `features/design-components/definitions/` must not import `features/page-builder/decorators/*` or `features/page-builder/hooks.ts`. Use `editor-controls.ts` instead.
-- **`design-component-runtime` → `design-components` → `page-builder` → `design-component-runtime`.** [`features/design-component-runtime/`](../features/design-component-runtime/) has two entry points:
-  - [`index.ts`](../features/design-component-runtime/index.ts) exposes the registry, `createDesignComponentInstance`, and `PreviewRenderer`. It is for consumers outside the assembly cycle.
-  - [`primitives.ts`](../features/design-component-runtime/primitives.ts) exposes the attribute-builder helpers, the registered-component lookup, `componentTagList`, and browser-safe data-source property substitution. Definitions in `features/design-components/definitions/`, and the dependents of `features/page-builder/editor-controls.ts`, import from here and must not import the full `index.ts`.
-- **When consolidating exports into a barrel**, check that no export transitively depends on a module that depends back on the current one, directly or through another feature. If one does, split the barrel into narrower entry points (for example a state-free surface and a state-aware surface) instead of forcing everything through one file.
+- **`client/features/app-state` owns editor state behavior.** App-state commands, types, tree lookup, and component creation remain in the client.
+- **Data-source constants** live in `client/features/data-sources/`; only types or constants needed by both runtimes belong in `shared/features/`.
+- **`client/features/design-components` is self-contained.** Component definitions, preview rendering, and edit-mode controls (`withEditorControls`, `withTextEditing`, divider, settings popovers) live there and do not import from `client/features/page-builder`.
+- **`client/features/page-builder` is a one-way consumer.** It consumes client app-state and design components, orchestrating the visual workspace.
+- **Entry point discipline.** Each feature exposes its public API through `index.ts`. Runtime-specific feature entry points stay in their matching tree; server routes must not import client barrels.

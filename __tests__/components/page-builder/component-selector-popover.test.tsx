@@ -1,10 +1,9 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@/features/design-component-runtime"
-import { ComponentLookupNotInitializedError, componentTagList } from "@/features/design-component-runtime/primitives"
-import { ComponentSelectorPopover, getComponentInfoSafe } from "@/features/page-builder"
-import { Button } from "@/components/ui/button"
+import { componentTagList, getComponentInfo } from "@/client/features/design-components"
+import { ComponentSelectorPopover } from "@/client/features/page-builder"
+import { Button } from "@/client/components/ui/button"
 
 describe("ComponentSelectorPopover", () => {
   const mockOnSelect = jest.fn()
@@ -98,17 +97,7 @@ describe("ComponentSelectorPopover", () => {
     })
   })
 
-  it("falls back to formatted labels when lookup is not initialized", async () => {
-    expect(
-      getComponentInfoSafe("header1", () => {
-        throw new ComponentLookupNotInitializedError()
-      }).label,
-    ).toBe("Header 1")
-
-    expect(
-      getComponentInfoSafe("inline-text", () => {
-        throw new ComponentLookupNotInitializedError()
-      }).label,
-    ).toBe("Inline Text")
+  it("exposes registered component metadata from the public API", () => {
+    expect(getComponentInfo("header1").label).toBe("Header 1")
   })
 })

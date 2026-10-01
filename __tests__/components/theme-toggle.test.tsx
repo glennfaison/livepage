@@ -3,7 +3,7 @@
 import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeToggle } from "@/client/components/theme-toggle"
 
 jest.mock("next-themes", () => ({
   useTheme: jest.fn(),

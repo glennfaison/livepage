@@ -1,4 +1,4 @@
-import { cn, generateId, intersperseAndAppend } from "@/lib/utils"
+import { cn, generateId, intersperseAndAppend } from "@/client/lib/utils"
 
 describe("Utility Functions", () => {
   describe("cn function", () => {

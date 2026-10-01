@@ -1,7 +1,7 @@
 import Link from "next/link"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/client/components/ui/accordion"
+import { Button } from "@/client/components/ui/button"
+import { ThemeToggle } from "@/client/components/theme-toggle"
 import { ArrowRight, Check, Code2, Download, Layers3, MousePointer2, Sparkles, WandSparkles } from "lucide-react"
 
 const features = [
