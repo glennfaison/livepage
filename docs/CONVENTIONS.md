@@ -16,7 +16,8 @@ Rules for how code in this repository is written. For how to scope and verify a 
 ## State
 
 - Keep the component tree as readonly `AppNode` data. Create and update nodes through the app-state API and the actions exposed by [`features/app-state/`](../features/app-state/).
-- Editor-facing operations belong to [`features/page-builder/`](../features/page-builder/). Consume them through its public entry points, [`index.ts`](../features/page-builder/index.ts) and [`editor-controls.ts`](../features/page-builder/editor-controls.ts), not through the internal `hooks.ts` or `decorators/` files.
+- Editor-facing operations and canvas rendering belong to [`features/page-builder/`](../features/page-builder/). Consume them through its public entry points, [`index.ts`](../features/page-builder/index.ts) (including `CanvasRenderer`, `Toolbar`, and operational hooks) and [`editor-controls.ts`](../features/page-builder/editor-controls.ts), not through internal hooks, decorators, or component definitions.
+- Domain features must not import upward from the application shell (`app/*`). Shared domain constants (such as data-source attribute keys) belong to their owning domain module (`features/data-sources/`).
 
 ## React
 

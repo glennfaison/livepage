@@ -1,4 +1,5 @@
 import type { AppNode } from "@/features/types"
+import { replacePlaceholdersInString } from "../../placeholders"
 
 export type DataSourceSettings = Readonly<{
   id: string
@@ -25,16 +26,7 @@ export function replaceDataSourceComponentProperties<T extends AppNode>(
 ): T {
   if (dataFromSource === null || dataFromSource === undefined) return originalComponent
 
-  const replace = (value: string) => value
-    .replace(/\[#data.*?#\]/g, (token) => {
-      try {
-        const result = new Function("data", "return (" + token.slice(2, -2) + ")")(dataFromSource)
-        return result === undefined || result === null ? token : String(result)
-      } catch {
-        return token
-      }
-    })
-    .replaceAll("[#CURRENT_DATE#]", now.toISOString())
+  const replace = (value: string) => replacePlaceholdersInString(value, dataFromSource, now)
   return {
     ...originalComponent,
     attributes: Object.fromEntries(

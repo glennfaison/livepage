@@ -6,3 +6,5 @@
 // cycle within the module.
 export { dataSourceIdList, getDataSourceInfo, encodeDataSourceSettings, decodeDataSourceSettings } from "./registry"
 export { withDataSource } from "./with-data-source"
+export { DATA_SOURCE_FIELD_NAME } from "./constants"
+

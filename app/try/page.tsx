@@ -2,12 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { componentMetadata as PageMeta } from "@/features/design-components/definitions/page-component"
-import { PreviewRenderer } from "@/features/design-components"
 import { selectCurrentPage } from "@/features/app-state"
 import type { PageBuilderMode } from "@/features/app-state"
 import { useAppState } from "@/features/app-state"
 import {
+  CanvasRenderer,
   ComponentOperationsContext,
   Toolbar,
   useComponentOperations,
@@ -247,21 +246,12 @@ export default function BuilderPage() {
             </div>
           </div>
 
-          {pageBuilderMode === "preview" ? (
-            <PreviewRenderer
-              selectedComponentId={state.selectedComponentId}
-              selectedComponentAncestors={state.selectedComponentAncestors}
-              pageBuilderMode="preview"
-              component={currentPage}
-            />
-          ) : (
-            <PageMeta.EditModeComponent
-              selectedComponentId={state.selectedComponentId}
-              selectedComponentAncestors={state.selectedComponentAncestors}
-              pageBuilderMode="edit"
-              component={currentPage}
-            />
-          )}
+          <CanvasRenderer
+            component={currentPage}
+            pageBuilderMode={pageBuilderMode}
+            selectedComponentId={state.selectedComponentId}
+            selectedComponentAncestors={state.selectedComponentAncestors}
+          />
         </main>
 
         <Toolbar

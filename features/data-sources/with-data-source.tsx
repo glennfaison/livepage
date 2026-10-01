@@ -1,12 +1,12 @@
 import React, { useCallback } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "./registry"
 import type { DataSourceId, Props } from "@/features/types"
-import { appSettings } from "@/app/app-settings"
+import { DATA_SOURCE_FIELD_NAME } from "./constants"
 import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { replaceDataSourceComponentProperties } from "@/features/design-component-runtime/primitives"
 
-const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
+const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
 
 export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 	return function DataSourceComponent(props: Props) {

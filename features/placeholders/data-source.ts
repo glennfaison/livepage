@@ -2,8 +2,12 @@ export function replaceDataSourcePlaceholdersInString(str: string, data: unknown
   const placeholderRegExp = /\[#data.*?#\]/g
 
   return str.replaceAll(placeholderRegExp, (match) => {
-    const evaluateProperty = new Function("data", `return ${match.substring(2, match.length - 2)}`)
-    const output = String(evaluateProperty(data))
-    return output !== undefined && output !== null ? output : match
+    try {
+      const evaluateProperty = new Function("data", `return (${match.substring(2, match.length - 2)})`)
+      const output = String(evaluateProperty(data))
+      return output !== undefined && output !== null ? output : match
+    } catch {
+      return match
+    }
   })
 }

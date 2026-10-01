@@ -3,8 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { SettingsPopover } from "@/features/page-builder"
 import { Button } from "@/components/ui/button"
 import { createDesignComponentInstance, getComponentInfo } from "@/features/design-components"
-import { appSettings } from "@/app/app-settings"
-import { encodeDataSourceSettings } from "@/features/data-sources"
+import { encodeDataSourceSettings, DATA_SOURCE_FIELD_NAME } from "@/features/data-sources"
 
 const mockUpdateComponent = jest.fn()
 
@@ -101,7 +100,7 @@ describe("SettingsPopover", () => {
       ...baseComponentData,
       attributes: {
       ...baseComponentData.attributes,
-      [appSettings.dataSources.dataSourceFieldName]: encodeDataSourceSettings({
+      [DATA_SOURCE_FIELD_NAME]: encodeDataSourceSettings({
         id: "rest-api",
         settings: {
           url: "https://example.com",

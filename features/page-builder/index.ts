@@ -16,3 +16,5 @@ export {
   useHistoryOperations,
 } from "./hooks"
 export { Toolbar } from "./toolbar"
+export { CanvasRenderer } from "./canvas-renderer"
+

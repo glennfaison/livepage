@@ -13,7 +13,7 @@ LivePage is a page builder. The document being edited is a single **app state**,
 | [`design-component-runtime`](../features/design-component-runtime/) | Registry, instance creation, and the shared preview renderer |
 | [`data-sources`](../features/data-sources/) | Data-source definitions and resolution |
 | [`placeholders`](../features/placeholders/) | Runtime tokens resolved inside component strings |
-| [`page-builder`](../features/page-builder/) | Editor UI, toolbar, and editor controls |
+| [`page-builder`](../features/page-builder/) | Editor UI, toolbar, canvas renderer, and editor controls |
 | [`templates`](../features/templates/) | Bundled page templates and the template catalog |
 | [`command-palette`](../features/command-palette/) | Command palette for the builder |
 | [`prompt-assist`](../features/prompt-assist/) | Chat that turns a prose request into a template, copy, and design edits |

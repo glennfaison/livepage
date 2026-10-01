@@ -5,8 +5,7 @@ import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { appSettings } from "@/app/app-settings"
-import { decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo, dataSourceIdList } from "@/features/data-sources"
+import { decodeDataSourceSettings, encodeDataSourceSettings, getDataSourceInfo, dataSourceIdList, DATA_SOURCE_FIELD_NAME } from "@/features/data-sources"
 import type { AppNode, DataSourceInfo, DataSourceSettings, PrimitiveSettingsField, SettingsFormData, SettingsValue } from "@/features/types"
 import { useComponentOperationsContext } from "@/features/page-builder/component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"
@@ -30,7 +29,7 @@ function useDataSourceSettingsEditor({
   handleFieldChange: (fieldId: string, value: SettingsValue) => void
 }> {
   const [searchDataSourceTerm, setSearchDataSourceTerm] = React.useState("")
-  const dataSourceFieldName = appSettings.dataSources.dataSourceFieldName
+  const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
   const savedDataSourceSettings = decodeDataSourceSettings(component.attributes[dataSourceFieldName] || "")
   const dataSourceInfo = savedDataSourceSettings.id ? getDataSourceInfo(savedDataSourceSettings.id) : undefined
   const isConnected = !!savedDataSourceSettings.id
