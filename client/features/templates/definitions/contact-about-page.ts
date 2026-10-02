@@ -76,6 +76,8 @@ export const contactAboutPageTemplate = {
       }, [
         node("row", "contact-shell", {
           "padding-top": "3rem", "padding-right": "2rem", "padding-bottom": "3rem", "padding-left": "2rem",
+          "margin-left": "auto",
+          "margin-right": "auto",
           "gap": "2.5rem",
           "custom-classes": "mx-auto w-full max-w-5xl items-start flex-wrap md:flex-nowrap",
         }, [
@@ -84,19 +86,19 @@ export const contactAboutPageTemplate = {
             "custom-classes": "min-w-0 flex-1",
           }, [
             node("row", "contact-hero", {
-              "child-sizing": "natural", "align-items": "center", "gap": "1.25rem",
+              "child-sizing": "natural", "align-items": "center", "gap": "1.25rem", "custom-classes": "[&>*]:!self-center",
             }, [
               node("image", "contact-hero-photo", {
-                alt: "Riley Ortiz portrait placeholder",
+                alt: "Riley Ortiz portrait",
                 src: "",
-                fallbackSrc: "/placeholder-img.svg?height=200&width=200",
-                width: "88px",
-                height: "88px",
+                fallbackSrc: "/avatars/riley-ortiz.svg",
+                width: "96px",
+                height: "96px",
                 objectFit: "cover",
                 borderRadius: "9999px",
                 loading: "lazy",
                 decoding: "async",
-                "custom-classes": "overflow-hidden rounded-full border border-slate-200 bg-slate-100",
+                "custom-classes": "shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100",
               }),
               node("column", "contact-hero-copy", { "gap": "0.25rem" }, [
                 text("header1", "contact-hero-name", "Riley Ortiz", { "custom-classes": "py-0 text-4xl font-semibold tracking-[-0.02em] text-slate-900" }),
@@ -108,13 +110,13 @@ export const contactAboutPageTemplate = {
             }),
             node("row", "contact-quick-facts", { "gap": "1rem", "custom-classes": "flex-wrap md:flex-nowrap" }, [
               node("column", "contact-fact-col-1", { "custom-classes": "min-w-0 flex-1" }, [
-                node("stat", "contact-fact-1", { value: "< 24h", "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Typical response time"]),
+                node("stat", "contact-fact-1", { value: "< 24h", "custom-classes": "flex-1 rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Typical response time"]),
               ]),
               node("column", "contact-fact-col-2", { "custom-classes": "min-w-0 flex-1" }, [
-                node("stat", "contact-fact-2", { value: "3", "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Active client slots"]),
+                node("stat", "contact-fact-2", { value: "3", "custom-classes": "flex-1 rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Active client slots"]),
               ]),
               node("column", "contact-fact-col-3", { "custom-classes": "min-w-0 flex-1" }, [
-                node("stat", "contact-fact-3", { value: "PST", "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Based & working hours"]),
+                node("stat", "contact-fact-3", { value: "PST", "custom-classes": "flex-1 rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Based & working hours"]),
               ]),
             ]),
             node("divider", "contact-divider-1", { color: "#e2e8f0", style: "solid" }),
@@ -137,7 +139,7 @@ export const contactAboutPageTemplate = {
           node("column", "contact-sidebar", {
             "padding-top": "1.75rem", "padding-right": "1.75rem", "padding-bottom": "1.75rem", "padding-left": "1.75rem",
             "gap": "1rem",
-            "custom-classes": "basis-[19rem] flex-none rounded-3xl border border-slate-200 bg-slate-50 xl:sticky xl:top-8",
+            "custom-classes": "basis-[19rem] flex-none !self-start rounded-3xl border border-slate-200 bg-slate-50 xl:sticky xl:top-8",
           }, [
             text("header3", "contact-card-heading", "Get in touch", { "custom-classes": "py-0 text-lg font-semibold text-slate-900" }),
             text("paragraph", "contact-card-primary", "riley@example.com • +1 (555) 987-6543 • Seattle, WA", { "custom-classes": "py-0 text-sm leading-6 text-slate-600" }),
