@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import BuilderPage from "@/app/try/page"
 // Do not import jest; it is available globally in the Jest environment
@@ -78,6 +78,10 @@ jest.mock("@/client/features/page-builder/toolbar", () => ({
 }))
 
 describe("BuilderPage Integration", () => {
+  afterEach(() => {
+    window.history.replaceState({}, "", "/")
+  })
+
   it("renders the builder page with all components", async () => {
     render(<BuilderPage />)
 
@@ -113,6 +117,7 @@ describe("BuilderPage Integration", () => {
         dispatch: mockDispatch,
       })
 
+    window.history.replaceState({}, "", "/try?template=patient-health-dashboard&prompt-assist=1")
     render(<BuilderPage />)
 
     await userEvent.click(screen.getByRole("button", { name: /switch to preview mode/i }))
@@ -121,6 +126,41 @@ describe("BuilderPage Integration", () => {
       type: "SET_PAGE_BUILDER_MODE",
       payload: "preview",
     })
+    expect(new URLSearchParams(window.location.search).get("mode")).toBe("preview")
+    expect(new URLSearchParams(window.location.search).get("template")).toBe("patient-health-dashboard")
+    expect(new URLSearchParams(window.location.search).get("prompt-assist")).toBe("1")
+  })
+
+  it("updates the mode query parameter when switching back to edit mode", async () => {
+    const { useAppState } = jest.requireMock("@/client/features/app-state")
+    const mockDispatch = jest.fn()
+      ; (useAppState as jest.Mock).mockReturnValue({
+        state: {
+          componentTree: [{ tag: "page", attributes: { id: "page-1", title: "Test Page" }, children: [] }],
+          activePage: "page-1",
+          selectedComponentId: null,
+          pageBuilderMode: "preview",
+          toolbarMinimized: false,
+          showToolbar: true,
+          history: [],
+          currentHistoryIndex: -1,
+          historyPreviewIndex: null,
+          originalHistoryState: null,
+        },
+        dispatch: mockDispatch,
+      })
+
+    window.history.replaceState({}, "", "/try?mode=preview&template=patient-health-dashboard")
+    render(<BuilderPage />)
+
+    await userEvent.click(screen.getByRole("button", { name: /switch to edit mode/i }))
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "SET_PAGE_BUILDER_MODE",
+      payload: "edit",
+    })
+    expect(new URLSearchParams(window.location.search).get("mode")).toBe("edit")
+    expect(new URLSearchParams(window.location.search).get("template")).toBe("patient-health-dashboard")
   })
 
   it("updates page title when input changes", async () => {
