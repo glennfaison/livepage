@@ -46,6 +46,7 @@ describe.each(pageTemplateRegistry.map((template) => [template.id, template] as 
 
   it("uses unique component ids", () => {
     const ids = nodes.map((node) => node.attributes.id)
+    expect(ids.filter((id) => !id)).toEqual([])
     expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([])
   })
 
@@ -55,7 +56,7 @@ describe.each(pageTemplateRegistry.map((template) => [template.id, template] as 
     for (const node of nodes.filter((candidate) => candidate.tag === "image")) {
       const source = node.attributes.fallbackSrc || node.attributes.src || ""
       if (!source || source.includes("placeholder-img")) placeholders.push(node.attributes.id)
-      else if (source.startsWith("/") && !existsSync(path.join(publicDir, source.split("?")[0]))) missing.push(node.attributes.id)
+      else if (source.startsWith("/") && !source.startsWith("//") && !existsSync(path.join(publicDir, source.split("?")[0]))) missing.push(node.attributes.id)
     }
     expectRule("no placeholder images", template.id, placeholders)
     expect(missing).toEqual([])
@@ -64,9 +65,13 @@ describe.each(pageTemplateRegistry.map((template) => [template.id, template] as 
   it("keeps local SVG assets self-contained", () => {
     for (const node of nodes.filter((candidate) => candidate.tag === "image")) {
       const source = (node.attributes.fallbackSrc || node.attributes.src).split("?")[0]
-      if (!source.endsWith(".svg") || !source.startsWith("/")) continue
-      const svg = readFileSync(path.join(publicDir, source), "utf8")
-      expect(svg).not.toMatch(/(href|src)=["']https?:/)
+      if (!source.endsWith(".svg") || !source.startsWith("/") || source.startsWith("//")) continue
+      const file = path.join(publicDir, source)
+      expect(existsSync(file)).toBe(true)
+      const svg = readFileSync(file, "utf8")
+      expect(svg).not.toMatch(/(href|src)=["']?(https?:)?\/\//)
+      expect(svg).not.toMatch(/url\(\s*["']?(https?:)?\/\//)
+      expect(svg).not.toMatch(/@import/)
     }
   })
 
@@ -80,7 +85,7 @@ describe.each(pageTemplateRegistry.map((template) => [template.id, template] as 
 
   it("lets rows that contain fixed-size images size their children naturally", () => {
     for (const node of nodes.filter((candidate) => candidate.tag === "row")) {
-      const hasFixedImage = node.children.some((child) => typeof child !== "string" && child.tag === "image" && /px$/.test(child.attributes.width ?? ""))
+      const hasFixedImage = node.children.some((child) => typeof child !== "string" && child.tag === "image" && /(px|rem|em)$/.test(child.attributes.width ?? ""))
       if (hasFixedImage) expect(node.attributes["child-sizing"]).toBe("natural")
     }
   })

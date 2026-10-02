@@ -63,7 +63,10 @@ export default function BuilderPage() {
   }, [])
 
   // Deep link used by template review: /try?template=<id>&mode=preview renders a template deterministically.
+  const deepLinkApplied = useRef(false)
   useEffect(() => {
+    if (deepLinkApplied.current) return
+    deepLinkApplied.current = true
     const params = new URLSearchParams(window.location.search)
     const template = getPageTemplateById(params.get("template") ?? "")
     if (template) {
