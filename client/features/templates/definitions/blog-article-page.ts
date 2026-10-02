@@ -83,6 +83,8 @@ export const blogArticlePageTemplate = {
           "padding-right": "1.5rem",
           "padding-bottom": "3.5rem",
           "padding-left": "1.5rem",
+          "margin-left": "auto",
+          "margin-right": "auto",
           "gap": "1.75rem",
           "custom-classes": "mx-auto w-full max-w-2xl",
         }, [
@@ -100,11 +102,12 @@ export const blogArticlePageTemplate = {
             "child-sizing": "natural",
             "align-items": "center",
             "gap": "0.75rem",
+            "custom-classes": "[&>*]:!self-center",
           }, [
             node("image", "blog-byline-photo", {
-              alt: "Author portrait placeholder",
+              alt: "Priya Nathan portrait",
               src: "",
-              fallbackSrc: "/placeholder-img.svg?height=96&width=96",
+              fallbackSrc: "/avatars/priya-nathan.svg",
               width: "44px",
               height: "44px",
               objectFit: "cover",
@@ -117,12 +120,12 @@ export const blogArticlePageTemplate = {
               text("inline-text", "blog-byline-name", "Priya Nathan", { "custom-classes": "text-sm font-semibold text-slate-900" }),
               text("inline-text", "blog-byline-headline", "Engineering manager writing about focus and team habits", { "custom-classes": "text-xs text-slate-500" }),
             ]),
-            node("time", "blog-published-time", { dateTime: "2026-09-18T09:00:00Z" }, ["Published"]),
+            node("time", "blog-published-time", { dateTime: "2026-09-18T09:00:00Z", "custom-classes": "ml-auto text-xs text-slate-400" }, ["Sep 18, 2026"]),
           ]),
           node("image", "blog-hero-image", {
-            alt: "Article cover illustration placeholder",
+            alt: "Illustration of notifications converging on a single focused point",
             src: "",
-            fallbackSrc: "/placeholder-img.svg?height=520&width=1040",
+            fallbackSrc: "/template-art/blog-focus-cover.svg",
             width: "100%",
             height: "320px",
             objectFit: "cover",
@@ -142,7 +145,7 @@ export const blogArticlePageTemplate = {
           }),
           node("callout", "blog-pull-quote", {
             tone: "info",
-            "custom-classes": "text-lg font-medium",
+            "custom-classes": "text-xl font-medium leading-8",
           }, ["The most expensive meetings on your calendar are often the ones that happen inside your own head, every time you change tabs."]),
           text("paragraph", "blog-body-3", "Teams that protect long stretches of uninterrupted time do not do it because they dislike collaboration. They do it because they have learned, usually the hard way, that depth and availability trade off against each other.", {
             "custom-classes": "py-0 text-[1.05rem] leading-8 text-slate-700",
@@ -161,13 +164,13 @@ export const blogArticlePageTemplate = {
             "padding-left": "1.5rem",
             "child-sizing": "natural",
             "align-items": "start",
-            "gap": "1rem",
+            "gap": "1.25rem",
             "custom-classes": "rounded-3xl border border-slate-200 bg-slate-50",
           }, [
             node("image", "blog-author-photo", {
-              alt: "Author portrait placeholder",
+              alt: "Priya Nathan portrait",
               src: "",
-              fallbackSrc: "/placeholder-img.svg?height=160&width=160",
+              fallbackSrc: "/avatars/priya-nathan.svg",
               width: "64px",
               height: "64px",
               objectFit: "cover",
