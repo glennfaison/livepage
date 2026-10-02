@@ -16,10 +16,18 @@ How to scope, verify, and finish a task in this repository. For what the code sh
 - Restart the development server before browser testing so the browser validates the current application state.
 - For editor controls, decorators, and other positioned UI, check real geometry after scroll and resize. Also check client-only and portal rendering for SSR and hydration safety. Passing TypeScript is not enough.
 - When merging a module's exports into a barrel, run the narrowest relevant Jest selector. Eager circular imports can throw at runtime even when `tsc` reports no errors.
+- UI work is not done until you have seen it in a browser. For Templates, judge the preview-mode render (`/try?template=<id>&mode=preview`), not the code or edit mode. Follow the [template skills](../.github/skills/template-authoring/SKILL.md).
 
 ## Finish
 
+- Ship Template changes in a pull request, never straight to `main`.
 - Check whether the change introduces or renames entities, relationships, or domain terms. If it does, update [the glossary](./GLOSSARY.md) before finishing.
+
+## Orchestration
+
+- For anything beyond a focused fix, follow the [agent orchestration skill](../.github/skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the [handoff skill](../.github/skills/handoff/SKILL.md) and iterating until the goal is met.
+- Whenever you write non-trivial code, have a fresh review sub-agent review it (trivial edits such as typos and one-line fixes only need your own check). The reviewer fixes the issues it finds rather than only reporting them, so the main agent's context stays small. It must not edit tests or allowlists to get green; you read its diff before accepting.
+- End the task by suggesting which parts of the process could be automated deterministically to reduce token use.
 
 ## Sub-agents
 

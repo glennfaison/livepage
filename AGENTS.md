@@ -9,3 +9,14 @@ Entry point for coding agents. Read the linked guidance that applies before chan
 - [Architecture decisions](./docs/adr/): accepted design decisions and their constraints
 - [README](./README.md): setup and development commands
 - [package.json](./package.json): authoritative build, lint, and test scripts
+
+## Skills
+
+Skills live in [.github/skills/](./.github/skills/).
+
+- [Agent orchestration](./.github/skills/agent-orchestration/SKILL.md): design, code and review sub-agents with handoffs; use for any non-trivial task
+- [Handoff](./.github/skills/handoff/SKILL.md): pass work between agents
+- [Code review](./.github/skills/code-review/SKILL.md): review current changes
+- [Template authoring](./.github/skills/template-authoring/SKILL.md) and [template design review](./.github/skills/template-design-review/SKILL.md): the build-and-evaluate loop for Templates
+- [Fallow](./.github/skills/fallow-skills/fallow/skills/fallow/SKILL.md): static analysis for dead code, duplication and architecture boundaries
+- [TypeSafe AI](./.github/skills/typesafe-ai/SKILL.md): AI-powered features
