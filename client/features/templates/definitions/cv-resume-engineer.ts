@@ -25,7 +25,7 @@ const mapping = {
 
 const darkContent = [
   node("page", "engineer-dark-page", { title: "Jordan Lee — Software Engineer", "custom-classes": "min-h-screen bg-[#0b1017] text-slate-100" }, [
-    node("column", "engineer-dark-shell", { "padding-top": "2rem", "padding-right": "3rem", "padding-bottom": "2rem", "padding-left": "3rem", "gap": "0", "custom-classes": "mx-auto w-full max-w-4xl" }, [
+    node("column", "engineer-dark-shell", { "padding-top": "2rem", "padding-right": "3rem", "padding-bottom": "2rem", "padding-left": "3rem", "gap": "0", "margin-left": "auto", "margin-right": "auto", "custom-classes": "mx-auto w-full max-w-4xl" }, [
       node("row", "engineer-dark-nav", { "padding-bottom": "1.25rem", "child-sizing": "natural", "align-items": "center", "justify-content": "between", "gap": "1rem", "custom-classes": "border-b border-slate-800" }, [
         text("inline-text", "engineer-dark-brand", "Jordan Lee", { "custom-classes": "font-mono text-xs font-semibold tracking-[0.18em] text-slate-100" }),
         node("row", "engineer-dark-nav-links", { "child-sizing": "natural", "align-items": "center", "justify-content": "end", "gap": "1rem" }, [

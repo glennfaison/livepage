@@ -95,6 +95,8 @@ export const landingPageSaasTemplate = {
             "child-sizing": "natural",
             "align-items": "center",
             "justify-content": "between",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-6xl",
           }, [
             text("inline-text", "landing-nav-brand", "Flowline", {
@@ -116,6 +118,8 @@ export const landingPageSaasTemplate = {
             "padding-left": "2.5rem",
             "gap": "1.5rem",
             "align-items": "center",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-3xl text-center bg-gradient-to-b from-indigo-50 to-white",
           }, [
             text("badge", "landing-hero-brand-badge", "Flowline 2.0 is here", {
@@ -147,6 +151,8 @@ export const landingPageSaasTemplate = {
             "padding-bottom": "3rem",
             "padding-left": "2.5rem",
             "gap": "1rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl flex-wrap md:flex-nowrap",
           }, [
             node("column", "landing-stat-col-1", { "custom-classes": "min-w-0 flex-1" }, [
@@ -166,6 +172,8 @@ export const landingPageSaasTemplate = {
             "padding-bottom": "3rem",
             "padding-left": "2.5rem",
             "gap": "2rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             node("column", "landing-features-heading-group", { "gap": "0.75rem", "align-items": "center", "custom-classes": "text-center" }, [
@@ -228,9 +236,10 @@ export const landingPageSaasTemplate = {
             "padding-bottom": "3rem",
             "padding-left": "2.5rem",
             "gap": "1.25rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl flex-wrap md:flex-nowrap",
-          }, [
-            node("column", "landing-price-starter", {
+          }, [            node("column", "landing-price-starter", {
               "padding-top": "2rem", "padding-right": "1.75rem", "padding-bottom": "2rem", "padding-left": "1.75rem",
               "gap": "1rem",
               "custom-classes": "min-w-0 flex-1 rounded-3xl border border-slate-200 bg-white",
@@ -269,6 +278,8 @@ export const landingPageSaasTemplate = {
             "padding-left": "2.5rem",
             "gap": "1rem",
             "align-items": "center",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-4xl rounded-[2rem] bg-slate-900 text-center text-white",
           }, [
             text("header2", "landing-final-cta-heading", "Automate your first workflow in under 10 minutes.", {

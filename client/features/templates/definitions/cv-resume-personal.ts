@@ -119,6 +119,8 @@ export const cvResumePersonalTemplate = {
         "custom-classes": "border-0 bg-[#f3f5f4] shadow-none",
       }, [
         node("row", "cv-shell", {
+          "margin-left": "auto",
+          "margin-right": "auto",
           "custom-classes": "mx-auto max-w-[1180px] items-start gap-8 py-8 xl:flex-nowrap",
         }, [
           node("column", "cv-sidebar", {
@@ -129,9 +131,9 @@ export const cvResumePersonalTemplate = {
             "custom-classes": "basis-[21rem] flex-none overflow-hidden rounded-[2rem] bg-[#0f172a] text-white shadow-[0_18px_44px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/60 gap-6 xl:sticky xl:top-8",
           }, [
             node("image", "cv-profile-photo", {
-              alt: "Avery Johnson portrait placeholder",
+              alt: "Avery Johnson portrait",
               src: "",
-              fallbackSrc: "/placeholder-img.svg?height=480&width=480",
+              fallbackSrc: "/avatars/samantha-johnson.svg",
               width: "100%",
               height: "320px",
               objectFit: "cover",

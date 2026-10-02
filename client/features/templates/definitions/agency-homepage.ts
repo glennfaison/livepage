@@ -83,6 +83,8 @@ export const agencyHomepageTemplate = {
           node("row", "agency-nav", {
             "padding-top": "1.5rem", "padding-right": "2.5rem", "padding-bottom": "1.5rem", "padding-left": "2.5rem",
             "child-sizing": "natural", "align-items": "center", "justify-content": "between",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-6xl",
           }, [
             text("inline-text", "agency-nav-brand", "Fieldwork Studio", { "custom-classes": "text-lg font-semibold tracking-[-0.02em] text-slate-900" }),
@@ -91,6 +93,8 @@ export const agencyHomepageTemplate = {
           node("column", "agency-hero", {
             "padding-top": "3rem", "padding-right": "2.5rem", "padding-bottom": "4rem", "padding-left": "2.5rem",
             "gap": "1.5rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-4xl bg-[#f6f5f2]",
           }, [
             text("header1", "agency-hero-headline", "A small studio building brands and products for growing companies.", {
@@ -113,6 +117,8 @@ export const agencyHomepageTemplate = {
             id: "services",
             "padding-top": "3rem", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1.5rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             text("header2", "agency-services-heading", "What we do", { "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500" }),
@@ -129,6 +135,8 @@ export const agencyHomepageTemplate = {
           node("column", "agency-process-section", {
             "padding-top": "1rem", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1.5rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             text("header2", "agency-process-heading", "How we work", { "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500" }),
@@ -155,6 +163,8 @@ export const agencyHomepageTemplate = {
             id: "work",
             "padding-top": "3rem", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1.5rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             text("header2", "agency-work-heading", "Recent work", { "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500" }),
@@ -188,6 +198,8 @@ export const agencyHomepageTemplate = {
             "padding-top": "3rem", "padding-right": "2.5rem", "padding-bottom": "4rem", "padding-left": "2.5rem",
             "gap": "1rem",
             "align-items": "center",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-3xl rounded-[2rem] bg-slate-900 text-center text-white",
           }, [
             text("header2", "agency-contact-heading", "Have a project in mind?", { "custom-classes": "py-0 text-3xl font-semibold text-white" }),
