@@ -146,6 +146,7 @@ export const landingPageSaasTemplate = {
             }),
           ]),
           node("row", "landing-stat-row", {
+              wrap: "wrap",
             "padding-top": "0",
             "padding-right": "2.5rem",
             "padding-bottom": "3rem",
@@ -153,7 +154,7 @@ export const landingPageSaasTemplate = {
             "gap": "1rem",
             "margin-left": "auto",
             "margin-right": "auto",
-            "custom-classes": "mx-auto w-full max-w-5xl flex-wrap md:flex-nowrap",
+            "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             node("column", "landing-stat-col-1", { "custom-classes": "min-w-0 flex-1" }, [
               node("stat", "landing-stat-1", { value: "4,200+", "custom-classes": "rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Teams automating workflows"]),
@@ -185,8 +186,8 @@ export const landingPageSaasTemplate = {
               }),
             ]),
             node("row", "landing-features-list", {
+              wrap: "wrap",
               "gap": "1.25rem",
-              "custom-classes": "flex-wrap md:flex-nowrap",
             }, [
               node("column", "landing-feature-1", {
                 "padding-top": "1.5rem", "padding-right": "1.5rem", "padding-bottom": "1.5rem", "padding-left": "1.5rem",
@@ -230,6 +231,7 @@ export const landingPageSaasTemplate = {
           ]),
           node("divider", "landing-divider-1", { color: "#e2e8f0", style: "solid" }),
           node("row", "landing-pricing-section", {
+              wrap: "wrap",
             id: "pricing",
             "padding-top": "3rem",
             "padding-right": "2.5rem",
@@ -238,7 +240,7 @@ export const landingPageSaasTemplate = {
             "gap": "1.25rem",
             "margin-left": "auto",
             "margin-right": "auto",
-            "custom-classes": "mx-auto w-full max-w-5xl flex-wrap md:flex-nowrap",
+            "custom-classes": "mx-auto w-full max-w-5xl",
           }, [            node("column", "landing-price-starter", {
               "padding-top": "2rem", "padding-right": "1.75rem", "padding-bottom": "2rem", "padding-left": "1.75rem",
               "gap": "1rem",

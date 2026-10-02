@@ -75,11 +75,12 @@ export const contactAboutPageTemplate = {
         "custom-classes": "border-0 bg-white shadow-none",
       }, [
         node("row", "contact-shell", {
+              wrap: "wrap",
           "padding-top": "3rem", "padding-right": "2rem", "padding-bottom": "3rem", "padding-left": "2rem",
           "margin-left": "auto",
           "margin-right": "auto",
           "gap": "2.5rem",
-          "custom-classes": "mx-auto w-full max-w-5xl items-start flex-wrap md:flex-nowrap",
+          "custom-classes": "mx-auto w-full max-w-5xl items-start",
         }, [
           node("column", "contact-main", {
             "gap": "2rem",
@@ -108,7 +109,7 @@ export const contactAboutPageTemplate = {
             text("paragraph", "contact-about-copy", "I've spent the last six years helping product teams replace assumptions with evidence — running interviews, usability tests, and surveys that actually change roadmaps. I work with a handful of teams at a time so every engagement gets real attention.", {
               "custom-classes": "py-0 max-w-xl text-[1.02rem] leading-8 text-slate-600",
             }),
-            node("row", "contact-quick-facts", { "gap": "1rem", "custom-classes": "flex-wrap md:flex-nowrap" }, [
+            node("row", "contact-quick-facts", { wrap: "wrap", "gap": "1rem", }, [
               node("column", "contact-fact-col-1", { "custom-classes": "min-w-0 flex-1" }, [
                 node("stat", "contact-fact-1", { value: "< 24h", "custom-classes": "flex-1 rounded-2xl border border-slate-200 bg-slate-50 shadow-none" }, ["Typical response time"]),
               ]),

@@ -162,7 +162,7 @@ export const patientHealthDashboardTemplate = {
             node("column", "phd-main-col", { gap: "1.5rem", "custom-classes": "min-w-0 flex-1" }, [
               node("column", "phd-diagnosis-card", { gap: "1rem", "padding-top": "1.25rem", "padding-right": "1.25rem", "padding-bottom": "1.25rem", "padding-left": "1.25rem", "custom-classes": "rounded-2xl border border-slate-200 bg-white" }, [
                 text("header3", "phd-diagnosis-heading", "Diagnosis History", { "custom-classes": "py-0 text-lg font-semibold text-slate-900" }),
-                node("row", "phd-diagnosis-row", { gap: "1.5rem", "align-items": "stretch", "custom-classes": "flex-wrap lg:flex-nowrap" }, [
+                node("row", "phd-diagnosis-row", { wrap: "wrap", gap: "1.5rem", "align-items": "stretch", }, [
                   node("column", "phd-chart-col", { "custom-classes": "min-w-0 flex-1" }, [
                     node("line-chart", "phd-bp-chart", {
                       title: "Blood Pressure",
@@ -192,7 +192,7 @@ export const patientHealthDashboardTemplate = {
                   ]),
                 ]),
               ]),
-              node("row", "phd-metrics-row", { gap: "1.25rem", "custom-classes": "flex-wrap md:flex-nowrap" }, [
+              node("row", "phd-metrics-row", { wrap: "wrap", gap: "1.25rem", }, [
                 node("column", "phd-metric-col-1", { "custom-classes": "min-w-0 flex-1" }, [
                   node("metric-card", "phd-metric-respiratory", { icon: "wind", tone: "blue", value: "27", unit: "bpm", label: "Respiratory Rate", trend: "none", "trend-label": "Normal" }),
                 ]),

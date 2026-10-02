@@ -169,8 +169,8 @@ export const portfolioPersonalSiteTemplate = {
             }),
           ]),
           node("row", "portfolio-stat-row", {
+              wrap: "wrap",
             "gap": "1rem",
-            "custom-classes": "flex-wrap md:flex-nowrap",
           }, [
             node("column", "portfolio-stat-col-1", { "custom-classes": "min-w-0 flex-1" }, [
               node("stat", "portfolio-stat-1", {
@@ -223,8 +223,8 @@ export const portfolioPersonalSiteTemplate = {
               "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500",
             }),
             node("row", "portfolio-projects-list", {
+              wrap: "wrap",
               "gap": "1.25rem",
-              "custom-classes": "flex-wrap md:flex-nowrap",
             }, [
               node("column", "portfolio-project-1", {
                 "padding-top": "1.5rem",

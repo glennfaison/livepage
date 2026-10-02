@@ -73,7 +73,18 @@ describe.each(pageTemplateRegistry.map((template) => [template.id, template] as 
     expectRule("centered columns set explicit auto margins", template.id, violations)
   })
 
-  it("lets rows that contain fixed-size images size their children naturally", () => {
+  it("asks rows to wrap through the wrap setting, not a flex-wrap class", () => {
+		// Only equal-sized rows are affected: they get `basis-0`, and a zero basis means
+		// `flex-wrap` can never break the line. Rows with natural child sizing size their
+		// children to content, so a plain `flex-wrap` class on those is meaningful.
+		const violations = nodes
+			.filter((node) => node.tag === "row" && node.attributes["child-sizing"] !== "natural")
+			.filter((node) => /\b(?:md|lg|xl|sm):?flex-wrap\b|\bflex-wrap\b/.test(node.attributes["custom-classes"] ?? ""))
+			.map((node) => node.attributes.id)
+		expectRule("rows wrap through the wrap setting", template.id, violations)
+	})
+
+	it("lets rows that contain fixed-size images size their children naturally", () => {
     for (const node of nodes.filter((candidate) => candidate.tag === "row")) {
       const hasFixedImage = node.children.some((child) => typeof child !== "string" && child.tag === "image" && /(px|rem|em)$/.test(child.attributes.width ?? ""))
       if (hasFixedImage) expect(node.attributes["child-sizing"]).toBe("natural")

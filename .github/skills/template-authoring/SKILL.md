@@ -83,6 +83,15 @@ This is the single home for these; the review skill points here.
   avatars, icons, and label/action pairs. `natural` still applies
   `self-stretch`, so add `"custom-classes": "[&>*]:!self-center"` to center
   children vertically.
+- **A `flex-wrap` class does not make a row wrap.** Set `"wrap": "wrap"` on the
+  row instead. A flex item only moves to a new line when its hypothetical main
+  size exceeds the space left, and that size comes from the basis. Equal sizing
+  uses `basis-0`, so it reports a hypothetical size of zero and the row can never
+  break, whatever `flex-wrap` says in `custom-classes`. With `"wrap": "wrap"`
+  the row uses `basis-auto`, so children size to their content and the line
+  breaks when they no longer fit; `flex-1` still grows them to fill each line.
+  Do not add `flex-wrap`, `md:flex-nowrap`, or `lg:flex-nowrap` to a row's
+  `custom-classes` — they are redundant at best and inert at worst.
 - **Fixed-size images in flex rows need `shrink-0`** (a 96px avatar rendered
   64px wide).
 - **Equal-height cards:** stretch the wrapping columns and give the inner
