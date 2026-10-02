@@ -107,11 +107,12 @@ export const eventConferencePageTemplate = {
             ]),
           ]),
           node("row", "event-stat-row", {
+              wrap: "wrap",
             "padding-top": "0", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1rem",
             "margin-left": "auto",
             "margin-right": "auto",
-            "custom-classes": "mx-auto w-full max-w-4xl flex-wrap md:flex-nowrap",
+            "custom-classes": "mx-auto w-full max-w-4xl",
           }, [
             node("column", "event-stat-col-1", { "custom-classes": "min-w-0 flex-1" }, [
               node("stat", "event-stat-1", { value: "3", "custom-classes": "rounded-2xl border border-slate-800 bg-slate-900 shadow-none" }, ["Days"]),
@@ -132,7 +133,7 @@ export const eventConferencePageTemplate = {
             "custom-classes": "mx-auto w-full max-w-5xl border-t border-slate-800",
           }, [
             text("header2", "event-speakers-heading", "Featured speakers", { "custom-classes": "py-0 pt-6 text-xl font-semibold text-slate-100" }),
-            node("row", "event-speakers-list", { "gap": "1.25rem", "custom-classes": "flex-wrap md:flex-nowrap" }, [
+            node("row", "event-speakers-list", { wrap: "wrap", "gap": "1.25rem", }, [
               node("column", "event-speaker-1", { "gap": "0.5rem", "custom-classes": "min-w-0 flex-1 rounded-2xl border border-slate-800 bg-slate-900 p-5" }, [
                 text("header3", "event-speaker-1-name", "Jordan Lee — VP Engineering, Northstar", { "custom-classes": "py-0 text-base font-semibold text-slate-100" }),
                 text("paragraph", "event-speaker-1-talk", "Scaling real-time infrastructure past a billion daily events without losing your weekends.", { "custom-classes": "py-0 text-sm leading-6 text-slate-400" }),
@@ -173,11 +174,12 @@ export const eventConferencePageTemplate = {
             ]),
           ]),
           node("row", "event-tickets-section", {
+              wrap: "wrap",
             "padding-top": "1rem", "padding-right": "2.5rem", "padding-bottom": "4rem", "padding-left": "2.5rem",
             "gap": "1.25rem",
             "margin-left": "auto",
             "margin-right": "auto",
-            "custom-classes": "mx-auto w-full max-w-5xl border-t border-slate-800 flex-wrap md:flex-nowrap",
+            "custom-classes": "mx-auto w-full max-w-5xl border-t border-slate-800",
           }, [
             node("column", "event-ticket-early", {
               "padding-top": "2rem", "padding-right": "1.5rem", "padding-bottom": "2rem", "padding-left": "1.5rem",

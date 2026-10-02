@@ -123,8 +123,8 @@ export const agencyHomepageTemplate = {
           }, [
             text("header2", "agency-services-heading", "What we do", { "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500" }),
             node("row", "agency-services-list", {
+              wrap: "wrap",
               "gap": "1rem",
-              "custom-classes": "flex-wrap md:flex-nowrap",
             }, [
               text("badge", "agency-service-1", "Brand strategy", { variant: "secondary", "custom-classes": "rounded-full px-4 py-2 text-sm" }),
               text("badge", "agency-service-2", "Visual identity", { variant: "secondary", "custom-classes": "rounded-full px-4 py-2 text-sm" }),
@@ -140,7 +140,7 @@ export const agencyHomepageTemplate = {
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             text("header2", "agency-process-heading", "How we work", { "custom-classes": "py-0 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-500" }),
-            node("row", "agency-process-list", { "gap": "1.25rem", "custom-classes": "flex-wrap md:flex-nowrap" }, [
+            node("row", "agency-process-list", { wrap: "wrap", "gap": "1.25rem", }, [
               node("column", "agency-process-1", { "gap": "0.5rem", "custom-classes": "min-w-0 flex-1" }, [
                 text("inline-text", "agency-process-1-index", "01", { "custom-classes": "text-sm font-semibold text-slate-400" }),
                 text("header3", "agency-process-1-title", "Discover", { "custom-classes": "py-0 text-lg font-semibold text-slate-900" }),

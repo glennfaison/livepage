@@ -42,6 +42,82 @@ describe("container child props", () => {
 		expect(screen.getByText("Child Header")).toBeInTheDocument()
 	})
 
+	it("gives wrapping rows a real basis so flex-wrap can actually break the line", () => {
+		// A flex item wraps when its hypothetical main size exceeds the space left on the
+		// line, and that size comes from the basis. Equal sizing used to use `basis-0`,
+		// which reports a hypothetical size of zero, so `flex-wrap` never broke the line
+		// and every template that asked for wrapping silently stayed on one line.
+		const component: AppNode = {
+			tag: "row",
+			attributes: { id: "row-1", wrap: "wrap" },
+			children: [
+				{ tag: "header1", attributes: { id: "header-1" }, children: ["First"] },
+				{ tag: "header1", attributes: { id: "header-2" }, children: ["Second"] },
+			],
+		}
+		const Component = getComponentInfo("row").PreviewModeComponent
+
+		const { container } = renderWithQueryClient(
+			<Component
+				pageBuilderMode="preview"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+
+		const row = container.firstElementChild
+		expect(row).toHaveClass("flex-wrap")
+		expect(row).not.toHaveClass("flex-nowrap")
+		for (const label of ["First", "Second"]) {
+			// A non-zero basis is the whole point: it is what gives the item a
+			// hypothetical main size for the line-breaking algorithm to compare.
+			expect(screen.getByText(label)).toHaveClass("basis-auto")
+			expect(screen.getByText(label)).not.toHaveClass("basis-0")
+		}
+	})
+
+	it("keeps a zero basis when the row does not wrap", () => {
+		const component: AppNode = {
+			tag: "row",
+			attributes: { id: "row-1" },
+			children: [{ tag: "header1", attributes: { id: "header-1" }, children: ["Only"] }],
+		}
+		const Component = getComponentInfo("row").PreviewModeComponent
+
+		const { container } = renderWithQueryClient(
+			<Component
+				pageBuilderMode="preview"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+
+		expect(container.firstElementChild).toHaveClass("flex-nowrap")
+		expect(screen.getByText("Only")).toHaveClass("basis-0")
+	})
+
+	it("leaves natural child sizing alone on a wrapping row", () => {
+		const component: AppNode = {
+			tag: "row",
+			attributes: { id: "row-1", wrap: "wrap", "child-sizing": "natural" },
+			children: [{ tag: "header1", attributes: { id: "header-1" }, children: ["Natural"] }],
+		}
+		const Component = getComponentInfo("row").PreviewModeComponent
+
+		renderWithQueryClient(
+			<Component
+				pageBuilderMode="preview"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+
+		expect(screen.getByText("Natural")).not.toHaveClass("basis-auto", "basis-0", "flex-1")
+	})
+
 	it("applies the child slot class to edit-mode wrappers", () => {
 		const component: AppNode = {
 			tag: "row",
