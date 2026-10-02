@@ -1,10 +1,8 @@
 import type { AppNode } from "@/client/features/app-state"
-import { findComponentById } from "@/client/features/app-state/tree"
-import { patchComponent } from "@/client/features/app-state/commands/helpers"
+import { findComponentById, patchComponent } from "@/client/features/app-state"
 import { applySettingValue, describeEditableSettings, readSettingValue } from "@/client/features/design-components"
 import { toSettingDescriptor } from "./page-description"
-import type { DesignEdit } from "@/shared/features/prompt-assist/contract/schema"
-import { filterDesignEdits } from "@/shared/features/prompt-assist/contract/setting-values"
+import { filterDesignEdits, type DesignEdit } from "@/shared/features/prompt-assist"
 
 function resolveField(pages: ReadonlyArray<AppNode>, edit: DesignEdit) {
   const node = findComponentById(pages, edit.componentId)

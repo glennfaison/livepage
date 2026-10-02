@@ -17,7 +17,7 @@ import { chatReducer, initialChatState, type AssistMessage, type Proposal } from
 import { composePages } from "./compose-pages"
 import { applyDesignEdits } from "./design-edits"
 import { refinePage } from "./refine-loop"
-import type { PageRequest } from "@/shared/features/prompt-assist/contract/schema"
+import type { PageRequest } from "@/shared/features/prompt-assist"
 
 const catalog = describeTemplateCatalog()
 

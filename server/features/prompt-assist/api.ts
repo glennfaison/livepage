@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import type { z } from "zod"
 import { createEnvRateLimiter, getClientKey, rateLimitedResponse } from "@/server/lib/rate-limit"
-import { isPromptAssistEnabled } from "@/shared/features/prompt-assist/contract/feature-flag"
+import { isPromptAssistEnabled } from "@/shared/features/prompt-assist"
 
 const limiters = {
   match: createEnvRateLimiter("PROMPT_ASSIST_RATE_LIMIT_PER_MINUTE", 20),

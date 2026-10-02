@@ -1,5 +1,5 @@
 import { createDesignComponentInstance } from "@/client/features/design-components"
-import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
+import { appReducer, initialState } from "@/client/features/app-state"
 import type { AppState, AppAction } from "@/client/features/app-state"
 import { generateId } from "@/client/lib/utils"
 

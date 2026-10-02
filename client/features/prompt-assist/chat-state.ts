@@ -1,4 +1,4 @@
-import type { DesignEdit, PageRequest, TemplateCandidate } from "@/shared/features/prompt-assist/contract/schema"
+import type { DesignEdit, PageRequest, TemplateCandidate } from "@/shared/features/prompt-assist"
 import type { TemplateTextField } from "@/client/features/templates"
 
 export type AssistMessage =

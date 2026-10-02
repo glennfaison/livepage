@@ -5,7 +5,7 @@ import { Suspense, useState } from "react"
 import type { AppAction } from "@/client/features/app-state"
 import { AssistPanel } from "./assist-panel"
 import { usePromptAssistEnabled } from "./availability"
-import { isPromptAssistEnabled } from "@/shared/features/prompt-assist/contract/feature-flag"
+import { isPromptAssistEnabled } from "@/shared/features/prompt-assist"
 import { usePromptAssist } from "./use-prompt-assist"
 
 /**

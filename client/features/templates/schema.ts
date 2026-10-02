@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { findComponentById } from "@/client/features/app-state/tree"
+import { findComponentById } from "@/client/features/app-state"
 import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 
 const templateFieldTargetSchema = z.object({

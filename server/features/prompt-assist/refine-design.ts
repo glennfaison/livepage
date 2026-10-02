@@ -2,8 +2,7 @@ import { z } from "zod"
 import { askJev, isJevConfigured, JevUnavailableError } from "@/server/services/jev"
 import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/server/services/openai"
 import { describeRequest } from "./request"
-import { designEditSchema, type DesignEdit, type PageDescription, type PageRequest, type RefineResponse } from "@/shared/features/prompt-assist/contract/schema"
-import { filterDesignEdits } from "@/shared/features/prompt-assist/contract/setting-values"
+import { designEditSchema, filterDesignEdits, type DesignEdit, type PageDescription, type PageRequest, type RefineResponse } from "@/shared/features/prompt-assist"
 
 /** Jev's yes-probability at or above which the page is considered to match the request. */
 const SATISFIED_AT = 0.8

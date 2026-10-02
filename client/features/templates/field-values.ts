@@ -1,5 +1,5 @@
 import type { AppNode } from "@/client/features/types"
-import { patchComponent } from "@/client/features/app-state/commands/helpers"
+import { patchComponent } from "@/client/features/app-state"
 import { listTemplateTextFields } from "@/client/features/templates/text-fields"
 import type { PageTemplateDefinition } from "@/client/features/templates/schema"
 export { listTemplateTextFields } from "@/client/features/templates/text-fields"

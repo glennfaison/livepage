@@ -3,7 +3,7 @@ import React from "react"
 import { Input } from "@/client/components/ui/input"
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
-import { getComponentInfo } from "../registry"
+import { getComponentInfo } from "../registry-store"
 import type { AppNodeTag } from "@/client/features/types"
 
 // Component selector popover

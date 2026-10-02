@@ -1,6 +1,6 @@
 import type { AppNode, PrimitiveSettingsField } from "@/client/features/app-state"
 import { describeEditableSettings, readSettingValue } from "@/client/features/design-components"
-import { MAX_DESCRIBED_NODES, type PageDescription, type SettingDescriptor } from "@/shared/features/prompt-assist/contract/schema"
+import { MAX_DESCRIBED_NODES, type PageDescription, type SettingDescriptor } from "@/shared/features/prompt-assist"
 
 const MAX_TEXT_PREVIEW = 60
 

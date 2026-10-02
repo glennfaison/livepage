@@ -3,7 +3,7 @@
 import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { Label } from "@/client/components/ui/label"
-import { getComponentInfo } from "../../registry"
+import { getComponentInfo } from "../../registry-store"
 import type { Metadata, PrimitiveSettingsField, SettingsField, SettingsFormData, SettingsValue, AppNode } from "@/client/features/types"
 import { useComponentOperationsContext } from "../component-operations-context"
 import { SettingsFieldInput } from "../shared/settings-field-input"

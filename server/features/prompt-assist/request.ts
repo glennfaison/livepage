@@ -1,4 +1,4 @@
-import type { PageRequest } from "@/shared/features/prompt-assist/contract/schema"
+import type { PageRequest } from "@/shared/features/prompt-assist"
 
 /** The person's request as plain text for a model: the prompt followed by each clarifying exchange. */
 export function describeRequest(request: PageRequest): string {

@@ -1,4 +1,4 @@
-import { parse, stringify } from "@/client/features/shortcode-parser/parser";
+import { parse, stringify } from "@/client/features/shortcode-parser";
 import { shortcodeSamples, parsedShortcodeElementSamples } from "./data";
 
 describe("parse", () => {

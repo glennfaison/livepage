@@ -9,7 +9,7 @@ import {
   type MatchResponse,
   type PageRequest,
   type RefineResponse,
-} from "@/shared/features/prompt-assist/contract/schema"
+} from "@/shared/features/prompt-assist"
 import type { AppNode } from "@/client/features/app-state"
 import { listTemplateTextFields, type PageTemplateDefinition } from "@/client/features/templates"
 import { describePage } from "./page-description"

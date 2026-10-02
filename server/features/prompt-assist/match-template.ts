@@ -9,7 +9,7 @@ import {
   type PageRequest,
   type TemplateCandidate,
   type TemplateSummary,
-} from "@/shared/features/prompt-assist/contract/schema"
+} from "@/shared/features/prompt-assist"
 
 const NO_MATCH = "none"
 const CANDIDATE_LIMIT = 4
