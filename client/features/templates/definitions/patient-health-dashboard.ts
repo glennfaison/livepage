@@ -58,11 +58,13 @@ function patientRow(id: string, name: string, meta: string, avatarSlug: string, 
 
 function labResultRow(id: string, name: string): TemplateNode {
   return node("row", id, {
+    "child-sizing": "natural",
     "align-items": "center",
     "justify-content": "between",
+    gap: "1.5rem",
     "padding-top": "0.5rem",
     "padding-bottom": "0.5rem",
-    "custom-classes": "border-b border-slate-100 last:border-0",
+    "custom-classes": "[&>*]:!self-center border-b border-slate-100 last:border-0",
   }, [
     text("inline-text", `${id}-name`, name, { "custom-classes": "text-sm text-slate-700" }),
     node("link", `${id}-download`, { href: "#", "custom-classes": "text-xs font-semibold text-teal-600 hover:text-teal-700" }, ["Download"]),
@@ -111,17 +113,17 @@ export const patientHealthDashboardTemplate = {
             "padding-bottom": "1rem",
             "padding-left": "2rem",
             gap: "1rem",
-            "custom-classes": "w-full flex-wrap border-b border-slate-200 bg-white",
+            "custom-classes": "[&>*]:!self-center w-full flex-wrap border-b border-slate-200 bg-white",
           }, [
             text("inline-text", "phd-brand", "Tech.Care", { "custom-classes": "text-lg font-semibold text-slate-900" }),
-            node("row", "phd-nav-links", { "child-sizing": "natural", "align-items": "center", gap: "1.5rem", "custom-classes": "flex-wrap" }, [
+            node("row", "phd-nav-links", { "child-sizing": "natural", "align-items": "center", gap: "1.5rem", "custom-classes": "[&>*]:!self-center flex-wrap" }, [
               node("link", "phd-nav-overview", { href: "#overview", "custom-classes": "text-sm font-medium text-slate-600 hover:text-slate-900" }, ["Overview"]),
               text("badge", "phd-nav-patients", "Patients", { variant: "default", "custom-classes": "rounded-full bg-teal-500 px-4 py-2 text-sm font-semibold text-white" }),
               node("link", "phd-nav-schedule", { href: "#schedule", "custom-classes": "text-sm font-medium text-slate-600 hover:text-slate-900" }, ["Schedule"]),
               node("link", "phd-nav-message", { href: "#message", "custom-classes": "text-sm font-medium text-slate-600 hover:text-slate-900" }, ["Message"]),
               node("link", "phd-nav-transactions", { href: "#transactions", "custom-classes": "text-sm font-medium text-slate-600 hover:text-slate-900" }, ["Transactions"]),
             ]),
-            node("row", "phd-nav-account", { "child-sizing": "natural", "align-items": "center", gap: "0.75rem" }, [
+            node("row", "phd-nav-account", { "child-sizing": "natural", "align-items": "center", gap: "0.75rem", "custom-classes": "[&>*]:!self-center" }, [
               node("image", "phd-doctor-avatar", {
                 src: "/avatars/dr-jose-simmons.svg",
                 alt: "Doctor avatar",
