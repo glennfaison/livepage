@@ -9,3 +9,4 @@ Entry point for coding agents. Read the linked guidance that applies before chan
 - [Architecture decisions](./docs/adr/): accepted design decisions and their constraints
 - [README](./README.md): setup and development commands
 - [package.json](./package.json): authoritative build, lint, and test scripts
+- [Template authoring skill](./.github/skills/template-authoring/SKILL.md) and [template design review skill](./.github/skills/template-design-review/SKILL.md): the build-and-evaluate loop for Templates
