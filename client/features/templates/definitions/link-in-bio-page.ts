@@ -85,23 +85,25 @@ export const linkInBioTemplate = {
     pages: [
       node("page", "link-in-bio-template-page", {
         title: "Sam Rivera — Links",
-        "custom-classes": "border-0 bg-gradient-to-b from-[#fef3f0] to-[#f8fafc] shadow-none",
+        "custom-classes": "border-0 bg-gradient-to-b from-[#ffe4d6] via-[#fff1ec] to-[#f8fafc] shadow-none",
       }, [
         node("column", "bio-shell", {
-          "padding-top": "3.5rem",
+          "padding-top": "4rem",
           "padding-right": "1.5rem",
-          "padding-bottom": "3.5rem",
+          "padding-bottom": "4rem",
           "padding-left": "1.5rem",
+          "margin-left": "auto",
+          "margin-right": "auto",
           "gap": "1.5rem",
           "align-items": "center",
           "custom-classes": "mx-auto w-full max-w-md",
         }, [
           node("image", "bio-photo", {
-            alt: "Sam Rivera portrait placeholder",
+            alt: "Sam Rivera portrait",
             src: "",
-            fallbackSrc: "/placeholder-img.svg?height=200&width=200",
-            width: "112px",
-            height: "112px",
+            fallbackSrc: "/avatars/sam-rivera.svg",
+            width: "128px",
+            height: "128px",
             objectFit: "cover",
             objectPosition: "center",
             borderRadius: "9999px",
@@ -129,26 +131,26 @@ export const linkInBioTemplate = {
             node("link", "bio-link-website", {
               href: "https://example.com",
               target: "_blank",
-              "custom-classes": "block w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-center text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50",
+              "custom-classes": "block w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
             }, ["🌐 My portfolio site"]),
             node("link", "bio-link-youtube", {
               href: "https://youtube.com",
               target: "_blank",
-              "custom-classes": "block w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-center text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50",
+              "custom-classes": "block w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
             }, ["🎥 Latest video"]),
             node("link", "bio-link-linkedin", {
               href: "https://linkedin.com",
               target: "_blank",
-              "custom-classes": "block w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-center text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50",
+              "custom-classes": "block w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
             }, ["💼 Connect on LinkedIn"]),
             node("link", "bio-link-github", {
               href: "https://github.com",
               target: "_blank",
-              "custom-classes": "block w-full rounded-full border border-slate-200 bg-white px-5 py-3 text-center text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50",
+              "custom-classes": "block w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
             }, ["💻 GitHub"]),
             node("link", "bio-link-email", {
               href: "mailto:sam@example.com",
-              "custom-classes": "block w-full rounded-full bg-slate-900 px-5 py-3 text-center text-sm font-medium text-white shadow-sm hover:bg-slate-700",
+              "custom-classes": "block w-full rounded-2xl bg-slate-900 px-5 py-4 text-center text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-700",
             }, ["✉️ Book a session"]),
           ]),
           node("divider", "bio-divider-2", {
@@ -158,9 +160,9 @@ export const linkInBioTemplate = {
           node("column", "bio-tags-list", {
             "custom-classes": "w-full flex-row flex-wrap items-center justify-center gap-2",
           }, [
-            text("badge", "bio-tag-1", "Photography", { variant: "outline" }),
-            text("badge", "bio-tag-2", "Filmmaking", { variant: "outline" }),
-            text("badge", "bio-tag-3", "Travel", { variant: "outline" }),
+            text("badge", "bio-tag-1", "Photography", { variant: "outline", "custom-classes": "rounded-full bg-white px-3 py-1" }),
+            text("badge", "bio-tag-2", "Filmmaking", { variant: "outline", "custom-classes": "rounded-full bg-white px-3 py-1" }),
+            text("badge", "bio-tag-3", "Travel", { variant: "outline", "custom-classes": "rounded-full bg-white px-3 py-1" }),
           ]),
         ]),
       ]),
