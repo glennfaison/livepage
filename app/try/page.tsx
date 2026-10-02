@@ -13,13 +13,13 @@ import {
   useHistoryOperations,
   usePageOperations,
 } from "@/client/features/page-builder"
-import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover } from "@/client/features/templates"
-import { CommandPalette } from "@/client/features/command-palette"
+import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
+import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
 
 export default function BuilderPage() {
@@ -46,37 +46,11 @@ export default function BuilderPage() {
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
 
-  // Global ⌘K / Ctrl+K shortcut for the command palette, available in both
-  // edit and preview mode (the floating Toolbar hides itself in preview mode,
-  // so this listener is the only way to reach the palette there).
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const isModifierPressed = event.metaKey || event.ctrlKey
-      if (isModifierPressed && event.key.toLowerCase() === "k") {
-        event.preventDefault()
-        setCommandPaletteOpen((open) => !open)
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  // Global shortcut works in both edit and preview mode.
+  useCommandPaletteShortcut(setCommandPaletteOpen)
 
   // Deep link used by template review: /try?template=<id>&mode=preview renders a template deterministically.
-  const deepLinkApplied = useRef(false)
-  useEffect(() => {
-    if (deepLinkApplied.current) return
-    deepLinkApplied.current = true
-    const params = new URLSearchParams(window.location.search)
-    const template = getPageTemplateById(params.get("template") ?? "")
-    if (template) {
-      for (const action of createApplyTemplateActions(template)) dispatch(action)
-    }
-    const mode = params.get("mode")
-    if (mode === "preview" || mode === "edit") {
-      dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: mode })
-    }
-  }, [dispatch])
+  useTemplateDeepLink(dispatch)
 
   // Get the current active page
   const currentPage = selectCurrentPage(state) ?? state.componentTree[0]
@@ -223,7 +197,13 @@ export default function BuilderPage() {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: pageBuilderMode === "edit" ? "preview" : "edit" })}
+                onClick={() => {
+                  const nextMode = pageBuilderMode === "edit" ? "preview" : "edit"
+                  dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: nextMode })
+                  const url = new URL(window.location.href)
+                  url.searchParams.set("mode", nextMode)
+                  window.history.replaceState(window.history.state, "", url)
+                }}
               >
                 {pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}
               </Button>
