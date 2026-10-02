@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fieldrun logo, a green sprout">
+  <rect x="3" y="3" width="58" height="58" rx="14" fill="#2e7d32" stroke="#1b1b18" stroke-width="4"/>
+  <path d="M32 50 V31" stroke="#fffdf6" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32 35 C20 35 15 26 15 18 C26 18 32 25 32 35Z" fill="#f5b82e" stroke="#1b1b18" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M32 31 C32 21 38 14 49 14 C49 23 44 31 32 31Z" fill="#fffdf6" stroke="#1b1b18" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>
