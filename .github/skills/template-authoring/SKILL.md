@@ -5,6 +5,8 @@ description: Create or modify a LivePage Template (a PageTemplateDefinition in c
 
 # Template authoring
 
+This is the Template-specific form of the [agent orchestration loop](../agent-orchestration/SKILL.md): the review sub-agent applies its own fixes, and the loop ends with a PR.
+
 Templates are typed data, not components. Each lives in
 `client/features/templates/definitions/<name>.ts` and is registered in
 `client/features/templates/registry.ts`. Read

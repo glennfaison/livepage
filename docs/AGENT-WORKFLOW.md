@@ -23,6 +23,12 @@ How to scope, verify, and finish a task in this repository. For what the code sh
 - Ship Template changes in a pull request, never straight to `main`.
 - Check whether the change introduces or renames entities, relationships, or domain terms. If it does, update [the glossary](./GLOSSARY.md) before finishing.
 
+## Orchestration
+
+- For anything beyond a focused fix, follow the [agent orchestration skill](../.github/skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the [handoff skill](../.github/skills/handoff/SKILL.md) and iterating until the goal is met.
+- Whenever you write code, have a fresh review sub-agent review it. The reviewer fixes the issues it finds rather than only reporting them, so the main agent's context stays small.
+- End the task by suggesting which parts of the process could be automated deterministically to reduce token use.
+
 ## Sub-agents
 
 - For parallel agents or sub-agents, use the lowest-cost model that still meets the task's quality and context requirements. Upgrade only if needed.
