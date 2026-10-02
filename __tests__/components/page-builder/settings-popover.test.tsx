@@ -7,17 +7,6 @@ import { encodeDataSourceSettings, DATA_SOURCE_FIELD_NAME } from "@/client/featu
 
 const mockUpdateComponent = jest.fn()
 
-jest.mock("@/client/features/page-builder/component-operations-context", () => ({
-  useComponentOperationsContext: () => ({
-    updateComponent: mockUpdateComponent,
-    setSelectedComponent: jest.fn(),
-    addComponent: jest.fn(),
-    removeComponent: jest.fn(),
-    duplicateComponent: jest.fn(),
-    replaceComponent: jest.fn(),
-    findComponentById: jest.fn(),
-  }),
-}))
 jest.mock("@/client/features/design-components/editor-controls/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
     updateComponent: mockUpdateComponent,

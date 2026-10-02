@@ -8,7 +8,7 @@ import { withEditorControls } from "../editor-controls/decorators/with-editor-co
 import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
 import { componentTagList, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/client/features/design-components/primitives"
-import { getComponentInfo } from "../registry"
+import { getComponentInfo } from "../registry-store"
 import { withDataSource } from "@/client/features/data-sources"
 
 const tag = "column" as const

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "boundaries": {
+    "zones": [
+      { "name": "app", "patterns": ["app/**"] },
+      { "name": "client", "patterns": ["client/**"] },
+      { "name": "server", "patterns": ["server/**"] },
+      { "name": "shared", "patterns": ["shared/**"] }
+    ],
+    "rules": [
+      { "from": "app", "allow": ["client", "server", "shared"] },
+      { "from": "client", "allow": ["shared"] },
+      { "from": "server", "allow": ["shared"] },
+      { "from": "shared", "allow": [] }
+    ]
+  }
+}

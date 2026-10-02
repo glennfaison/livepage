@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/server/services/openai"
 import { describeRequest } from "./request"
-import type { DraftResponse, DraftTemplate, PageRequest } from "@/shared/features/prompt-assist/contract/schema"
+import type { DraftResponse, DraftTemplate, PageRequest } from "@/shared/features/prompt-assist"
 
 const MAX_VALUE_LENGTH = 600
 

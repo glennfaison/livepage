@@ -1,6 +1,6 @@
 import type { AppNode } from "@/client/features/app-state"
 import { applyDesignEdits, validateDesignEdits } from "./design-edits"
-import type { DesignEdit, RefineResponse } from "@/shared/features/prompt-assist/contract/schema"
+import type { DesignEdit, RefineResponse } from "@/shared/features/prompt-assist"
 
 export const MAX_REFINE_STEPS = 4
 

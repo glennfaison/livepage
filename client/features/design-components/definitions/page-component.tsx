@@ -7,7 +7,7 @@ import { useCallback } from "react"
 import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "@/client/features/design-components/primitives"
-import { getComponentInfo } from "../registry"
+import { getComponentInfo } from "../registry-store"
 
 const tag = "page" as const
 

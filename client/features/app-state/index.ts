@@ -1,3 +1,6 @@
 export * from "@/client/features/types"
 export * from "./selectors"
 export { useAppState } from "./hooks"
+export { findComponentById } from "./tree"
+export { patchComponent } from "./commands/helpers"
+export { appReducer, initialState } from "./commands/reducer"
