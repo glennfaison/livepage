@@ -27,6 +27,12 @@ const attributes = [
 		options: ["equal", "natural"],
 		defaultValue: "equal",
 	}),
+	createSelectAttribute({
+		id: "wrap",
+		label: "Wrap",
+		options: ["nowrap", "wrap"],
+		defaultValue: "nowrap",
+	}),
 	...createSpacingAttributes("padding"),
 	...createSpacingAttributes("margin"),
 ] as const satisfies ReadonlyArray<SettingsField>
@@ -34,6 +40,33 @@ const attributes = [
 const attributesMap = createAttributeMap(attributes)
 
 const Icon = <AlignHorizontalSpaceBetween className="size-4" />
+
+/**
+ * A flex item only wraps onto a new line when its hypothetical main size exceeds the
+ * remaining space, and that size comes from the basis. Equal sizing therefore has to use a
+ * content-based basis (`basis-auto`) instead of `basis-0`: a zero basis reports a
+ * hypothetical size of zero, so `flex-wrap` could never break the line and every template
+ * that asked for wrapping silently stayed on one line. `basis-auto` reports the item's own
+ * width, so line-breaking works, and `flex-1` still grows each child to fill its line.
+ * A percentage basis is deliberately avoided here: `basis-full` would report the whole row
+ * as the item's size and stack every child on its own line.
+ */
+function readRowLayout(componentAttributes: Readonly<Record<string, string>>): Readonly<{
+	containerClassName: string
+	slotClassName: string
+}> {
+	const wraps = componentAttributes["wrap"] === "wrap"
+	const sizesChildrenNaturally = componentAttributes["child-sizing"] === "natural"
+
+	return {
+		containerClassName: wraps ? "flex-wrap" : "flex-nowrap",
+		slotClassName: sizesChildrenNaturally
+			? "self-stretch"
+			: wraps
+				? "flex-1 basis-auto min-w-0 self-stretch"
+				: "flex-1 basis-0 min-w-0 self-stretch",
+	}
+}
 
 const _PreviewModeComponent = (props: ViewModeProps) => {
 	const { component } = props
@@ -43,9 +76,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
 	const layoutStyles = readLayoutStyles(component.attributes)
-	const slotClassName = component.attributes["child-sizing"] === "natural"
-		? "self-stretch"
-		: "flex-1 basis-0 min-w-0 self-stretch"
+	const { containerClassName, slotClassName } = readRowLayout(component.attributes)
 
 	const childComponents = props.component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -63,7 +94,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 	return (
 		<div
 			{...attributes}
-			className={cn("min-h-[50px] flex flex-row flex-nowrap justify-start items-stretch", "p-0 gap-0", customClasses, childClassName)}
+			className={cn("min-h-[50px] flex flex-row justify-start items-stretch", "p-0 gap-0", containerClassName, customClasses, childClassName)}
 			style={{
 				padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
@@ -117,9 +148,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 		const childIndex = Math.floor(dividerIndex / 2)
 		addComponent({ tag, parentId: attributes.id, index: childIndex })
 	}, [addComponent, attributes.id])
-	const slotClassName = component.attributes["child-sizing"] === "natural"
-		? "self-stretch"
-		: "flex-1 basis-0 min-w-0 self-stretch"
+	const { containerClassName, slotClassName } = readRowLayout(component.attributes)
 
 	const children = component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -154,8 +183,9 @@ const _EditModeComponent = (props: EditModeProps) => {
 		<div
 			{...attributes}
 			className={cn(
-				"min-h-[50px] flex flex-row flex-nowrap justify-start items-stretch",
+				"min-h-[50px] flex flex-row justify-start items-stretch",
 				"p-0 gap-0",
+				containerClassName,
 				"border border-dashed border-gray-300",
 				customClasses,
 				childClassName,
