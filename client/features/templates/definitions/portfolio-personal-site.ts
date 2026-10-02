@@ -113,6 +113,8 @@ export const portfolioPersonalSiteTemplate = {
           "padding-bottom": "3rem",
           "padding-left": "2rem",
           "gap": "3.5rem",
+          "margin-left": "auto",
+          "margin-right": "auto",
           "custom-classes": "mx-auto w-full max-w-5xl",
         }, [
           node("row", "portfolio-hero", {
@@ -153,9 +155,9 @@ export const portfolioPersonalSiteTemplate = {
               ]),
             ]),
             node("image", "portfolio-hero-photo", {
-              alt: "Maya Chen portrait placeholder",
+              alt: "Maya Chen portrait",
               src: "",
-              fallbackSrc: "/placeholder-img.svg?height=420&width=420",
+              fallbackSrc: "/avatars/maya-chen.svg",
               width: "260px",
               height: "260px",
               objectFit: "cover",
@@ -163,7 +165,7 @@ export const portfolioPersonalSiteTemplate = {
               borderRadius: "28px",
               loading: "lazy",
               decoding: "async",
-              "custom-classes": "flex-none overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-100 shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
+              "custom-classes": "flex-none shrink-0 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-100 shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
             }),
           ]),
           node("row", "portfolio-stat-row", {
@@ -235,7 +237,7 @@ export const portfolioPersonalSiteTemplate = {
                 node("image", "portfolio-project-1-image", {
                   alt: "Orbit onboarding case study cover",
                   src: "",
-                  fallbackSrc: "/placeholder-img.svg?height=320&width=480",
+                  fallbackSrc: "/template-art/portfolio-orbit.svg",
                   width: "100%",
                   height: "160px",
                   objectFit: "cover",
@@ -262,7 +264,7 @@ export const portfolioPersonalSiteTemplate = {
                 node("image", "portfolio-project-2-image", {
                   alt: "Fieldnote brand system cover",
                   src: "",
-                  fallbackSrc: "/placeholder-img.svg?height=320&width=480",
+                  fallbackSrc: "/template-art/portfolio-fieldnote.svg",
                   width: "100%",
                   height: "160px",
                   objectFit: "cover",
@@ -289,7 +291,7 @@ export const portfolioPersonalSiteTemplate = {
                 node("image", "portfolio-project-3-image", {
                   alt: "Northline dashboard cover",
                   src: "",
-                  fallbackSrc: "/placeholder-img.svg?height=320&width=480",
+                  fallbackSrc: "/template-art/portfolio-northline.svg",
                   width: "100%",
                   height: "160px",
                   objectFit: "cover",
@@ -337,8 +339,12 @@ export const portfolioPersonalSiteTemplate = {
           }),
           node("column", "portfolio-contact-section", {
             id: "contact",
+            "padding-top": "2.5rem",
+            "padding-right": "2.5rem",
+            "padding-bottom": "2.5rem",
+            "padding-left": "2.5rem",
             "gap": "1rem",
-            "custom-classes": "rounded-3xl bg-slate-900 p-10 text-white",
+            "custom-classes": "rounded-3xl bg-slate-900 text-white",
           }, [
             text("header2", "portfolio-contact-heading", "Let's work together", {
               "custom-classes": "py-0 text-2xl font-semibold text-white",
