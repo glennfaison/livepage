@@ -61,6 +61,28 @@ describe("page template registry", () => {
     expect(screen.getAllByText("Type 2 Diabetes")).toHaveLength(2)
   })
 
+  it("renders the podcast show page with its host portrait and episode list", () => {
+    const template = getPageTemplateById("podcast-show-page")
+    expect(template).toBeDefined()
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={cloneTemplatePages(template!)[0]}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getAllByText("The Longform Hour")).toHaveLength(2)
+    expect(screen.getByText("Latest episodes")).toBeInTheDocument()
+    expect(screen.getByAltText("Sam Rivera, host of The Longform Hour")).toBeInTheDocument()
+    expect(screen.getAllByRole("link", { name: "Listen" })).toHaveLength(3)
+  })
+
   it("renders a readable template catalog summary with an apply action", async () => {
     const user = userEvent.setup()
     const onApplyTemplate = jest.fn()
