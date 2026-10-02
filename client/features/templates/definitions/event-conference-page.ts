@@ -83,6 +83,8 @@ export const eventConferencePageTemplate = {
           node("row", "event-nav", {
             "padding-top": "1.5rem", "padding-right": "2.5rem", "padding-bottom": "1.5rem", "padding-left": "2.5rem",
             "child-sizing": "natural", "align-items": "center", "justify-content": "between",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-6xl border-b border-slate-800",
           }, [
             text("inline-text", "event-nav-brand", "SIGNAL CONF", { "custom-classes": "font-mono text-sm font-semibold tracking-[0.14em] text-slate-100" }),
@@ -91,6 +93,8 @@ export const eventConferencePageTemplate = {
           node("column", "event-hero", {
             "padding-top": "4rem", "padding-right": "2.5rem", "padding-bottom": "4rem", "padding-left": "2.5rem",
             "gap": "1.25rem", "align-items": "center",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-3xl text-center",
           }, [
             text("badge", "event-hero-badge", "3 days · 40+ sessions", { variant: "secondary", "custom-classes": "w-fit rounded-full px-3 py-1 text-xs font-semibold" }),
@@ -105,6 +109,8 @@ export const eventConferencePageTemplate = {
           node("row", "event-stat-row", {
             "padding-top": "0", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-4xl flex-wrap md:flex-nowrap",
           }, [
             node("column", "event-stat-col-1", { "custom-classes": "min-w-0 flex-1" }, [
@@ -121,6 +127,8 @@ export const eventConferencePageTemplate = {
             id: "speakers",
             "padding-top": "1rem", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1.5rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl border-t border-slate-800",
           }, [
             text("header2", "event-speakers-heading", "Featured speakers", { "custom-classes": "py-0 pt-6 text-xl font-semibold text-slate-100" }),
@@ -149,6 +157,8 @@ export const eventConferencePageTemplate = {
             id: "schedule",
             "padding-top": "1rem", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-3xl border-t border-slate-800",
           }, [
             text("header2", "event-schedule-heading", "Day one at a glance", { "custom-classes": "py-0 pt-6 text-xl font-semibold text-slate-100" }),
@@ -165,6 +175,8 @@ export const eventConferencePageTemplate = {
           node("row", "event-tickets-section", {
             "padding-top": "1rem", "padding-right": "2.5rem", "padding-bottom": "4rem", "padding-left": "2.5rem",
             "gap": "1.25rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl border-t border-slate-800 flex-wrap md:flex-nowrap",
           }, [
             node("column", "event-ticket-early", {

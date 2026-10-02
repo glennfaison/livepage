@@ -6,18 +6,8 @@ type Node = Readonly<{ tag: string; attributes: Readonly<Record<string, string>>
 
 const publicDir = path.join(process.cwd(), "public")
 
-// Templates still waiting for their design pass. Remove an entry when its template is fixed; the ratchet below fails if you forget.
-const knownLeftovers: Readonly<Record<string, ReadonlyArray<string>>> = {
-  "centered columns set explicit auto margins": [
-    "agency-homepage",
-    "cv-resume-engineer-dark",
-    "cv-resume-engineer-light",
-    "cv-resume-personal-website",
-    "event-conference-page",
-    "landing-page-saas",
-  ],
-  "no placeholder images": ["cv-resume-personal-website"],
-}
+// Templates must pass the quality checks without any allowlist exceptions.
+const knownLeftovers: Readonly<Record<string, ReadonlyArray<string>>> = {}
 
 function expectRule(rule: string, templateId: string, violations: ReadonlyArray<string>): void {
   if (knownLeftovers[rule]?.includes(templateId)) {
