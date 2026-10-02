@@ -29,8 +29,9 @@ function detailRow(id: string, labelText: string, valueText: string): TemplateNo
   ])
 }
 
-function patientRow(id: string, name: string, meta: string, active = false): TemplateNode {
+function patientRow(id: string, name: string, meta: string, avatarSlug: string, active = false): TemplateNode {
   return node("row", id, {
+    "child-sizing": "natural",
     "align-items": "center",
     gap: "0.75rem",
     "padding-top": "0.5rem",
@@ -40,12 +41,13 @@ function patientRow(id: string, name: string, meta: string, active = false): Tem
     "custom-classes": active ? "rounded-lg bg-teal-50" : "rounded-lg",
   }, [
     node("image", `${id}-avatar`, {
-      src: "/placeholder-img.svg?height=80&width=80",
+      src: `/avatars/${avatarSlug}.svg`,
       alt: `${name} avatar`,
-      width: "40px",
-      height: "40px",
+      width: "44px",
+      height: "44px",
       borderRadius: "50%",
       objectFit: "cover",
+      "custom-classes": "shrink-0 ring-2 ring-white",
     }),
     node("column", `${id}-info`, { gap: "0" }, [
       text("inline-text", `${id}-name`, name, { "custom-classes": "text-sm font-semibold text-slate-900" }),
@@ -121,7 +123,7 @@ export const patientHealthDashboardTemplate = {
             ]),
             node("row", "phd-nav-account", { "child-sizing": "natural", "align-items": "center", gap: "0.75rem" }, [
               node("image", "phd-doctor-avatar", {
-                src: "/placeholder-img.svg?height=80&width=80",
+                src: "/avatars/dr-jose-simmons.svg",
                 alt: "Doctor avatar",
                 width: "40px",
                 height: "40px",
@@ -147,12 +149,12 @@ export const patientHealthDashboardTemplate = {
             node("column", "phd-patients-col", { gap: "0.75rem", "padding-top": "1rem", "padding-right": "1rem", "padding-bottom": "1rem", "padding-left": "1rem", "custom-classes": "w-full lg:w-72 shrink-0 rounded-2xl border border-slate-200 bg-white" }, [
               text("header3", "phd-patients-heading", "Patients", { "custom-classes": "py-0 text-lg font-semibold text-slate-900" }),
               node("column", "phd-patients-list", { gap: "0.25rem" }, [
-                patientRow("phd-patient-1", "Emily Williams", "Female, 18", true),
-                patientRow("phd-patient-2", "Ryan Johnson", "Male, 45"),
-                patientRow("phd-patient-3", "Brandon Mitchell", "Male, 36"),
-                patientRow("phd-patient-4", "Jessica Taylor", "Female, 28"),
-                patientRow("phd-patient-5", "Samantha Johnson", "Female, 56"),
-                patientRow("phd-patient-6", "Ashley Martinez", "Female, 54"),
+                patientRow("phd-patient-1", "Emily Williams", "Female, 18", "emily-williams", true),
+                patientRow("phd-patient-2", "Ryan Johnson", "Male, 45", "ryan-johnson"),
+                patientRow("phd-patient-3", "Brandon Mitchell", "Male, 36", "brandon-mitchell"),
+                patientRow("phd-patient-4", "Jessica Taylor", "Female, 28", "jessica-taylor"),
+                patientRow("phd-patient-5", "Samantha Johnson", "Female, 56", "samantha-johnson"),
+                patientRow("phd-patient-6", "Ashley Martinez", "Female, 54", "ashley-martinez"),
               ]),
             ]),
             node("column", "phd-main-col", { gap: "1.5rem", "custom-classes": "min-w-0 flex-1" }, [
@@ -215,7 +217,7 @@ export const patientHealthDashboardTemplate = {
             node("column", "phd-sidebar-col", { gap: "1.5rem", "custom-classes": "w-full lg:w-80 shrink-0" }, [
               node("column", "phd-profile-card", { gap: "0.75rem", "align-items": "center", "padding-top": "1.5rem", "padding-right": "1.25rem", "padding-bottom": "1.5rem", "padding-left": "1.25rem", "custom-classes": "rounded-2xl border border-slate-200 bg-white text-center" }, [
                 node("image", "phd-profile-avatar", {
-                  src: "/placeholder-img.svg?height=200&width=200",
+                  src: "/avatars/emily-williams.svg",
                   alt: "Emily Williams",
                   width: "96px",
                   height: "96px",

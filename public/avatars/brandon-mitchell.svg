@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="brandon-mitchell">
+  <rect width="200" height="200" fill="#fef3c7"/>
+  
+  <path d="M30 200c0-34 30-52 70-52s70 18 70 52z" fill="#f59e0b"/>
+  <rect x="88" y="124" width="24" height="28" rx="10" fill="#8d5a3b"/>
+  <ellipse cx="100" cy="94" rx="30" ry="36" fill="#8d5a3b"/>
+  <path d="M72 84c0-24 12-34 28-34s28 10 28 34c-8-14-18-20-28-20s-20 6-28 20z" fill="#120d0a"/>
+  <circle cx="88" cy="96" r="2.5" fill="#1f2937"/><circle cx="112" cy="96" r="2.5" fill="#1f2937"/>
+  <path d="M91 110q9 7 18 0" fill="none" stroke="#7c2d12" stroke-width="2.5" stroke-linecap="round"/>
+  
+</svg>
