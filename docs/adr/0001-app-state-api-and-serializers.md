@@ -14,13 +14,17 @@ We are organizing the builder around a central **app state** boundary with a com
 ## Standalone HTML export
 
 The HTML serializer produces a standalone document rather than a server-rendered
-snapshot. It embeds the validated app-node tree as JSON and an inline browser runtime,
-which renders the registered preview component set without depending on the builder's
-Next.js bundle. The runtime uses pinned React and ReactDOM ESM imports (`19.1.0`) from
-esm.sh, so exported files intentionally require network access when opened.
+snapshot. It embeds the validated app-node tree as JSON, the browser-safe
+`PreviewRenderer` and registered `PreviewModeComponent` implementations bundled
+independently of Next.js, and the Tailwind stylesheet compiled from the same global
+CSS entry used by the builder. Export and preview therefore share rendering
+implementations instead of maintaining separate HTML tag mappings. The generated
+runtime uses pinned React and ReactDOM ESM imports (`19.1.0`) from esm.sh, and the
+document loads Inter from Google Fonts; exported files intentionally require network
+access for these assets when opened.
 
-Data-source settings remain in the tree. The browser runtime supports the built-in
-generated-data and REST API sources, resolves data-source and current-date placeholders,
-and renders loading/error states. As with preview mode, REST sources must permit the
-exported page's browser origin via CORS, and generated-data/parse functions are trusted
-code supplied by the page author.
+Data-source settings remain in the tree and are resolved by the same preview component
+wrappers used in the builder. Data-source behavior is not part of the template layout
+parity contract: live values may change, REST sources must permit the exported page's
+browser origin via CORS, and generated-data/parse functions are trusted code supplied
+by the page author.

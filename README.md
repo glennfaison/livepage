@@ -43,13 +43,13 @@ The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and reb
 
 The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
-The standalone HTML browser test serves the exact serializer output over loopback,
-then runs it in headless Chromium. It fulfills the export's pinned React imports
-from the locally installed React packages and blocks other external requests. To
-install the browser locally, run `npx playwright install chromium` once after
-`npm install`; then run `npm run test:html-browser`. Its fixed fixture uses
-components supported by the current export runtime; it does not assert general
-editor-preview parity.
+The standalone HTML browser tests run in headless Chromium against both the live
+`/try?template=<id>&mode=preview` page and the exact exported HTML for every bundled
+template at desktop and mobile viewport sizes. They fulfill pinned React imports
+from locally installed React packages and use the preview's local font assets, so
+the comparison does not depend on CDN availability. To install the browser locally,
+run `npx playwright install chromium` once after `npm install`; then run
+`npm run test:html-browser`.
 
 The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
 
@@ -59,11 +59,12 @@ Application code is organized by runtime: browser features and UI live in [`clie
 
 ## HTML exports
 
-An HTML export is a single file that opens directly in a modern browser, with no LivePage server needed. Keep these limits in mind:
+An HTML export is a single file that opens directly in a modern browser, with no LivePage server needed. It bundles the same registered preview-component implementations and compiled Tailwind CSS generated from the builder's global stylesheet. Keep these limits in mind:
 
-- The file loads pinned React and ReactDOM builds from [esm.sh](https://esm.sh), so the browser needs network access when it opens the file.
-- The export runtime supports the generated-data and REST API data sources. REST endpoints must allow the page's origin through CORS.
-- Image and other asset URLs stay as references. They are not embedded.
+- The file loads pinned React and ReactDOM builds from [esm.sh](https://esm.sh), and Inter from Google Fonts, so the browser needs network access when it opens the file.
+- The export runtime uses the registered preview data-source implementations. Network-backed sources must allow the exported page's origin through CORS.
+- Image and other asset URLs stay as references. They are not embedded. Root-relative public image paths are made absolute against the builder's origin so they can load when the exported file is opened locally.
+- Template parity covers initial content and layout at desktop and mobile sizes; live data-source runtime states are not guaranteed to remain visually identical.
 
 ## Bundled templates
 
