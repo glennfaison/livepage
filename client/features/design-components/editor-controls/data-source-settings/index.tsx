@@ -242,24 +242,6 @@ function DataSourceSettingsView(props: Readonly<{
   const [connectionResult, setConnectionResult] = React.useState("")
   const [testingConnection, setTestingConnection] = React.useState(false)
   const isLinkedInProfile = selectedDataSource.id === "linkedin-profile"
-  const queryClient = useQueryClient()
-
-  React.useEffect(() => {
-    if (!isLinkedInProfile) return
-
-    const handleOAuthMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || event.data?.type !== "linkedin-profile-oauth") return
-      setConnectionResult(event.data.status === "connected"
-        ? "LinkedIn connected."
-        : "LinkedIn connection was cancelled or could not be completed.")
-      if (event.data.status === "connected") {
-        void queryClient.invalidateQueries({ queryKey: ["data-source-data"] })
-      }
-    }
-
-    window.addEventListener("message", handleOAuthMessage)
-    return () => window.removeEventListener("message", handleOAuthMessage)
-  }, [isLinkedInProfile, queryClient])
 
   const testConnection = async (nextFormData: DataSourceSettings) => {
     try {
@@ -305,6 +287,7 @@ function DataSourceSettingsView(props: Readonly<{
 
   return (
     <>
+      {isLinkedInProfile && <LinkedInOAuthMessageHandler setConnectionResult={setConnectionResult} />}
       <div className="flex bg-background border-b align-middle">
         <Button
           className="rounded-none bg-accent border-r text-foreground hover:bg-accent cursor-pointer"
@@ -374,6 +357,31 @@ function DataSourceSettingsView(props: Readonly<{
       </div>
     </>
   )
+}
+
+function LinkedInOAuthMessageHandler({
+  setConnectionResult,
+}: Readonly<{
+  setConnectionResult: React.Dispatch<React.SetStateAction<string>>
+}>): null {
+  const queryClient = useQueryClient()
+
+  React.useEffect(() => {
+    const handleOAuthMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.data?.type !== "linkedin-profile-oauth") return
+      setConnectionResult(event.data.status === "connected"
+        ? "LinkedIn connected."
+        : "LinkedIn connection was cancelled or could not be completed.")
+      if (event.data.status === "connected") {
+        void queryClient.invalidateQueries({ queryKey: ["data-source-data"] })
+      }
+    }
+
+    window.addEventListener("message", handleOAuthMessage)
+    return () => window.removeEventListener("message", handleOAuthMessage)
+  }, [queryClient, setConnectionResult])
+
+  return null
 }
 
 function DataSourceSelectorButton({
