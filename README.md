@@ -39,8 +39,17 @@ The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and reb
 | `npm run test:watch` | Run Jest in watch mode |
 | `npm run test:coverage` | Run Jest with coverage |
 | `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
+| `npm run test:html-browser` | Run the standalone HTML artifact regression test in Chromium |
 
 The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
+
+The standalone HTML browser test serves the exact serializer output over loopback,
+then runs it in headless Chromium. It fulfills the export's pinned React imports
+from the locally installed React packages and blocks other external requests. To
+install the browser locally, run `npx playwright install chromium` once after
+`npm install`; then run `npm run test:html-browser`. Its fixed fixture uses
+components supported by the current export runtime; it does not assert general
+editor-preview parity.
 
 The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
 
