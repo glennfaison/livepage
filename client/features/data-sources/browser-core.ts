@@ -11,7 +11,10 @@ export function decodeBrowserDataSourceSettings(encoded: string): DataSourceSett
     const binary = typeof atob === "function"
       ? atob(encoded)
       : Buffer.from(encoded, "base64").toString("binary")
-    const json = new TextDecoder().decode(Uint8Array.from(binary, (character) => character.charCodeAt(0)))
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0))
+    const json = typeof TextDecoder === "function"
+      ? new TextDecoder().decode(bytes)
+      : decodeURIComponent(Array.from(bytes, (byte) => `%${byte.toString(16).padStart(2, "0")}`).join(""))
     const value = JSON.parse(json)
     return value && typeof value.id === "string" ? value : null
   } catch {
