@@ -2,6 +2,7 @@
 
 import React from "react"
 import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Label } from "@/client/components/ui/label"
@@ -240,6 +241,25 @@ function DataSourceSettingsView(props: Readonly<{
 
   const [connectionResult, setConnectionResult] = React.useState("")
   const [testingConnection, setTestingConnection] = React.useState(false)
+  const isLinkedInProfile = selectedDataSource.id === "linkedin-profile"
+  const queryClient = useQueryClient()
+
+  React.useEffect(() => {
+    if (!isLinkedInProfile) return
+
+    const handleOAuthMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.data?.type !== "linkedin-profile-oauth") return
+      setConnectionResult(event.data.status === "connected"
+        ? "LinkedIn connected."
+        : "LinkedIn connection was cancelled or could not be completed.")
+      if (event.data.status === "connected") {
+        void queryClient.invalidateQueries({ queryKey: ["data-source-data"] })
+      }
+    }
+
+    window.addEventListener("message", handleOAuthMessage)
+    return () => window.removeEventListener("message", handleOAuthMessage)
+  }, [isLinkedInProfile, queryClient])
 
   const testConnection = async (nextFormData: DataSourceSettings) => {
     try {
@@ -256,6 +276,32 @@ function DataSourceSettingsView(props: Readonly<{
   const discardConnection = React.useCallback(() => {
     handleDiscard()
   }, [handleDiscard])
+
+  const connectLinkedIn = () => {
+    handleSave()
+    const popup = window.open(
+      "/api/linkedin-profile/connect",
+      "linkedin-profile-oauth",
+      "width=600,height=700",
+    )
+    if (!popup) setConnectionResult("Allow popups to connect your LinkedIn account.")
+  }
+
+  const disconnect = async () => {
+    if (isLinkedInProfile && isConnected) {
+      try {
+        const response = await fetch("/api/linkedin-profile/disconnect", { method: "POST" })
+        if (!response.ok) {
+          setConnectionResult("Could not disconnect LinkedIn. Please try again.")
+          return
+        }
+      } catch {
+        setConnectionResult("Could not disconnect LinkedIn. Please try again.")
+        return
+      }
+    }
+    discardConnection()
+  }
 
   return (
     <>
@@ -282,10 +328,17 @@ function DataSourceSettingsView(props: Readonly<{
         ))}
 
         <div className="space-y-2">
-          <Button className="cursor-pointer w-full" disabled={testingConnection || !selectedDataSource} onClick={() => testConnection(formData)}>
-            {testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" />}&nbsp;
-            {testingConnection ? "Testing..." : "Test Connection"}
-          </Button>
+          {isLinkedInProfile ? (
+            <Button className="cursor-pointer w-full" disabled={testingConnection} onClick={connectLinkedIn}>
+              <PlugZapIcon className="h-4 w-4" />&nbsp;
+              {isConnected ? "Reconnect LinkedIn" : "Connect LinkedIn"}
+            </Button>
+          ) : (
+            <Button className="cursor-pointer w-full" disabled={testingConnection || !selectedDataSource} onClick={() => testConnection(formData)}>
+              {testingConnection ? <LoaderIcon className="h-4 w-4 animate-spin" /> : <PlugZapIcon className="h-4 w-4" />}&nbsp;
+              {testingConnection ? "Testing..." : "Test Connection"}
+            </Button>
+          )}
         </div>
 
         {connectionResult && (
@@ -306,7 +359,7 @@ function DataSourceSettingsView(props: Readonly<{
           variant="ghost"
           className="flex-1 rounded-none rounded-bl-lg bg-muted hover:bg-muted/80 text-foreground h-12 cursor-pointer"
           disabled={!isConnected || testingConnection}
-          onClick={discardConnection}
+          onClick={() => void disconnect()}
         >
           Disconnect
         </Button>

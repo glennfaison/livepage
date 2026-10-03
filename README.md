@@ -7,7 +7,7 @@ LivePage is a visual page builder. You compose a page from design components in 
 ## Features
 
 - **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, callouts, charts, metric cards, and data tables. Includes undo/redo history and a command palette.
-- **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, or generated data through placeholders.
+- **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, generated data, or an authorized LinkedIn OIDC profile through placeholders.
 - **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
 - **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`, and even then hidden unless the page is opened with `?prompt-assist=1`; see [Optional: page assistant](#optional-page-assistant).
 - **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
@@ -26,6 +26,36 @@ Open [http://localhost:3000](http://localhost:3000) for the landing page, or go 
 ### Optional: page assistant
 
 The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and rebuild (the value is inlined at build time) to turn it on; then the chat bubble (bottom-right of `/try`) appears only when you open the builder with `?prompt-assist=1` (for example `/try?prompt-assist=1`). With the flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`docs/CONTEXT.md`](./docs/CONTEXT.md#prompt-assist).
+
+### Optional: LinkedIn profile data source
+
+The LinkedIn Profile source uses LinkedIn's official OpenID Connect authorization
+code flow. In your LinkedIn developer app, enable the Sign In with LinkedIn using
+OpenID Connect product and authorize the `openid`, `profile`, and `email` scopes.
+Register the exact value of `LINKEDIN_REDIRECT_URI` as an authorized redirect URL.
+For local development, use `http://localhost:3000/api/linkedin-profile/callback`;
+production must use the HTTPS callback URL for your deployment.
+The integration uses LinkedIn's [OIDC discovery document](https://www.linkedin.com/oauth/.well-known/openid-configuration)
+and the [userinfo endpoint](https://api.linkedin.com/v2/userinfo).
+
+Set `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_REDIRECT_URI`, and
+`LINKEDIN_SESSION_ENCRYPTION_KEY` in `.env.local` using the names in
+[`.env.example`](./.env.example). Generate the encryption key with
+`openssl rand -base64 32`. The client secret stays on the server. The profile session is stored in an
+encrypted, HttpOnly, SameSite=Lax cookie; it is protected from client-side JS
+read access and expires after eight hours, but it is not cryptographically bound to
+one browser/device. It requires HTTPS in production and is removed on disconnect.
+LinkedIn data is loaded only
+through the same-origin profile endpoint and is not stored in source settings,
+app nodes, or exports.
+
+Available profile values are limited to claims returned by the configured app's
+LinkedIn OIDC scopes: subject, name, given/family names, picture, locale, and the
+optional email and email-verification claim. LinkedIn does not expose headline,
+about/summary, positions, education, or skills through this normal self-serve
+OIDC profile. Those template fields remain empty; access to broader profile
+permissions requires LinkedIn approval. LivePage does not scrape LinkedIn.
+Standalone HTML files cannot use the LinkedIn session cookie.
 
 ## Development
 
