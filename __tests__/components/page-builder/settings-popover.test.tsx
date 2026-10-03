@@ -1,4 +1,6 @@
+import type React from "react"
 import { render, screen, waitFor } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import userEvent from "@testing-library/user-event"
 import { SettingsPopover } from "@/client/features/page-builder"
 import { Button } from "@/client/components/ui/button"
@@ -6,6 +8,10 @@ import { createDesignComponentInstance, getComponentInfo } from "@/client/featur
 import { encodeDataSourceSettings, DATA_SOURCE_FIELD_NAME } from "@/client/features/data-sources"
 
 const mockUpdateComponent = jest.fn()
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const renderWithProvider = (ui: React.ReactElement) => render(
+  <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+)
 
 jest.mock("@/client/features/design-components/editor-controls/component-operations-context", () => ({
   useComponentOperationsContext: () => ({
@@ -26,7 +32,7 @@ describe("SettingsPopover", () => {
 
   it("renders the trigger element", () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -37,7 +43,7 @@ describe("SettingsPopover", () => {
 
   it("opens the popover when trigger is clicked", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -54,7 +60,7 @@ describe("SettingsPopover", () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
     const defaultContentArray = getComponentInfo(designComponentData.tag).defaultChildren
     const defaultContent = Array.isArray(defaultContentArray) ? String(defaultContentArray) : String(defaultContentArray)
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -71,7 +77,7 @@ describe("SettingsPopover", () => {
 
   it("switches between settings and connect tabs", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -110,7 +116,7 @@ describe("SettingsPopover", () => {
       },
     }
 
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -128,7 +134,7 @@ describe("SettingsPopover", () => {
   it("enables back navigation and connect/disconnect state while preparing a new connection", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
 
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -146,7 +152,7 @@ describe("SettingsPopover", () => {
 
   it("calls updateComponent with updated values when Save button is clicked", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -166,7 +172,7 @@ describe("SettingsPopover", () => {
   it("resets to default values when field is cleared and saved", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
     const defaultContent = getComponentInfo(designComponentData.tag).defaultChildren
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
@@ -186,7 +192,7 @@ describe("SettingsPopover", () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
     const defaultContentArray = getComponentInfo(designComponentData.tag).defaultChildren
     const defaultContent = Array.isArray(defaultContentArray) ? String(defaultContentArray) : String(defaultContentArray)
-    render(
+    renderWithProvider(
       <SettingsPopover component={designComponentData}>
         <Button data-testid="settings-trigger">Settings</Button>
       </SettingsPopover>,
