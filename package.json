@@ -15,6 +15,7 @@
     "pretest": "npm run build:html-runtime",
     "test": "jest",
     "pretest:watch": "npm run build:html-runtime",
+    "test:html-browser": "npm run build:html-runtime && playwright test --config=playwright.config.ts",
     "test:watch": "jest --watch",
     "pretest:coverage": "npm run build:html-runtime",
     "test:coverage": "jest --coverage"
@@ -45,6 +46,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "~1.57.0",
     "@tailwindcss/postcss": "^4.1.8",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -59,6 +61,7 @@
     "fallow": "^2.101.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "postcss": "8.5.3",
     "tailwindcss": "^4.1.8",
     "ts-jest": "^29.3.4",
     "typescript": "^5.8.3"

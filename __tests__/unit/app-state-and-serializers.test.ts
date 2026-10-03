@@ -1,6 +1,8 @@
 import { selectCurrentPage } from "@/client/features/app-state"
+import { decodeDataSourceSettings, encodeDataSourceSettings } from "@/client/features/data-sources"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/client/features/serializers"
 import { validateImportedFile } from "@/client/features/page-builder"
+import type { AppNode } from "@/client/features/types"
 
 describe("app-state selectors and serializers", () => {
   const appState = {
@@ -54,14 +56,22 @@ describe("app-state selectors and serializers", () => {
     expect(() => validateImportedFile(emptyFile, "json")).toThrow("empty")
   })
 
+  it("round-trips Unicode data-source settings in browser runtimes", () => {
+    const settings = {
+      id: "generated-data",
+      settings: { generate: ["return { name: 'Zoë 🌱' }"] },
+    } as const
+    expect(decodeDataSourceSettings(encodeDataSourceSettings(settings))).toEqual(settings)
+  })
+
   it("escapes html output", () => {
     const html = serializeAppStateAsHtml(appState.componentTree as any)
     expect(html).toContain("&lt;Page&gt;")
-    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;")
+    expect(html).toContain("\\u003cscript\\u003ealert(1)\\u003c/script\\u003e")
     expect(html).not.toContain("<script>alert(1)</script>")
   })
 
-  it("uses registry metadata for nested HTML structure", () => {
+  it("renders nested component trees through the shared preview runtime", () => {
     const html = serializeAppStateAsHtml([
       {
         tag: "page",
@@ -78,7 +88,29 @@ describe("app-state selectors and serializers", () => {
       },
     ] as any)
 
-    expect(html).toContain('<div class="column"><div class="row"><div class="column"><h1>Title</h1></div></div></div>')
+    expect(html).toContain('id="livepage-root"></div>')
+    expect(html).toContain("text-4xl font-bold py-2")
+    expect(html).not.toContain('<div class="column"><div class="row">')
+  })
+
+  it("resolves public image paths against the export origin", () => {
+    const html = serializeAppStateAsHtml([
+      {
+        tag: "page",
+        attributes: { title: "Image export" },
+        children: [{
+          tag: "image",
+          attributes: {
+            src: "/avatars/ada.svg",
+            fallbackSrc: "/template-art/portrait.svg",
+          },
+          children: [],
+        }],
+      },
+    ] satisfies ReadonlyArray<AppNode>, { assetBaseUrl: "https://livepage.example" })
+
+    expect(html).toContain('"src":"https://livepage.example/avatars/ada.svg"')
+    expect(html).toContain('"fallbackSrc":"https://livepage.example/template-art/portrait.svg"')
   })
 
   it("exports a browser runtime with the complete serialized tree", () => {

@@ -124,7 +124,9 @@ export function usePageOperations(state: AppState) {
 
   const savePageAsHtmlMutation = useMutation({
     mutationFn: async (componentTree: ReadonlyArray<AppNode>) => {
-      const htmlTemplate = serializeAppStateAsHtml(componentTree)
+      const htmlTemplate = serializeAppStateAsHtml(componentTree, {
+        assetBaseUrl: window.location.origin,
+      })
 
       // Create and download the HTML file
       const blob = new Blob([htmlTemplate], { type: "text/html" })

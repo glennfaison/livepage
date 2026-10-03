@@ -29,6 +29,7 @@ const customJestConfig = {
     "<rootDir>/node_modules/",
     "<rootDir>/.next/",
     "<rootDir>/__tests__/utils/",
+    "<rootDir>/__tests__/browser/",
     "<rootDir>/__tests__/.*/data.ts"
   ],
 }

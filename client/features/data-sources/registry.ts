@@ -6,6 +6,7 @@ import { dataSourceInfo as GraphQL } from "./definitions/graphql"
 import { dataSourceInfo as JsonFeed } from "./definitions/json-feed"
 import { dataSourceInfo as Csv } from "./definitions/csv"
 import { dataSourceInfo as LinkedInProfile } from "./definitions/linkedin-profile"
+import { decodeBrowserDataSourceSettings } from "./browser-core"
 
 export const dataSourceIdList = [
 	RestApi.id,
@@ -47,10 +48,10 @@ export function decodeDataSourceSettings(encodedDataSourceSettings: string): {
 	if (typeof encodedDataSourceSettings !== "string" || encodedDataSourceSettings === "") {
 		return {} as {id: DataSourceId; settings: DataSourceSettings}
 	}
-	try {
-		const jsonString = Buffer.from(encodedDataSourceSettings, "base64").toString("utf8")
-		return JSON.parse(jsonString)
-	} catch (error) {
-		throw error
+	const decoded = decodeBrowserDataSourceSettings(encodedDataSourceSettings)
+	if (!decoded) throw new Error("Invalid data-source settings")
+	return {
+		id: decoded.id,
+		settings: decoded.settings as DataSourceSettings,
 	}
 }
