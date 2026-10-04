@@ -37,7 +37,7 @@ const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
 	const customClasses = readCustomClasses(props.component.attributes)
 	const textAppearance = readTextAppearance(props.component.attributes)
-	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, parentTag: ____, component: _____, ...filteredProps } = props
 
 	return (
 		<h3 className={cn("text-2xl font-bold py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{children as React.ReactNode}</h3>

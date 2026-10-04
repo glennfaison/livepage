@@ -22,7 +22,7 @@ import { Input } from "@/client/components/ui/input"
 import { toast } from "@/client/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { componentTagList, getComponentInfo } from "@/client/features/design-components"
+import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
 import { cn } from "@/client/lib/utils"
 
@@ -205,8 +205,11 @@ export const CommandPalette: React.FC<
       },
     ]
 
-    const insertParentId = state.selectedComponentId || currentPage?.attributes.id
-    const insertCommands: PaletteCommand[] = componentTagList.map((tag) => {
+    const insertParent = state.selectedComponentId
+      ? componentOperations.findComponentById(state.componentTree, state.selectedComponentId)
+      : currentPage
+    const insertParentId = insertParent?.attributes.id
+    const insertCommands: PaletteCommand[] = (insertParent ? getComponentsAllowedIn(insertParent.tag) : []).map(({ tag }) => {
       const info = getComponentInfo(tag)
       return {
         id: `insert-${tag}`,

@@ -1,8 +1,8 @@
 import { z } from "zod"
-import { componentTagList } from "@/client/features/design-components"
+import { componentMetadataByTag } from "@/client/features/design-components"
 import type { AppNode } from "@/client/features/types"
 
-const allowedAppNodeTags = new Set([...componentTagList, "page"])
+const allowedAppNodeTags = new Set(Object.keys(componentMetadataByTag))
 
 const appNodeTagSchema = z.string().refine((tag) => allowedAppNodeTags.has(tag), {
   message: "Invalid component tag",

@@ -3,24 +3,26 @@ import React from "react"
 import { Input } from "@/client/components/ui/input"
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
-import { getComponentInfo } from "../registry-store"
+import { getComponentsAllowedIn } from "../registry-store"
 import type { AppNodeTag } from "@/client/features/types"
 
 // Component selector popover
 export const ComponentSelectorPopover = ({
 	onSelect,
 	children,
-	componentTagList,
+	parentTag,
+	excludeTag,
 }: Readonly<{
 	onSelect: (type: AppNodeTag) => void
 	children: React.ReactNode
-	componentTagList: ReadonlyArray<AppNodeTag>
+	parentTag?: AppNodeTag
+	excludeTag?: AppNodeTag
 }>) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
   const [open, setOpen] = React.useState(false)
 
 	const filteredComponents = React.useMemo(() => {
-		const components = componentTagList.map((componentTag) => getComponentInfo(componentTag))
+		const components = getComponentsAllowedIn(parentTag).filter(({ tag }) => tag !== excludeTag)
 		if (!searchTerm.trim()) return components
 
 		const search = searchTerm.toLowerCase()
@@ -29,7 +31,7 @@ export const ComponentSelectorPopover = ({
 				component.label.toLowerCase().includes(search) ||
 				component.keywords.some((keyword) => keyword.includes(search)),
 		)
-	}, [searchTerm, componentTagList])
+	}, [searchTerm, parentTag, excludeTag])
 
 	const handleSelect = (type: AppNodeTag) => {
 		onSelect(type)

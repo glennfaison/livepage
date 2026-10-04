@@ -188,6 +188,7 @@ export type DataSourceInfoMap = Readonly<Record<DataSourceId, DataSourceInfo>>
 export type Props = Readonly<{
   pageBuilderMode: PageBuilderMode
   component: AppNode
+  parentTag?: AppNodeTag
   selectedComponentId: string
   selectedComponentAncestors: ReadonlyArray<AppNode>
   childClassName?: string
@@ -205,6 +206,12 @@ export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
 
 export interface Metadata {
   readonly tag: string
+  /** Whether app nodes with this tag can contain child app nodes. */
+  readonly acceptsChildren?: boolean
+  /** Parent tags that may contain this design component. */
+  readonly allowedParentTags?: ReadonlyArray<AppNodeTag>
+  /** Restricts which design-component tags this parent may contain. */
+  readonly allowedChildTags?: ReadonlyArray<AppNodeTag>
   readonly label: string
   readonly keywords: string[]
   readonly Icon: ReactNode

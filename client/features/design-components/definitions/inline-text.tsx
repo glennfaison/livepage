@@ -44,7 +44,7 @@ const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
 	const customClasses = readCustomClasses(props.component.attributes)
 	const textAppearance = readTextAppearance(props.component.attributes)
-	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, parentTag: ____, component: _____, ...filteredProps } = props
 
 	return (
 		<span className={cn("inline", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{children as React.ReactNode}</span>

@@ -1,4 +1,3 @@
-import { componentTagList } from "../primitives"
 import { cn } from "@/client/lib/utils"
 import { Plus } from "lucide-react"
 import React from "react"
@@ -8,11 +7,13 @@ import type { AppNodeTag } from "@/client/features/types"
 
 export const Divider = ({
   orientation,
+  parentTag,
   onAddComponent,
   index,
   isVisible,
 }: Readonly<{
   orientation: "horizontal" | "vertical"
+  parentTag: AppNodeTag
   onAddComponent: (type: AppNodeTag, index: number) => void
   index: number
   isVisible: boolean
@@ -35,7 +36,7 @@ export const Divider = ({
         isVisible ? "bg-primary/45" : "bg-transparent hover:bg-primary/30",
       )}
     >
-      <ComponentSelectorPopover onSelect={handleAddComponent} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={handleAddComponent} parentTag={parentTag}>
         <Button
           variant="ghost"
           size="icon"
