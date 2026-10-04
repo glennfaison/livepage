@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Deeply readonly request/response contracts for prompt assist. Zod infers
  * mutable types, so each exported type is wrapped in `DeepReadonly`, per the
- * "feature-facing types are deeply readonly" rule in docs/CONTEXT.md.
+ * "feature-facing types are deeply readonly" rule in .agents/docs/CONTEXT.md.
  */
 type DeepReadonly<T> = T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepReadonly<U>>

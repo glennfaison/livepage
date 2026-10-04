@@ -25,7 +25,7 @@ Open [http://localhost:3000](http://localhost:3000) for the landing page, or go 
 
 ### Optional: page assistant
 
-The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and rebuild (the value is inlined at build time) to turn it on; then the chat bubble (bottom-right of `/try`) appears only when you open the builder with `?prompt-assist=1` (for example `/try?prompt-assist=1`). With the flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`docs/CONTEXT.md`](./docs/CONTEXT.md#prompt-assist).
+The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and rebuild (the value is inlined at build time) to turn it on; then the chat bubble (bottom-right of `/try`) appears only when you open the builder with `?prompt-assist=1` (for example `/try?prompt-assist=1`). With the flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md#prompt-assist).
 
 ## Development
 
@@ -55,7 +55,7 @@ The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, 
 
 ## Project layout
 
-Application code is organized by runtime: browser features and UI live in [`client/`](./client/), backend features and integrations in [`server/`](./server/), and runtime-neutral models and contracts in [`shared/`](./shared/). Each runtime groups domain code in its own `features/` subfolder. The Next.js route tree stays in [`app/`](./app/); page files import client features, while API route files are thin adapters to server features. UI primitives live in [`client/components/ui/`](./client/components/ui/). [`docs/CONTEXT.md`](./docs/CONTEXT.md) has the module map and import-boundary rule.
+Application code is organized by runtime: browser features and UI live in [`client/`](./client/), backend features and integrations in [`server/`](./server/), and runtime-neutral models and contracts in [`shared/`](./shared/). Each runtime groups domain code in its own `features/` subfolder. The Next.js route tree stays in [`app/`](./app/); page files import client features, while API route files are thin adapters to server features. UI primitives live in [`client/components/ui/`](./client/components/ui/). [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md) has the module map and import-boundary rule.
 
 ## HTML exports
 
@@ -81,10 +81,10 @@ The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapp
 
 ## Documentation
 
-- [Project context](./docs/CONTEXT.md) and [architecture decisions](./docs/adr/)
-- [Code conventions](./docs/CONVENTIONS.md)
-- [Glossary](./docs/GLOSSARY.md)
-- [AGENTS.md](./AGENTS.md) and the [agent workflow](./docs/AGENT-WORKFLOW.md) for coding agents
+- [Project context](./.agents/docs/CONTEXT.md) and [architecture decisions](./.agents/docs/adr/)
+- [Code conventions](./.agents/docs/CONVENTIONS.md)
+- [Glossary](./.agents/docs/GLOSSARY.md)
+- [AGENTS.md](./AGENTS.md) and the [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) for coding agents
 
 ## Security and conduct
 

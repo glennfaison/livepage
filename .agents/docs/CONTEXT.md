@@ -6,25 +6,25 @@ LivePage is a page builder. The document being edited is a single **app state**,
 
 | Area | Responsibility |
 | --- | --- |
-| [`app/`](../app/) | Next.js App Router pages and thin API route adapters; keep these in Next's required route tree |
-| [`client/features/app-state/`](../client/features/app-state/) | State transitions, selectors, tree operations, history, and React hook |
-| [`client/features/page-builder/`](../client/features/page-builder/) | Visual studio shell: canvas orchestrator, toolbar, history, and operation hooks |
-| [`client/features/design-components/`](../client/features/design-components/) | Component definitions, preview/edit renderers, settings catalog, and editor controls |
-| [`client/features/data-sources/`](../client/features/data-sources/) | Browser data-source registry, decorators, and browser data loader |
-| [`client/features/placeholders/`](../client/features/placeholders/) | Browser runtime tokens resolved inside component strings |
-| [`client/features/serializers/`](../client/features/serializers/) | JSON, shortcode, and standalone HTML import/export operations |
-| [`client/features/serializers/schema.ts`](../client/features/serializers/schema.ts) | Runtime validation for serialized app-node trees |
-| [`client/features/shortcode-parser/`](../client/features/shortcode-parser/) | Parser used by the browser-side shortcode serializer |
-| [`client/features/templates/`](../client/features/templates/) | Template definitions, catalog, schema, data mapping, and picker UI |
-| [`client/features/command-palette/`](../client/features/command-palette/) | Command palette for the builder |
-| [`client/features/prompt-assist/`](../client/features/prompt-assist/) | Browser chat, page description, and design refinement loop |
-| [`server/features/prompt-assist/`](../server/features/prompt-assist/) | Provider orchestration and prompt-assist request handling |
-| [`shared/features/prompt-assist/contract/`](../shared/features/prompt-assist/contract/) | Runtime-neutral prompt-assist schemas, flag, and edit validation |
-| [`client/features/types.ts`](../client/features/types.ts) | Client-owned app-state and feature-facing types |
-| [`client/components/`](../client/components/) | Browser providers, theme controls, and UI primitives |
-| [`server/services/`](../server/services/) | Server-only provider clients such as Jev and OpenAI |
-| [`server/lib/`](../server/lib/) | Server-only infrastructure such as rate limiting |
-| [`client/lib/`](../client/lib/) | Browser/UI utilities such as ID generation and class-name merging |
+| [`app/`](../../app/) | Next.js App Router pages and thin API route adapters; keep these in Next's required route tree |
+| [`client/features/app-state/`](../../client/features/app-state/) | State transitions, selectors, tree operations, history, and React hook |
+| [`client/features/page-builder/`](../../client/features/page-builder/) | Visual studio shell: canvas orchestrator, toolbar, history, and operation hooks |
+| [`client/features/design-components/`](../../client/features/design-components/) | Component definitions, preview/edit renderers, settings catalog, and editor controls |
+| [`client/features/data-sources/`](../../client/features/data-sources/) | Browser data-source registry, decorators, and browser data loader |
+| [`client/features/placeholders/`](../../client/features/placeholders/) | Browser runtime tokens resolved inside component strings |
+| [`client/features/serializers/`](../../client/features/serializers/) | JSON, shortcode, and standalone HTML import/export operations |
+| [`client/features/serializers/schema.ts`](../../client/features/serializers/schema.ts) | Runtime validation for serialized app-node trees |
+| [`client/features/shortcode-parser/`](../../client/features/shortcode-parser/) | Parser used by the browser-side shortcode serializer |
+| [`client/features/templates/`](../../client/features/templates/) | Template definitions, catalog, schema, data mapping, and picker UI |
+| [`client/features/command-palette/`](../../client/features/command-palette/) | Command palette for the builder |
+| [`client/features/prompt-assist/`](../../client/features/prompt-assist/) | Browser chat, page description, and design refinement loop |
+| [`server/features/prompt-assist/`](../../server/features/prompt-assist/) | Provider orchestration and prompt-assist request handling |
+| [`shared/features/prompt-assist/contract/`](../../shared/features/prompt-assist/contract/) | Runtime-neutral prompt-assist schemas, flag, and edit validation |
+| [`client/features/types.ts`](../../client/features/types.ts) | Client-owned app-state and feature-facing types |
+| [`client/components/`](../../client/components/) | Browser providers, theme controls, and UI primitives |
+| [`server/services/`](../../server/services/) | Server-only provider clients such as Jev and OpenAI |
+| [`server/lib/`](../../server/lib/) | Server-only infrastructure such as rate limiting |
+| [`client/lib/`](../../client/lib/) | Browser/UI utilities such as ID generation and class-name merging |
 
 ```text
 app/                         # Next.js pages and API route adapters
@@ -66,7 +66,7 @@ The chat on `/try` turns "describe the page you want" into a proposal the person
 
 The design loop runs step by step from the browser because the component registry loads React components and cannot be bundled into a route handler. The server sees only the request, bounded catalog/field metadata, and page description.
 
-The feature is off unless `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` (`shared/features/prompt-assist/contract/feature-flag.ts`). One flag serves both sides: the `/api/prompt-assist` routes answer 404 when it is off, and the chat never renders, so the two cannot disagree. When on, the chat also appears only on pages opened with `?prompt-assist=1` (`client/features/prompt-assist/availability.ts`). The flag is inlined at build time, so changing it needs a rebuild. Once enabled, routes are protected by provider keys, validation, and rate limits. Both providers are optional; see [`.env.example`](../.env.example). [`server/services/jev/`](../server/services/jev/) and [`server/services/openai/`](../server/services/openai/) read secrets and import `server-only`. Route handlers use the server feature entry point, never the client barrel.
+The feature is off unless `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` (`shared/features/prompt-assist/contract/feature-flag.ts`). One flag serves both sides: the `/api/prompt-assist` routes answer 404 when it is off, and the chat never renders, so the two cannot disagree. When on, the chat also appears only on pages opened with `?prompt-assist=1` (`client/features/prompt-assist/availability.ts`). The flag is inlined at build time, so changing it needs a rebuild. Once enabled, routes are protected by provider keys, validation, and rate limits. Both providers are optional; see [`.env.example`](../../.env.example). [`server/services/jev/`](../../server/services/jev/) and [`server/services/openai/`](../../server/services/openai/) read secrets and import `server-only`. Route handlers use the server feature entry point, never the client barrel.
 
 ## Before you change things
 

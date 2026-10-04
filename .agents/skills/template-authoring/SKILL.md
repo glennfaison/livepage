@@ -10,8 +10,8 @@ This is the Template-specific form of the [agent orchestration loop](../agent-or
 Templates are typed data, not components. Each lives in
 `client/features/templates/definitions/<name>.ts` and is registered in
 `client/features/templates/registry.ts`. Read
-[the conventions](../../../docs/CONVENTIONS.md) and
-[the glossary](../../../docs/GLOSSARY.md) first, and use
+[the conventions](../../../.agents/docs/CONVENTIONS.md) and
+[the glossary](../../../.agents/docs/GLOSSARY.md) first, and use
 `client/features/templates/schema.ts` as the source of truth.
 
 ## The loop
@@ -47,11 +47,12 @@ add it instead of working around it with fragile `custom-classes`.
   `settings-catalog.ts`, with a default that leaves every existing template and
   saved page rendering unchanged.
 - Implement both the edit-mode and preview-mode rendering; the preview renderer
-  is shared with HTML export (see `docs/adr/0002-shared-preview-renderer.md`).
-- Respect the module boundaries in `docs/CONVENTIONS.md`
+  is shared with HTML export (see
+  `.agents/docs/adr/0002-shared-preview-renderer.md`).
+- Respect the module boundaries in `.agents/docs/CONVENTIONS.md`
   (`design-components` does not import from `page-builder`).
 - Add or extend a unit test for the new behavior, and update
-  `docs/GLOSSARY.md` if you introduce a domain term.
+  `.agents/docs/GLOSSARY.md` if you introduce a domain term.
 - Keep component changes in their own commit, ahead of the Template commit that
   uses them, and call them out in the PR description.
 
