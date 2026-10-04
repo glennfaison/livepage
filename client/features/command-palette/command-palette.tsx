@@ -23,7 +23,7 @@ import { toast } from "@/client/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { componentTagList, getComponentInfo } from "@/client/features/design-components"
-import type { PageTemplateDefinition } from "@/client/features/templates"
+import type { TemplateDisplaySummary } from "@/client/features/templates"
 import { cn } from "@/client/lib/utils"
 
 type PaletteCommand = Readonly<{
@@ -62,7 +62,7 @@ export const CommandPalette: React.FC<
     state: AppState
     dispatch: React.Dispatch<AppAction>
     componentOperations: Operations
-    templates: ReadonlyArray<PageTemplateDefinition>
+    templates: ReadonlyArray<TemplateDisplaySummary>
     onApplyTemplate: (templateId: string) => void
     onSaveAsJson: () => void
     onSaveAsShortcode: () => void
@@ -222,13 +222,13 @@ export const CommandPalette: React.FC<
     const templateCommands: PaletteCommand[] = templates.map((template) => ({
       id: `template-${template.id}`,
       group: "Templates",
-      label: `Apply template: ${template.metadata.name}`,
-      description: template.metadata.description,
-      keywords: [template.metadata.category, ...template.metadata.tags],
+      label: `Apply template: ${template.name}`,
+      description: template.description,
+      keywords: [template.category, ...template.tags],
       icon: <LayoutTemplate className="h-4 w-4" />,
       onSelect: () => {
         onApplyTemplate(template.id)
-        toast({ title: "Template applied", description: template.metadata.name })
+        toast({ title: "Template applied", description: template.name })
       },
     }))
 

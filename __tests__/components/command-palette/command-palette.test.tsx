@@ -4,6 +4,8 @@ import userEvent from "@testing-library/user-event"
 import "@/client/features/design-components"
 import { CommandPalette } from "@/client/features/command-palette"
 import type { AppState, Operations } from "@/client/features/app-state"
+import { describeTemplateDisplayCatalog } from "@/client/features/templates"
+import { toast } from "@/client/components/ui/use-toast"
 
 jest.mock("@/client/components/ui/use-toast", () => ({
   toast: jest.fn(),
@@ -140,5 +142,36 @@ describe("CommandPalette", () => {
     await userEvent.click(screen.getByText(/Header 1/))
 
     expect(componentOperations.setSelectedComponent).toHaveBeenCalledWith("header-1")
+  })
+
+  it("filters and applies a template from display metadata by id", async () => {
+    const onApplyTemplate = jest.fn()
+    const templates = describeTemplateDisplayCatalog()
+    render(
+      <CommandPalette
+        open
+        onOpenChange={jest.fn()}
+        state={buildState()}
+        dispatch={jest.fn()}
+        componentOperations={buildComponentOperations()}
+        templates={templates}
+        onApplyTemplate={onApplyTemplate}
+        onSaveAsJson={jest.fn()}
+        onSaveAsShortcode={jest.fn()}
+        onSaveAsHtml={jest.fn()}
+        onImportJson={jest.fn()}
+        onImportShortcode={jest.fn()}
+        onDiscardChanges={jest.fn()}
+      />,
+    )
+
+    const search = screen.getByPlaceholderText(/search actions, components, and templates/i)
+    await userEvent.type(search, "linkedin import")
+
+    const command = await screen.findByRole("button", { name: /apply template: personal cv \/ resume/i })
+    await userEvent.click(command)
+
+    expect(onApplyTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
+    expect(toast).toHaveBeenCalledWith({ title: "Template applied", description: "Personal CV / Resume" })
   })
 })

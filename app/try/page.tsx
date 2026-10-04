@@ -13,7 +13,7 @@ import {
   useHistoryOperations,
   usePageOperations,
 } from "@/client/features/page-builder"
-import { createApplyTemplateActions, getPageTemplateById, pageTemplateRegistry, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
+import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
@@ -21,6 +21,8 @@ import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } f
 import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
+
+const templateDisplayCatalog = describeTemplateDisplayCatalog()
 
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
@@ -137,7 +139,7 @@ export default function BuilderPage() {
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
               </Button>
-              <TemplateCatalogPopover templates={pageTemplateRegistry} onApplyTemplate={applyTemplate} />
+              <TemplateCatalogPopover templates={templateDisplayCatalog} onApplyTemplate={applyTemplate} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -271,7 +273,7 @@ export default function BuilderPage() {
           state={state}
           dispatch={dispatch}
           componentOperations={componentOperations}
-          templates={pageTemplateRegistry}
+          templates={templateDisplayCatalog}
           onApplyTemplate={applyTemplate}
           onSaveAsJson={saveAsJSON}
           onSaveAsShortcode={saveAsShortcode}

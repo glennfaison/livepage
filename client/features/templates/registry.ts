@@ -32,6 +32,26 @@ export function getPageTemplateById(id: string): PageTemplateDefinition | undefi
   return pageTemplateRegistry.find((template) => template.id === id)
 }
 
+export type TemplateDisplaySummary = Readonly<{
+  id: string
+  name: string
+  description: string
+  category: string
+  tags: ReadonlyArray<string>
+  thumbnail: string
+}>
+
+export function describeTemplateDisplayCatalog(): ReadonlyArray<TemplateDisplaySummary> {
+  return pageTemplateRegistry.map(({ id, metadata }) => ({
+    id,
+    name: metadata.name,
+    description: metadata.description,
+    category: metadata.category,
+    tags: metadata.tags,
+    thumbnail: metadata.thumbnail,
+  }))
+}
+
 /** The catalog-facing metadata of a template, without its page payload. */
 export type TemplateSummary = Readonly<{
   id: string

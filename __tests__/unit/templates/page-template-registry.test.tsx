@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { PreviewRenderer } from "@/client/features/design-components"
 import { appReducer, initialState } from "@/client/features/app-state"
 import type { AppNode, AppState } from "@/client/features/app-state"
-import { createApplyTemplateActions, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages, TemplateCatalogPopover } from "@/client/features/templates"
+import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, pageTemplateDefinitionSchema, pageTemplateRegistry, cloneTemplatePages, TemplateCatalogPopover } from "@/client/features/templates"
 
 describe("page template registry", () => {
   it("validates every bundled template definition and keeps ids unique", () => {
@@ -88,7 +88,7 @@ describe("page template registry", () => {
     const onApplyTemplate = jest.fn()
     render(
       <TemplateCatalogPopover
-        templates={pageTemplateRegistry}
+        templates={describeTemplateDisplayCatalog()}
         onApplyTemplate={onApplyTemplate}
       />,
     )
@@ -98,6 +98,7 @@ describe("page template registry", () => {
 
     expect(await screen.findByText("Template catalog")).toBeInTheDocument()
     expect(screen.getAllByText("Best for resume")).toHaveLength(3)
+    expect(screen.getByLabelText("Personal CV / Resume preview")).toHaveStyle({ backgroundImage: 'url("/template-thumbnails/cv-resume-personal.svg")' })
     expect(screen.getByRole("dialog")).toHaveClass("max-h-[min(80vh,48rem)]", "overflow-hidden")
     expect(screen.getByRole("region", { name: "Available templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden")
 
@@ -181,7 +182,7 @@ describe("page template registry", () => {
 
   it("filters templates by metadata", async () => {
     const user = userEvent.setup()
-    render(<TemplateCatalogPopover templates={pageTemplateRegistry} onApplyTemplate={jest.fn()} />)
+    render(<TemplateCatalogPopover templates={describeTemplateDisplayCatalog()} onApplyTemplate={jest.fn()} />)
 
     await user.click(screen.getByRole("button", { name: /templates/i }))
     const search = screen.getByRole("textbox", { name: /search templates/i })
