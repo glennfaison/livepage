@@ -83,6 +83,30 @@ describe("page template registry", () => {
     expect(screen.getAllByRole("link", { name: "Listen" })).toHaveLength(3)
   })
 
+  it("renders the neighborhood cafe page with menu and visit details", () => {
+    const template = getPageTemplateById("neighborhood-cafe-page")
+    expect(template).toBeDefined()
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PreviewRenderer
+          component={cloneTemplatePages(template!)[0]}
+          pageBuilderMode="preview"
+          selectedComponentId=""
+          selectedComponentAncestors={[]}
+        />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByText("A little ritual, right around the corner.")).toBeInTheDocument()
+    expect(screen.getByText("This season, at the counter")).toBeInTheDocument()
+    expect(screen.getByText("Maple oat latte")).toBeInTheDocument()
+    expect(screen.getByText("Pear & ginger danish")).toBeInTheDocument()
+    expect(screen.getByText("Your table is waiting.")).toBeInTheDocument()
+    expect(screen.getByAltText("Illustration of a cappuccino, fresh pastry, and a leafy café plant")).toBeInTheDocument()
+  })
+
   it("renders a readable template catalog summary with an apply action", async () => {
     const user = userEvent.setup()
     const onApplyTemplate = jest.fn()
