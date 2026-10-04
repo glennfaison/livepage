@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-label="A refrigerated truck loaded with produce leaving a farm with crates of tomatoes beside the road">
+  <rect width="800" height="640" fill="#fbe3a0"/>
+  <circle cx="640" cy="130" r="72" fill="#f5b82e" stroke="#1b1b18" stroke-width="4"/>
+  <g fill="#fffdf6" stroke="#1b1b18" stroke-width="3">
+    <ellipse cx="170" cy="120" rx="46" ry="22"/><ellipse cx="215" cy="104" rx="36" ry="22"/><ellipse cx="250" cy="122" rx="40" ry="20"/>
+    <ellipse cx="470" cy="70" rx="34" ry="16"/><ellipse cx="505" cy="60" rx="26" ry="15"/>
+  </g>
+  <path d="M0 330 Q200 245 400 320 T800 290 L800 500 L0 500Z" fill="#b7d89a" stroke="#1b1b18" stroke-width="4"/>
+  <path d="M0 410 Q250 350 500 405 T800 385 L800 500 L0 500Z" fill="#6fae5c" stroke="#1b1b18" stroke-width="4"/>
+  <g stroke="#3f8a3b" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M40 495 L150 425"/><path d="M110 495 L205 430"/><path d="M180 495 L255 438"/>
+    <path d="M520 495 L560 420"/><path d="M590 495 L620 415"/><path d="M660 495 L680 412"/><path d="M730 495 L740 410"/>
+  </g>
+  <rect x="70" y="340" width="112" height="80" fill="#d9533a" stroke="#1b1b18" stroke-width="4"/>
+  <polygon points="58,346 126,292 194,346" fill="#8c2f1e" stroke="#1b1b18" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="106" y="372" width="40" height="48" fill="#fffdf6" stroke="#1b1b18" stroke-width="3"/>
+  <path d="M106 372 L146 420 M146 372 L106 420" stroke="#1b1b18" stroke-width="3"/>
+  <rect x="0" y="495" width="800" height="90" fill="#3a3a35" stroke="#1b1b18" stroke-width="4"/>
+  <path d="M0 562 H800" stroke="#f5b82e" stroke-width="5" stroke-dasharray="36 26"/>
+  <rect x="0" y="585" width="800" height="55" fill="#2e7d32"/>
+  <g stroke="#1b1b18" stroke-width="4">
+    <rect x="150" y="455" width="70" height="40" fill="#e3b56a"/><rect x="224" y="455" width="70" height="40" fill="#e3b56a"/><rect x="187" y="415" width="70" height="40" fill="#e3b56a"/>
+  </g>
+  <g fill="#e4572e" stroke="#1b1b18" stroke-width="3">
+    <circle cx="165" cy="450" r="9"/><circle cx="185" cy="448" r="9"/><circle cx="205" cy="450" r="9"/>
+    <circle cx="239" cy="450" r="9"/><circle cx="259" cy="448" r="9"/><circle cx="279" cy="450" r="9"/>
+    <circle cx="202" cy="410" r="9"/><circle cx="222" cy="408" r="9"/><circle cx="242" cy="410" r="9"/>
+  </g>
+  <rect x="330" y="360" width="262" height="132" rx="10" fill="#fffdf6" stroke="#1b1b18" stroke-width="4"/>
+  <rect x="330" y="360" width="262" height="30" rx="10" fill="#f5b82e" stroke="#1b1b18" stroke-width="4"/>
+  <path d="M590 400 H652 L692 446 L702 492 H590Z" fill="#2e7d32" stroke="#1b1b18" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M602 412 H644 L672 446 H602Z" fill="#cfe8c9" stroke="#1b1b18" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#2e7d32" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M460 412 V470"/><path d="M432 428 L488 454"/><path d="M432 454 L488 428"/>
+  </g>
+  <circle cx="460" cy="441" r="6" fill="#2e7d32"/>
+  <g stroke="#1b1b18" stroke-width="4"><circle cx="400" cy="505" r="30" fill="#1b1b18"/><circle cx="642" cy="505" r="30" fill="#1b1b18"/></g>
+  <circle cx="400" cy="505" r="12" fill="#f4f1e8"/><circle cx="642" cy="505" r="12" fill="#f4f1e8"/>
+</svg>

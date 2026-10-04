@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="amina-diallo">
+  <rect width="200" height="200" fill="#fde68a"/>
+  <path d="M30 200c0-34 30-52 70-52s70 18 70 52z" fill="#2e7d32"/>
+  <rect x="88" y="124" width="24" height="28" rx="10" fill="#8d5524"/>
+  <ellipse cx="100" cy="94" rx="30" ry="36" fill="#8d5524"/>
+  <path d="M66 90c-6-34 12-52 34-52s40 18 34 52c-4-14-8-22-34-22s-30 8-34 22z" fill="#1c1917"/>
+  <circle cx="88" cy="96" r="2.5" fill="#1f2937"/><circle cx="112" cy="96" r="2.5" fill="#1f2937"/>
+  <path d="M91 110q9 7 18 0" fill="none" stroke="#5b2a14" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

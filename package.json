@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build:html-runtime": "node scripts/build-html-runtime.mjs",
+    "import:zip-branch": "node scripts/import-zip-branch.mjs",
     "predev": "npm run build:html-runtime",
     "dev": "next dev",
     "prebuild": "npm run build:html-runtime",
