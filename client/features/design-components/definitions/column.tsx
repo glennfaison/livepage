@@ -29,7 +29,7 @@ const attributesMap = createAttributeMap(attributes)
 
 const Icon = <AlignVerticalSpaceBetween className="h-4 w-4 bg-gray-200 rounded" />
 
-const _PreviewModeComponent = (props: ViewModeProps) => {
+const PreviewModeComponent = (props: ViewModeProps) => {
 	const { component } = props
 	const { "custom-classes": _, ...attributes } = component.attributes
 	const { childClassName } = props
@@ -84,7 +84,7 @@ const EmptyColumnContent = ({
 	)
 }
 
-const _EditModeComponent = (props: EditModeProps) => {
+const EditModeComponent = (props: EditModeProps) => {
 	const { component } = props
 	const { "custom-classes": _, ...attributes } = component.attributes
 	const { childClassName, onMouseMove, onMouseLeave } = props
@@ -173,6 +173,6 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon,
-	PreviewModeComponent: withDataSource(_PreviewModeComponent as React.ComponentType<Props>),
-	EditModeComponent: withEditorControls(withDataSource(_EditModeComponent as React.ComponentType<Props>)),
+	PreviewModeComponent: withDataSource(PreviewModeComponent as React.ComponentType<Props>),
+	EditModeComponent: withEditorControls(withDataSource(EditModeComponent as React.ComponentType<Props>)),
 } as const satisfies Metadata

@@ -1,5 +1,5 @@
 import type React from "react"
-import type { AppNode, Props, SettingsField } from "@/client/features/types"
+import type { AppNode, SettingsField } from "@/client/features/types"
 
 type AttributeMap = Readonly<Record<ReadonlyArray<SettingsField>[number]["id"], ReadonlyArray<SettingsField>[number]>>
 
