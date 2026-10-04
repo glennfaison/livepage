@@ -14,7 +14,7 @@ const defaultChildren = [
 	mauris non mollis. Pellentesque sem purus, sagittis sed odio commodo, faucibus
 	vehicula elit. Mauris vestibulum euismod mi, feugiat accumsan mauris imperdiet
 	eget. Ut sit amet dolor mattis, consectetur est id, placerat tellus. Proin nisl
-	odio, elementum sed porttitor ut, tempus non neque. In hac habitasse platea
+	o dio, elementum sed porttitor ut, tempus non neque. In hac habitasse platea
 	dictumst. Proin at lorem lacinia, ullamcorper lorem eget, fringilla massa.
 	Suspendisse consequat, lectus sit amet congue tincidunt, neque felis
 	pellentesque nulla, ac pharetra lectus elit eget neque. Sed feugiat tincidunt
@@ -51,7 +51,7 @@ const Component = (props: Props) => {
 	const renderedChildren = children.length ? children : (attributesMap.content.defaultValue as readonly string[])
 	const customClasses = readCustomClasses(props.component.attributes)
 	const textAppearance = readTextAppearance(props.component.attributes)
-	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, parentTag: ____, component: _____, ...filteredProps } = props
 
 	return <p className={cn(renderedChildren.length > 0 && "py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
 }

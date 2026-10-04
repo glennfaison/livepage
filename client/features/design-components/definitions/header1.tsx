@@ -3,17 +3,17 @@ import { Heading } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Props, SettingsField, Metadata } from "@/client/features/types"
+import type { Props, Metadata, SettingsField } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
+const defaultChildren = ["Heading 1"] as const
+
 const tag = "header1" as const
 
-const label = "Header 1"
+const label = "Heading 1"
 
-const keywords = ["h1", "title", "header", "heading", "large"]
-
-const defaultChildren = ["Header 1"] as const
+const keywords = ["h1", "heading", "title", "header"]
 
 const attributes: SettingsField[] = [
 	createIdAttribute(),
@@ -21,8 +21,8 @@ const attributes: SettingsField[] = [
 	createTextAttribute({
 		id: "content",
 		label: "Content",
-		placeholder: "Enter header text",
-		defaultValue: "",
+		placeholder: "Enter heading text",
+		defaultValue: defaultChildren[0],
 		getValue: (component) => readTextChildren(component),
 		setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
 	}),
@@ -37,7 +37,7 @@ const Component = (props: Props) => {
 	const children = readTextChildren(props.component) || attributesMap.content.defaultValue
 	const customClasses = readCustomClasses(props.component.attributes)
 	const textAppearance = readTextAppearance(props.component.attributes)
-	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, ...filteredProps } = props
+	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, parentTag: ____, component: _____, ...filteredProps } = props
 
 	return (
 		<h1 className={cn("text-4xl font-bold py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{children as React.ReactNode}</h1>
