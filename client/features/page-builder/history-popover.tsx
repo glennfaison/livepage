@@ -185,7 +185,10 @@ export const HistoryPopover: React.FC<Readonly<{
             <Button
               variant="ghost"
               className="flex-1 rounded-none rounded-br-lg bg-foreground hover:bg-foreground/90 text-background h-12"
-              onClick={() => onAccept(currentHistoryIndex)}
+              onClick={() => {
+                onAccept(currentHistoryIndex)
+                onOpenChange(false)
+              }}
             >
               <Check className="h-4 w-4 mr-2" />
               Accept
