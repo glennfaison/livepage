@@ -83,6 +83,22 @@ run `npx playwright install chromium` once after `npm install`; then run
 
 The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
 
+### Branch naming
+
+Branches must follow gitflow naming. CI fails on any other name.
+
+| Type | Pattern | Example |
+| --- | --- | --- |
+| main | `main` | `main` |
+| develop | `develop` | `develop` |
+| feature | `feature/<topic>` | `feature/login-flow` |
+| release | `release/<version>` | `release/1.4.0` |
+| hotfix | `hotfix/<topic>` | `hotfix/crash-on-start` |
+| support | `support/<version-line>` | `support/1.x` |
+| bugfix | `bugfix/<topic>` | `bugfix/null-deref` |
+
+Topic and version segments must be lowercase (letters, digits, hyphens; versions may use dots). The check lives in `.github/workflows/branch-name.yml`. Rejecting invalid names at push time via a GitHub repository ruleset is recommended for full enforcement and is configured in the repository settings by a maintainer.
+
 ## Project layout
 
 Application code is organized by runtime: browser features and UI live in [`client/`](./client/), backend features and integrations in [`server/`](./server/), and runtime-neutral models and contracts in [`shared/`](./shared/). Each runtime groups domain code in its own `features/` subfolder. The Next.js route tree stays in [`app/`](./app/); page files import client features, while API route files are thin adapters to server features. UI primitives live in [`client/components/ui/`](./client/components/ui/). [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md) has the module map and import-boundary rule.
