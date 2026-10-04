@@ -8,6 +8,7 @@ import type { EditModeProps } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import React from "react";
 import { getComponentInfo } from "../../registry-store";
+import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "../shared/editor-chrome";
 
 function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
@@ -45,8 +46,9 @@ function AncestorTags(props: EditModeProps) {
         return (
           <div key={component.attributes.id}
             className={cn(
-              "relative flex border p-1 px-2 shadow-sm cursor-pointer text-right justify-end text-xs",
-              "bg-background opacity-95 text-muted-foreground",
+              "relative flex cursor-pointer justify-end p-1 px-2 text-right text-xs",
+              editorChromeSurfaceClassName,
+              "text-muted-foreground",
             )}
             style={{ width: `${100 + 10 * idx}%` }}
             onClick={(e) => selectAncestor(e, component.attributes.id)}
@@ -71,13 +73,13 @@ function EditorControls(props: EditModeProps) {
   return (
     <div className="absolute -top-8 right-0">
       <AncestorTags {...props} />
-      <div className="flex gap-1 bg-background border p-1 shadow-sm">
-        <span className="text-xs font-medium px-2 flex items-center">{label}</span>
+      <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)}>
+        <span className="flex items-center px-2 text-xs font-medium text-popover-foreground">{label}</span>
         <SettingsPopover component={component}>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 cursor-pointer"
+            className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
             aria-label="Settings"
             title="Settings"
             onClick={(e) => e.stopPropagation()}
@@ -89,7 +91,7 @@ function EditorControls(props: EditModeProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 cursor-pointer"
+            className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
             aria-label="Replace"
             title="Replace"
             onClick={(e) => e.stopPropagation()}
@@ -100,7 +102,7 @@ function EditorControls(props: EditModeProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 cursor-pointer"
+          className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
           aria-label="Duplicate"
           title="Duplicate"
           onClick={(e) => {
@@ -113,7 +115,7 @@ function EditorControls(props: EditModeProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 cursor-pointer"
+          className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
           aria-label="Delete"
           title="Delete"
           onClick={(e) => {
@@ -126,7 +128,7 @@ function EditorControls(props: EditModeProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 cursor-grab"
+          className={cn("h-6 w-6 cursor-grab", editorChromeButtonClassName)}
           aria-label="Move"
           title="Move"
         >

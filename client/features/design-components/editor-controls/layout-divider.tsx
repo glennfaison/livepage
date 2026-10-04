@@ -1,4 +1,5 @@
 import { cn } from "@/client/lib/utils"
+import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "./shared/editor-chrome"
 import { Plus } from "lucide-react"
 import React from "react"
 import { Button } from "@/client/components/ui/button"
@@ -41,8 +42,9 @@ export const Divider = ({
           variant="ghost"
           size="icon"
           className={cn(
-            "relative z-20 size-7 rounded-full border bg-background shadow-sm transition-transform hover:scale-110",
-            "text-primary hover:bg-primary hover:text-primary-foreground",
+            "relative z-20 size-7 rounded-full transition-transform hover:scale-110",
+            editorChromeSurfaceClassName,
+            editorChromeButtonClassName,
           )}
           onClick={(e) => {
             e.stopPropagation()
