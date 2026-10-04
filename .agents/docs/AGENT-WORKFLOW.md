@@ -9,10 +9,6 @@ How to scope, verify, and finish a task in this repository. For what the code sh
 - Do not create an ADR or a planning document for a focused task unless the user explicitly asks for one. A new abstraction is welcome when it generalizes existing special cases or deepens a module, as [the conventions](./CONVENTIONS.md) describe.
 - Treat explicit layout and DOM-structure requirements as binding. Preserve the existing decorator structure unless a broader redesign is requested. For example, do not replace a requested `display: contents` wrapper with a semantic wrapper or a new overlay architecture, and keep editor controls simple.
 
-## Branch names
-
-Use gitflow branch names only (`feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, `support/<line>`, or `main` / `develop`). Topic and version segments are lowercase kebab-case. CI rejects other names; see [AGENTS.md](../../AGENTS.md#branch-naming-gitflow).
-
 ## Verify
 
 - Run the narrowest relevant Jest selector first, for example `npm test -- --runInBand path/to/test.test.tsx`, then broader checks.
@@ -25,6 +21,7 @@ Use gitflow branch names only (`feature/<topic>`, `bugfix/<topic>`, `hotfix/<top
 ## Finish
 
 - Ship Template changes in a pull request, never straight to `main`.
+- Open that pull request from a gitflow branch. Allowed names are `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, `support/<version-line>`, `develop`, and `main`. See [branch names](./BRANCH-NAMES.md). A non-matching push is rejected by GitHub and fails CI.
 - Check whether the change introduces or renames entities, relationships, or domain terms. If it does, update [the glossary](./GLOSSARY.md) before finishing.
 
 ## Orchestration

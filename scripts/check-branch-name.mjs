@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process"
 
 const GITFLOW_BRANCH_PATTERN =
   /^(?:main|develop|(?:feature|hotfix|bugfix)\/[a-z0-9]+(?:-[a-z0-9]+)*|release\/\d+(?:\.\d+)*|support\/\d+(?:\.\d+)*(?:\.x|x)?)$/
@@ -38,9 +39,7 @@ export function branchNameError(branchName) {
 
 export function normalizeBranchRef(ref) {
   if (!ref) return ""
-  return ref
-    .replace(/^refs\/heads\//, "")
-    .replace(/^refs\/remotes\/origin\//, "")
+  return ref.replace(/^refs\/heads\//, "").replace(/^refs\/remotes\/origin\//, "")
 }
 
 function assertBranchName(branchName) {
@@ -77,14 +76,10 @@ function selfTest() {
   ]
 
   for (const name of accepted) {
-    if (!isGitflowBranchName(name)) {
-      throw new Error(`Expected ${name} to be accepted.`)
-    }
+    if (!isGitflowBranchName(name)) throw new Error(`Expected ${name} to be accepted.`)
   }
   for (const name of rejected) {
-    if (isGitflowBranchName(name)) {
-      throw new Error(`Expected ${name} to be rejected.`)
-    }
+    if (isGitflowBranchName(name)) throw new Error(`Expected ${name} to be rejected.`)
   }
   if (!branchNameError("fix/oops").includes("feature/<topic>")) {
     throw new Error("Rejection message must list the expected patterns.")
@@ -93,15 +88,10 @@ function selfTest() {
 }
 
 function readBranchFromGit() {
-  const { spawnSync } = requireChildProcess()
   const result = spawnSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { encoding: "utf8" })
   if (result.status !== 0) return ""
   const name = result.stdout.trim()
   return name === "HEAD" ? "" : name
-}
-
-function requireChildProcess() {
-  return require("node:child_process")
 }
 
 function currentBranchName(argv) {
@@ -124,8 +114,9 @@ function main() {
     console.log("Usage: node scripts/check-branch-name.mjs [--branch <name>] [--self-test]")
     return
   }
-  assertBranchName(normalizeBranchRef(currentBranchName(argv)))
-  console.log(`Branch name ${normalizeBranchRef(currentBranchName(argv))} matches gitflow.`)
+  const branchName = normalizeBranchRef(currentBranchName(argv))
+  assertBranchName(branchName)
+  console.log(`Branch name ${branchName} matches gitflow.`)
 }
 
 const isDirectRun = process.argv[1] && process.argv[1].endsWith("check-branch-name.mjs")
