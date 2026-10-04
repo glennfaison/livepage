@@ -35,9 +35,9 @@ export function TemplateCatalogPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Templates">
           <LayoutTemplate className="h-4 w-4" />
-          Templates
+          <span className="hidden sm:inline">Templates</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[min(52rem,calc(100vw-2rem))] max-h-[min(80vh,48rem)] overflow-hidden p-4">

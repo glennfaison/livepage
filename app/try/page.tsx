@@ -119,22 +119,23 @@ export default function BuilderPage() {
 
   return (
     <ComponentOperationsContext.Provider value={componentOperations}>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
         <header className="border-b px-2">
-          <div className="container flex items-center justify-between py-4 mx-auto">
-            <div className="flex items-center gap-2">
-              <Link href="/" className="flex items-center gap-2">
-                <Layers className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-bold">LivePage</h1>
+          <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-2 py-3 sm:py-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link href="/" className="flex min-w-0 items-center gap-2">
+                <Layers className="h-6 w-6 shrink-0 text-primary" />
+                <h1 className="truncate text-xl font-bold">LivePage</h1>
               </Link>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-2 px-2 sm:px-3"
                 onClick={() => setCommandPaletteOpen(true)}
                 title="Command palette (⌘K)"
+                aria-label="Open command palette"
               >
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
@@ -142,9 +143,10 @@ export default function BuilderPage() {
               <TemplateCatalogPopover templates={templateDisplayCatalog} onApplyTemplate={applyTemplate} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Upload className="h-4 w-4" /> Import
-                    <ChevronDown className="h-3 w-3" />
+                  <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Import page">
+                    <Upload className="h-4 w-4" />
+                    <span className="hidden sm:inline">Import</span>
+                    <ChevronDown className="hidden h-3 w-3 sm:block" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -175,9 +177,10 @@ export default function BuilderPage() {
 
               <DropdownMenu open={saveDropdownOpen} onOpenChange={setSaveDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Download className="h-4 w-4" /> Export
-                    <ChevronDown className="h-3 w-3" />
+                  <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Export page">
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export</span>
+                    <ChevronDown className="hidden h-3 w-3 sm:block" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -198,7 +201,9 @@ export default function BuilderPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-2 px-2 sm:px-3"
+                aria-label={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
+                title={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
                 onClick={() => {
                   const nextMode = pageBuilderMode === "edit" ? "preview" : "edit"
                   dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: nextMode })
@@ -207,7 +212,8 @@ export default function BuilderPage() {
                   window.history.replaceState(window.history.state, "", url)
                 }}
               >
-                {pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}
+                {pageBuilderMode === "edit" ? <MonitorPlay className="h-4 w-4 sm:hidden" /> : <Pencil className="h-4 w-4 sm:hidden" />}
+                <span className="hidden sm:inline">{pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}</span>
               </Button>
               <ThemeToggle />
             </div>
@@ -216,25 +222,25 @@ export default function BuilderPage() {
 
         <main className="flex-1 overflow-hidden flex flex-col">
           <div className="border-b bg-background">
-            <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-              <div className="flex min-w-0 items-center gap-3">
+            <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <div className="flex min-w-0 flex-1 basis-full items-center gap-3 sm:basis-0">
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                   <Pencil className="size-4" aria-hidden="true" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Editing page</p>
                   <Input
                     key={currentPage?.attributes.id}
                     defaultValue={currentPage?.attributes.title ?? ""}
                     onChange={updatePageTitle}
                     aria-label="Page title"
-                    className="h-8 w-full max-w-sm border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
+                    className="h-8 w-full min-w-0 max-w-full border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0 sm:max-w-sm"
                     id="page-title"
                     placeholder="Page Title"
                   />
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
                   {pageBuilderMode === "edit" ? <Pencil className="size-3.5" aria-hidden="true" /> : <MonitorPlay className="size-3.5" aria-hidden="true" />}
                   {pageBuilderMode === "edit" ? "Edit mode" : "Preview mode"}

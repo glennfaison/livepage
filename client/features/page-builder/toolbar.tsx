@@ -9,6 +9,29 @@ import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 
+const COMPACT_TOOLBAR_BREAKPOINT = 640
+const TOOLBAR_VIEWPORT_MARGIN = 8
+
+export function clampToolbarCenter(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  viewportWidth: number,
+  viewportHeight: number,
+) {
+  const halfWidth = Math.min(width, viewportWidth - TOOLBAR_VIEWPORT_MARGIN * 2) / 2
+  const halfHeight = Math.min(height, viewportHeight - TOOLBAR_VIEWPORT_MARGIN * 2) / 2
+  const minX = TOOLBAR_VIEWPORT_MARGIN + halfWidth
+  const maxX = Math.max(minX, viewportWidth - TOOLBAR_VIEWPORT_MARGIN - halfWidth)
+  const minY = TOOLBAR_VIEWPORT_MARGIN + halfHeight
+  const maxY = Math.max(minY, viewportHeight - TOOLBAR_VIEWPORT_MARGIN - halfHeight)
+  return {
+    x: Math.min(Math.max(x, minX), maxX),
+    y: Math.min(Math.max(y, minY), maxY),
+  }
+}
+
 export const Toolbar: React.FC<Readonly<{
   toolbarMinimized: boolean
   setToolbarMinimized: (minimized: boolean) => void
@@ -43,22 +66,40 @@ export const Toolbar: React.FC<Readonly<{
   const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
-
-  // Initialize position to right center
-  useEffect(() => {
-    const updatePosition = () => {
-      if (typeof window !== "undefined") {
-        setPosition({
-          x: window.innerWidth - 48,
-          y: window.innerHeight / 2, // Vertically centered
-        })
-      }
+  const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
+    if (typeof window === "undefined") return
+    const rect = toolbarRef.current?.getBoundingClientRect()
+    const width = rect?.width ?? 48
+    const height = rect?.height ?? 48
+    const fallback = {
+      x: window.innerWidth - TOOLBAR_VIEWPORT_MARGIN - width / 2,
+      y: window.innerHeight / 2,
     }
-
-    updatePosition()
-    window.addEventListener("resize", updatePosition)
-    return () => window.removeEventListener("resize", updatePosition)
+    setPosition(clampToolbarCenter(
+      preferred?.x ?? fallback.x,
+      preferred?.y ?? fallback.y,
+      width,
+      height,
+      window.innerWidth,
+      window.innerHeight,
+    ))
   }, [])
+
+  // Keep the floating toolbar inside the viewport. Narrow screens start compact
+  // so the expanded control strip cannot run off the right or bottom edge.
+  useEffect(() => {
+    if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) {
+      setToolbarMinimized(true)
+      setToolbarLayout("vertical")
+    }
+    dockPosition()
+    const handleResize = () => {
+      if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) setToolbarLayout("vertical")
+      dockPosition()
+    }
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [dockPosition, setToolbarMinimized])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const gripElement = e.currentTarget as HTMLElement
@@ -76,10 +117,15 @@ export const Toolbar: React.FC<Readonly<{
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (isDragging && toolbarRef.current) {
-        setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
-        })
+        const rect = toolbarRef.current.getBoundingClientRect()
+        setPosition(clampToolbarCenter(
+          e.clientX - dragOffset.x,
+          e.clientY - dragOffset.y,
+          rect.width,
+          rect.height,
+          window.innerWidth,
+          window.innerHeight,
+        ))
       }
     },
     [isDragging, dragOffset.x, dragOffset.y],
@@ -106,9 +152,10 @@ export const Toolbar: React.FC<Readonly<{
     <div
       ref={toolbarRef}
       className={cn(
-        "fixed bg-background/50 backdrop-blur-sm shadow-lg border rounded-lg p-2 z-50 transition-all duration-300 select-none",
+        "fixed max-h-[calc(100dvh-1rem)] max-w-[calc(100vw-1rem)] overflow-auto bg-background/50 backdrop-blur-sm shadow-lg border rounded-lg p-2 z-50 select-none",
         toolbarMinimized && "p-1 w-auto",
         isDragging && "cursor-grabbing",
+        !isDragging && "transition-all duration-300",
       )}
       style={{
         left: `${position.x}px`,
