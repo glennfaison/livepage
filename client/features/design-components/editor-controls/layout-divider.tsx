@@ -59,81 +59,87 @@ export const Divider = ({
 }
 
 
+type DividerAxis = "v" | "h"
+
+const dividerKey = (axis: DividerAxis, index: number) => `${axis}${index}`
+
+/**
+ * Divider visibility is keyed per edge. Show and hide each bump a generation so a
+ * hide that already queued a state update cannot clobber a later show (the race
+ * that left insertion dividers stuck visible or stuck invisible).
+ */
 export const useDividerVisibility = () => {
-  const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(new Set())
-  const [visibleHorizontalDividers, setVisibleHorizontalDividers] = React.useState<Set<number>>(new Set())
-  const hideTimeoutRef = React.useRef<Record<string, NodeJS.Timeout>>({})
-  const visibilityTimeoutMS = 300
+  const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(() => new Set())
+  const [visibleHorizontalDividers, setVisibleHorizontalDividers] = React.useState<Set<number>>(() => new Set())
+  const generationRef = React.useRef<Record<string, number>>({})
+  const timeoutRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
-  const showVerticalDivider = (index: number) => {
-    if (hideTimeoutRef.current[`v${index}`]) {
-      clearTimeout(hideTimeoutRef.current[`v${index}`])
-      delete hideTimeoutRef.current[`v${index}`]
+  const clearTimer = React.useCallback((key: string) => {
+    const pending = timeoutRef.current[key]
+    if (pending) {
+      clearTimeout(pending)
+      delete timeoutRef.current[key]
     }
-    setVisibleVerticalDividers((prev) => new Set(prev).add(index))
-  }
+  }, [])
 
-  const showHorizontalDivider = (index: number) => {
-    if (hideTimeoutRef.current[`h${index}`]) {
-      clearTimeout(hideTimeoutRef.current[`h${index}`])
-      delete hideTimeoutRef.current[`h${index}`]
+  const bump = React.useCallback((key: string) => {
+    clearTimer(key)
+    const next = (generationRef.current[key] ?? 0) + 1
+    generationRef.current[key] = next
+    return next
+  }, [clearTimer])
+
+  const setVisible = React.useCallback((axis: DividerAxis, index: number, visible: boolean, generation: number) => {
+    const key = dividerKey(axis, index)
+    const setter = axis === "v" ? setVisibleVerticalDividers : setVisibleHorizontalDividers
+    setter((prev) => {
+      if (generationRef.current[key] !== generation) return prev
+      if (prev.has(index) === visible) return prev
+      const next = new Set(prev)
+      if (visible) next.add(index)
+      else next.delete(index)
+      return next
+    })
+  }, [])
+
+  const showDivider = React.useCallback((axis: DividerAxis, index: number) => {
+    const generation = bump(dividerKey(axis, index))
+    setVisible(axis, index, true, generation)
+  }, [bump, setVisible])
+
+  const hideDividerNow = React.useCallback((axis: DividerAxis, index: number) => {
+    const generation = bump(dividerKey(axis, index))
+    setVisible(axis, index, false, generation)
+  }, [bump, setVisible])
+
+  React.useEffect(() => {
+    const timeouts = timeoutRef.current
+    return () => {
+      for (const pending of Object.values(timeouts)) clearTimeout(pending)
     }
-    setVisibleHorizontalDividers((prev) => new Set(prev).add(index))
-  }
+  }, [])
 
-  const hideVerticalDivider = (index: number) => {
-    hideTimeoutRef.current[`v${index}`] = setTimeout(() => {
-      setVisibleVerticalDividers((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(index)
-        return newSet
-      })
-    }, visibilityTimeoutMS)
-  }
-
-  const hideHorizontalDivider = (index: number) => {
-    hideTimeoutRef.current[`h${index}`] = setTimeout(() => {
-      setVisibleHorizontalDividers((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(index)
-        return newSet
-      })
-    }, visibilityTimeoutMS)
+  const syncEdge = (axis: DividerAxis, index: number, near: boolean) => {
+    if (near) showDivider(axis, index)
+    else hideDividerNow(axis, index)
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
-    const width = rect.width
     const y = e.clientY - rect.top
-    const height = rect.height
 
-    if (x < width * 0.3) {
-      const leftDividerIndex = childIndex * 2
-      showVerticalDivider(leftDividerIndex)
-    } else if (x > width * 0.7) {
-      const rightDividerIndex = (childIndex + 1) * 2
-      showVerticalDivider(rightDividerIndex)
-    }
-
-    if (y < height * 0.3) {
-      const topDividerIndex = childIndex * 2
-      showHorizontalDivider(topDividerIndex)
-    } else if (y > height * 0.7) {
-      const bottomDividerIndex = (childIndex + 1) * 2
-      showHorizontalDivider(bottomDividerIndex)
-    }
+    syncEdge("v", childIndex * 2, x < rect.width * 0.3)
+    syncEdge("v", (childIndex + 1) * 2, x > rect.width * 0.7)
+    syncEdge("h", childIndex * 2, y < rect.height * 0.3)
+    syncEdge("h", (childIndex + 1) * 2, y > rect.height * 0.7)
   }
 
   const handleChildMouseLeave = (childIndex: number) => {
-    const leftDividerIndex = 2 * childIndex
-    const rightDividerIndex = 2 * childIndex + 2
-    const topDividerIndex = 2 * childIndex
-    const bottomDividerIndex = 2 * childIndex + 2
-    hideVerticalDivider(leftDividerIndex)
-    hideVerticalDivider(rightDividerIndex)
-    hideHorizontalDivider(topDividerIndex)
-    hideHorizontalDivider(bottomDividerIndex)
+    hideDividerNow("v", childIndex * 2)
+    hideDividerNow("v", (childIndex + 1) * 2)
+    hideDividerNow("h", childIndex * 2)
+    hideDividerNow("h", (childIndex + 1) * 2)
   }
 
   return {
