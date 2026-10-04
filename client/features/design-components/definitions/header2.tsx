@@ -3,17 +3,17 @@ import { Heading } from "lucide-react"
 import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Props, Metadata, SettingsField } from "@/client/features/types"
+import type { Props, SettingsField, Metadata } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
-const defaultChildren = ["Heading 2"] as const
-
 const tag = "header2" as const
 
-const label = "Heading 2"
+const label = "Header 2"
 
-const keywords = ["h2", "heading", "title", "header", "subtitle"]
+const keywords = ["h2", "title", "subtitle", "header", "heading", "medium"]
+
+const defaultChildren = ["Header 2"] as const
 
 const attributes: SettingsField[] = [
 	createIdAttribute(),
@@ -21,8 +21,8 @@ const attributes: SettingsField[] = [
 	createTextAttribute({
 		id: "content",
 		label: "Content",
-		placeholder: "Enter heading text",
-		defaultValue: defaultChildren[0],
+		placeholder: "Enter header text",
+		defaultValue: "",
 		getValue: (component) => readTextChildren(component),
 		setValue: (component, value) => ({ ...component, children: [value] } as Props["component"]),
 	}),
