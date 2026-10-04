@@ -1,7 +1,7 @@
 "use client"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { componentTagList, getComponentInfo } from "@/client/features/design-components"
+import { componentMetadataByTag, getComponentInfo } from "@/client/features/design-components"
 import { ComponentSelectorPopover } from "@/client/features/page-builder"
 import { Button } from "@/client/components/ui/button"
 
@@ -10,7 +10,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("renders the trigger element", () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -20,7 +20,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("opens the popover when trigger is clicked", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -34,7 +34,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("displays all components in the grid", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -50,7 +50,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("filters components based on search term", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -69,7 +69,7 @@ describe("ComponentSelectorPopover", () => {
 
   it("calls onSelect when a component is clicked", async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -82,7 +82,7 @@ describe("ComponentSelectorPopover", () => {
 
   it('shows "No components found" when search has no results', async () => {
     render(
-      <ComponentSelectorPopover onSelect={mockOnSelect} componentTagList={componentTagList}>
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
         <Button data-testid="trigger-button">Add Component</Button>
       </ComponentSelectorPopover>,
     )
@@ -99,5 +99,45 @@ describe("ComponentSelectorPopover", () => {
 
   it("exposes registered component metadata from the public API", () => {
     expect(getComponentInfo("header1").label).toBe("Header 1")
+  })
+
+  it("exposes registered metadata in a map keyed by its tag", () => {
+    for (const [tag, metadata] of Object.entries(componentMetadataByTag)) {
+      expect(metadata.tag).toBe(tag)
+    }
+  })
+
+  it("allows pages only inside future site and directory containers", () => {
+    expect(componentMetadataByTag.page.allowedParentTags).toEqual(["site", "directory"])
+  })
+
+  it("does not offer pages as children of pages", async () => {
+    render(
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page">
+        <Button data-testid="trigger-button">Add Component</Button>
+      </ComponentSelectorPopover>,
+    )
+
+    await userEvent.click(screen.getByTestId("trigger-button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Select Component")).toBeInTheDocument()
+      expect(screen.queryByText("Page")).not.toBeInTheDocument()
+    })
+  })
+
+  it("excludes the current design component from replacement choices", async () => {
+    render(
+      <ComponentSelectorPopover onSelect={mockOnSelect} parentTag="page" excludeTag="header1">
+        <Button data-testid="trigger-button">Replace Component</Button>
+      </ComponentSelectorPopover>,
+    )
+
+    await userEvent.click(screen.getByTestId("trigger-button"))
+
+    await waitFor(() => {
+      expect(screen.queryByText("Header 1")).not.toBeInTheDocument()
+      expect(screen.getByText("Paragraph")).toBeInTheDocument()
+    })
   })
 })

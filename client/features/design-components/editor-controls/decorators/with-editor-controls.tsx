@@ -85,7 +85,7 @@ function EditorControls(props: EditModeProps) {
             <SettingsIcon className="h-4 w-4" />
           </Button>
         </SettingsPopover>
-        <ReplaceWithPopover currentComponent={component} onReplace={handleReplace}>
+        <ReplaceWithPopover currentComponent={component} parentTag={props.parentTag} onReplace={handleReplace}>
           <Button
             variant="ghost"
             size="icon"

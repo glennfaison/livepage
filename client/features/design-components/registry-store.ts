@@ -3,12 +3,24 @@
 // resolve component metadata by tag without creating an import cycle through
 // `registry.ts` (which is the only module that imports every definition to
 // populate this store).
-import type { Props, Metadata, AppNode } from "@/client/features/types"
+import type { AppNodeTag, Props, Metadata, AppNode } from "@/client/features/types"
 
-const componentMap: Record<string, Metadata> = {}
+const mutableComponentMetadataByTag: Record<string, Metadata> = {}
+export const componentMetadataByTag: Readonly<Record<string, Metadata>> = mutableComponentMetadataByTag
 
 export function registerComponent(metadata: Metadata): void {
-  componentMap[metadata.tag] = metadata
+  mutableComponentMetadataByTag[metadata.tag] = metadata
+}
+
+export function getComponentsAllowedIn(parentTag?: AppNodeTag): ReadonlyArray<Metadata> {
+  const parentMetadata = parentTag ? componentMetadataByTag[parentTag] : undefined
+  if (!parentMetadata?.acceptsChildren) return []
+
+  return Object.values(componentMetadataByTag).filter((childMetadata) => {
+    if (parentMetadata.allowedChildTags && !parentMetadata.allowedChildTags.includes(childMetadata.tag)) return false
+    return childMetadata.allowedParentTags === undefined ||
+      (parentTag !== undefined && childMetadata.allowedParentTags.includes(parentTag))
+  })
 }
 
 function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unknown>> {
@@ -27,7 +39,7 @@ function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unkno
 }
 
 export const getComponentInfo = function (tag: string): Metadata {
-  const metadata = componentMap[tag]
+  const metadata = componentMetadataByTag[tag]
   if (!metadata) throw new Error(`Unknown component tag: ${tag}`)
   return {
     ...metadata,

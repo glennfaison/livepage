@@ -7,7 +7,7 @@ import { useComponentOperationsContext } from "../editor-controls/component-oper
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
-import { componentTagList, createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/client/features/design-components/primitives"
 import { getComponentInfo } from "../registry-store"
 import { withDataSource } from "@/client/features/data-sources"
 
@@ -86,6 +86,7 @@ const _PreviewModeComponent = (props: ViewModeProps) => {
 				{...props}
 				key={`${child.attributes.id}-${childIndex}`}
 				component={child}
+				parentTag={component.tag}
 				childClassName={slotClassName}
 			/>
 		)
@@ -113,7 +114,7 @@ const EmptyColumnContent = ({
 }>) => {
 	return (
 		<div className="flex min-h-24 w-full flex-col items-center justify-center gap-2 rounded-sm bg-muted/30 px-4 text-muted-foreground">
-			<ComponentSelectorPopover onSelect={onAddChildComponent} componentTagList={componentTagList}>
+			<ComponentSelectorPopover onSelect={onAddChildComponent} parentTag={tag}>
 				<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
 					<Plus className="size-3.5" />
 					<span className="text-xs font-medium">Add component</span>
@@ -159,6 +160,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 				{...props}
 				key={`${child.attributes.id}-${childIndex}`}
 				component={child}
+				parentTag={component.tag}
 				childClassName={slotClassName}
 				onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 				onMouseLeave={() => handleChildMouseLeave(childIndex)}
@@ -171,6 +173,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 			<Divider
 				key={`divider-${index}`}
 				orientation="vertical"
+				parentTag={component.tag}
 				onAddComponent={handleAddAtIndex}
 				index={index}
 				isVisible={visibleVerticalDividers.has(index)} />
@@ -205,6 +208,7 @@ const _EditModeComponent = (props: EditModeProps) => {
 
 export const componentMetadata = {
 	tag,
+	acceptsChildren: true,
 	htmlTag: "div",
 	htmlClassName: "row",
 	label,

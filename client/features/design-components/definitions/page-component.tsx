@@ -45,7 +45,7 @@ function _PreviewModeComponent(props: ViewModeProps) {
 					if (typeof component === "string") return component
 
 					const Child = getComponentInfo(component.tag).PreviewModeComponent
-					return <Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />
+					return <Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} parentTag={currentPage.tag} />
 				})}
 			</div>
 		</section>
@@ -81,7 +81,7 @@ function _EditModeComponent(props: EditModeProps) {
 
 					const meta = getComponentInfo(component.tag)
 					const Child = meta.EditModeComponent
-					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} />)
+					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} parentTag={currentPage.tag} />)
 				})}
 
 				<div className={cn(
@@ -104,6 +104,8 @@ function _EditModeComponent(props: EditModeProps) {
 
 export const componentMetadata = {
 	tag,
+	acceptsChildren: true,
+	allowedParentTags: ["site", "directory"],
 	htmlTag: "div",
 	htmlClassName: "column",
 	label: "Page",

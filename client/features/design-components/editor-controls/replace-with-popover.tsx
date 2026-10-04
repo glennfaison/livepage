@@ -1,4 +1,3 @@
-import { componentTagList } from "../primitives"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNode, AppNodeTag } from "@/client/features/types"
 import type React from "react"
@@ -6,20 +5,20 @@ import type React from "react"
 export const ReplaceWithPopover = ({
 	children,
 	currentComponent,
+	parentTag,
 	onReplace,
 }: Readonly<{
 	children: React.ReactNode
 	currentComponent: AppNode
+	parentTag?: AppNodeTag
 	onReplace: (newType: AppNodeTag) => void
 }>) => {
-	const tagList = componentTagList.filter((tag) => tag !== currentComponent.tag)
-
 	const handleReplace = (newType: AppNodeTag) => {
 		onReplace(newType)
 	}
 
 	return (
-		<ComponentSelectorPopover componentTagList={tagList} onSelect={handleReplace}>
+		<ComponentSelectorPopover parentTag={parentTag} excludeTag={currentComponent.tag} onSelect={handleReplace}>
 			{children}
 		</ComponentSelectorPopover>
 	)

@@ -23,10 +23,14 @@ import { componentMetadata as Page } from "./definitions/page-component"
 import { componentMetadata as LineChart } from "./definitions/line-chart"
 import { componentMetadata as MetricCard } from "./definitions/metric-card"
 import { componentMetadata as DataTable } from "./definitions/data-table"
-import { registerComponent } from "./registry-store"
+import { componentMetadataByTag, registerComponent } from "./registry-store"
 
-export { componentTagList } from "./component-tags"
-export { getComponentInfo, createDesignComponentInstance } from "./registry-store"
+export {
+  componentMetadataByTag,
+  getComponentInfo,
+  getComponentsAllowedIn,
+  createDesignComponentInstance,
+} from "./registry-store"
 
 const allComponentMetadata = [
   Header1, Header2, Header3, Paragraph, InlineText, Link, Button, Image,
