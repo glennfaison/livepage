@@ -10,6 +10,7 @@ import { contactAboutPageTemplate } from "@/client/features/templates/definition
 import { farmLogisticsLandingPageTemplate } from "@/client/features/templates/definitions/farm-logistics-landing-page"
 import { patientHealthDashboardTemplate } from "@/client/features/templates/definitions/patient-health-dashboard"
 import { podcastShowPageTemplate } from "@/client/features/templates/definitions/podcast-show-page"
+import { neighborhoodCafePageTemplate } from "@/client/features/templates/definitions/neighborhood-cafe-page"
 import { parsePageTemplateDefinition, type PageTemplateDefinition } from "@/client/features/templates/schema"
 
 export const pageTemplateRegistry = [
@@ -26,6 +27,7 @@ export const pageTemplateRegistry = [
   parsePageTemplateDefinition(contactAboutPageTemplate),
   parsePageTemplateDefinition(patientHealthDashboardTemplate),
   parsePageTemplateDefinition(podcastShowPageTemplate),
+  parsePageTemplateDefinition(neighborhoodCafePageTemplate),
 ] as const
 
 export function getPageTemplateById(id: string): PageTemplateDefinition | undefined {
