@@ -4,7 +4,7 @@ import { Button } from "@/client/components/ui/button"
 import { useComponentOperationsContext } from "../editor-controls/component-operations-context"
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
-import type { Props, Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
+import type { Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "@/client/features/design-components/primitives"
 import { getComponentInfo } from "../registry-store"
@@ -25,7 +25,7 @@ const attributes: SettingsField[] = [
 
 const attributesMap = createAttributeMap(attributes)
 
-function _PreviewModeComponent(props: ViewModeProps) {
+function PreviewModeComponent(props: ViewModeProps) {
 	const { component: currentPage } = props
 	const { "custom-classes": _, ...attributes } = currentPage.attributes
 	const { childClassName } = props
@@ -52,7 +52,7 @@ function _PreviewModeComponent(props: ViewModeProps) {
 	)
 }
 
-function _EditModeComponent(props: EditModeProps) {
+function EditModeComponent(props: EditModeProps) {
 	const { component: currentPage } = props
 	const { "custom-classes": _, ...attributes } = currentPage.attributes
 	const { childClassName, onMouseMove, onMouseLeave } = props
