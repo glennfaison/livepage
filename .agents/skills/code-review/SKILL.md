@@ -17,7 +17,7 @@ review.
      branch with its merge base when branch intent is relevant.
    - Do not report unrelated pre-existing issues unless they are made worse by
      the changes.
-2. Read `AGENTS.md`, the relevant `docs/` guidance, package scripts, and any
+2. Read `AGENTS.md`, the relevant `.agents/docs/` guidance, package scripts, and any
    feature-local instructions before judging the implementation.
 3. Inspect the complete diff and the surrounding code needed to understand
    callers, state boundaries, serializers, decorators, and tests.
@@ -45,14 +45,14 @@ review.
 - Preserve explicit DOM/layout requirements, including existing decorator
   structure and `display: contents` where required.
 - Check changed code against the design principles and React rules in
-  `docs/CONVENTIONS.md`: special cases that a more general mechanism would
+  `.agents/docs/CONVENTIONS.md`: special cases that a more general mechanism would
   absorb, shallow modules with wide interfaces, nested conditionals or loops
   that guard clauses would flatten, unnecessary `useEffect`, large effects not
   extracted into custom hooks, and components that mix several hooks and
   computations with markup.
-- Check that the change follows the redesign rule in `docs/AGENT-WORKFLOW.md`:
+- Check that the change follows the redesign rule in `.agents/docs/AGENT-WORKFLOW.md`:
   flag patches that work around the old shape instead of restructuring it.
-- Use the project's canonical terms from `docs/GLOSSARY.md` in findings.
+- Use the project's canonical terms from `.agents/docs/GLOSSARY.md` in findings.
 
 ## Finding standard
 
