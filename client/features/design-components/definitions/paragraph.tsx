@@ -14,7 +14,7 @@ const defaultChildren = [
 	mauris non mollis. Pellentesque sem purus, sagittis sed odio commodo, faucibus
 	vehicula elit. Mauris vestibulum euismod mi, feugiat accumsan mauris imperdiet
 	eget. Ut sit amet dolor mattis, consectetur est id, placerat tellus. Proin nisl
-	o dio, elementum sed porttitor ut, tempus non neque. In hac habitasse platea
+	odio, elementum sed porttitor ut, tempus non neque. In hac habitasse platea
 	dictumst. Proin at lorem lacinia, ullamcorper lorem eget, fringilla massa.
 	Suspendisse consequat, lectus sit amet congue tincidunt, neque felis
 	pellentesque nulla, ac pharetra lectus elit eget neque. Sed feugiat tincidunt
