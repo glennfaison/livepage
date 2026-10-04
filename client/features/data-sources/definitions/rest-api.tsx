@@ -28,37 +28,19 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		throw new Error("Expected REST API settings to provide a URL string")
 	}
 
-	let parseResultFn
-	try {
-		const parseResult = componentDataSourceSettings["parse-result"]
-		const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
-		if (parseResultSource.trim()) {
-			parseResultFn = new Function("data", `${parseResultSource}`)
-		}
-	} catch (error) {
-		throw error
-	}
+	const parseResult = componentDataSourceSettings["parse-result"]
+	const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
+	const parseResultFn = parseResultSource.trim()
+		? new Function("data", parseResultSource) as (data: unknown) => unknown
+		: undefined
 
-	let unparsedData
-	try {
-		const result = await fetch(url)
-		if (!result.ok) {
-			throw await result.json()
-		}
-		unparsedData = await result.json()
-	} catch (error) {
-		throw error
+	const result = await fetch(url)
+	if (!result.ok) {
+		throw await result.json()
 	}
+	const unparsedData = await result.json()
 
-	if (!parseResultFn) {
-		return unparsedData
-	}
-
-	try {
-		return parseResultFn(unparsedData)
-	} catch (error) {
-		throw error
-	}
+	return parseResultFn ? parseResultFn(unparsedData) : unparsedData
 }
 
 export const dataSourceInfo = {

@@ -20,18 +20,8 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		throw new Error("Expected generated data settings to provide a string function body")
 	}
 
-	let asyncGeneratorFn
-	try {
-		asyncGeneratorFn = new Function(`return (async () => { ${generateSource} })()`)
-	} catch (error) {
-		throw error
-	}
-	try {
-		const result = await asyncGeneratorFn()
-		return result
-	} catch (error) {
-		throw error
-	}
+	const asyncGeneratorFn = new Function(`return (async () => { ${generateSource} })()`) as () => Promise<unknown>
+	return asyncGeneratorFn()
 }
 
 export const dataSourceInfo = {

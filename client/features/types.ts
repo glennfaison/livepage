@@ -3,10 +3,8 @@ import type { ReactNode } from "react"
 
 export type PageBuilderMode = "edit" | "preview"
 
-export type AppNodeTag = string
-
 export type AppNode = Readonly<{
-  tag: AppNodeTag
+  tag: string
   attributes: Readonly<Record<string, string>>
   children: ReadonlyArray<AppNode | string>
 }>
@@ -39,11 +37,11 @@ export type AppAction =
   | Readonly<{ type: "SET_ACTIVE_PAGE"; payload: string }>
   | Readonly<{
       type: "INSERT_COMPONENT"
-      payload: Readonly<{ newComponent?: AppNode; newComponentTag?: AppNodeTag; parentId?: string; index?: number }>
+      payload: Readonly<{ newComponent?: AppNode; newComponentTag?: string; parentId?: string; index?: number }>
     }>
   | Readonly<{ type: "UPDATE_COMPONENT"; payload: Readonly<{ componentId: string; updates: Partial<AppNode> }> }>
   | Readonly<{ type: "REMOVE_COMPONENT"; payload: Readonly<{ componentId: string }> }>
-  | Readonly<{ type: "REPLACE_COMPONENT"; payload: Readonly<{ oldComponentId: string; newComponent?: AppNode; newComponentTag?: AppNodeTag }> }>
+  | Readonly<{ type: "REPLACE_COMPONENT"; payload: Readonly<{ oldComponentId: string; newComponent?: AppNode; newComponentTag?: string }> }>
   | Readonly<{ type: "DUPLICATE_COMPONENT"; payload: Readonly<{ componentId: string; parentId?: string }> }>
   | Readonly<{ type: "SET_SELECTED_COMPONENT"; payload: string }>
   | Readonly<{ type: "SET_SELECTED_COMPONENT_ANCESTORS"; payload: string }>

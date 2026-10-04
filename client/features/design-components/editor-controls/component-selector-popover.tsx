@@ -4,7 +4,6 @@ import { Input } from "@/client/components/ui/input"
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
 import { getComponentInfo } from "../registry-store"
-import type { AppNodeTag } from "@/client/features/types"
 
 // Component selector popover
 export const ComponentSelectorPopover = ({
@@ -12,9 +11,9 @@ export const ComponentSelectorPopover = ({
 	children,
 	componentTagList,
 }: Readonly<{
-	onSelect: (type: AppNodeTag) => void
+	onSelect: (type: string) => void
 	children: React.ReactNode
-	componentTagList: ReadonlyArray<AppNodeTag>
+	componentTagList: ReadonlyArray<string>
 }>) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
   const [open, setOpen] = React.useState(false)
@@ -31,7 +30,7 @@ export const ComponentSelectorPopover = ({
 		)
 	}, [searchTerm, componentTagList])
 
-	const handleSelect = (type: AppNodeTag) => {
+	const handleSelect = (type: string) => {
 		onSelect(type)
 		if (closePopover) {
 			closePopover()
