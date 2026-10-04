@@ -24,6 +24,8 @@ points you to the right instructions.
   review changes using Fallow's graph-grounded structural findings.
 - [`/grilling`](../grilling/SKILL.md): challenge a design or plan through
   focused questions.
+- [`/grill-with-docs`](../grill-with-docs/SKILL.md): grill through a design
+  while building the domain model and recording decisions.
 - [`/handoff`](../handoff/SKILL.md): prepare a concise handoff for another
   agent or session.
 - [`/implement`](../implement/SKILL.md): implement one spec or a set of
