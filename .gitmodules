@@ -1,3 +1,7 @@
 [submodule "fallow-skills"]
 	path = .agents/skills/fallow-skills
 	url = https://github.com/fallow-rs/fallow-skills.git
+[submodule ".agents/skills/matt-pocock-skills"]
+	path = .agents/skills/matt-pocock-skills
+	url = https://github.com/mattpocock/skills.git
+	branch = main
