@@ -10,3 +10,12 @@ Before changing code, read the [project context](./.agents/docs/CONTEXT.md),
 
 All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
 find the right skill, then read its `SKILL.md` before following its workflow.
+
+## Branch names
+
+Create branches only with a gitflow name. GitHub rejects any other name, for agents
+and humans alike. Use `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`,
+`release/<version>`, `support/<version-line>`, `develop`, or `main`. Topics are
+lowercase kebab-case (`feature/gitflow-branch-names`). Do not invent prefixes such
+as `cursor/`, `fix/`, or `templates/`. Full patterns and the rejection message are
+in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).

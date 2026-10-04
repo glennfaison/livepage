@@ -1,0 +1,13 @@
+name: Branch name
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gitflow-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject non-gitflow branch names
+        run: node scripts/check-branch-name.mjs --self-test && node scripts/check-branch-name.mjs

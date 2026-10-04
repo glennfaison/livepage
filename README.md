@@ -70,6 +70,7 @@ Standalone HTML files cannot use the LinkedIn session cookie.
 | `npm run test:coverage` | Run Jest with coverage |
 | `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
 | `npm run test:html-browser` | Run the standalone HTML artifact regression test in Chromium |
+| `npm run check:branch` | Check that the current branch name follows gitflow |
 
 The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
@@ -82,6 +83,22 @@ run `npx playwright install chromium` once after `npm install`; then run
 `npm run test:html-browser`.
 
 The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
+
+### Branch names
+
+Pushes must use a gitflow branch name. The check applies to people, agents, and other automation. Topic segments are lowercase kebab-case.
+
+| Branch type | Pattern | Example |
+| --- | --- | --- |
+| main | `main` | `main` |
+| develop | `develop` | `develop` |
+| feature | `feature/<topic>` | `feature/login-flow` |
+| release | `release/<version>` | `release/1.4.0` |
+| hotfix | `hotfix/<topic>` | `hotfix/crash-on-start` |
+| support | `support/<version-line>` | `support/1.x` |
+| bugfix | `bugfix/<topic>` | `bugfix/null-deref` |
+
+A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. `git config core.hooksPath scripts/git-hooks` enables an advisory local pre-push hook. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
 
 ## Project layout
 
@@ -114,6 +131,7 @@ The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapp
 - [Project context](./.agents/docs/CONTEXT.md) and [architecture decisions](./.agents/docs/adr/)
 - [Code conventions](./.agents/docs/CONVENTIONS.md)
 - [Glossary](./.agents/docs/GLOSSARY.md)
+- [Branch names](./.agents/docs/BRANCH-NAMES.md)
 - [AGENTS.md](./AGENTS.md) and the [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) for coding agents
 
 ## Security and conduct

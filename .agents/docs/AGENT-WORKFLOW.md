@@ -21,6 +21,7 @@ How to scope, verify, and finish a task in this repository. For what the code sh
 ## Finish
 
 - Ship Template changes in a pull request, never straight to `main`.
+- Open that pull request from a gitflow branch. Allowed names are `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, `support/<version-line>`, `develop`, and `main`. See [branch names](./BRANCH-NAMES.md). A non-matching push is rejected by GitHub and fails CI.
 - Check whether the change introduces or renames entities, relationships, or domain terms. If it does, update [the glossary](./GLOSSARY.md) before finishing.
 
 ## Orchestration
