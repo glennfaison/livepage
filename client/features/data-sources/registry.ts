@@ -5,6 +5,7 @@ import { dataSourceInfo as RssFeed } from "./definitions/rss-feed"
 import { dataSourceInfo as GraphQL } from "./definitions/graphql"
 import { dataSourceInfo as JsonFeed } from "./definitions/json-feed"
 import { dataSourceInfo as Csv } from "./definitions/csv"
+import { dataSourceInfo as LinkedInProfile } from "./definitions/linkedin-profile"
 import { decodeBrowserDataSourceSettings } from "./browser-core"
 
 export const dataSourceIdList = [
@@ -14,6 +15,7 @@ export const dataSourceIdList = [
 	GraphQL.id,
 	JsonFeed.id,
 	Csv.id,
+	LinkedInProfile.id,
 ] as const
 
 const dataSourceMap: DataSourceInfoMap = {
@@ -23,6 +25,7 @@ const dataSourceMap: DataSourceInfoMap = {
 	[GraphQL.id]: GraphQL,
 	[JsonFeed.id]: JsonFeed,
 	[Csv.id]: Csv,
+	[LinkedInProfile.id]: LinkedInProfile,
 }
 
 export function getDataSourceInfo(connectionId: DataSourceId): DataSourceInfo | undefined {
