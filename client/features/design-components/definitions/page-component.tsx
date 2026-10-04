@@ -65,7 +65,7 @@ function _EditModeComponent(props: EditModeProps) {
 	}, [addComponent, attributes.id])
 
 	return (
-		<section className="flex-1 bg-gray-50 overflow-y-visible relative pr-24" id={attributes.id}>
+		<section className="flex-1 bg-gray-50 overflow-y-visible relative md:pr-24" id={attributes.id}>
 			<div
 				className={cn("bg-white min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
 				onClick={() => setSelectedComponent("")}
