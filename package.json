@@ -20,7 +20,8 @@
     "test:html-browser": "npm run build:html-runtime && playwright test --config=playwright.config.ts",
     "test:watch": "jest --watch",
     "pretest:coverage": "npm run build:html-runtime",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "verify": "npm run lint && npm test -- --runInBand && npm run check:branch"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
