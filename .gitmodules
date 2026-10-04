@@ -1,0 +1,3 @@
+[submodule "fallow-skills"]
+	path = .agents/skills/fallow-skills
+	url = https://github.com/fallow-rs/fallow-skills.git
