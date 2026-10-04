@@ -5,55 +5,9 @@ on:
   pull_request:
 
 jobs:
-  validate:
-    name: Validate branch name
+  gitflow-branch-name:
     runs-on: ubuntu-latest
     steps:
-      - name: Check gitflow branch name
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          # Allowed patterns (topic/version: lowercase kebab-case / dots for versions):
-          #   main
-          #   develop
-          #   feature/<topic>
-          #   release/<version>
-          #   hotfix/<topic>
-          #   support/<version-line>
-          #   bugfix/<topic>
-          #
-          # Topic segment: [a-z0-9]+(-[a-z0-9]+)*
-          # Version segment: [a-z0-9]+([.-][a-z0-9]+)*  (allows 1.4.0, 1.x)
-
-          PATTERN='^(main|develop|(feature|hotfix|bugfix)/[a-z0-9]+(-[a-z0-9]+)*|(release|support)/[a-z0-9]+([.-][a-z0-9]+)*)$'
-
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BRANCH="${{ github.head_ref }}"
-          else
-            BRANCH="${GITHUB_REF#refs/heads/}"
-          fi
-
-          echo "Checking branch name: ${BRANCH}"
-
-          if [[ ! "${BRANCH}" =~ ${PATTERN} ]]; then
-            echo "::error::Branch name '${BRANCH}' does not follow gitflow conventions."
-            echo ""
-            echo "Allowed patterns:"
-            echo "  main"
-            echo "  develop"
-            echo "  feature/<topic>     e.g. feature/login-flow"
-            echo "  release/<version>   e.g. release/1.4.0"
-            echo "  hotfix/<topic>      e.g. hotfix/crash-on-start"
-            echo "  support/<line>      e.g. support/1.x"
-            echo "  bugfix/<topic>      e.g. bugfix/null-deref"
-            echo ""
-            echo "Topic/version segments must be lowercase (a-z, 0-9, hyphens; versions may use dots)."
-            echo ""
-            echo "Rename the branch and push again, for example:"
-            echo "  git branch -m feature/your-topic"
-            echo "  git push -u origin HEAD"
-            exit 1
-          fi
-
-          echo "Branch name is valid."
+      - uses: actions/checkout@v4
+      - name: Reject non-gitflow branch names
+        run: node scripts/check-branch-name.mjs --self-test && node scripts/check-branch-name.mjs

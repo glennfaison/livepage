@@ -1,0 +1,11 @@
+#!/bin/sh
+# Advisory local check. Server-side rules and CI are the enforcement that agents cannot skip.
+root=$(git rev-parse --show-toplevel) || exit 1
+while read -r local_ref local_sha remote_ref remote_sha; do
+  branch=${remote_ref#refs/heads/}
+  if [ -z "$branch" ] || [ "$branch" = "$remote_ref" ]; then
+    continue
+  fi
+  node "$root/scripts/check-branch-name.mjs" --branch "$branch" || exit 1
+done
+exit 0
