@@ -1,10 +1,34 @@
 import { cn } from "@/client/lib/utils"
-import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "./shared/editor-chrome"
+import { CONTRAST_DARK, CONTRAST_LIGHT, getContrastColorForBackground, parseCssColor } from "./shared/contrast-color"
 import { Plus } from "lucide-react"
 import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
+
+const MAX_ANCESTOR_DEPTH = 12
+
+export const measureBackgroundUnder = (el: HTMLElement | null): string | null => {
+  if (typeof window === "undefined" || !el) return null
+  let node: HTMLElement | null = el.parentElement
+  for (let depth = 0; node && depth < MAX_ANCESTOR_DEPTH; depth++) {
+    const bg = window.getComputedStyle(node).backgroundColor
+    if (parseCssColor(bg)) return bg
+    node = node.parentElement
+  }
+  return null
+}
+
+export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>) => {
+  const [color, setColor] = React.useState(CONTRAST_DARK)
+  React.useEffect(() => {
+    const measure = () => setColor(getContrastColorForBackground(measureBackgroundUnder(ref.current)))
+    measure()
+    const frame = requestAnimationFrame(measure)
+    return () => cancelAnimationFrame(frame)
+  }, [ref])
+  return color
+}
 
 export const Divider = ({
   orientation,
@@ -22,6 +46,10 @@ export const Divider = ({
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   isVisible = isVisible || popoverOpen
 
+  const barRef = React.useRef<HTMLDivElement>(null)
+  const color = useDividerContrastColor(barRef)
+  const iconColor = color === CONTRAST_LIGHT ? CONTRAST_DARK : CONTRAST_LIGHT
+
   const handleAddComponent = (type: AppNodeTag) => {
     onAddComponent(type, index)
     setPopoverOpen(false)
@@ -29,23 +57,20 @@ export const Divider = ({
 
   return (
     <div
+      ref={barRef}
+      style={{ backgroundColor: color }}
       className={cn(
-        "relative flex items-center justify-center transition-all duration-200 group",
-        "cursor-pointer bg-transparent hover:bg-gray-400 hover:visible",
-        isVisible ? "bg-gray-400" : "invisible",
+        "relative flex items-center justify-center transition-all duration-200 group cursor-pointer",
+        isVisible ? "opacity-100" : "invisible opacity-30 hover:visible",
         orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
-        isVisible ? "bg-primary/45" : "bg-transparent hover:bg-primary/30",
       )}
     >
       <ComponentSelectorPopover onSelect={handleAddComponent} parentTag={parentTag}>
         <Button
           variant="ghost"
           size="icon"
-          className={cn(
-            "relative z-20 size-7 rounded-full transition-transform hover:scale-110",
-            editorChromeSurfaceClassName,
-            editorChromeButtonClassName,
-          )}
+          style={{ backgroundColor: color, color: iconColor }}
+          className="relative z-20 size-7 rounded-full transition-transform hover:scale-110 hover:bg-inherit"
           onClick={(e) => {
             e.stopPropagation()
             setPopoverOpen(true)
