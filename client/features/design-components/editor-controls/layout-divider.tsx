@@ -7,6 +7,8 @@ import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
 
 const MAX_ANCESTOR_DEPTH = 12
+/** Time the pointer has to reach the divider after leaving a child before it hides. */
+const HIDE_DELAY_MS = 250
 
 export const measureBackgroundUnder = (el: HTMLElement | null): string | null => {
   if (typeof window === "undefined" || !el) return null
@@ -44,7 +46,9 @@ export const Divider = ({
   isVisible: boolean
 }>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
-  isVisible = isVisible || popoverOpen
+  const [hovered, setHovered] = React.useState(false)
+  // Stay visible while the pointer is on the bar/+ so it does not fade mid-click.
+  const shown = isVisible || popoverOpen || hovered
 
   const barRef = React.useRef<HTMLDivElement>(null)
   const color = useDividerContrastColor(barRef)
@@ -59,9 +63,13 @@ export const Divider = ({
     <div
       ref={barRef}
       style={{ backgroundColor: color }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={cn(
-        "relative flex items-center justify-center transition-all duration-200 group cursor-pointer",
-        isVisible ? "opacity-100" : "invisible opacity-30 hover:visible",
+        "relative flex items-center justify-center transition-opacity duration-150 group cursor-pointer",
+        // Opacity only — never visibility:hidden — so the hit target stays active
+        // while the pointer moves from a child onto the bar.
+        shown ? "opacity-100" : "opacity-0",
         orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
       )}
     >
@@ -92,6 +100,9 @@ const dividerKey = (axis: DividerAxis, index: number) => `${axis}${index}`
  * Divider visibility is keyed per edge. Show and hide each bump a generation so a
  * hide that already queued a state update cannot clobber a later show (the race
  * that left insertion dividers stuck visible or stuck invisible).
+ *
+ * Hide is delayed so the pointer can travel from a child edge onto the divider
+ * bar and its + button without the control disappearing under the cursor.
  */
 export const useDividerVisibility = () => {
   const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(() => new Set())
@@ -132,10 +143,16 @@ export const useDividerVisibility = () => {
     setVisible(axis, index, true, generation)
   }, [bump, setVisible])
 
-  const hideDividerNow = React.useCallback((axis: DividerAxis, index: number) => {
-    const generation = bump(dividerKey(axis, index))
-    setVisible(axis, index, false, generation)
-  }, [bump, setVisible])
+  const hideDividerDelayed = React.useCallback((axis: DividerAxis, index: number) => {
+    const key = dividerKey(axis, index)
+    clearTimer(key)
+    const generation = (generationRef.current[key] ?? 0) + 1
+    generationRef.current[key] = generation
+    timeoutRef.current[key] = setTimeout(() => {
+      delete timeoutRef.current[key]
+      setVisible(axis, index, false, generation)
+    }, HIDE_DELAY_MS)
+  }, [clearTimer, setVisible])
 
   React.useEffect(() => {
     const timeouts = timeoutRef.current
@@ -146,7 +163,7 @@ export const useDividerVisibility = () => {
 
   const syncEdge = (axis: DividerAxis, index: number, near: boolean) => {
     if (near) showDivider(axis, index)
-    else hideDividerNow(axis, index)
+    else hideDividerDelayed(axis, index)
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
@@ -161,10 +178,10 @@ export const useDividerVisibility = () => {
   }
 
   const handleChildMouseLeave = (childIndex: number) => {
-    hideDividerNow("v", childIndex * 2)
-    hideDividerNow("v", (childIndex + 1) * 2)
-    hideDividerNow("h", childIndex * 2)
-    hideDividerNow("h", (childIndex + 1) * 2)
+    hideDividerDelayed("v", childIndex * 2)
+    hideDividerDelayed("v", (childIndex + 1) * 2)
+    hideDividerDelayed("h", childIndex * 2)
+    hideDividerDelayed("h", (childIndex + 1) * 2)
   }
 
   return {
