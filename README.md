@@ -71,6 +71,7 @@ Standalone HTML files cannot use the LinkedIn session cookie.
 | `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
 | `npm run test:html-browser` | Run the standalone HTML artifact regression test in Chromium |
 | `npm run check:branch` | Check that the current branch name follows gitflow |
+| `npm run verify` | Lint + full Jest suite (`--runInBand`) + branch-name check (convenient pre-PR gate) |
 
 The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
