@@ -184,6 +184,7 @@ export const Toolbar: React.FC<Readonly<{
               history={history}
               currentHistoryIndex={currentHistoryIndex}
               onSelectHistory={onSelectHistory}
+              onAccept={onAcceptHistory}
               onDiscard={onDiscardHistory}
               previewIndex={historyPreviewIndex}
             >

@@ -113,6 +113,6 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon: null,
-	PreviewModeComponent: _PreviewModeComponent,
-	EditModeComponent: _EditModeComponent,
+	PreviewModeComponent: PreviewModeComponent,
+	EditModeComponent: EditModeComponent,
 } as const satisfies Metadata

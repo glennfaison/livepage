@@ -3,10 +3,9 @@ import { SettingsPopover } from "../settings-popover";
 import { Button } from "@/client/components/ui/button";
 import { cn } from "@/client/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import type { EditModeProps } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
-import React from "react";
 import { getComponentInfo } from "../../registry-store";
 import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "../shared/editor-chrome";
 

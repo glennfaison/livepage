@@ -14,6 +14,7 @@ export const HistoryPopover: React.FC<Readonly<{
   history: ReadonlyArray<HistoryEntry>
   currentHistoryIndex: number
   onSelectHistory: (index: number) => void
+  onAccept: (index: number) => void
   onDiscard: () => void
   previewIndex: number | null
   children: React.ReactNode
@@ -23,7 +24,7 @@ export const HistoryPopover: React.FC<Readonly<{
   history,
   currentHistoryIndex,
   onSelectHistory,
-  // onAccept,
+  onAccept,
   onDiscard,
   previewIndex,
   children,
@@ -184,7 +185,7 @@ export const HistoryPopover: React.FC<Readonly<{
             <Button
               variant="ghost"
               className="flex-1 rounded-none rounded-br-lg bg-foreground hover:bg-foreground/90 text-background h-12"
-            // onClick={() => onAccept(index)}
+              onClick={() => onAccept(currentHistoryIndex)}
             >
               <Check className="h-4 w-4 mr-2" />
               Accept
