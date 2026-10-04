@@ -116,6 +116,10 @@ The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapp
 - [Glossary](./.agents/docs/GLOSSARY.md)
 - [AGENTS.md](./AGENTS.md) and the [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) for coding agents
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to open a pull request and the branch naming (gitflow) conventions enforced in this repo.
+
 ## Security and conduct
 
 Report vulnerabilities privately as described in [SECURITY.md](./SECURITY.md). Participation in this project is governed by the [Code of Conduct](./CODE_OF_CONDUCT.md).
