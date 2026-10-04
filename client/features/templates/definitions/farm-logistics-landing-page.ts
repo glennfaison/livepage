@@ -180,7 +180,7 @@ export const farmLogisticsLandingPageTemplate = {
           node("row", "farm-nav", {
             ...padding("1.25rem", "1.5rem"), ...centered,
             "child-sizing": "natural", "align-items": "center", "justify-content": "between", gap: "1rem",
-            "custom-classes": `${SHELL} [&>*]:!self-center`,
+            "custom-classes": `${SHELL} relative [&>*]:!self-center`,
           }, [
             node("row", "farm-nav-brandmark", { "child-sizing": "natural", "align-items": "center", gap: "0.6rem", "custom-classes": "min-h-0 [&>*]:!self-center" }, [
               node("image", "farm-nav-logo", {
@@ -192,15 +192,15 @@ export const farmLogisticsLandingPageTemplate = {
             ]),
             node("row", "farm-nav-links", {
               "child-sizing": "natural", "align-items": "center", gap: "1.75rem",
-              "custom-classes": "hidden min-h-0 md:flex [&>*]:!self-center",
+              "custom-classes": "invisible absolute left-0 top-0 min-h-0 md:visible md:static md:flex [&>*]:!self-center",
             }, [
               navLink("farm-nav-link-services", "Services", "#farm-services"),
               navLink("farm-nav-link-how", "How it works", "#farm-how"),
               navLink("farm-nav-link-pricing", "Pricing", "#farm-pricing"),
               navLink("farm-nav-link-stories", "Stories", "#farm-stories"),
             ]),
-            node("row", "farm-nav-actions", { "child-sizing": "natural", "align-items": "center", gap: "1rem", "custom-classes": "min-h-0 [&>*]:!self-center" }, [
-              node("link", "farm-nav-signin", { href: "https://example.com/sign-in", "custom-classes": "hidden text-sm font-semibold text-[#1b1b18] no-underline hover:underline sm:inline" }, ["Sign in"]),
+            node("row", "farm-nav-actions", { "child-sizing": "natural", "align-items": "center", gap: "1rem", "custom-classes": "relative min-h-0 [&>*]:!self-center" }, [
+              node("link", "farm-nav-signin", { href: "https://example.com/sign-in", "custom-classes": "invisible absolute left-0 top-0 text-sm font-semibold text-[#1b1b18] no-underline hover:underline sm:visible sm:static sm:inline" }, ["Sign in"]),
               node("button", "farm-nav-cta", { variant: "default", size: "sm", "custom-classes": "rounded-lg border-2 border-[#1b1b18] bg-[#f5b82e] px-4 font-bold text-[#1b1b18] shadow-[2px_2px_0_0_#1b1b18] hover:bg-[#f7c653]" }, ["Get started"]),
             ]),
           ]),
@@ -241,7 +241,7 @@ export const farmLogisticsLandingPageTemplate = {
             }, [
               text("paragraph", "farm-proof-label", "Trusted by 3,200 farms, 140 co-ops and the markets they sell to", { "custom-classes": "py-0 text-center text-sm font-semibold text-[#6b6b60]" }),
               node("row", "farm-proof-logos", {
-                "child-sizing": "natural", "align-items": "center", "justify-content": "center", gap: "0.75rem 1.75rem",
+                "child-sizing": "natural", "align-items": "center", "justify-content": "center", gap: "0.75rem 1rem",
                 "custom-classes": "min-h-0 flex-wrap [&>*]:!self-center",
               }, [
                 text("inline-text", "farm-proof-1", "GREENMARKET CO-OP", { "custom-classes": "text-sm font-black tracking-[0.12em] text-[#1b1b18]" }),
