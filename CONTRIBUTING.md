@@ -34,4 +34,4 @@ See [issue #76](https://github.com/glennfaison/livepage/issues/76) for the full 
 
 - Create your branch on the appropriate base branch (`main` or `develop`) using one of the allowed names above.
 - Fill in the pull request template in [`.github/pull_request_template.md`](./.github/pull_request_template.md).
-- Make sure `npm run lint` and `npm test` pass locally before opening the PR.
+- Run `npm run verify` locally before opening the PR (lint + full Jest suite + branch-name check). Prefer the narrowest relevant Jest selector while iterating, then use `verify` as the pre-PR gate.
