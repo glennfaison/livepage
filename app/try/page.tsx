@@ -17,6 +17,7 @@ import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemp
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
+import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
 import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useRef, useState } from "react"
@@ -250,12 +251,14 @@ export default function BuilderPage() {
             </div>
           </div>
 
-          <CanvasRenderer
-            component={currentPage}
-            pageBuilderMode={pageBuilderMode}
-            selectedComponentId={state.selectedComponentId}
-            selectedComponentAncestors={state.selectedComponentAncestors}
-          />
+          <PageBuilderErrorBoundary>
+            <CanvasRenderer
+              component={currentPage}
+              pageBuilderMode={pageBuilderMode}
+              selectedComponentId={state.selectedComponentId}
+              selectedComponentAncestors={state.selectedComponentAncestors}
+            />
+          </PageBuilderErrorBoundary>
         </main>
 
         <Toolbar
