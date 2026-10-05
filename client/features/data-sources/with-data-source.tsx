@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react"
+import React, { useCallback, useMemo, useRef } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "./registry"
 import type { DataSourceId, Props } from "@/client/features/types"
 import { DATA_SOURCE_FIELD_NAME } from "./constants"
@@ -13,6 +13,10 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 	function DataSourceComponent(props: Props) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 
+		if (!dataSourceSettings || dataSourceSettings.trim() === "") {
+			return <WrappedComponent {...props} />
+		}
+
 		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {
 			const decodedDataSourceSettings = decodeDataSourceSettings(dataSourceSettingsValue)
 			const dataSourceId: DataSourceId = decodedDataSourceSettings.id
@@ -25,12 +29,12 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 
 		const queryKey = ["data-source-data", dataSourceSettings]
 
-		const queryOptions = {
+		const queryOptions = useMemo(() => ({
 			queryKey,
 			queryFn: () => fetchData(dataSourceSettings!),
 			enabled: !!dataSourceSettings,
-			staleTime: 60 * 60 * 1000, // 60 minutes for now. TODO: make this configurable per data source
-		}
+			staleTime: 60 * 60 * 1000,
+		}), [queryKey, fetchData, dataSourceSettings])
 
 		const queryClient = useQuery(queryOptions)
 		const { data: dataSourceData, isLoading: loading, error, refetch } = queryClient
@@ -41,11 +45,6 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		const handleRetry = useCallback(() => {
 			retryRef.current()
 		}, [])
-
-		if (!dataSourceSettings || dataSourceSettings.trim() === "") {
-			// Not a data-source-bound component, render as usual
-			return <WrappedComponent {...props} />
-		}
 
 		if (loading) return <DataSourceLoading childClassName={props.childClassName} />
 		if (error) return <DataSourceError childClassName={props.childClassName} retry={handleRetry} errorMessage={readableErrorMessage(error)} />
