@@ -1,0 +1,77 @@
+name: Ready for agent
+description: Fully specified work that an AFK coding agent can implement without further clarification.
+labels: ["ready-for-agent"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when the task is **fully specified**: goal, scope, acceptance criteria, and any constraints are clear enough that an agent can implement it without asking questions.
+
+        Prefer this over a vague feature request when you want agents (or humans working AFK) to pick the issue up.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Editor / page builder
+        - Design components
+        - Data sources / placeholders
+        - Templates
+        - Import / export (JSON, shortcode)
+        - Standalone HTML export
+        - Command palette / theme
+        - Docs / tooling / CI
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the outcome.
+      placeholder: e.g. Add a dark-theme variant of the engineer resume template and register it in the catalog.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and motivation
+      description: Why this matters and any background an agent needs (links to docs, related issues, ADRs).
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checklist of observable outcomes. Agents treat these as the definition of done.
+      placeholder: |
+        - [ ] New template definition under shared/features/templates/definitions/
+        - [ ] Registered in the template registry and visible in the catalog
+        - [ ] Renders correctly in /try?template=<id>&mode=preview at desktop and mobile
+        - [ ] npm test -- --runInBand relevant suites pass
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and non-goals
+      description: What must not change, modules that are off-limits, or approaches to avoid.
+      placeholder: Do not introduce new design-component tags unless strictly required. Follow redesign-over-minimal-diffs for code you touch.
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Paths, skills, or docs the agent should read first.
+      placeholder: |
+        - .agents/docs/CONTEXT.md
+        - .agents/skills/template-authoring/SKILL.md
+        - existing definition files under shared/features/templates/definitions/
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: This issue is fully specified; an agent should not need to ask clarifying questions to implement it.
+          required: true
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
