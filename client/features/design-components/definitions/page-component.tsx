@@ -6,8 +6,7 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses } from "@/client/features/design-components/primitives"
-import { getComponentInfo } from "../registry-store"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 
 const tag = "page" as const
 
@@ -31,9 +30,11 @@ function PreviewModeComponent(props: ViewModeProps) {
 	const { childClassName } = props
 	const customClasses = readCustomClasses(currentPage.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
+	const metadata = getComponentInfo(currentPage.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(currentPage, metadata)
 
 	return (
-		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
+		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
 			<div
 				className={cn("bg-white min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
 				{...attributes}
@@ -59,13 +60,15 @@ function EditModeComponent(props: EditModeProps) {
 	const customClasses = readCustomClasses(currentPage.attributes)
 	const padding = readBoxSpacing(attributes, attributesMap, "padding")
 	const { setSelectedComponent, addComponent } = useComponentOperationsContext()
+	const metadata = getComponentInfo(currentPage.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(currentPage, metadata)
 
 	const appendComponent = useCallback(() => {
 		addComponent({ tag: "row", parentId: attributes.id })
 	}, [addComponent, attributes.id])
 
 	return (
-		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id}>
+		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
 			<div
 				className={cn("bg-white min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
 				onClick={() => setSelectedComponent("")}

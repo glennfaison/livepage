@@ -3,7 +3,7 @@ import { Activity, ArrowDown, ArrowUp, Droplet, Heart, Thermometer, Wind } from 
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import type { Metadata, Props, SettingsField } from "@/client/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readCustomClasses } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "metric-card" as const
@@ -55,13 +55,15 @@ const Component = (props: Props) => {
   const trend = (nodeAttributes.trend || attributesMap.trend.defaultValue) as (typeof trendOptions)[number]
   const trendLabel = nodeAttributes["trend-label"] || attributesMap["trend-label"].defaultValue
   const customClasses = readCustomClasses(props.component.attributes)
+  const metadata = getComponentInfo(props.component.tag)
+  const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
   const MetricIcon = iconMap[iconKey] || Activity
   const toneStyle = toneClasses[tone] || toneClasses.neutral
   const TrendIcon = trend === "up" ? ArrowUp : trend === "down" ? ArrowDown : null
 
   return (
-    <section className={cn("flex flex-col gap-4 rounded-2xl p-5", toneStyle.card, customClasses, props.childClassName)}>
+    <section className={cn("flex flex-col gap-4 rounded-2xl p-5", toneStyle.card, customClasses, props.childClassName)} {...accessibilityAttrs}>
       <span className={cn("flex size-11 items-center justify-center rounded-full shadow-sm", toneStyle.iconWrap)}>
         <MetricIcon className={cn("size-5", toneStyle.icon)} aria-hidden="true" />
       </span>

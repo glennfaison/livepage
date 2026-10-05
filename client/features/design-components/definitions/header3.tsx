@@ -4,7 +4,7 @@ import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
 import type { Props, SettingsField, Metadata } from "@/client/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "header3" as const
@@ -38,9 +38,11 @@ const Component = (props: Props) => {
 	const customClasses = readCustomClasses(props.component.attributes)
 	const textAppearance = readTextAppearance(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, parentTag: ____, component: _____, ...filteredProps } = props
+	const metadata = getComponentInfo(props.component.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
 	return (
-		<h3 className={cn("text-2xl font-bold py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{children as React.ReactNode}</h3>
+		<h3 className={cn("text-2xl font-bold py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps} {...accessibilityAttrs}>{children as React.ReactNode}</h3>
 	)
 }
 

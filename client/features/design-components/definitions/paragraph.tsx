@@ -4,7 +4,7 @@ import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
 import type { Props, Metadata, SettingsField } from "@/client/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextareaAttribute, readCustomClasses, readTextAppearance, readTextArrayChildren } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAppearanceAttributes, createTextareaAttribute, readCustomClasses, readTextAppearance, readTextArrayChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const defaultChildren = [
@@ -52,8 +52,10 @@ const Component = (props: Props) => {
 	const customClasses = readCustomClasses(props.component.attributes)
 	const textAppearance = readTextAppearance(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName, parentTag: ____, component: _____, ...filteredProps } = props
+	const metadata = getComponentInfo(props.component.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
-	return <p className={cn(renderedChildren.length > 0 && "py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps}>{renderedChildren as React.ReactNode}</p>
+	return <p className={cn(renderedChildren.length > 0 && "py-2", customClasses, childClassName)} style={textAppearance} {...filteredProps} {...accessibilityAttrs}>{renderedChildren as React.ReactNode}</p>
 }
 
 export const componentMetadata = {

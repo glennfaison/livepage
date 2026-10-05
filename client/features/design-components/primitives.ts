@@ -1,6 +1,7 @@
 // Registry-independent helpers used by component definitions and editor
 // controls, along with browser-safe data-source property substitution.
 export * from "./shared/component-helpers"
+export { getComponentInfo } from "./registry-store"
 export {
   replaceDataSourceComponentProperties,
   decodeBrowserDataSourceSettings,

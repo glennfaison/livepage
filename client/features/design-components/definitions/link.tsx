@@ -4,7 +4,7 @@ import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
 import type { Props, Metadata, SettingsField } from "@/client/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAppearanceAttributes, createTextAttribute, readCustomClasses, readTextAppearance, readTextChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
@@ -51,6 +51,8 @@ const Component = (props: Props) => {
   const textAppearance = readTextAppearance(props.component.attributes)
   const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName } = props
   const opensModal = target === "modal"
+  const metadata = getComponentInfo(props.component.tag)
+  const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
     if (!opensModal) return
@@ -70,6 +72,7 @@ const Component = (props: Props) => {
         className={cn("text-primary underline-offset-4 hover:underline", customClasses, childClassName)}
         style={textAppearance}
         data-component-id={props.component.attributes.id}
+        {...accessibilityAttrs}
       >
         {children as React.ReactNode}
       </a>

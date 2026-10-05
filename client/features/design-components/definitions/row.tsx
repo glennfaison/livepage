@@ -7,8 +7,7 @@ import { useComponentOperationsContext } from "../editor-controls/component-oper
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles } from "@/client/features/design-components/primitives"
-import { getComponentInfo } from "../registry-store"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { withDataSource } from "@/client/features/data-sources"
 
 const tag = "row" as const
@@ -77,6 +76,8 @@ const PreviewModeComponent = (props: ViewModeProps) => {
 	const margin = readBoxSpacing(attributes, attributesMap, "margin")
 	const layoutStyles = readLayoutStyles(component.attributes)
 	const { containerClassName, slotClassName } = readRowLayout(component.attributes)
+	const metadata = getComponentInfo(component.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(component, metadata)
 
 	const childComponents = props.component.children.map((child, childIndex) => {
 		if (typeof child === "string") return child
@@ -101,6 +102,7 @@ const PreviewModeComponent = (props: ViewModeProps) => {
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
 				...layoutStyles,
 			}}
+			{...accessibilityAttrs}
 		>
 			{childComponents}
 		</div>
@@ -139,6 +141,8 @@ const EditModeComponent = (props: EditModeProps) => {
 		handleChildMouseMove,
 		handleChildMouseLeave,
 	} = useDividerVisibility()
+	const metadata = getComponentInfo(component.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(component, metadata)
 
 	const onAddChildComponent = useCallback(
 		(tag: string): void => addComponent({ tag, parentId: attributes.id, index: 0 }),
@@ -200,6 +204,7 @@ const EditModeComponent = (props: EditModeProps) => {
 				margin: `${margin.top} ${margin.right} ${margin.bottom} ${margin.left}`,
 				...layoutStyles,
 			}}
+			{...accessibilityAttrs}
 		>
 			{hasChildren ? WrappedChildren : <EmptyColumnContent onAddChildComponent={onAddChildComponent} />}
 		</div>

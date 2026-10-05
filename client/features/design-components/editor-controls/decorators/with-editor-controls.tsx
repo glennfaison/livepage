@@ -4,10 +4,11 @@ import { Button } from "@/client/components/ui/button";
 import { cn } from "@/client/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import React, { useCallback } from "react";
-import type { EditModeProps } from "@/client/features/types";
+import type { EditModeProps, Metadata } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import { getComponentInfo } from "../../registry-store";
 import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "../shared/editor-chrome";
+import { getAccessibilityAttributes } from "../../primitives";
 
 function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
@@ -145,6 +146,9 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
     const { setSelectedComponent } = useComponentOperationsContext()
     const { childClassName, onMouseMove, onMouseLeave } = props
 
+    const metadata = getComponentInfo(props.component.tag)
+    const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
+
     const selectComponent = useCallback((e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation()
       setSelectedComponent(props.component.attributes.id)
@@ -161,6 +165,8 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
           "hover:border-gray-300",
           childClassName,
         )}
+        {...accessibilityAttrs}
+        data-component-id={props.component.attributes.id}
       >
         {showControls && <EditorControls {...props} />}
         <WrappedComponent {...props} />

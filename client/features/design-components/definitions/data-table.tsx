@@ -3,7 +3,7 @@ import { Table2 } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import type { Metadata, Props, SettingsField } from "@/client/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, parseJsonSetting, readCustomClasses } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, parseJsonSetting, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "data-table" as const
@@ -39,19 +39,21 @@ const Component = (props: Props) => {
   const customClasses = readCustomClasses(props.component.attributes)
   const columns = parseJsonSetting(nodeAttributes.columns || attributesMap.columns.defaultValue, isStringArray, "an array of column labels")
   const rows = parseJsonSetting(nodeAttributes.rows || attributesMap.rows.defaultValue, isStringMatrix, "an array of row arrays containing strings")
+  const metadata = getComponentInfo(props.component.tag)
+  const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
   if (!columns.ok) {
-    return <section className={cn("rounded-xl border p-4 text-sm text-destructive", customClasses, props.childClassName)}><p role="alert">Invalid table columns: {columns.error}</p></section>
+    return <section className={cn("rounded-xl border p-4 text-sm text-destructive", customClasses, props.childClassName)} {...accessibilityAttrs}><p role="alert">Invalid table columns: {columns.error}</p></section>
   }
   if (!rows.ok) {
-    return <section className={cn("rounded-xl border p-4 text-sm text-destructive", customClasses, props.childClassName)}><p role="alert">Invalid table rows: {rows.error}</p></section>
+    return <section className={cn("rounded-xl border p-4 text-sm text-destructive", customClasses, props.childClassName)} {...accessibilityAttrs}><p role="alert">Invalid table rows: {rows.error}</p></section>
   }
   if (rows.value.some((row) => row.length !== columns.value.length)) {
-    return <section className={cn("rounded-xl border p-4 text-sm text-destructive", customClasses, props.childClassName)}><p role="alert">Each table row must contain one cell for every column.</p></section>
+    return <section className={cn("rounded-xl border p-4 text-sm text-destructive", customClasses, props.childClassName)} {...accessibilityAttrs}><p role="alert">Each table row must contain one cell for every column.</p></section>
   }
 
   return (
-    <section className={cn("overflow-x-auto rounded-xl border bg-card", customClasses, props.childClassName)}>
+    <section className={cn("overflow-x-auto rounded-xl border bg-card", customClasses, props.childClassName)} {...accessibilityAttrs}>
       <table className="w-full min-w-[560px] text-left text-sm">
         <thead>
           <tr className="border-b bg-muted/40">

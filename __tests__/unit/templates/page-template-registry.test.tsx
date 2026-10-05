@@ -80,7 +80,7 @@ describe("page template registry", () => {
     expect(screen.getAllByText("The Longform Hour")).toHaveLength(2)
     expect(screen.getByText("Latest episodes")).toBeInTheDocument()
     expect(screen.getByAltText("Sam Rivera, host of The Longform Hour")).toBeInTheDocument()
-    expect(screen.getAllByRole("link", { name: "Listen" })).toHaveLength(3)
+    expect(screen.getAllByRole("link", { name: "Link: Listen" })).toHaveLength(3)
   })
 
   it("renders the neighborhood cafe page with menu and visit details", () => {
@@ -148,8 +148,8 @@ describe("page template registry", () => {
       </QueryClientProvider>,
     )
 
-    expect(screen.getByRole("link", { name: "Experience" })).toHaveAttribute("href", "#experience")
-    expect(screen.getByRole("link", { name: "jordan@example.com" })).toHaveAttribute("href", "mailto:jordan@example.com")
+    expect(screen.getByRole("link", { name: "Link: Experience" })).toHaveAttribute("href", "#experience")
+    expect(screen.getByRole("link", { name: "Link: jordan@example.com" })).toHaveAttribute("href", "mailto:jordan@example.com")
     expect(document.getElementById("experience")).toBeInTheDocument()
   })
 
@@ -172,8 +172,8 @@ describe("page template registry", () => {
       </QueryClientProvider>,
     )
 
-    expect(screen.getByRole("link", { name: "External" })).toHaveAttribute("target", "_blank")
-    expect(screen.getByRole("link", { name: "External" })).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByRole("link", { name: "Link: External" })).toHaveAttribute("target", "_blank")
+    expect(screen.getByRole("link", { name: "Link: External" })).toHaveAttribute("rel", "noopener noreferrer")
   })
 
   it("opens modal-target links in an accessible dialog", async () => {
@@ -196,7 +196,7 @@ describe("page template registry", () => {
       </QueryClientProvider>,
     )
 
-    await user.click(screen.getByRole("link", { name: "Details" }))
+    await user.click(screen.getByRole("link", { name: "Link: Details" }))
     expect(screen.getByRole("dialog", { name: "Details" })).toBeInTheDocument()
     expect(screen.getByTitle("Details")).toHaveAttribute("src", "https://example.com/details")
 

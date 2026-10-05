@@ -6,7 +6,7 @@ import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import type { Props, SettingsField, Metadata } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
-import { createColorAttribute, createCustomClassesAttribute, createGroupAttribute, createIdAttribute, createSelectAttribute, readCustomClasses } from "@/client/features/design-components/primitives"
+import { createColorAttribute, createCustomClassesAttribute, createGroupAttribute, createIdAttribute, createSelectAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 
 const tag = "image" as const
 
@@ -172,6 +172,8 @@ const Component = (props: Props) => {
 	} = props.component.attributes
 	const customClasses = readCustomClasses(props.component.attributes)
 	const { childClassName } = props
+	const metadata = getComponentInfo(props.component.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
 	return (
 		// eslint-disable-next-line @next/next/no-img-element
@@ -191,6 +193,7 @@ const Component = (props: Props) => {
 				borderColor,
 			}}
 			{...restAttributes}
+			{...accessibilityAttrs}
 		/>
 	)
 }
