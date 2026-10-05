@@ -5,12 +5,13 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X, Undo2, Redo2 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppNode } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -53,6 +54,10 @@ export const Toolbar: React.FC<Readonly<{
   pageComponent?: AppNode
   /** Callback to update page title */
   onPageTitleChange?: (title: string) => void
+  /** Undo callback */
+  onUndo?: () => void
+  /** Redo callback */
+  onRedo?: () => void
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -68,6 +73,8 @@ export const Toolbar: React.FC<Readonly<{
   onOpenCommandPalette,
   pageComponent,
   onPageTitleChange,
+  onUndo,
+  onRedo,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -78,6 +85,15 @@ export const Toolbar: React.FC<Readonly<{
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
+  const canUndo = currentHistoryIndex > 0
+  const canRedo = currentHistoryIndex < history.length - 1
+
+  // Keyboard shortcuts
+  useSaveShortcut(savePage)
+  useHistoryShortcut(() => setHistoryPopoverOpen(true))
+  useUndoShortcut(() => onUndo?.(), canUndo)
+  useRedoShortcut(() => onRedo?.(), canRedo)
+
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
     const rect = toolbarRef.current?.getBoundingClientRect()
@@ -187,8 +203,9 @@ export const Toolbar: React.FC<Readonly<{
 
           <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
             {onOpenCommandPalette ? (
-              <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette (⌘K)">
+              <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title={`Command palette (${formatShortcut("k")})`} className="gap-1.5">
                 <Command className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("k")}</span>
               </Button>
             ) : null}
             <HistoryPopover
@@ -201,8 +218,9 @@ export const Toolbar: React.FC<Readonly<{
               onDiscard={onDiscardHistory}
               previewIndex={historyPreviewIndex}
             >
-              <Button variant="outline" size="sm" title="History">
+              <Button variant="outline" size="sm" title={`History (${formatShortcut("h")})`} className="gap-1.5">
                 <History className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("h")}</span>
               </Button>
             </HistoryPopover>
             <ToolbarSettingsPopover
@@ -232,13 +250,27 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
 
           <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
-            <Button variant="outline" size="sm" onClick={savePage} title="Save">
+            <Button variant="outline" size="sm" onClick={savePage} title={`Save (${formatShortcut("s")})`} className="gap-1.5">
               <Save className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("s")}</span>
             </Button>
             <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard">
               <X className="h-4 w-4" />
             </Button>
           </div>
+
+          {canUndo && (
+            <Button variant="outline" size="sm" onClick={onUndo} title={`Undo (${formatShortcut("z")})`} className="gap-1.5" disabled={!canUndo}>
+              <Undo2 className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("z")}</span>
+            </Button>
+          )}
+          {canRedo && (
+            <Button variant="outline" size="sm" onClick={onRedo} title={`Redo (${formatShortcut("shift+z")})`} className="gap-1.5" disabled={!canRedo}>
+              <Redo2 className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("shift+z")}</span>
+            </Button>
+          )}
 
           <div
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"

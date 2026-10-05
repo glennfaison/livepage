@@ -79,6 +79,33 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
+  const canUndo = state.currentHistoryIndex > 0
+  const canRedo = state.currentHistoryIndex < state.history.length - 1
+
+  const handleUndo = () => {
+    if (canUndo) {
+      dispatch({
+        type: "SET_PAGES",
+        payload: JSON.parse(JSON.stringify(state.history[state.currentHistoryIndex - 1].pageState)),
+      })
+      dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: state.currentHistoryIndex - 1 })
+      dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
+      dispatch({ type: "SET_ORIGINAL_HISTORY_STATE", payload: null })
+    }
+  }
+
+  const handleRedo = () => {
+    if (canRedo) {
+      dispatch({
+        type: "SET_PAGES",
+        payload: JSON.parse(JSON.stringify(state.history[state.currentHistoryIndex + 1].pageState)),
+      })
+      dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: state.currentHistoryIndex + 1 })
+      dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
+      dispatch({ type: "SET_ORIGINAL_HISTORY_STATE", payload: null })
+    }
+  }
+
   const applyTemplate = (templateId: string) => {
     const template = getPageTemplateById(templateId)
     if (!template) {
@@ -276,6 +303,8 @@ export default function BuilderPage() {
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           pageComponent={currentPage}
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
         />
 
         <CommandPalette
