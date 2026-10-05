@@ -6,6 +6,11 @@ Before changing code, read the [project context](./.agents/docs/CONTEXT.md),
 [glossary](./.agents/docs/GLOSSARY.md), relevant [ADRs](./.agents/docs/adr/), the
 [README](./README.md), and authoritative scripts in [package.json](./package.json).
 
+The [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) is the canonical process for
+both coding agents and human contributors. Humans can follow the same Verify and
+Finish checklists; the [PR template](./.github/pull_request_template.md) and
+`npm run verify` encode a lighter version of those checks.
+
 ## Skills
 
 All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
