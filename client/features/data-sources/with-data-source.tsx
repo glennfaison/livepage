@@ -1,15 +1,16 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useRef } from "react"
 import { decodeDataSourceSettings, getDataSourceInfo } from "./registry"
 import type { DataSourceId, Props } from "@/client/features/types"
 import { DATA_SOURCE_FIELD_NAME } from "./constants"
 import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/client/lib/utils"
 import { replaceDataSourceComponentProperties } from "./browser-core"
+import { DataSourceLoading, DataSourceError, readableErrorMessage } from "./data-source-states"
 
 const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
 
 export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
-	return function DataSourceComponent(props: Props) {
+	function DataSourceComponent(props: Props) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 
 		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {
@@ -22,20 +23,32 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			return dataSource.tryConnection(decodedDataSourceSettings.settings)
 		}, [])
 
-		const { data: dataSourceData, isLoading: loading, error } = useQuery({
-			queryKey: ["data-source-data", dataSourceSettings],
+		const queryKey = ["data-source-data", dataSourceSettings]
+
+		const queryOptions = {
+			queryKey,
 			queryFn: () => fetchData(dataSourceSettings!),
 			enabled: !!dataSourceSettings,
 			staleTime: 60 * 60 * 1000, // 60 minutes for now. TODO: make this configurable per data source
-		})
+		}
+
+		const queryClient = useQuery(queryOptions)
+		const { data: dataSourceData, isLoading: loading, error, refetch } = queryClient
+
+		const retryRef = useRef(refetch)
+		retryRef.current = refetch
+
+		const handleRetry = useCallback(() => {
+			retryRef.current()
+		}, [])
 
 		if (!dataSourceSettings || dataSourceSettings.trim() === "") {
 			// Not a data-source-bound component, render as usual
 			return <WrappedComponent {...props} />
 		}
 
-		if (loading) return <div>Loading...</div>	// TODO: show loading/skeleton component assigned to this design component
-		if (error) return <div>Error: {String(error)}</div>	// TODO: show error component assigned to this design component
+		if (loading) return <DataSourceLoading childClassName={props.childClassName} />
+		if (error) return <DataSourceError childClassName={props.childClassName} retry={handleRetry} errorMessage={readableErrorMessage(error)} />
 
 		const renderDataSourceComponent = (data: unknown, key?: React.Key) => {
 			const newComponent = replaceDataSourceComponentProperties(props.component, data)
@@ -57,4 +70,12 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			return renderDataSourceComponent(dataSourceData)
 		}
 	}
+
+	DataSourceComponent.displayName = `withDataSource(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`
+
+	return DataSourceComponent
 }
+
+withDataSource.LoadingComponent = DataSourceLoading
+withDataSource.ErrorComponent = DataSourceError
+withDataSource.readableErrorMessage = readableErrorMessage
