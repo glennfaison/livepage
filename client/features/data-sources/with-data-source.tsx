@@ -13,18 +13,13 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 
 		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {
-			try {
-				const decodedDataSourceSettings = decodeDataSourceSettings(dataSourceSettingsValue)
-				const dataSourceId: DataSourceId = decodedDataSourceSettings.id
-				const dataSource = getDataSourceInfo(dataSourceId)
-				if (!dataSource) {
-					throw new Error(`Unknown data source: ${dataSourceId}`)
-				}
-				const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
-				return result
-			} catch (err) {
-				throw err
+			const decodedDataSourceSettings = decodeDataSourceSettings(dataSourceSettingsValue)
+			const dataSourceId: DataSourceId = decodedDataSourceSettings.id
+			const dataSource = getDataSourceInfo(dataSourceId)
+			if (!dataSource) {
+				throw new Error(`Unknown data source: ${dataSourceId}`)
 			}
+			return dataSource.tryConnection(decodedDataSourceSettings.settings)
 		}, [])
 
 		const { data: dataSourceData, isLoading: loading, error } = useQuery({
