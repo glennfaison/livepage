@@ -1,6 +1,7 @@
 "use client"
 
 import { HistoryPopover } from "@/client/features/page-builder/history-popover"
+import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
@@ -8,6 +9,8 @@ import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Set
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
+import type { AppNode } from "@/client/features/app-state"
+import { selectCurrentPage } from "@/client/features/app-state"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -46,6 +49,10 @@ export const Toolbar: React.FC<Readonly<{
   historyPreviewIndex: number | null
   /** Optional: renders a command-palette trigger button when provided. */
   onOpenCommandPalette?: () => void
+  /** Page component for settings popover */
+  pageComponent?: AppNode
+  /** Callback to update page title */
+  onPageTitleChange?: (title: string) => void
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -59,13 +66,18 @@ export const Toolbar: React.FC<Readonly<{
   onDiscardHistory,
   historyPreviewIndex,
   onOpenCommandPalette,
+  pageComponent,
+  onPageTitleChange,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false)
+  const [settingsPopoverOpen, setSettingsPopoverOpen] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
+
+  const pageTitle = pageComponent?.attributes?.title ?? ""
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
     const rect = toolbarRef.current?.getBoundingClientRect()
@@ -193,16 +205,18 @@ export const Toolbar: React.FC<Readonly<{
                 <History className="h-4 w-4" />
               </Button>
             </HistoryPopover>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                /* Settings functionality */
-              }}
-              title="Settings"
+            <ToolbarSettingsPopover
+              isOpen={settingsPopoverOpen}
+              onOpenChange={setSettingsPopoverOpen}
+              toolbarLayout={toolbarLayout}
+              onToolbarLayoutChange={setToolbarLayout}
+              pageTitle={pageTitle}
+              onPageTitleChange={onPageTitleChange ?? (() => {})}
             >
-              <Settings className="h-4 w-4" />
-            </Button>
+              <Button variant="outline" size="sm" title="Settings">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </ToolbarSettingsPopover>
             <Button
               variant="outline"
               size="sm"

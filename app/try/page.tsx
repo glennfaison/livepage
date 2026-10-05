@@ -274,6 +274,8 @@ export default function BuilderPage() {
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          pageComponent={currentPage}
+          onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
         />
 
         <CommandPalette
