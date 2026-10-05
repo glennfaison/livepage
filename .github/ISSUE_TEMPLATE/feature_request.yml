@@ -2,6 +2,10 @@ name: Feature request
 description: Suggest an improvement or a new capability.
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        For work that is already fully specified and ready for an AFK agent, prefer the **Ready for agent** template instead so it can be labeled and picked up cleanly.
   - type: dropdown
     id: area
     attributes:
@@ -13,6 +17,8 @@ body:
         - Templates
         - Import / export (JSON, shortcode)
         - Standalone HTML export
+        - Command palette / theme
+        - Docs / tooling / CI
         - Other
     validations:
       required: true
@@ -30,6 +36,13 @@ body:
       description: What would you like to happen? Sketches and examples help.
     validations:
       required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria (optional)
+      description: If you can list concrete, testable outcomes, include them here. Fully specified issues can later be labeled ready-for-agent.
+      placeholder: |
+        - [ ] ...
   - type: textarea
     id: alternatives
     attributes:
