@@ -71,10 +71,10 @@ export default function HomePage() {
                 A calmer way to create
               </span>
               <h1 className="max-w-3xl text-5xl font-semibold tracking-[-0.06em] md:text-7xl md:leading-[0.98]">
-                Turn a blank canvas into a page people remember.
+                LivePage
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground">
-                LivePage gives you the freedom of a design tool and the speed of a visual builder. Create something clear, useful, and ready to share.
+                Turn a blank canvas into a page people remember. LivePage gives you the freedom of a design tool and the speed of a visual builder. Create something clear, useful, and ready to share.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="rounded-full px-6">
