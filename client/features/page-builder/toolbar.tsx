@@ -88,6 +88,7 @@ export const Toolbar: React.FC<Readonly<{
   // Keep the floating toolbar inside the viewport. Narrow screens start compact
   // so the expanded control strip cannot run off the right or bottom edge.
   useEffect(() => {
+    if (pageBuilderMode === "preview") return
     if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) {
       setToolbarMinimized(true)
       setToolbarLayout("vertical")
@@ -99,7 +100,7 @@ export const Toolbar: React.FC<Readonly<{
     }
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [dockPosition, setToolbarMinimized])
+  }, [dockPosition, setToolbarMinimized, pageBuilderMode])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const gripElement = e.currentTarget as HTMLElement
