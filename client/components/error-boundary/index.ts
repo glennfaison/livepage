@@ -1,0 +1,1 @@
+export { PageBuilderErrorBoundary } from "./page-builder-error-boundary"
