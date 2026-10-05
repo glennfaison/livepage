@@ -2,7 +2,7 @@ import { Clock3 } from "lucide-react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
 import type { Metadata, Props, SettingsField } from "@/client/features/types"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "time" as const
@@ -54,11 +54,14 @@ const Component = (props: Props) => {
   const labelText = readTextChildren(props.component) || attributesMap.label.defaultValue
   const date = new Date(dateTime)
   const fullDate = Number.isNaN(date.getTime()) ? dateTime : new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date)
+  const metadata = getComponentInfo(props.component.tag)
+  const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
   return (
     <time
       dateTime={dateTime}
       title={fullDate}
       className={cn("inline-flex items-center gap-1.5 text-sm text-muted-foreground underline decoration-dotted underline-offset-4", readCustomClasses(props.component.attributes), props.childClassName)}
+      {...accessibilityAttrs}
     >
       <Clock3 className="size-3.5" aria-hidden="true" />
       <span>{labelText}</span>

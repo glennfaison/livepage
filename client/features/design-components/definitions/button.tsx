@@ -6,7 +6,7 @@ import React from "react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
 import type { Props, SettingsField, Metadata } from "@/client/features/types"
-import { createAttributeMap, createBooleanAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readTextChildren, readCustomClasses } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createBooleanAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readTextChildren, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "button" as const
@@ -61,8 +61,10 @@ const Component = (props: Props) => {
 	const { variant, size, disabled, "custom-classes": _customClasses, ...filteredAttributes } = props.component.attributes
 	const customClasses = readCustomClasses(props.component.attributes)
 	const { pageBuilderMode: _, selectedComponentId: __, selectedComponentAncestors: ___, childClassName } = props
+	const metadata = getComponentInfo(props.component.tag)
+	const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
 
-	return <Button variant={variant as ButtonVariant} size={size as ButtonSize} disabled={disabled === "true"} className={cn(customClasses, childClassName)} {...filteredAttributes}>{children as React.ReactNode}</Button>
+	return <Button variant={variant as ButtonVariant} size={size as ButtonSize} disabled={disabled === "true"} className={cn(customClasses, childClassName)} {...filteredAttributes} {...accessibilityAttrs}>{children as React.ReactNode}</Button>
 }
 
 export const componentMetadata = {

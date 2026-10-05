@@ -3,7 +3,7 @@ import { Minus } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import type { Metadata, Props, SettingsField } from "@/client/features/types"
-import { createColorAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, readCustomClasses } from "@/client/features/design-components/primitives"
+import { createColorAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "divider" as const
@@ -19,7 +19,9 @@ const Icon = <Minus className="h-4 w-4" />
 
 const Component = (props: Props) => {
   const { style = "solid", color = "#e5e7eb" } = props.component.attributes
-  return <hr className={cn("my-4 w-full border-0 border-t", readCustomClasses(props.component.attributes), props.childClassName)} style={{ borderTopStyle: style as React.CSSProperties["borderTopStyle"], borderTopColor: color }} aria-hidden="true" />
+  const metadata = getComponentInfo(props.component.tag)
+  const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
+  return <hr className={cn("my-4 w-full border-0 border-t", readCustomClasses(props.component.attributes), props.childClassName)} style={{ borderTopStyle: style as React.CSSProperties["borderTopStyle"], borderTopColor: color }} aria-hidden="true" {...accessibilityAttrs} />
 }
 
 export const componentMetadata = {

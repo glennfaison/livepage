@@ -1,7 +1,32 @@
 import type React from "react"
-import type { AppNode, SettingsField } from "@/client/features/types"
+import type { AppNode, SettingsField, Metadata } from "@/client/features/types"
 
 type AttributeMap = Readonly<Record<ReadonlyArray<SettingsField>[number]["id"], ReadonlyArray<SettingsField>[number]>>
+
+export function getAccessibilityLabel(component: Readonly<AppNode>, metadata: Readonly<Metadata>): string {
+  const { label } = metadata
+  const children = component.children
+
+  let content = ""
+  if (Array.isArray(children)) {
+    content = children.filter((c): c is string => typeof c === "string").join(" ").trim()
+  } else if (typeof children === "string") {
+    content = children.trim()
+  }
+
+  if (content) {
+    return `${label}: ${content.slice(0, 100)}`
+  }
+  return label
+}
+
+export function getAccessibilityAttributes(component: Readonly<AppNode>, metadata: Readonly<Metadata>): React.HTMLAttributes<HTMLElement> {
+  const accessibilityLabel = getAccessibilityLabel(component, metadata)
+  return {
+    title: accessibilityLabel,
+    "aria-label": accessibilityLabel,
+  }
+}
 
 type BoxSide = "top" | "right" | "bottom" | "left"
 

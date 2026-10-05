@@ -3,7 +3,7 @@ import { Activity } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import type { Metadata, Props, SettingsField } from "@/client/features/types"
-import { createAttributeMap, createColorAttribute, createCustomClassesAttribute, createIdAttribute, createTextAttribute, parseJsonSetting, readCustomClasses } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createColorAttribute, createCustomClassesAttribute, createIdAttribute, createTextAttribute, parseJsonSetting, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
 const tag = "line-chart" as const
@@ -104,8 +104,11 @@ const Component = (props: Props) => {
     return { value: Math.round(value), y }
   })
 
+  const metadata = getComponentInfo(props.component.tag)
+  const accessibilityAttrs = getAccessibilityAttributes(props.component, metadata)
+
   return (
-    <section className={cn("rounded-xl border bg-card p-5 shadow-sm", customClasses, props.childClassName)}>
+    <section className={cn("rounded-xl border bg-card p-5 shadow-sm", customClasses, props.childClassName)} {...accessibilityAttrs}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-foreground">{title as React.ReactNode}</h3>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
