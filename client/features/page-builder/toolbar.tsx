@@ -12,6 +12,14 @@ import type { HistoryEntry } from "@/client/features/types"
 import type { AppNode } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 
+function ShortcutHint({ shortcut }: { shortcut: string }) {
+  return (
+    <kbd className="ml-2 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono text-muted-foreground shrink-0">
+      {shortcut}
+    </kbd>
+  )
+}
+
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
 
@@ -187,8 +195,15 @@ export const Toolbar: React.FC<Readonly<{
 
           <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
             {onOpenCommandPalette ? (
-              <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette (⌘K)">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onOpenCommandPalette}
+                title="Command palette (⌘K)"
+                className="flex items-center gap-1"
+              >
                 <Command className="h-4 w-4" />
+                <ShortcutHint shortcut="⌘K" />
               </Button>
             ) : null}
             <HistoryPopover
@@ -201,8 +216,14 @@ export const Toolbar: React.FC<Readonly<{
               onDiscard={onDiscardHistory}
               previewIndex={historyPreviewIndex}
             >
-              <Button variant="outline" size="sm" title="History">
+              <Button
+                variant="outline"
+                size="sm"
+                title="History (⌘H)"
+                className="flex items-center gap-1"
+              >
                 <History className="h-4 w-4" />
+                <ShortcutHint shortcut="⌘H" />
               </Button>
             </HistoryPopover>
             <ToolbarSettingsPopover
@@ -232,8 +253,15 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
 
           <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
-            <Button variant="outline" size="sm" onClick={savePage} title="Save">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={savePage}
+              title="Save (⌘S)"
+              className="flex items-center gap-1"
+            >
               <Save className="h-4 w-4" />
+              <ShortcutHint shortcut="⌘S" />
             </Button>
             <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard">
               <X className="h-4 w-4" />
