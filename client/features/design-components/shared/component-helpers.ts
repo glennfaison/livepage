@@ -10,8 +10,6 @@ export function getAccessibilityLabel(component: Readonly<AppNode>, metadata: Re
   let content = ""
   if (Array.isArray(children)) {
     content = children.filter((c): c is string => typeof c === "string").join(" ").trim()
-  } else if (typeof children === "string") {
-    content = children.trim()
   }
 
   if (content) {
