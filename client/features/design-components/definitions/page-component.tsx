@@ -7,6 +7,7 @@ import { useCallback } from "react"
 import type { Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
+import { useDragDrop } from "../editor-controls/drag-drop-context"
 
 const tag = "page" as const
 
@@ -62,10 +63,39 @@ function EditModeComponent(props: EditModeProps) {
 	const { setSelectedComponent, addComponent } = useComponentOperationsContext()
 	const metadata = getComponentInfo(currentPage.tag)
 	const accessibilityAttrs = getAccessibilityAttributes(currentPage, metadata)
+	const { state, setDropTarget, endDrag } = useDragDrop()
+	const hasChildren = currentPage.children.length > 0
+	const isDropTarget = state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === attributes.id
 
 	const appendComponent = useCallback(() => {
 		addComponent({ tag: "row", parentId: attributes.id })
 	}, [addComponent, attributes.id])
+
+	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		e.dataTransfer.dropEffect = "move"
+		if (state.draggedComponentId) {
+			setDropTarget({
+				type: "empty-layout",
+				parentId: attributes.id,
+				parentTag: "page",
+				index: 0,
+			})
+		}
+	}
+
+	const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+		if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+			if (state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === attributes.id) {
+				setDropTarget(null)
+			}
+		}
+	}
+
+	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		endDrag()
+	}
 
 	return (
 		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
@@ -87,10 +117,16 @@ function EditModeComponent(props: EditModeProps) {
 					return (<Child key={`${component.attributes.id}-${childIndex}`} {...props} component={component} parentTag={currentPage.tag} />)
 				})}
 
-				<div className={cn(
-					"flex flex-col items-center justify-center rounded-md p-4",
-					props.pageBuilderMode === "edit" && "border-2 border-dashed border-gray-200",
-				)}>
+				<div
+					className={cn(
+						"flex flex-col items-center justify-center rounded-md p-4 min-h-24",
+						props.pageBuilderMode === "edit" && "border-2 border-dashed border-gray-200",
+						isDropTarget && "bg-primary/20 ring-2 ring-primary ring-offset-2"
+					)}
+					onDragOver={handleDragOver}
+					onDragLeave={handleDragLeave}
+					onDrop={handleDrop}
+				>
 					<Button
 						variant="outline"
 						className="gap-2 px-4 py-2"

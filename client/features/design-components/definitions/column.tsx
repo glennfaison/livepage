@@ -9,6 +9,7 @@ import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { withDataSource } from "@/client/features/data-sources"
+import { useDragDrop, type DropTargetType } from "../editor-controls/drag-drop-context"
 
 const tag = "column" as const
 
@@ -72,11 +73,50 @@ const PreviewModeComponent = (props: ViewModeProps) => {
 
 const EmptyColumnContent = ({
 	onAddChildComponent,
+	parentId,
 }: Readonly<{
 	onAddChildComponent: (tag: string) => void
+	parentId: string
 }>) => {
+	const { state, setDropTarget, endDrag } = useDragDrop()
+	const isDropTarget = state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === parentId
+
+	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		e.dataTransfer.dropEffect = "move"
+		if (state.draggedComponentId) {
+			setDropTarget({
+				type: "empty-layout",
+				parentId,
+				parentTag: "column",
+				index: 0,
+			})
+		}
+	}
+
+	const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+		if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+			if (state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === parentId) {
+				setDropTarget(null)
+			}
+		}
+	}
+
+	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		endDrag()
+	}
+
 	return (
-		<div className="flex items-center justify-center h-full w-full text-muted-foreground">
+		<div
+			className={cn(
+				"flex items-center justify-center h-full w-full text-muted-foreground min-h-24",
+				isDropTarget && "bg-primary/20 ring-2 ring-primary ring-offset-2"
+			)}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
+		>
 			<ComponentSelectorPopover onSelect={onAddChildComponent} parentTag={tag}>
 				<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
 					<Plus className="h-3 w-3" />
@@ -142,7 +182,9 @@ const EditModeComponent = (props: EditModeProps) => {
 				parentTag={component.tag}
 				onAddComponent={handleAddAtIndex}
 				index={index}
-				isVisible={visibleHorizontalDividers.has(index)} />
+				isVisible={visibleHorizontalDividers.has(index)}
+				parentId={attributes.id}
+				dividerIndex={index} />
 		) : (
 			<React.Fragment key={index}>{item}</React.Fragment>
 		)
@@ -167,7 +209,7 @@ const EditModeComponent = (props: EditModeProps) => {
 			}}
 			{...accessibilityAttrs}
 		>
-			{hasChildren ? WrappedChildren : <EmptyColumnContent onAddChildComponent={onAddChildComponent} />}
+			{hasChildren ? WrappedChildren : <EmptyColumnContent onAddChildComponent={onAddChildComponent} parentId={attributes.id} />}
 		</div>
 	)
 }

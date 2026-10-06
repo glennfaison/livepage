@@ -45,6 +45,7 @@ export type AppAction =
   | Readonly<{ type: "REMOVE_COMPONENT"; payload: Readonly<{ componentId: string }> }>
   | Readonly<{ type: "REPLACE_COMPONENT"; payload: Readonly<{ oldComponentId: string; newComponent?: AppNode; newComponentTag?: AppNodeTag }> }>
   | Readonly<{ type: "DUPLICATE_COMPONENT"; payload: Readonly<{ componentId: string; parentId?: string }> }>
+  | Readonly<{ type: "MOVE_COMPONENT"; payload: Readonly<{ componentId: string; newParentId: string; index?: number }> }>
   | Readonly<{ type: "SET_SELECTED_COMPONENT"; payload: string }>
   | Readonly<{ type: "SET_SELECTED_COMPONENT_ANCESTORS"; payload: string }>
   | Readonly<{ type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }>
@@ -231,6 +232,7 @@ export type Operations = Readonly<{
   updateComponent: (componentId: string, updates: Partial<AppNode>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
+  moveComponent?: (componentId: string, newParentId: string, index?: number) => void
   addComponent: (args: { tag: string; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: string) => void
   findComponentById: (components: ReadonlyArray<AppNode | string>, id: string) => AppNode | null
