@@ -1,5 +1,6 @@
 import { Plug } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
+import { safeFetch } from "../ssrf-protection"
 
 const settings = [
 	{
@@ -34,7 +35,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		? new Function("data", parseResultSource) as (data: unknown) => unknown
 		: undefined
 
-	const result = await fetch(url)
+	const result = await safeFetch(url)
 	if (!result.ok) {
 		throw await result.json()
 	}
