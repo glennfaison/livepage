@@ -16,13 +16,7 @@ const customJestConfig = {
     "^@/server/(.*)$": "<rootDir>/server/$1",
     "^@/app/(.*)$": "<rootDir>/app/$1",
     "^@/(.*)$": "<rootDir>/$1",
-    "^jsonpath-plus$": "<rootDir>/__tests__/utils/jsonpath-plus-mock.ts",
   },
-  transformIgnorePatterns: [
-    "/node_modules/(?!.pnpm)(?!(geist|jsonpath-plus)/)",
-    "/node_modules/.pnpm/(?!(geist|jsonpath-plus)@)",
-    "^.+\\.module\\.(css|sass|scss)$",
-  ],
   collectCoverageFrom: [
     "client/**/*.{js,jsx,ts,tsx}",
     "shared/**/*.{js,jsx,ts,tsx}",
