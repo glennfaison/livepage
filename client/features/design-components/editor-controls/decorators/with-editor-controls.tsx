@@ -3,12 +3,13 @@ import { SettingsPopover } from "../settings-popover";
 import { Button } from "@/client/components/ui/button";
 import { cn } from "@/client/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import type { EditModeProps, Metadata } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import { getComponentInfo } from "../../registry-store";
 import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "../shared/editor-chrome";
 import { getAccessibilityAttributes } from "../../primitives";
+import { useDragDrop } from "../drag-drop-context";
 
 function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
@@ -64,11 +65,33 @@ function AncestorTags(props: EditModeProps) {
 function EditorControls(props: EditModeProps) {
   const { component } = props
   const { label } = getComponentInfo(component.tag)
-  const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
+  const { duplicateComponent, removeComponent, replaceComponent } = useComponentOperationsContext()
+  const { startDrag, endDrag } = useDragDrop()
 
   const handleReplace = useCallback((newType: string) => {
     replaceComponent(component.attributes.id, newType);
   }, [component.attributes.id, replaceComponent])
+
+  const dragRef = useRef<{ startX: number; startY: number; hasMoved: boolean } | null>(null)
+
+  const handleDragStart = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", component.attributes.id)
+    dragRef.current = { startX: e.clientX, startY: e.clientY, hasMoved: false }
+    startDrag(component.attributes.id, component.tag)
+  }, [component.attributes.id, component.tag, startDrag])
+
+  const handleDragEnd = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    endDrag()
+    dragRef.current = null
+  }, [endDrag])
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+  }, [])
 
   return (
     <div className="absolute -top-8 right-0">
@@ -131,6 +154,10 @@ function EditorControls(props: EditModeProps) {
           className={cn("h-6 w-6 cursor-grab", editorChromeButtonClassName)}
           aria-label="Move"
           title="Move"
+          draggable
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragOver={handleDragOver}
         >
           <Move className="h-4 w-4" />
         </Button>

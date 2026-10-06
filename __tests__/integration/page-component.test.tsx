@@ -4,6 +4,7 @@ import React from "react"
 import { getComponentInfo } from "@/client/features/design-components"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { AppNode } from "@/client/features/app-state"
+import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 
 
 // features/design-components/page-component.test.tsx
@@ -47,12 +48,14 @@ describe("page-component", () => {
     const qc = new QueryClient()
     render(
       <QueryClientProvider client={qc}>
-        <Component
-          pageBuilderMode="edit"
-          component={currentPage}
-          selectedComponentId={""}
-          selectedComponentAncestors={[]}
-        />
+        <DragDropProvider moveComponent={() => {}}>
+          <Component
+            pageBuilderMode="edit"
+            component={currentPage}
+            selectedComponentId={""}
+            selectedComponentAncestors={[]}
+          />
+        </DragDropProvider>
       </QueryClientProvider>
     )
 

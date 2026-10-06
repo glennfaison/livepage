@@ -6,6 +6,7 @@ import {
   removeComponent,
   duplicateComponent,
   replaceComponent,
+  moveComponent,
   findComponentParentTree,
   findComponentById,
 } from "./helpers"
@@ -176,6 +177,36 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         },
         newComponentTree,
         `Replaced ${oldComponentId} with ${tag}`,
+      )
+    }
+
+    case "MOVE_COMPONENT": {
+      const { componentId, newParentId, index } = action.payload
+      if (!findComponentById(state.componentTree, componentId)) {
+        return state
+      }
+      if (!findComponentById(state.componentTree, newParentId)) {
+        return state
+      }
+      // Prevent moving a component into its own descendant
+      const parentTree = findComponentParentTree({ components: state.componentTree, componentId: newParentId })
+      if (parentTree.some((p) => p.attributes.id === componentId)) {
+        return state
+      }
+      const newComponentTree = moveComponent({
+        components: state.componentTree,
+        componentId,
+        newParentId,
+        index,
+      })
+      return withHistory(
+        {
+          ...state,
+          componentTree: newComponentTree,
+          selectedComponentId: componentId,
+        },
+        newComponentTree,
+        `Moved ${componentId}`,
       )
     }
 
