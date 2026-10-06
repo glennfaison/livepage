@@ -9,6 +9,7 @@ import { useComponentOperationsContext } from "../component-operations-context";
 import { getComponentInfo } from "../../registry-store";
 import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "../shared/editor-chrome";
 import { getAccessibilityAttributes } from "../../primitives";
+import { useDragContext } from "../drag-context";
 
 function AncestorTags(props: EditModeProps) {
   const { setSelectedComponent } = useComponentOperationsContext()
@@ -64,11 +65,18 @@ function AncestorTags(props: EditModeProps) {
 function EditorControls(props: EditModeProps) {
   const { component } = props
   const { label } = getComponentInfo(component.tag)
-  const { duplicateComponent, removeComponent, replaceComponent, } = useComponentOperationsContext()
+  const { duplicateComponent, removeComponent, replaceComponent } = useComponentOperationsContext()
+  const { startDrag } = useDragContext()
 
   const handleReplace = useCallback((newType: string) => {
     replaceComponent(component.attributes.id, newType);
   }, [component.attributes.id, replaceComponent])
+
+  const handleDragStart = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", component.attributes.id)
+    startDrag(component, props.parentTag ?? "", 0)
+  }, [component, props.parentTag, startDrag])
 
   return (
     <div className="absolute -top-8 right-0">
@@ -131,6 +139,8 @@ function EditorControls(props: EditModeProps) {
           className={cn("h-6 w-6 cursor-grab", editorChromeButtonClassName)}
           aria-label="Move"
           title="Move"
+          draggable
+          onDragStart={handleDragStart}
         >
           <Move className="h-4 w-4" />
         </Button>

@@ -3,6 +3,13 @@
 import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/client/components/ui/select"
 import type { TemplateDisplaySummary } from "./registry"
 import { LayoutTemplate } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -16,16 +23,29 @@ export function TemplateCatalogPopover({
 }>) {
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(templates.map((t) => t.category))
+    return ["all", ...Array.from(uniqueCategories).sort()]
+  }, [templates])
+
   const normalizedSearchTerm = searchTerm.trim().toLowerCase()
   const filteredTemplates = useMemo(() => {
-    if (!normalizedSearchTerm) return templates
-    return templates.filter((template) => [
-      template.name,
-      template.description,
-      template.category,
-      ...template.tags,
-    ].some((value) => value.toLowerCase().includes(normalizedSearchTerm)))
-  }, [normalizedSearchTerm, templates])
+    return templates.filter((template) => {
+      const matchesSearch =
+        !normalizedSearchTerm ||
+        [
+          template.name,
+          template.description,
+          template.category,
+          ...template.tags,
+        ].some((value) => value.toLowerCase().includes(normalizedSearchTerm))
+      const matchesCategory =
+        selectedCategory === "all" || template.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+  }, [normalizedSearchTerm, selectedCategory, templates])
 
   const handleApplyTemplate = (templateId: string) => {
     onApplyTemplate(templateId)
@@ -52,6 +72,18 @@ export function TemplateCatalogPopover({
             placeholder="Search templates by name, tag, or category"
             aria-label="Search templates"
           />
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger aria-label="Filter templates by category">
+              <SelectValue placeholder="All categories" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category === "all" ? "All categories" : category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div
             className="min-h-0 overflow-y-auto overflow-x-hidden pr-1"
             role="region"
@@ -103,7 +135,9 @@ export function TemplateCatalogPopover({
             </div>
             {filteredTemplates.length === 0 && (
               <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-                No templates match your search.
+                {searchTerm || selectedCategory !== "all"
+                  ? "No templates match your filters."
+                  : "No templates available."}
               </p>
             )}
           </div>

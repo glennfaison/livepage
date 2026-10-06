@@ -115,6 +115,8 @@ export const Toolbar: React.FC<Readonly<{
 
   // Keep the floating toolbar inside the viewport. Narrow screens start compact
   // so the expanded control strip cannot run off the right or bottom edge.
+  // Skip in preview mode: the toolbar renders null but the effect would still run
+  // and trigger state updates on resize, causing "Maximum update depth exceeded".
   useEffect(() => {
     if (pageBuilderMode === "preview") return
     if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) {
@@ -165,15 +167,15 @@ export const Toolbar: React.FC<Readonly<{
   }
 
   useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove)
-      document.addEventListener("mouseup", handleMouseUp)
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove)
-        document.removeEventListener("mouseup", handleMouseUp)
-      }
+    if (pageBuilderMode === "preview" || !isDragging) return
+
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [isDragging, dragOffset, handleMouseMove])
+  }, [isDragging, dragOffset, handleMouseMove, pageBuilderMode])
 
   if (pageBuilderMode === "preview" as PageBuilderMode) return null
 
