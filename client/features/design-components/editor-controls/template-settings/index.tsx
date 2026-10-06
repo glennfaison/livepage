@@ -1,10 +1,11 @@
 "use client"
 
 import React from "react"
+import { Input } from "@/client/components/ui/input"
+import { Search } from "lucide-react"
 import { useAppState } from "@/client/features/app-state"
 import { describeTemplateDisplayCatalog, getPageTemplateById, type TemplateDisplaySummary, type PageTemplateDefinition } from "@/client/features/templates/catalog-data"
 import type { AppAction, AppNode } from "@/client/features/types"
-import { TemplateCatalog } from "@/client/features/templates/template-catalog"
 
 function cloneTemplatePages(template: PageTemplateDefinition): ReadonlyArray<AppNode> {
   return JSON.parse(JSON.stringify(template.content.pages)) as ReadonlyArray<AppNode>
@@ -44,8 +45,20 @@ export function useTemplateSettingsEditor({
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }>) {
   const { dispatch } = useAppState()
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
 
   const templates = React.useMemo(() => describeTemplateDisplayCatalog(), [])
+
+  const filteredTemplates = React.useMemo(() => {
+    if (!normalizedSearchTerm) return templates
+    return templates.filter((template) => [
+      template.name,
+      template.description,
+      template.category,
+      ...template.tags,
+    ].some((value) => value.toLowerCase().includes(normalizedSearchTerm)))
+  }, [normalizedSearchTerm, templates])
 
   const handleApplyTemplate = (templateId: string) => {
     const template = getPageTemplateById(templateId)
@@ -58,22 +71,97 @@ export function useTemplateSettingsEditor({
   }
 
   return {
-    templates,
+    searchTerm,
+    setSearchTerm,
+    filteredTemplates,
     handleApplyTemplate,
   }
 }
 
 export function TemplateTabContent({
-  templates,
+  searchTerm,
+  setSearchTerm,
+  filteredTemplates,
   handleApplyTemplate,
 }: Readonly<{
-  templates: ReadonlyArray<TemplateDisplaySummary>
+  searchTerm: string
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
+  filteredTemplates: ReadonlyArray<TemplateDisplaySummary>
   handleApplyTemplate: (templateId: string) => void
 }>) {
   return (
-    <TemplateCatalog
-      templates={templates}
-      onApplyTemplate={handleApplyTemplate}
-    />
+    <div className="flex flex-col flex-1 min-h-1 overflow-clip">
+      <div className="p-4 space-y-4">
+        <div className="space-y-1.5">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Template catalog</h2>
+          <p className="text-sm text-muted-foreground">Choose a starting point tailored to the kind of page you want to build.</p>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search templates by name, tag, or category"
+            aria-label="Search templates"
+            className="pl-10"
+          />
+        </div>
+        <div
+          className="min-h-0 overflow-y-auto overflow-x-hidden pr-1 flex-1"
+          role="region"
+          aria-label="Available templates"
+        >
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredTemplates.map((template) => {
+              const primaryTag = template.tags[0] ?? template.category
+
+              return (
+                <button
+                  key={template.id}
+                  type="button"
+                  onClick={() => handleApplyTemplate(template.id)}
+                  aria-label={`Apply ${template.name} template`}
+                  className="group w-full rounded-2xl border border-border bg-background p-3 text-left transition-all duration-150 hover:border-foreground/20 hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <div className="space-y-3">
+                    <div
+                      className="aspect-[4/3] overflow-hidden rounded-xl border border-border bg-cover bg-center bg-no-repeat shadow-sm"
+                      style={{ backgroundImage: `url(${template.thumbnail})` }}
+                      aria-label={`${template.name} preview`}
+                    />
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                            {template.category}
+                          </span>
+                          <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400">
+                            Best for {primaryTag}
+                          </span>
+                        </div>
+                        <h3 className="font-medium text-foreground">{template.name}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{template.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {template.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          {filteredTemplates.length === 0 && (
+            <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+              No templates match your search.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

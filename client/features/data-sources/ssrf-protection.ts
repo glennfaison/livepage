@@ -26,9 +26,9 @@ function ipToNumber(ip: string): bigint {
 function ipv4ToNumber(ip: string): bigint {
   const parts = ip.split(".").map(Number)
   return (
-    (BigInt(parts[0]) << 24n) |
-    (BigInt(parts[1]) << 16n) |
-    (BigInt(parts[2]) << 8n) |
+    (BigInt(parts[0]) << BigInt(24)) |
+    (BigInt(parts[1]) << BigInt(16)) |
+    (BigInt(parts[2]) << BigInt(8)) |
     BigInt(parts[3])
   )
 }
@@ -36,9 +36,9 @@ function ipv4ToNumber(ip: string): bigint {
 function ipv6ToNumber(ip: string): bigint {
   const expanded = expandIPv6(ip)
   const parts = expanded.split(":").map((part) => BigInt(`0x${part}`))
-  let result = 0n
+  let result = BigInt(0)
   for (const part of parts) {
-    result = (result << 16n) | part
+    result = (result << BigInt(16)) | part
   }
   return result
 }

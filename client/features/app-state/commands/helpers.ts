@@ -212,6 +212,55 @@ export function replaceComponent({
   })
 }
 
+export function moveComponent({
+  components,
+  componentId,
+  newParentId,
+  index,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+  newParentId: string
+  index: number
+}>): AppNode[] {
+  // First, find and extract the component to move
+  let componentToMove: AppNode | null = null
+
+  const withoutComponent = components.reduce<AppNode[]>((acc, component) => {
+    if (typeof component === "string") {
+      return [...acc, component as never]
+    }
+
+    if (component.attributes.id === componentId) {
+      componentToMove = component
+      return acc
+    }
+
+    return [
+      ...acc,
+      {
+        ...component,
+        children: removeComponent({
+          components: component.children,
+          componentId,
+        }),
+      },
+    ]
+  }, [])
+
+  if (!componentToMove) {
+    return [...components] as AppNode[]
+  }
+
+  // Now insert the component at the new location
+  return insertComponent({
+    components: withoutComponent,
+    newComponent: componentToMove,
+    parentId: newParentId,
+    index,
+  })
+}
+
 /**
  * Pure counterpart of the UPDATE_COMPONENT command for callers that batch
  * several edits into one action (for example applying a template with
