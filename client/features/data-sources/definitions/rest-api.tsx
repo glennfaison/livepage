@@ -1,6 +1,7 @@
 import { Plug } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
 import { validateUrlForSsrf } from "@/client/lib/utils"
+import { JSONPath } from "jsonpath-plus"
 
 const settings = [
 	{
@@ -13,14 +14,20 @@ const settings = [
 	{
 		id: "parse-result",
 		type: "textarea",
-		label: "JavaScript function to parse your results",
-		placeholder: "Enter the function body",
-		variant: "function-body",
-		functionName: "parse",
-		functionParameters: "data",
+		label: "JSONPath expression to parse your results",
+		placeholder: "$.data.items[*] (leave empty to use raw response)",
 		defaultValue: [],
 	},
 ] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>
+
+function evaluateJsonPath(data: unknown, expression: string): unknown {
+	try {
+		const results = JSONPath({ path: expression, json: data, wrap: false }) as unknown[]
+		return results.length === 1 ? results[0] : results
+	} catch (error) {
+		throw new Error(`Invalid JSONPath expression: ${error instanceof Error ? error.message : String(error)}`)
+	}
+}
 
 async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSettings>): Promise<unknown> {
 	const urlValue = componentDataSourceSettings.url
@@ -36,9 +43,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 
 	const parseResult = componentDataSourceSettings["parse-result"]
 	const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
-	const parseResultFn = parseResultSource.trim()
-		? new Function("data", parseResultSource) as (data: unknown) => unknown
-		: undefined
+	const jsonPathExpression = parseResultSource.trim()
 
 	const result = await fetch(url)
 	if (!result.ok) {
@@ -46,7 +51,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	}
 	const unparsedData = await result.json()
 
-	return parseResultFn ? parseResultFn(unparsedData) : unparsedData
+	return jsonPathExpression ? evaluateJsonPath(unparsedData, jsonPathExpression) : unparsedData
 }
 
 export const dataSourceInfo = {

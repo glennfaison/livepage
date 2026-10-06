@@ -1,5 +1,6 @@
 import type { AppNode } from "@/client/features/types"
 import { replacePlaceholdersInString } from "@/client/features/placeholders"
+import { JSONPath } from "jsonpath-plus"
 
 export type DataSourceSettings = Readonly<{
   id: string
@@ -43,6 +44,15 @@ export function replaceDataSourceComponentProperties<T extends AppNode>(
   } as T
 }
 
+function evaluateJsonPath(data: unknown, expression: string): unknown {
+  try {
+    const results = JSONPath({ path: expression, json: data, wrap: false }) as unknown[]
+    return results.length === 1 ? results[0] : results
+  } catch (error) {
+    throw new Error(`Invalid JSONPath expression: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
 export async function loadBrowserDataSource(
   settings: DataSourceSettings,
   fetcher: typeof fetch = fetch,
@@ -58,8 +68,8 @@ export async function loadBrowserDataSource(
     if (!response.ok) throw new Error(`Data source request failed (${response.status})`)
     const result = await response.json()
     const source = settings.settings["parse-result"]
-    const code = Array.isArray(source) ? source.join("") : String(source || "")
-    return code.trim() ? new Function("data", code)(result) : result
+    const expression = Array.isArray(source) ? source.join("") : String(source || "")
+    return expression.trim() ? evaluateJsonPath(result, expression.trim()) : result
   }
   throw new Error(`Unknown data source: ${settings.id}`)
 }

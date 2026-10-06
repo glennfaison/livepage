@@ -16,7 +16,11 @@ const customJestConfig = {
     "^@/server/(.*)$": "<rootDir>/server/$1",
     "^@/app/(.*)$": "<rootDir>/app/$1",
     "^@/(.*)$": "<rootDir>/$1",
+    "^jsonpath-plus$": "<rootDir>/node_modules/jsonpath-plus/dist/index-node-cjs.cjs",
   },
+  transformIgnorePatterns: [
+    "/node_modules/(?!jsonpath-plus/)",
+  ],
   collectCoverageFrom: [
     "client/**/*.{js,jsx,ts,tsx}",
     "shared/**/*.{js,jsx,ts,tsx}",
