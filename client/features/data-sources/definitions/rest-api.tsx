@@ -1,4 +1,5 @@
 import { Plug } from "lucide-react"
+import { JSONPath } from "./jsonpath-wrapper"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
 
 const settings = [
@@ -10,13 +11,10 @@ const settings = [
 		defaultValue: [],
 	},
 	{
-		id: "parse-result",
+		id: "jsonpath",
 		type: "textarea",
-		label: "JavaScript function to parse your results",
-		placeholder: "Enter the function body",
-		variant: "function-body",
-		functionName: "parse",
-		functionParameters: "data",
+		label: "JSONPath expression to extract data",
+		placeholder: "$.items[*] or $.data.users[?(@.active==true)]",
 		defaultValue: [],
 	},
 ] as const satisfies ReadonlyArray<DataSourceInfo["settings"][number]>
@@ -28,11 +26,8 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		throw new Error("Expected REST API settings to provide a URL string")
 	}
 
-	const parseResult = componentDataSourceSettings["parse-result"]
-	const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
-	const parseResultFn = parseResultSource.trim()
-		? new Function("data", parseResultSource) as (data: unknown) => unknown
-		: undefined
+	const jsonpathValue = componentDataSourceSettings.jsonpath
+	const jsonpathExpression = Array.isArray(jsonpathValue) ? jsonpathValue.join("") : String(jsonpathValue)
 
 	const result = await fetch(url)
 	if (!result.ok) {
@@ -40,7 +35,16 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	}
 	const unparsedData = await result.json()
 
-	return parseResultFn ? parseResultFn(unparsedData) : unparsedData
+	if (!jsonpathExpression.trim()) {
+		return unparsedData
+	}
+
+	try {
+		const extractedData = JSONPath({ path: jsonpathExpression, json: unparsedData })
+		return extractedData
+	} catch (error) {
+		throw new Error(`Invalid JSONPath expression: ${error instanceof Error ? error.message : String(error)}`)
+	}
 }
 
 export const dataSourceInfo = {
