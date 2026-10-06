@@ -1,8 +1,9 @@
 "use client"
 
 import React from "react"
+import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
-import { Search } from "lucide-react"
+import { Grid, List, Search } from "lucide-react"
 import { useAppState } from "@/client/features/app-state"
 import { describeTemplateDisplayCatalog, getPageTemplateById, type TemplateDisplaySummary, type PageTemplateDefinition } from "@/client/features/templates/catalog-data"
 import type { AppAction, AppNode } from "@/client/features/types"
@@ -46,6 +47,7 @@ export function useTemplateSettingsEditor({
 }>) {
   const { dispatch } = useAppState()
   const [searchTerm, setSearchTerm] = React.useState("")
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">("list")
   const normalizedSearchTerm = searchTerm.trim().toLowerCase()
 
   const templates = React.useMemo(() => describeTemplateDisplayCatalog(), [])
@@ -74,6 +76,8 @@ export function useTemplateSettingsEditor({
     searchTerm,
     setSearchTerm,
     filteredTemplates,
+    viewMode,
+    setViewMode,
     handleApplyTemplate,
   }
 }
@@ -82,11 +86,15 @@ export function TemplateTabContent({
   searchTerm,
   setSearchTerm,
   filteredTemplates,
+  viewMode,
+  setViewMode,
   handleApplyTemplate,
 }: Readonly<{
   searchTerm: string
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>
   filteredTemplates: ReadonlyArray<TemplateDisplaySummary>
+  viewMode: "grid" | "list"
+  setViewMode: React.Dispatch<React.SetStateAction<"grid" | "list">>
   handleApplyTemplate: (templateId: string) => void
 }>) {
   return (
@@ -106,55 +114,116 @@ export function TemplateTabContent({
             className="pl-10"
           />
         </div>
+        <div className="flex gap-2 self-end">
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            aria-label="List view"
+            onClick={() => setViewMode("list")}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            aria-label="Grid view"
+            onClick={() => setViewMode("grid")}
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+        </div>
         <div
           className="min-h-0 overflow-y-auto overflow-x-hidden pr-1 flex-1"
           role="region"
           aria-label="Available templates"
         >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredTemplates.map((template) => {
-              const primaryTag = template.tags[0] ?? template.category
+          {viewMode === "list" ? (
+            <div className="space-y-2">
+              {filteredTemplates.map((template) => {
+                const primaryTag = template.tags[0] ?? template.category
 
-              return (
-                <button
-                  key={template.id}
-                  type="button"
-                  onClick={() => handleApplyTemplate(template.id)}
-                  aria-label={`Apply ${template.name} template`}
-                  className="group w-full rounded-2xl border border-border bg-background p-3 text-left transition-all duration-150 hover:border-foreground/20 hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <div className="space-y-3">
+                return (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => handleApplyTemplate(template.id)}
+                    aria-label={`Apply ${template.name} template`}
+                    className="group w-full rounded-xl border border-border bg-background p-3 text-left transition-all duration-150 hover:border-foreground/20 hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center gap-4"
+                  >
                     <div
-                      className="aspect-[4/3] overflow-hidden rounded-xl border border-border bg-cover bg-center bg-no-repeat shadow-sm"
+                      className="aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat shadow-sm flex-shrink-0"
                       style={{ backgroundImage: `url(${template.thumbnail})` }}
                       aria-label={`${template.name} preview`}
                     />
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="mb-2 flex items-center gap-2">
-                          <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                            {template.category}
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                          {template.category}
+                        </span>
+                        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400">
+                          Best for {primaryTag}
+                        </span>
+                      </div>
+                      <h3 className="font-medium text-foreground truncate">{template.name}</h3>
+                      <p className="text-sm text-muted-foreground truncate">{template.description}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {template.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                            {tag}
                           </span>
-                          <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400">
-                            Best for {primaryTag}
-                          </span>
-                        </div>
-                        <h3 className="font-medium text-foreground">{template.name}</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">{template.description}</p>
+                        ))}
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {template.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
-                          {tag}
-                        </span>
-                      ))}
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredTemplates.map((template) => {
+                const primaryTag = template.tags[0] ?? template.category
+
+                return (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => handleApplyTemplate(template.id)}
+                    aria-label={`Apply ${template.name} template`}
+                    className="group w-full rounded-2xl border border-border bg-background p-3 text-left transition-all duration-150 hover:border-foreground/20 hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <div className="space-y-3">
+                      <div
+                        className="aspect-[4/3] overflow-hidden rounded-xl border border-border bg-cover bg-center bg-no-repeat shadow-sm"
+                        style={{ backgroundImage: `url(${template.thumbnail})` }}
+                        aria-label={`${template.name} preview`}
+                      />
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="mb-2 flex items-center gap-2">
+                            <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                              {template.category}
+                            </span>
+                            <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400">
+                              Best for {primaryTag}
+                            </span>
+                          </div>
+                          <h3 className="font-medium text-foreground">{template.name}</h3>
+                          <p className="mt-1 text-sm text-muted-foreground">{template.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {template.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+                  </button>
+                )
+              })}
+            </div>
+          )}
           {filteredTemplates.length === 0 && (
             <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
               No templates match your search.
