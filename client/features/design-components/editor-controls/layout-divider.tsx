@@ -5,6 +5,7 @@ import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
+import { useDragDrop, type DropTargetType } from "./drag-drop-context"
 
 const MAX_ANCESTOR_DEPTH = 12
 /** Time the pointer has to reach the divider after leaving a child before it hides. */
@@ -38,17 +39,24 @@ export const Divider = ({
   onAddComponent,
   index,
   isVisible,
+  parentId,
+  dividerIndex,
 }: Readonly<{
   orientation: "horizontal" | "vertical"
   parentTag: AppNodeTag
   onAddComponent: (type: AppNodeTag, index: number) => void
   index: number
   isVisible: boolean
+  parentId: string
+  dividerIndex: number
 }>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   const [hovered, setHovered] = React.useState(false)
+  const { state, setDropTarget, endDrag } = useDragDrop()
   // Stay visible while the pointer is on the bar/+ so it does not fade mid-click.
   const shown = isVisible || popoverOpen || hovered
+
+  const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex
 
   const barRef = React.useRef<HTMLDivElement>(null)
   const color = useDividerContrastColor(barRef)
@@ -59,18 +67,50 @@ export const Divider = ({
     setPopoverOpen(false)
   }
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    if (state.draggedComponentId) {
+      setDropTarget({
+        type: "divider",
+        parentId,
+        parentTag,
+        index,
+        dividerIndex,
+      })
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    // Only clear if we're actually leaving the element (not entering a child)
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      if (state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex) {
+        setDropTarget(null)
+      }
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    endDrag()
+  }
+
   return (
     <div
       ref={barRef}
       style={{ backgroundColor: color }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       className={cn(
         "relative flex items-center justify-center transition-opacity duration-150 group cursor-pointer",
         // Opacity only — never visibility:hidden — so the hit target stays active
         // while the pointer moves from a child onto the bar.
         shown ? "opacity-100" : "opacity-0",
         orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
+        isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
       )}
     >
       <ComponentSelectorPopover onSelect={handleAddComponent} parentTag={parentTag}>

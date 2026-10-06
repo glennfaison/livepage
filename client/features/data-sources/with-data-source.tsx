@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/client/lib/utils"
 import { replaceDataSourceComponentProperties } from "./browser-core"
 import { DataSourceLoading, DataSourceError, readableErrorMessage } from "./data-source-states"
+import { DataSourceErrorBoundary } from "@/client/components/error-boundary"
 
 const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
 
@@ -61,15 +62,19 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			return <WrappedComponent {...props} component={dataSourceComponent} key={key} />
 		}
 
-		if (Array.isArray(dataSourceData)) {
-			return (
-				<div className={cn("block", props.childClassName)}>
-					{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}
-				</div>
-			)
-		} else {
-			return renderDataSourceComponent(dataSourceData)
-		}
+		const renderedContent = Array.isArray(dataSourceData) ? (
+			<div className={cn("block", props.childClassName)}>
+				{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}
+			</div>
+		) : (
+			renderDataSourceComponent(dataSourceData)
+		)
+
+		return (
+			<DataSourceErrorBoundary isPreviewMode={isPreviewMode} onRetry={handleRetry}>
+				{renderedContent}
+			</DataSourceErrorBoundary>
+		)
 	}
 
 	DataSourceComponent.displayName = `withDataSource(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`

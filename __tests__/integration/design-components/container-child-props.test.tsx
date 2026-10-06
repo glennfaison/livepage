@@ -4,11 +4,23 @@ import { render, screen } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { getComponentInfo } from "@/client/features/design-components"
 import type { AppNode } from "@/client/features/app-state"
+import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 
 function renderWithQueryClient(ui: React.ReactElement) {
 	const queryClient = new QueryClient()
 
 	return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+}
+
+function renderWithDragDrop(ui: React.ReactElement) {
+	const queryClient = new QueryClient()
+	return render(
+		<QueryClientProvider client={queryClient}>
+			<DragDropProvider moveComponent={() => {}}>
+				{ui}
+			</DragDropProvider>
+		</QueryClientProvider>
+	)
 }
 
 describe("container child props", () => {
@@ -132,7 +144,7 @@ describe("container child props", () => {
 		}
 
 		const Component = getComponentInfo("row").EditModeComponent
-		const { container } = renderWithQueryClient(
+		const { container } = renderWithDragDrop(
 			<Component
 				pageBuilderMode="edit"
 				component={component}
@@ -152,7 +164,7 @@ describe("container child props", () => {
 			children: [],
 		}
 		const Component = getComponentInfo("row").EditModeComponent
-		const { container } = renderWithQueryClient(
+		const { container } = renderWithDragDrop(
 			<Component
 				pageBuilderMode="edit"
 				component={component}
@@ -184,7 +196,7 @@ describe("container child props", () => {
 		}
 
 		const Component = getComponentInfo("row").EditModeComponent
-		const { container } = renderWithQueryClient(
+		const { container } = renderWithDragDrop(
 			<Component
 				pageBuilderMode="edit"
 				component={component}

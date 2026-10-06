@@ -22,6 +22,7 @@ import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } f
 import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
+import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 
 const templateDisplayCatalog = describeTemplateDisplayCatalog()
 
@@ -279,12 +280,14 @@ export default function BuilderPage() {
           </div>
 
           <PageBuilderErrorBoundary>
-            <CanvasRenderer
-              component={currentPage}
-              pageBuilderMode={pageBuilderMode}
-              selectedComponentId={state.selectedComponentId}
-              selectedComponentAncestors={state.selectedComponentAncestors}
-            />
+            <DragDropProvider moveComponent={componentOperations.moveComponent ?? (() => {})}>
+              <CanvasRenderer
+                component={currentPage}
+                pageBuilderMode={pageBuilderMode}
+                selectedComponentId={state.selectedComponentId}
+                selectedComponentAncestors={state.selectedComponentAncestors}
+              />
+            </DragDropProvider>
           </PageBuilderErrorBoundary>
         </main>
 
