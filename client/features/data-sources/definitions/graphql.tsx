@@ -1,5 +1,6 @@
 import { Network } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
+import { validateUrlForSsrf } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -36,6 +37,11 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	const url = value(componentDataSourceSettings, "url").trim()
 	const query = value(componentDataSourceSettings, "query").trim()
 	if (!url || !query) throw new Error("GraphQL settings require an endpoint URL and query")
+
+	const validation = validateUrlForSsrf(url)
+	if (!validation.valid) {
+		throw new Error(validation.error ?? "Invalid URL")
+	}
 
 	let variables: unknown = {}
 	const variablesSource = value(componentDataSourceSettings, "variables").trim()
