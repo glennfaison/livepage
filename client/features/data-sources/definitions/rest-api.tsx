@@ -1,5 +1,6 @@
 import { Plug } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
+import { validateUrlForSsrf } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -26,6 +27,11 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	const url = Array.isArray(urlValue) ? urlValue.join("") : String(urlValue)
 	if (!url.trim()) {
 		throw new Error("Expected REST API settings to provide a URL string")
+	}
+
+	const validation = validateUrlForSsrf(url.trim())
+	if (!validation.valid) {
+		throw new Error(validation.error ?? "Invalid URL")
 	}
 
 	const parseResult = componentDataSourceSettings["parse-result"]
