@@ -1,6 +1,7 @@
 import React from "react"
 import type { AppNode, PageBuilderMode } from "@/client/features/types"
 import { getComponentInfo, PreviewRenderer } from "@/client/features/design-components"
+import { DataSourceErrorBoundary } from "@/client/components/error-boundary"
 
 export type CanvasRendererProps = Readonly<{
   component: AppNode
@@ -15,11 +16,13 @@ export function CanvasRenderer(props: CanvasRendererProps) {
 
   if (pageBuilderMode === "preview") {
     return (
-      <PreviewRenderer
-        {...rest}
-        pageBuilderMode="preview"
-        component={component}
-      />
+      <DataSourceErrorBoundary isPreviewMode={true}>
+        <PreviewRenderer
+          {...rest}
+          pageBuilderMode="preview"
+          component={component}
+        />
+      </DataSourceErrorBoundary>
     )
   }
 
