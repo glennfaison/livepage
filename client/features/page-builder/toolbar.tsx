@@ -5,7 +5,7 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X, Undo2, Redo2 } from "lucide-react"
+import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
@@ -195,7 +195,7 @@ export const Toolbar: React.FC<Readonly<{
       }}
     >
       {!toolbarMinimized ? (
-        <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
+        <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
@@ -203,76 +203,57 @@ export const Toolbar: React.FC<Readonly<{
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
 
-          <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
-            {onOpenCommandPalette ? (
-              <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title={`Command palette (${formatShortcut("k")})`} className="gap-1.5">
-                <Command className="h-4 w-4" />
-                <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("k")}</span>
-              </Button>
-            ) : null}
-            <HistoryPopover
-              isOpen={historyPopoverOpen}
-              onOpenChange={setHistoryPopoverOpen}
-              history={history}
-              currentHistoryIndex={currentHistoryIndex}
-              onSelectHistory={onSelectHistory}
-              onAccept={onAcceptHistory}
-              onDiscard={onDiscardHistory}
-              previewIndex={historyPreviewIndex}
-            >
-              <Button variant="outline" size="sm" title={`History (${formatShortcut("h")})`} className="gap-1.5">
-                <History className="h-4 w-4" />
-                <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("h")}</span>
-              </Button>
-            </HistoryPopover>
-            <ToolbarSettingsPopover
-              isOpen={settingsPopoverOpen}
-              onOpenChange={setSettingsPopoverOpen}
-              toolbarLayout={toolbarLayout}
-              onToolbarLayoutChange={setToolbarLayout}
-              pageTitle={pageTitle}
-              onPageTitleChange={onPageTitleChange ?? (() => {})}
-            >
-              <Button variant="outline" size="sm" title="Settings">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </ToolbarSettingsPopover>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setToolbarLayout(toolbarLayout === "horizontal" ? "vertical" : "horizontal")}
-              title={`Switch to ${toolbarLayout === "horizontal" ? "vertical" : "horizontal"} layout`}
-            >
-              <RotateCw className="h-4 w-4" />
+          {onOpenCommandPalette ? (
+            <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette" className="shrink-0">
+              <Command className="h-4 w-4" />
             </Button>
-          </div>
+          ) : null}
+          <HistoryPopover
+            isOpen={historyPopoverOpen}
+            onOpenChange={setHistoryPopoverOpen}
+            history={history}
+            currentHistoryIndex={currentHistoryIndex}
+            onSelectHistory={onSelectHistory}
+            onAccept={onAcceptHistory}
+            onDiscard={onDiscardHistory}
+            previewIndex={historyPreviewIndex}
+          >
+            <Button variant="outline" size="sm" title="History" className="shrink-0">
+              <History className="h-4 w-4" />
+            </Button>
+          </HistoryPopover>
+          <ToolbarSettingsPopover
+            isOpen={settingsPopoverOpen}
+            onOpenChange={setSettingsPopoverOpen}
+            toolbarLayout={toolbarLayout}
+            onToolbarLayoutChange={setToolbarLayout}
+            pageTitle={pageTitle}
+            onPageTitleChange={onPageTitleChange ?? (() => {})}
+          >
+            <Button variant="outline" size="sm" title="Settings" className="shrink-0">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </ToolbarSettingsPopover>
 
-          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize">
+          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
             <Minimize className="h-4 w-4" />
           </Button>
 
-          <div className={cn("flex items-center gap-2", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
-            <Button variant="outline" size="sm" onClick={savePage} title={`Save (${formatShortcut("s")})`} className="gap-1.5">
-              <Save className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("s")}</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {canUndo && (
-            <Button variant="outline" size="sm" onClick={onUndo} title={`Undo (${formatShortcut("z")})`} className="gap-1.5" disabled={!canUndo}>
-              <Undo2 className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("z")}</span>
-            </Button>
-          )}
-          {canRedo && (
-            <Button variant="outline" size="sm" onClick={onRedo} title={`Redo (${formatShortcut("shift+z")})`} className="gap-1.5" disabled={!canRedo}>
-              <Redo2 className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs text-muted-foreground">{formatShortcut("shift+z")}</span>
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={savePage} title="Save" className="shrink-0">
+            <Save className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard" className="shrink-0">
+            <X className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setToolbarLayout(toolbarLayout === "horizontal" ? "vertical" : "horizontal")}
+            title={`Switch to ${toolbarLayout === "horizontal" ? "vertical" : "horizontal"} layout`}
+            className="shrink-0"
+          >
+            <RotateCw className="h-4 w-4" />
+          </Button>
 
           <div
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
