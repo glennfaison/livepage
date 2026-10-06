@@ -1,5 +1,6 @@
 import { Rss } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
+import { safeFetch } from "../ssrf-protection"
 
 const settings = [
 	{
@@ -22,7 +23,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		throw new Error("Expected RSS feed settings to provide a URL string")
 	}
 
-	const result = await fetch(url)
+	const result = await safeFetch(url)
 	if (!result.ok) {
 		throw new Error(`RSS feed request failed with status ${result.status}`)
 	}
