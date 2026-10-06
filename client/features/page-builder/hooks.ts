@@ -318,6 +318,19 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch])
 
+  // Move component
+  const moveComponent = useCallback(({ componentId, newParentId, index }: { componentId: string; newParentId: string; index: number }) => {
+    dispatch({
+      type: "MOVE_COMPONENT",
+      payload: { componentId, newParentId, index },
+    })
+
+    toast({
+      title: "Component moved",
+      description: "The component has been moved to a new location.",
+    })
+  }, [dispatch])
+
   return {
     addComponent,
     updateComponent,
@@ -325,6 +338,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     duplicateComponent,
     setSelectedComponent,
     replaceComponent,
+    moveComponent,
     findComponentById,
   }
 }

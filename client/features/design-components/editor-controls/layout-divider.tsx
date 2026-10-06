@@ -5,6 +5,7 @@ import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
+import { useDragContext } from "./drag-context"
 
 const MAX_ANCESTOR_DEPTH = 12
 /** Time the pointer has to reach the divider after leaving a child before it hides. */
@@ -38,17 +39,21 @@ export const Divider = ({
   onAddComponent,
   index,
   isVisible,
+  parentId,
 }: Readonly<{
   orientation: "horizontal" | "vertical"
   parentTag: AppNodeTag
   onAddComponent: (type: AppNodeTag, index: number) => void
   index: number
   isVisible: boolean
+  parentId: string
 }>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   const [hovered, setHovered] = React.useState(false)
+  const { isDragging, draggedComponentId, moveComponent } = useDragContext()
+  const [isDragOver, setIsDragOver] = React.useState(false)
   // Stay visible while the pointer is on the bar/+ so it does not fade mid-click.
-  const shown = isVisible || popoverOpen || hovered
+  const shown = isVisible || popoverOpen || hovered || isDragging
 
   const barRef = React.useRef<HTMLDivElement>(null)
   const color = useDividerContrastColor(barRef)
@@ -59,18 +64,42 @@ export const Divider = ({
     setPopoverOpen(false)
   }
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    if (draggedComponentId && moveComponent) {
+      moveComponent({ componentId: draggedComponentId, newParentId: parentId, index })
+    }
+  }
+
+  const dragOverClass = isDragOver ? "bg-primary/20 ring-2 ring-primary" : ""
+
   return (
     <div
       ref={barRef}
       style={{ backgroundColor: color }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
       className={cn(
         "relative flex items-center justify-center transition-opacity duration-150 group cursor-pointer",
         // Opacity only — never visibility:hidden — so the hit target stays active
         // while the pointer moves from a child onto the bar.
         shown ? "opacity-100" : "opacity-0",
         orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
+        dragOverClass,
       )}
     >
       <ComponentSelectorPopover onSelect={handleAddComponent} parentTag={parentTag}>
