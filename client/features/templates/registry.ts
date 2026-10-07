@@ -30,6 +30,12 @@ export const pageTemplateRegistry = [
   parsePageTemplateDefinition(neighborhoodCafePageTemplate),
 ] as const
 
+/**
+ * Finds a template by its ID in the registry.
+ *
+ * @param id - The template ID to search for
+ * @returns The template definition if found, undefined otherwise
+ */
 export function getPageTemplateById(id: string): PageTemplateDefinition | undefined {
   return pageTemplateRegistry.find((template) => template.id === id)
 }
@@ -43,6 +49,12 @@ export type TemplateDisplaySummary = Readonly<{
   thumbnail: string
 }>
 
+/**
+ * Returns a summary of all registered templates for display in the catalog UI,
+ * including thumbnail images.
+ *
+ * @returns Array of template display summaries
+ */
 export function describeTemplateDisplayCatalog(): ReadonlyArray<TemplateDisplaySummary> {
   return pageTemplateRegistry.map(({ id, metadata }) => ({
     id,
@@ -63,7 +75,12 @@ export type TemplateSummary = Readonly<{
   tags: ReadonlyArray<string>
 }>
 
-/** Describes every registered template from its own metadata, so selection logic never hard-codes the catalog. */
+/**
+ * Returns a summary of all registered templates for selection logic, without
+ * page content or thumbnails.
+ *
+ * @returns Array of template summaries
+ */
 export function describeTemplateCatalog(): ReadonlyArray<TemplateSummary> {
   return pageTemplateRegistry.map(({ id, metadata }) => ({
     id,
