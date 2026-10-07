@@ -11,6 +11,20 @@ both coding agents and human contributors. Humans can follow the same Verify and
 Finish checklists; the [PR template](./.github/pull_request_template.md) and
 `npm run verify` encode a lighter version of those checks.
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in the repo's GitHub Issues (uses the `gh` CLI). See `docs/agents/issue-tracker-github.md`.
+
+### Triage labels
+
+Five canonical triage roles mapped to label strings: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
 ## Skills
 
 All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
