@@ -1,11 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import React from "react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useStoredList } from "./stored-list"
 
 const RECENTLY_USED_KEY = "livepage-recently-used-templates"
 const FAVORITES_KEY = "livepage-favorite-templates"
+const VIEW_MODE_KEY = "livepage-template-view-mode"
 const MAX_RECENT = 5
 
 export type CatalogViewMode = "grid" | "list"
@@ -34,9 +36,24 @@ function matchesSearch(template: TemplateDisplaySummary, normalizedSearchTerm: s
 export function useTemplateCatalog(templates: ReadonlyArray<TemplateDisplaySummary>) {
   const [searchTerm, setSearchTerm] = useState("")
   const [requestedTabId, setRequestedTabId] = useState(ALL_TAB_ID)
-  const [viewMode, setViewMode] = useState<CatalogViewMode>("grid")
+  const [viewMode, setViewMode] = useState<CatalogViewMode>(() => {
+    try {
+      const stored = window.localStorage.getItem(VIEW_MODE_KEY)
+      return stored === "list" ? "list" : "grid"
+    } catch {
+      return "grid"
+    }
+  })
   const [favorites, updateFavorites] = useStoredList(FAVORITES_KEY)
   const [recentlyUsed, updateRecentlyUsed] = useStoredList(RECENTLY_USED_KEY)
+
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem(VIEW_MODE_KEY, viewMode)
+    } catch {
+      // Storage can be unavailable (private mode, quota); the preference then simply does not persist.
+    }
+  }, [viewMode])
 
   const tabs = useMemo<ReadonlyArray<CatalogTab>>(() => {
     const categories = Array.from(new Set(templates.map((template) => template.category))).sort()
