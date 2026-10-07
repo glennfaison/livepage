@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/client/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/client/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/client/components/ui/dropdown-menu"
 import { selectCurrentPage } from "@/client/features/app-state"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
@@ -18,11 +18,13 @@ import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/com
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
+import { serializeAppStateAsHtml, validateHtmlExport } from "@/client/features/serializers"
+import { toast } from "@/client/components/ui/use-toast"
 
 const templateDisplayCatalog = describeTemplateDisplayCatalog()
 
@@ -77,6 +79,52 @@ export default function BuilderPage() {
 
   const saveAsHTML = () => {
     savePageAsHtmlMutation.mutate(state.componentTree)
+    setSaveDropdownOpen(false)
+  }
+
+  const previewExport = () => {
+    const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    
+    if (validation.hasWarnings || validation.hasErrors) {
+      for (const issue of validation.issues) {
+        toast({
+          title: issue.type === "error" ? "Export Issue" : "Export Warning",
+          description: issue.message,
+          variant: issue.type === "error" ? "destructive" : "default",
+        })
+      }
+    }
+
+    const blob = new Blob([html], { type: "text/html" })
+    const url = URL.createObjectURL(blob)
+    const previewWindow = window.open(url, "_blank")
+    if (!previewWindow) {
+      toast({
+        title: "Preview blocked",
+        description: "Please allow popups for this site to preview the export.",
+        variant: "destructive",
+      })
+      URL.revokeObjectURL(url)
+    }
+    setSaveDropdownOpen(false)
+  }
+
+  const copyHtmlToClipboard = async () => {
+    const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+    try {
+      await navigator.clipboard.writeText(html)
+      toast({
+        title: "HTML copied",
+        description: "Exported HTML has been copied to clipboard.",
+      })
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy HTML to clipboard.",
+        variant: "destructive",
+      })
+    }
     setSaveDropdownOpen(false)
   }
 
@@ -224,6 +272,15 @@ export default function BuilderPage() {
                   <DropdownMenuItem onClick={saveAsHTML} disabled={savePageAsHtmlMutation.isPending}>
                     <Download className="h-4 w-4 mr-2" />
                     {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download as HTML"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={previewExport}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview Export
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={copyHtmlToClipboard}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy HTML to Clipboard
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
