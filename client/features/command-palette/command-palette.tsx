@@ -3,7 +3,9 @@
 import {
   Command as CommandIcon,
   CornerDownLeft,
+  Copy,
   Download,
+  Eye,
   FileJson,
   FileText,
   LayoutTemplate,
@@ -24,6 +26,7 @@ import type { AppAction, AppNode, AppState, Operations } from "@/client/features
 import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
+import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
 type PaletteCommand = Readonly<{
@@ -67,6 +70,8 @@ export const CommandPalette: React.FC<
     onSaveAsJson: () => void
     onSaveAsShortcode: () => void
     onSaveAsHtml: () => void
+    onPreviewExport: () => void
+    onCopyHtml: () => void
     onImportJson: () => void
     onImportShortcode: () => void
     onDiscardChanges: () => void
@@ -82,6 +87,8 @@ export const CommandPalette: React.FC<
   onSaveAsJson,
   onSaveAsShortcode,
   onSaveAsHtml,
+  onPreviewExport,
+  onCopyHtml,
   onImportJson,
   onImportShortcode,
   onDiscardChanges,
@@ -118,6 +125,29 @@ export const CommandPalette: React.FC<
     },
     [dispatch, state.currentHistoryIndex, state.history],
   )
+
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false)
+  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+
+  const runValidation = (action: "preview" | "copy") => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    setValidationResult(validation)
+    setPendingExportAction(action)
+    setValidationDialogOpen(true)
+    onOpenChange(false)
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction === "preview") {
+      onPreviewExport()
+    } else if (pendingExportAction === "copy") {
+      onCopyHtml()
+    }
+    setValidationDialogOpen(false)
+    setPendingExportAction(null)
+    setValidationResult(null)
+  }
 
   const commands = useMemo<ReadonlyArray<PaletteCommand>>(() => {
     const actionCommands: PaletteCommand[] = [
@@ -186,6 +216,22 @@ export const CommandPalette: React.FC<
         keywords: ["export", "html", "download"],
         icon: <Download className="h-4 w-4" />,
         onSelect: onSaveAsHtml,
+      },
+      {
+        id: "action-preview-export",
+        group: "Actions",
+        label: "Preview export",
+        keywords: ["preview", "export", "html", "validate"],
+        icon: <Eye className="h-4 w-4" />,
+        onSelect: () => runValidation("preview"),
+      },
+      {
+        id: "action-copy-html",
+        group: "Actions",
+        label: "Copy HTML to clipboard",
+        keywords: ["copy", "html", "clipboard", "export"],
+        icon: <Copy className="h-4 w-4" />,
+        onSelect: () => runValidation("copy"),
       },
       {
         id: "action-import-json",
@@ -402,6 +448,18 @@ export const CommandPalette: React.FC<
           <span>↑↓ to navigate · ↵ to run · Esc to close</span>
         </div>
       </DialogContent>
+
+      <ValidationDialog
+        validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+        onProceed={handleValidationProceed}
+        onCancel={() => {
+          setValidationDialogOpen(false)
+          setPendingExportAction(null)
+          setValidationResult(null)
+        }}
+        isOpen={validationDialogOpen}
+        onOpenChange={setValidationDialogOpen}
+      />
     </Dialog>
   )
 }

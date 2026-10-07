@@ -23,7 +23,7 @@ import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
-import { serializeAppStateAsHtml, validateHtmlExport } from "@/client/features/serializers"
+import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
 const templateDisplayCatalog = describeTemplateDisplayCatalog()
@@ -51,6 +51,9 @@ export default function BuilderPage() {
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false)
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false)
+  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
@@ -83,48 +86,55 @@ export default function BuilderPage() {
   }
 
   const previewExport = () => {
-    const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
-    
-    if (validation.hasWarnings || validation.hasErrors) {
-      for (const issue of validation.issues) {
-        toast({
-          title: issue.type === "error" ? "Export Issue" : "Export Warning",
-          description: issue.message,
-          variant: issue.type === "error" ? "destructive" : "default",
-        })
-      }
-    }
-
-    const blob = new Blob([html], { type: "text/html" })
-    const url = URL.createObjectURL(blob)
-    const previewWindow = window.open(url, "_blank")
-    if (!previewWindow) {
-      toast({
-        title: "Preview blocked",
-        description: "Please allow popups for this site to preview the export.",
-        variant: "destructive",
-      })
-      URL.revokeObjectURL(url)
-    }
+    setValidationResult(validation)
+    setPendingExportAction("preview")
+    setValidationDialogOpen(true)
     setSaveDropdownOpen(false)
   }
 
-  const copyHtmlToClipboard = async () => {
-    const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
-    try {
-      await navigator.clipboard.writeText(html)
-      toast({
-        title: "HTML copied",
-        description: "Exported HTML has been copied to clipboard.",
-      })
-    } catch {
-      toast({
-        title: "Copy failed",
-        description: "Failed to copy HTML to clipboard.",
-        variant: "destructive",
-      })
+  const handleValidationProceed = () => {
+    if (pendingExportAction === "preview") {
+      const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+      const blob = new Blob([html], { type: "text/html" })
+      const url = URL.createObjectURL(blob)
+      const previewWindow = window.open(url, "_blank")
+      if (!previewWindow) {
+        toast({
+          title: "Preview blocked",
+          description: "Please allow popups for this site to preview the export.",
+          variant: "destructive",
+        })
+        URL.revokeObjectURL(url)
+      }
+    } else if (pendingExportAction === "copy") {
+      const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+      navigator.clipboard.writeText(html).then(
+        () => {
+          toast({
+            title: "HTML copied",
+            description: "Exported HTML has been copied to clipboard.",
+          })
+        },
+        () => {
+          toast({
+            title: "Copy failed",
+            description: "Failed to copy HTML to clipboard.",
+            variant: "destructive",
+          })
+        },
+      )
     }
+    setValidationDialogOpen(false)
+    setPendingExportAction(null)
+    setValidationResult(null)
+  }
+
+  const copyHtmlToClipboard = () => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    setValidationResult(validation)
+    setPendingExportAction("copy")
+    setValidationDialogOpen(true)
     setSaveDropdownOpen(false)
   }
 
@@ -362,6 +372,7 @@ export default function BuilderPage() {
           historyPreviewIndex={state.historyPreviewIndex}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           pageComponent={currentPage}
+          componentTree={state.componentTree}
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
@@ -378,9 +389,23 @@ export default function BuilderPage() {
           onSaveAsJson={saveAsJSON}
           onSaveAsShortcode={saveAsShortcode}
           onSaveAsHtml={saveAsHTML}
+          onPreviewExport={previewExport}
+          onCopyHtml={copyHtmlToClipboard}
           onImportJson={() => jsonFileInputRef.current?.click()}
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
           onDiscardChanges={handleDiscard}
+        />
+
+        <ValidationDialog
+          validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+          onProceed={handleValidationProceed}
+          onCancel={() => {
+            setValidationDialogOpen(false)
+            setPendingExportAction(null)
+            setValidationResult(null)
+          }}
+          isOpen={validationDialogOpen}
+          onOpenChange={setValidationDialogOpen}
         />
 
         <AssistChat dispatch={dispatch} />
