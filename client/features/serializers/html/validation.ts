@@ -91,6 +91,17 @@ function findLinks(nodes: ReadonlyArray<AppNode>): Array<{ node: AppNode; href: 
   return results
 }
 
+/**
+ * Validates a component tree for HTML export, checking for issues that may
+ * prevent the exported HTML from working correctly as a standalone document.
+ * Checks include: unknown data sources, external data sources that may fail
+ * due to CORS, relative image URLs without an asset base URL, relative links,
+ * and missing page titles.
+ *
+ * @param componentTree - The component tree to validate
+ * @param assetBaseUrl - Optional base URL for resolving relative asset URLs
+ * @returns ValidationResult with issues, hasErrors, and hasWarnings flags
+ */
 export function validateHtmlExport(
   componentTree: ReadonlyArray<AppNode>,
   assetBaseUrl?: string,

@@ -28,10 +28,23 @@ const dataSourceMap: DataSourceInfoMap = {
 	[LinkedInProfile.id]: LinkedInProfile,
 }
 
+/**
+ * Retrieves data source info by its ID.
+ *
+ * @param connectionId - The data source ID to look up
+ * @returns DataSourceInfo if found, undefined otherwise
+ */
 export function getDataSourceInfo(connectionId: DataSourceId): DataSourceInfo | undefined {
 	return dataSourceMap[connectionId]
 }
 
+/**
+ * Encodes data source settings (ID + settings object) as a base64 string
+ * for storage in component attributes.
+ *
+ * @param dataSourceSettings - Object containing the data source ID and settings
+ * @returns Base64-encoded string
+ */
 export function encodeDataSourceSettings(dataSourceSettings: {
 	id: DataSourceId
 	settings: DataSourceSettings
@@ -41,6 +54,13 @@ export function encodeDataSourceSettings(dataSourceSettings: {
 	return base64
 }
 
+/**
+ * Decodes a base64-encoded data source settings string back into its
+ * component ID and settings object.
+ *
+ * @param encodedDataSourceSettings - Base64-encoded settings string
+ * @returns Object with id and settings, or empty object if invalid
+ */
 export function decodeDataSourceSettings(encodedDataSourceSettings: string): {
 	id: DataSourceId
 	settings: DataSourceSettings

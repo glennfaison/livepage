@@ -29,6 +29,16 @@ function resolvePublicImageUrls(node: AppNode, assetBaseUrl: URL): AppNode {
   }
 }
 
+/**
+ * Serializes the app state (component tree) as a standalone HTML document.
+ * The HTML includes the serialized component tree as JSON data, the browser
+ * runtime, and styles for rendering. Relative image URLs can be resolved
+ * against an optional asset base URL.
+ *
+ * @param componentTree - The array of page components to serialize
+ * @param options.assetBaseUrl - Optional base URL to resolve relative image URLs
+ * @returns A complete HTML document as a string
+ */
 export function serializeAppStateAsHtml(
   componentTree: ReadonlyArray<AppNode>,
   options: HtmlExportOptions = {},
