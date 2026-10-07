@@ -3,12 +3,13 @@ import browserRuntime from "./generated/browser-runtime.js"
 import browserStyles from "./generated/browser-styles.js"
 import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 import { validateHtmlExport, type ValidationResult, type ValidationIssue } from "./validation"
+import { ValidationDialog } from "./validation-dialog"
 
 type HtmlExportOptions = Readonly<{
   assetBaseUrl?: string
 }>
 
-export { validateHtmlExport, type ValidationResult, type ValidationIssue }
+export { validateHtmlExport, type ValidationResult, type ValidationIssue, ValidationDialog }
 
 function resolvePublicImageUrls(node: AppNode, assetBaseUrl: URL): AppNode {
   const attributes = node.tag === "image"

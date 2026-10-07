@@ -52,6 +52,8 @@ export const Toolbar: React.FC<Readonly<{
   onOpenCommandPalette?: () => void
   /** Page component for settings popover */
   pageComponent?: AppNode
+  /** Full component tree for export validation */
+  componentTree: ReadonlyArray<AppNode>
   /** Callback to update page title */
   onPageTitleChange?: (title: string) => void
   /** Undo callback */
@@ -72,6 +74,7 @@ export const Toolbar: React.FC<Readonly<{
   historyPreviewIndex,
   onOpenCommandPalette,
   pageComponent,
+  componentTree,
   onPageTitleChange,
   onUndo,
   onRedo,
@@ -229,6 +232,7 @@ export const Toolbar: React.FC<Readonly<{
             onToolbarLayoutChange={setToolbarLayout}
             pageTitle={pageTitle}
             onPageTitleChange={onPageTitleChange ?? (() => {})}
+            componentTree={componentTree}
           >
             <Button variant="outline" size="sm" title="Settings" className="shrink-0">
               <Settings className="h-4 w-4" />

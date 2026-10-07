@@ -3,11 +3,13 @@
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
 import { cn } from "@/client/lib/utils"
-import { GripVertical, Keyboard, LayoutDashboard, Palette, Save, Settings } from "lucide-react"
+import { Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Save, Settings } from "lucide-react"
 import type React from "react"
 import { useCallback, useRef, useState } from "react"
 import type { AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
+import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { toast } from "@/client/components/ui/use-toast"
 
 type ToolbarSettingsPopoverProps = Readonly<{
   isOpen: boolean
@@ -17,6 +19,7 @@ type ToolbarSettingsPopoverProps = Readonly<{
   pageTitle: string
   onPageTitleChange: (title: string) => void
   children: React.ReactNode
+  componentTree: ReadonlyArray<AppNode>
 }>
 
 export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
@@ -27,11 +30,15 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   pageTitle,
   onPageTitleChange,
   children,
+  componentTree,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [isPositioned, setIsPositioned] = useState(false)
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false)
+  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -57,6 +64,51 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
 
   const handleMouseUp = () => {
     setIsDragging(false)
+  }
+
+  const runValidation = (action: "preview" | "copy") => {
+    const validation = validateHtmlExport(componentTree, window.location.origin)
+    setValidationResult(validation)
+    setPendingExportAction(action)
+    setValidationDialogOpen(true)
+    onOpenChange(false)
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction === "preview") {
+      const html = serializeAppStateAsHtml(componentTree, { assetBaseUrl: window.location.origin })
+      const blob = new Blob([html], { type: "text/html" })
+      const url = URL.createObjectURL(blob)
+      const previewWindow = window.open(url, "_blank")
+      if (!previewWindow) {
+        toast({
+          title: "Preview blocked",
+          description: "Please allow popups for this site to preview the export.",
+          variant: "destructive",
+        })
+        URL.revokeObjectURL(url)
+      }
+    } else if (pendingExportAction === "copy") {
+      const html = serializeAppStateAsHtml(componentTree, { assetBaseUrl: window.location.origin })
+      navigator.clipboard.writeText(html).then(
+        () => {
+          toast({
+            title: "HTML copied",
+            description: "Exported HTML has been copied to clipboard.",
+          })
+        },
+        () => {
+          toast({
+            title: "Copy failed",
+            description: "Failed to copy HTML to clipboard.",
+            variant: "destructive",
+          })
+        },
+      )
+    }
+    setValidationDialogOpen(false)
+    setPendingExportAction(null)
+    setValidationResult(null)
   }
 
   return (
@@ -168,15 +220,35 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   <Palette className="h-4 w-4" />
                   Browse Templates
                 </Button>
+                <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => runValidation("preview")}>
+                  <Eye className="h-4 w-4" />
+                  Preview Export
+                </Button>
+                <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => runValidation("copy")}>
+                  <Copy className="h-4 w-4" />
+                  Copy HTML to Clipboard
+                </Button>
                 <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => onOpenChange(false)}>
-                  <Save className="h-4 w-4" />
-                  Export Page
+                  <Download className="h-4 w-4" />
+                  Download as HTML
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </PopoverContent>
+
+      <ValidationDialog
+        validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+        onProceed={handleValidationProceed}
+        onCancel={() => {
+          setValidationDialogOpen(false)
+          setPendingExportAction(null)
+          setValidationResult(null)
+        }}
+        isOpen={validationDialogOpen}
+        onOpenChange={setValidationDialogOpen}
+      />
     </Popover>
   )
 }
