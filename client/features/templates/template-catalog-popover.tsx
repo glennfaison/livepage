@@ -16,11 +16,6 @@ export function TemplateCatalogPopover({
 }>) {
   const [open, setOpen] = React.useState(false)
 
-  const handleApplyTemplate = (templateId: string) => {
-    onApplyTemplate(templateId)
-    setOpen(false)
-  }
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -29,10 +24,10 @@ export function TemplateCatalogPopover({
           <span className="hidden sm:inline">Templates</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(52rem,calc(100vw-2rem))] max-h-[min(80vh,48rem)] overflow-hidden p-0">
+      <PopoverContent align="end" className="w-[min(52rem,calc(100vw-2rem))] flex max-h-[min(80vh,48rem)] flex-col overflow-hidden p-0">
         <TemplateCatalog
           templates={templates}
-          onApplyTemplate={handleApplyTemplate}
+          onApplyTemplate={onApplyTemplate}
           onClose={() => setOpen(false)}
         />
       </PopoverContent>
