@@ -2,6 +2,7 @@ import { z } from "zod"
 import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/server/services/openai"
 import { describeRequest } from "./request"
 import type { DraftResponse, DraftTemplate, PageRequest } from "@/shared/features/prompt-assist"
+import { logger } from "@/server/lib/logger"
 
 const MAX_VALUE_LENGTH = 600
 
@@ -31,7 +32,7 @@ export async function draftCopy(request: PageRequest, template: DraftTemplate): 
     return { values, source: "openai" }
   } catch (error) {
     if (!(error instanceof OpenAiUnavailableError)) throw error
-    console.warn("[prompt-assist] copy draft failed, leaving template text:", error.message)
+    logger.warn("[prompt-assist] copy draft failed, leaving template text:", { error: error.message })
     return { values: {}, source: "none" }
   }
 }

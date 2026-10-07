@@ -18,6 +18,7 @@ import { composePages } from "./compose-pages"
 import { applyDesignEdits } from "./design-edits"
 import { refinePage } from "./refine-loop"
 import type { PageRequest } from "@/shared/features/prompt-assist"
+import { logger } from "@/client/lib/logger"
 
 const catalog = describeTemplateCatalog()
 
@@ -56,7 +57,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
       onStep: (step) => emit({ type: "status", status: { phase: "refining", step } }),
     }).catch((error: unknown) => {
       emit({ type: "message", message: assistantText("I couldn't finish tuning the design, so this uses the template's own styling. You can still adjust it after applying.") })
-      console.warn("[prompt-assist] design loop failed:", error)
+      logger.warn("[prompt-assist] design loop failed:", { error })
       return { edits: [], satisfaction: null }
     })
 

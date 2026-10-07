@@ -10,6 +10,7 @@ import {
   type TemplateCandidate,
   type TemplateSummary,
 } from "@/shared/features/prompt-assist"
+import { logger } from "@/server/lib/logger"
 
 const NO_MATCH = "none"
 const CANDIDATE_LIMIT = 4
@@ -86,7 +87,7 @@ async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, cat
     return { kind: "clarify", question: reply.question, options: reply.options }
   } catch (error) {
     if (!(error instanceof OpenAiUnavailableError)) throw error
-    console.warn("[prompt-assist] clarifying question failed, using best guess:", error.message)
+    logger.warn("[prompt-assist] clarifying question failed, using best guess:", { error: error.message })
     return null
   }
 }
@@ -106,7 +107,7 @@ export async function matchTemplate(input: MatchRequest): Promise<MatchResponse>
       ranking = await rankWithJev(request, catalog)
     } catch (error) {
       if (!(error instanceof JevUnavailableError)) throw error
-      console.warn("[prompt-assist] Jev unavailable, falling back to OpenAI:", error.message)
+      logger.warn("[prompt-assist] Jev unavailable, falling back to OpenAI:", { error: error.message })
     }
   }
   if (!ranking && isOpenAiConfigured()) {
@@ -114,7 +115,7 @@ export async function matchTemplate(input: MatchRequest): Promise<MatchResponse>
       ranking = await rankWithOpenAi(request, catalog)
     } catch (error) {
       if (!(error instanceof OpenAiUnavailableError)) throw error
-      console.warn("[prompt-assist] OpenAI template match failed:", error.message)
+      logger.warn("[prompt-assist] OpenAI template match failed:", { error: error.message })
     }
   }
   if (!ranking) return { kind: "unavailable" }
