@@ -1,0 +1,6 @@
+#!/bin/sh
+# Advisory local check. Server-side rules and CI are the enforcement that agents cannot skip.
+root=$(git rev-parse --show-toplevel) || exit 1
+branch=$(git rev-parse --abbrev-ref HEAD)
+node "$root/scripts/check-branch-name.mjs" --branch "$branch" || exit 1
+exit 0
