@@ -104,6 +104,8 @@ export const Toolbar: React.FC<Readonly<{
   const [settingsPopoverOpen, setSettingsPopoverOpen] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
+  const isDraggingRef = useRef(isDragging)
+  const dragOffsetRef = useRef(dragOffset)
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
   const currentPage = pageComponent ?? componentTree[0]
@@ -176,44 +178,46 @@ export const Toolbar: React.FC<Readonly<{
     const gripCenterX = rect.left + rect.width / 2
     const gripCenterY = rect.top + rect.height / 2
 
-    setDragOffset({
+    const offset = {
       x: e.clientX - gripCenterX,
       y: e.clientY - gripCenterY,
-    })
+    }
+    setDragOffset(offset)
+    dragOffsetRef.current = offset
     setIsDragging(true)
+    isDraggingRef.current = true
   }
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging && toolbarRef.current) {
+  useEffect(() => {
+    if (pageBuilderMode === "preview") return
+
+    const handleMove = (e: MouseEvent) => {
+      if (isDraggingRef.current && toolbarRef.current) {
         const rect = toolbarRef.current.getBoundingClientRect()
+        const offset = dragOffsetRef.current
         setPosition(clampToolbarCenter(
-          e.clientX - dragOffset.x,
-          e.clientY - dragOffset.y,
+          e.clientX - offset.x,
+          e.clientY - offset.y,
           rect.width,
           rect.height,
           window.innerWidth,
           window.innerHeight,
         ))
       }
-    },
-    [isDragging, dragOffset.x, dragOffset.y],
-  )
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
-
-  useEffect(() => {
-    if (pageBuilderMode === "preview" || !isDragging) return
-
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseup", handleMouseUp)
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [isDragging, dragOffset, handleMouseMove, pageBuilderMode])
+
+    const handleUp = () => {
+      isDraggingRef.current = false
+      setIsDragging(false)
+    }
+
+    document.addEventListener("mousemove", handleMove)
+    document.addEventListener("mouseup", handleUp)
+    return () => {
+      document.removeEventListener("mousemove", handleMove)
+      document.removeEventListener("mouseup", handleUp)
+    }
+  }, [pageBuilderMode])
 
   if (pageBuilderMode === "preview" as PageBuilderMode) return null
 
