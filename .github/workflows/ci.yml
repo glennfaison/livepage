@@ -5,15 +5,23 @@ on:
   pull_request:
 
 jobs:
-  branch-name-check:
+  gitflow-branch-name:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Reject non-gitflow branch names
         run: node scripts/check-branch-name.mjs --self-test && node scripts/check-branch-name.mjs
 
+  pr-source-branch-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PR source branch policy
+        run: node scripts/check-branch-name.mjs --pr-source-branch --head "${{ github.head_ref }}" --base "${{ github.base_ref }}"
+
   test:
-    needs: branch-name-check
+    needs: [gitflow-branch-name, pr-source-branch-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
