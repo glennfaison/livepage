@@ -3,6 +3,10 @@
 import { useEffect, useReducer } from "react"
 import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
 
+/**
+ * Hook that provides the global app state and dispatch function.
+ * Initializes history with the first page if history is empty.
+ */
 export function useAppState() {
   const [state, dispatch] = useReducer(appReducer, initialState)
 

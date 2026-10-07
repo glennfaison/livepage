@@ -1,11 +1,25 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+/**
+ * Generates a unique ID. Uses crypto.randomUUID() when available,
+ * otherwise falls back to a timestamp + random string.
+ *
+ * @returns A unique identifier string
+ */
 export const generateId = () =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
+/**
+ * Intersperses an item between each element of an array and appends it
+ * at the end. For example, [1, 2, 3] with item 0 becomes [0, 1, 0, 2, 0, 3, 0].
+ *
+ * @param originalArray - Array to intersperse
+ * @param itemToInsert - Item to insert between and after elements
+ * @returns New array with items interspersed
+ */
 export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U): (T | U)[] {
   if (originalArray.length === 0) {
     return []
@@ -15,6 +29,13 @@ export function intersperseAndAppend<T, U>(originalArray: T[], itemToInsert: U):
   return result
 }
 
+/**
+ * Merges Tailwind CSS classes with clsx, resolving conflicts using tailwind-merge.
+ * Useful for conditionally applying classes while avoiding duplicate utilities.
+ *
+ * @param inputs - Class values to merge
+ * @returns Merged class string
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -51,6 +72,13 @@ function normalizeHostname(hostname: string): string {
   return hostname.startsWith("[") && hostname.endsWith("]") ? hostname.slice(1, -1) : hostname
 }
 
+/**
+ * Validates a URL for SSRF protection. Ensures the URL uses HTTP/HTTPS,
+ * is not a localhost or private IP address, and has a valid format.
+ *
+ * @param url - URL string to validate
+ * @returns Object with valid boolean and optional error message
+ */
 export function validateUrlForSsrf(url: string): { valid: boolean; error?: string } {
   let parsedUrl: URL
   try {
