@@ -9,7 +9,7 @@ import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Set
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
-import type { AppNode } from "@/client/features/app-state"
+import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 
@@ -60,6 +60,10 @@ export const Toolbar: React.FC<Readonly<{
   onUndo?: () => void
   /** Redo callback */
   onRedo?: () => void
+  /** App dispatch for settings */
+  dispatch?: React.Dispatch<AppAction>
+  /** Whether AI Assistant is enabled */
+  promptAssistEnabled?: boolean
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -78,6 +82,8 @@ export const Toolbar: React.FC<Readonly<{
   onPageTitleChange,
   onUndo,
   onRedo,
+  dispatch,
+  promptAssistEnabled,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -233,6 +239,8 @@ export const Toolbar: React.FC<Readonly<{
             pageTitle={pageTitle}
             onPageTitleChange={onPageTitleChange ?? (() => {})}
             componentTree={componentTree}
+            dispatch={dispatch ?? (() => {})}
+            promptAssistEnabled={promptAssistEnabled ?? false}
           >
             <Button variant="outline" size="sm" title="Settings" className="shrink-0">
               <Settings className="h-4 w-4" />

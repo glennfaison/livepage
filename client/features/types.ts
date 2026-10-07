@@ -26,6 +26,7 @@ export type AppState = Readonly<{
   pageBuilderMode: PageBuilderMode
   toolbarMinimized: boolean
   showToolbar: boolean
+  promptAssistEnabled: boolean
   history: ReadonlyArray<HistoryEntry>
   currentHistoryIndex: number
   historyPreviewIndex: number | null
@@ -51,6 +52,7 @@ export type AppAction =
   | Readonly<{ type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }>
   | Readonly<{ type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }>
   | Readonly<{ type: "SET_SHOW_TOOLBAR"; payload: boolean }>
+  | Readonly<{ type: "SET_PROMPT_ASSIST_ENABLED"; payload: boolean }>
   | Readonly<{ type: "ADD_TO_HISTORY"; payload: Readonly<{ action: string; pageState: ReadonlyArray<AppNode> }> }>
   | Readonly<{ type: "SET_CURRENT_HISTORY_INDEX"; payload: number }>
   | Readonly<{ type: "SET_HISTORY_PREVIEW_INDEX"; payload: number | null }>

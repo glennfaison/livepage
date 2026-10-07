@@ -3,10 +3,10 @@
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
 import { cn } from "@/client/lib/utils"
-import { Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Save, Settings } from "lucide-react"
+import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Save, Settings } from "lucide-react"
 import type React from "react"
 import { useCallback, useRef, useState } from "react"
-import type { AppNode } from "@/client/features/types"
+import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
@@ -20,6 +20,8 @@ type ToolbarSettingsPopoverProps = Readonly<{
   onPageTitleChange: (title: string) => void
   children: React.ReactNode
   componentTree: ReadonlyArray<AppNode>
+  dispatch: React.Dispatch<AppAction>
+  promptAssistEnabled: boolean
 }>
 
 export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
@@ -31,6 +33,8 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   onPageTitleChange,
   children,
   componentTree,
+  dispatch,
+  promptAssistEnabled,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -210,6 +214,25 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘⇧Z</kbd>
                   <span>Redo</span>
                 </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2 border-t">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Assistant</h3>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={promptAssistEnabled}
+                    onChange={(e) => dispatch({ type: "SET_PROMPT_ASSIST_ENABLED", payload: e.target.checked })}
+                    className="h-4 w-4 rounded border-input bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                  <span className="text-sm font-medium">Enable AI Assistant</span>
+                </label>
+                <p className="text-xs text-muted-foreground ml-6">
+                  When enabled, the AI Assistant chat bubble appears in the bottom-right corner.
+                  Use it to describe a page and get a template with drafted content and tuned design.
+                </p>
               </div>
             </div>
 

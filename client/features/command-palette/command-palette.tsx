@@ -16,6 +16,7 @@ import {
   Search,
   Undo2,
   Upload,
+  Bot,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -75,6 +76,7 @@ export const CommandPalette: React.FC<
     onImportJson: () => void
     onImportShortcode: () => void
     onDiscardChanges: () => void
+    onOpenAIAssistant: () => void
   }>
 > = ({
   open,
@@ -92,6 +94,7 @@ export const CommandPalette: React.FC<
   onImportJson,
   onImportShortcode,
   onDiscardChanges,
+  onOpenAIAssistant,
 }) => {
   const [search, setSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
@@ -248,6 +251,14 @@ export const CommandPalette: React.FC<
         keywords: ["import", "load", "shortcode", "upload"],
         icon: <Upload className="h-4 w-4" />,
         onSelect: onImportShortcode,
+      },
+      {
+        id: "action-open-ai-assistant",
+        group: "Actions",
+        label: "Open AI Assistant",
+        keywords: ["ai", "assistant", "prompt", "chat"],
+        icon: <Bot className="h-4 w-4" />,
+        onSelect: onOpenAIAssistant,
       },
     ]
 
