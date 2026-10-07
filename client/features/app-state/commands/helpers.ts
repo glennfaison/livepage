@@ -2,6 +2,27 @@ import type { AppNode } from "@/client/features/types"
 import { findComponentById } from "@/client/features/app-state/tree"
 export { findComponentById } from "@/client/features/app-state/tree"
 
+export function findComponentParent({
+  components,
+  componentId,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+}>): AppNode | null {
+  for (const component of components) {
+    if (typeof component === "string") continue
+
+    const childIndex = component.children.findIndex(
+      (child) => typeof child !== "string" && child.attributes.id === componentId
+    )
+    if (childIndex !== -1) return component
+
+    const found = findComponentParent({ components: component.children, componentId })
+    if (found) return found
+  }
+  return null
+}
+
 function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
   const newId = `${component.attributes.id}${idSuffix}`
   return {
@@ -212,55 +233,6 @@ export function replaceComponent({
   })
 }
 
-export function moveComponent({
-  components,
-  componentId,
-  newParentId,
-  index,
-}: Readonly<{
-  components: ReadonlyArray<AppNode | string>
-  componentId: string
-  newParentId: string
-  index: number
-}>): AppNode[] {
-  // First, find and extract the component to move
-  let componentToMove: AppNode | null = null
-
-  const withoutComponent = components.reduce<AppNode[]>((acc, component) => {
-    if (typeof component === "string") {
-      return [...acc, component as never]
-    }
-
-    if (component.attributes.id === componentId) {
-      componentToMove = component
-      return acc
-    }
-
-    return [
-      ...acc,
-      {
-        ...component,
-        children: removeComponent({
-          components: component.children,
-          componentId,
-        }),
-      },
-    ]
-  }, [])
-
-  if (!componentToMove) {
-    return [...components] as AppNode[]
-  }
-
-  // Now insert the component at the new location
-  return insertComponent({
-    components: withoutComponent,
-    newComponent: componentToMove,
-    parentId: newParentId,
-    index,
-  })
-}
-
 /**
  * Pure counterpart of the UPDATE_COMPONENT command for callers that batch
  * several edits into one action (for example applying a template with
@@ -272,4 +244,31 @@ export function patchComponent(
   updates: Partial<AppNode>,
 ): ReadonlyArray<AppNode> {
   return updateComponent({ components, componentId, updates, updated: { value: false } })
+}
+
+export function moveComponent({
+  components,
+  componentId,
+  newParentId,
+  index,
+}: Readonly<{
+  components: ReadonlyArray<AppNode | string>
+  componentId: string
+  newParentId: string
+  index?: number
+}>): AppNode[] {
+  // First, remove the component from its current location
+  const withoutComponent = removeComponent({ components, componentId })
+
+  // Then insert it at the new location
+  // We need to find the component that was removed to re-insert it
+  const componentToMove = findComponentById(components, componentId)
+  if (!componentToMove) return components as unknown as AppNode[]
+
+  return insertComponent({
+    components: withoutComponent,
+    newComponent: componentToMove,
+    parentId: newParentId,
+    index,
+  })
 }

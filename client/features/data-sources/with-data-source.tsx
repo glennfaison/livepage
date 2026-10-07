@@ -6,12 +6,14 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/client/lib/utils"
 import { replaceDataSourceComponentProperties } from "./browser-core"
 import { DataSourceLoading, DataSourceError, readableErrorMessage } from "./data-source-states"
+import { DataSourceErrorBoundary } from "@/client/components/error-boundary"
 
 const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
 
 export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 	function DataSourceComponent(props: Props) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
+		const isPreviewMode = props.pageBuilderMode === "preview"
 
 		if (!dataSourceSettings || dataSourceSettings.trim() === "") {
 			return <WrappedComponent {...props} />
@@ -34,7 +36,8 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			queryFn: () => fetchData(dataSourceSettings!),
 			enabled: !!dataSourceSettings,
 			staleTime: 60 * 60 * 1000,
-		}), [queryKey, fetchData, dataSourceSettings])
+			throwOnError: isPreviewMode,
+		}), [queryKey, fetchData, dataSourceSettings, isPreviewMode])
 
 		const queryClient = useQuery(queryOptions)
 		const { data: dataSourceData, isLoading: loading, error, refetch } = queryClient
@@ -47,7 +50,7 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		}, [])
 
 		if (loading) return <DataSourceLoading childClassName={props.childClassName} />
-		if (error) return <DataSourceError childClassName={props.childClassName} retry={handleRetry} errorMessage={readableErrorMessage(error)} />
+		if (error && !isPreviewMode) return <DataSourceError childClassName={props.childClassName} retry={handleRetry} errorMessage={readableErrorMessage(error)} />
 
 		const renderDataSourceComponent = (data: unknown, key?: React.Key) => {
 			const newComponent = replaceDataSourceComponentProperties(props.component, data)
@@ -59,15 +62,19 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			return <WrappedComponent {...props} component={dataSourceComponent} key={key} />
 		}
 
-		if (Array.isArray(dataSourceData)) {
-			return (
-				<div className={cn("block", props.childClassName)}>
-					{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}
-				</div>
-			)
-		} else {
-			return renderDataSourceComponent(dataSourceData)
-		}
+		const renderedContent = Array.isArray(dataSourceData) ? (
+			<div className={cn("block", props.childClassName)}>
+				{dataSourceData.map((item, idx) => renderDataSourceComponent(item, idx))}
+			</div>
+		) : (
+			renderDataSourceComponent(dataSourceData)
+		)
+
+		return (
+			<DataSourceErrorBoundary isPreviewMode={isPreviewMode} onRetry={handleRetry}>
+				{renderedContent}
+			</DataSourceErrorBoundary>
+		)
 	}
 
 	DataSourceComponent.displayName = `withDataSource(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`

@@ -1,6 +1,6 @@
 import { Network } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { safeFetch } from "../ssrf-protection"
+import { validateUrlForSsrf } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -38,6 +38,11 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	const query = value(componentDataSourceSettings, "query").trim()
 	if (!url || !query) throw new Error("GraphQL settings require an endpoint URL and query")
 
+	const validation = validateUrlForSsrf(url)
+	if (!validation.valid) {
+		throw new Error(validation.error ?? "Invalid URL")
+	}
+
 	let variables: unknown = {}
 	const variablesSource = value(componentDataSourceSettings, "variables").trim()
 	if (variablesSource) {
@@ -48,7 +53,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		}
 	}
 
-	const result = await safeFetch(url, {
+	const result = await fetch(url, {
 		method: "POST",
 		headers: { "content-type": "application/json", accept: "application/json" },
 		body: JSON.stringify({ query, variables }),

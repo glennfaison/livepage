@@ -1,6 +1,6 @@
 import { Plug } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { safeFetch } from "../ssrf-protection"
+import { validateUrlForSsrf } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -29,13 +29,18 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 		throw new Error("Expected REST API settings to provide a URL string")
 	}
 
+	const validation = validateUrlForSsrf(url.trim())
+	if (!validation.valid) {
+		throw new Error(validation.error ?? "Invalid URL")
+	}
+
 	const parseResult = componentDataSourceSettings["parse-result"]
 	const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
 	const parseResultFn = parseResultSource.trim()
 		? new Function("data", parseResultSource) as (data: unknown) => unknown
 		: undefined
 
-	const result = await safeFetch(url)
+	const result = await fetch(url)
 	if (!result.ok) {
 		throw await result.json()
 	}

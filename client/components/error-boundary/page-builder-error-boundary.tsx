@@ -4,6 +4,7 @@ import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { RefreshCw, AlertTriangle } from "lucide-react"
 import { cn } from "@/client/lib/utils"
+import { logger } from "@/client/lib/logger"
 
 interface PageBuilderErrorBoundaryState {
   hasError: boolean
@@ -29,7 +30,7 @@ export class PageBuilderErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error("[PageBuilderErrorBoundary] Caught error:", error, errorInfo)
+    logger.error("[PageBuilderErrorBoundary] Caught error:", { error: error.message, stack: error.stack, errorInfo })
   }
 
   handleRetry = (): void => {

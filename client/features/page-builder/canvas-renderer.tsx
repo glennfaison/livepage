@@ -1,7 +1,7 @@
 import React from "react"
 import type { AppNode, PageBuilderMode } from "@/client/features/types"
 import { getComponentInfo, PreviewRenderer } from "@/client/features/design-components"
-import { DragProvider, useComponentOperationsContext } from "@/client/features/design-components/editor-controls"
+import { DataSourceErrorBoundary } from "@/client/components/error-boundary"
 
 export type CanvasRendererProps = Readonly<{
   component: AppNode
@@ -13,26 +13,25 @@ export type CanvasRendererProps = Readonly<{
 
 export function CanvasRenderer(props: CanvasRendererProps) {
   const { component, pageBuilderMode, ...rest } = props
-  const { moveComponent } = useComponentOperationsContext()
 
   if (pageBuilderMode === "preview") {
     return (
-      <PreviewRenderer
-        {...rest}
-        pageBuilderMode="preview"
-        component={component}
-      />
+      <DataSourceErrorBoundary isPreviewMode={true}>
+        <PreviewRenderer
+          {...rest}
+          pageBuilderMode="preview"
+          component={component}
+        />
+      </DataSourceErrorBoundary>
     )
   }
 
   const EditModeComponent = getComponentInfo(component.tag).EditModeComponent
   return (
-    <DragProvider moveComponent={moveComponent}>
-      <EditModeComponent
-        {...rest}
-        pageBuilderMode="edit"
-        component={component}
-      />
-    </DragProvider>
+    <EditModeComponent
+      {...rest}
+      pageBuilderMode="edit"
+      component={component}
+    />
   )
 }

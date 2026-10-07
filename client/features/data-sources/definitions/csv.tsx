@@ -1,6 +1,6 @@
 import { Table2 } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { safeFetch } from "../ssrf-protection"
+import { validateUrlForSsrf } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -34,7 +34,13 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	const raw = componentDataSourceSettings.url
 	const url = (Array.isArray(raw) ? raw.join("") : String(raw ?? "")).trim()
 	if (!url) throw new Error("Expected CSV settings to provide a URL string")
-	const result = await safeFetch(url, { headers: { accept: "text/csv, text/plain" } })
+
+	const validation = validateUrlForSsrf(url)
+	if (!validation.valid) {
+		throw new Error(validation.error ?? "Invalid URL")
+	}
+
+	const result = await fetch(url, { headers: { accept: "text/csv, text/plain" } })
 	if (!result.ok) throw new Error(`CSV request failed with status ${result.status}`)
 	const rows = parseCsv(await result.text())
 	if (rows.length === 0) return { columns: [], rows: [] }

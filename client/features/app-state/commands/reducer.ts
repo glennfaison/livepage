@@ -1,5 +1,6 @@
 import type { AppAction, AppNode, AppState, HistoryEntry } from "@/client/features/types"
 import { generateId } from "@/client/lib/utils"
+import { logger } from "@/client/lib/logger"
 import {
   insertComponent,
   updateComponent,
@@ -110,7 +111,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         updated,
       })
       if (!updated.value) {
-        console.error(`Invalid component ID: ${componentId}`)
+        logger.error(`Invalid component ID: ${componentId}`)
         return { ...state }
       }
       return withHistory(
@@ -188,14 +189,25 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (!findComponentById(state.componentTree, newParentId)) {
         return state
       }
-      const newComponentTree = moveComponent({ components: state.componentTree, componentId, newParentId, index })
+      // Prevent moving a component into its own descendant
+      const parentTree = findComponentParentTree({ components: state.componentTree, componentId: newParentId })
+      if (parentTree.some((p) => p.attributes.id === componentId)) {
+        return state
+      }
+      const newComponentTree = moveComponent({
+        components: state.componentTree,
+        componentId,
+        newParentId,
+        index,
+      })
       return withHistory(
         {
           ...state,
           componentTree: newComponentTree,
+          selectedComponentId: componentId,
         },
         newComponentTree,
-        `Moved ${componentId} to ${newParentId}`,
+        `Moved ${componentId}`,
       )
     }
 

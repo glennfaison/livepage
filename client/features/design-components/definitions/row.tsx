@@ -9,7 +9,7 @@ import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { withDataSource } from "@/client/features/data-sources"
-import { useDragContext } from "../editor-controls/drag-context"
+import { useDragDrop, type DropTargetType } from "../editor-controls/drag-drop-context"
 
 const tag = "row" as const
 
@@ -111,50 +111,59 @@ const PreviewModeComponent = (props: ViewModeProps) => {
 }
 
 const EmptyColumnContent = ({
-  onAddChildComponent,
-  parentId,
+	onAddChildComponent,
+	parentId,
 }: Readonly<{
-  onAddChildComponent: (tag: string) => void
-  parentId: string
+	onAddChildComponent: (tag: string) => void
+	parentId: string
 }>) => {
-  const { isDragging, draggedComponentId, moveComponent } = useDragContext()
-  const [isDragOver, setIsDragOver] = React.useState(false)
+	const { state, setDropTarget, endDrag } = useDragDrop()
+	const isDropTarget = state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === parentId
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-    setIsDragOver(true)
-  }
+	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		e.dataTransfer.dropEffect = "move"
+		if (state.draggedComponentId) {
+			setDropTarget({
+				type: "empty-layout",
+				parentId,
+				parentTag: "row",
+				index: 0,
+			})
+		}
+	}
 
-  const handleDragLeave = () => {
-    setIsDragOver(false)
-  }
+	const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+		if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+			if (state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === parentId) {
+				setDropTarget(null)
+			}
+		}
+	}
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragOver(false)
-    if (draggedComponentId && moveComponent) {
-      moveComponent({ componentId: draggedComponentId, newParentId: parentId, index: 0 })
-    }
-  }
+	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault()
+		endDrag()
+	}
 
-  const dragOverClass = isDragOver ? "bg-primary/20 ring-2 ring-primary" : ""
-
-  return (
-    <div
-      className={cn("flex min-h-24 w-full flex-col items-center justify-center gap-2 rounded-sm bg-muted/30 px-4 text-muted-foreground", dragOverClass)}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <ComponentSelectorPopover onSelect={onAddChildComponent} parentTag={tag}>
-        <Button variant="outline" size="icon" className="rounded-full h-6 w-6">
-          <Plus className="size-3.5" />
-          <span className="text-xs font-medium">Add component</span>
-        </Button>
-      </ComponentSelectorPopover>
-    </div>
-  )
+	return (
+		<div
+			className={cn(
+				"flex min-h-24 w-full flex-col items-center justify-center gap-2 rounded-sm bg-muted/30 px-4 text-muted-foreground",
+				isDropTarget && "bg-primary/20 ring-2 ring-primary ring-offset-2"
+			)}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
+		>
+			<ComponentSelectorPopover onSelect={onAddChildComponent} parentTag="row">
+				<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
+					<Plus className="size-3.5" />
+					<span className="text-xs font-medium">Add component</span>
+				</Button>
+			</ComponentSelectorPopover>
+		</div>
+	)
 }
 
 const EditModeComponent = (props: EditModeProps) => {
@@ -212,7 +221,8 @@ const EditModeComponent = (props: EditModeProps) => {
 				onAddComponent={handleAddAtIndex}
 				index={index}
 				isVisible={visibleVerticalDividers.has(index)}
-				parentId={attributes.id} />
+				parentId={attributes.id}
+				dividerIndex={index} />
 		) : (
 			<React.Fragment key={index}>{item}</React.Fragment>
 		)

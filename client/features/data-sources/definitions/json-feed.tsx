@@ -1,6 +1,6 @@
 import { Braces } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { safeFetch } from "../ssrf-protection"
+import { validateUrlForSsrf } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -17,7 +17,12 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	const url = (Array.isArray(raw) ? raw.join("") : String(raw ?? "")).trim()
 	if (!url) throw new Error("Expected JSON Feed settings to provide a URL string")
 
-	const result = await safeFetch(url, { headers: { accept: "application/feed+json, application/json" } })
+	const validation = validateUrlForSsrf(url)
+	if (!validation.valid) {
+		throw new Error(validation.error ?? "Invalid URL")
+	}
+
+	const result = await fetch(url, { headers: { accept: "application/feed+json, application/json" } })
 	if (!result.ok) throw new Error(`JSON Feed request failed with status ${result.status}`)
 	const feed = await result.json()
 	if (feed?.version !== "https://jsonfeed.org/version/1" && feed?.version !== "https://jsonfeed.org/version/1.1") {

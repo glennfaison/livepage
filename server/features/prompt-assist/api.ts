@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server"
 import type { z } from "zod"
 import { createEnvRateLimiter, getClientKey, rateLimitedResponse } from "@/server/lib/rate-limit"
 import { isPromptAssistEnabled } from "@/shared/features/prompt-assist"
+import { logger } from "@/server/lib/logger"
 
 const limiters = {
   match: createEnvRateLimiter("PROMPT_ASSIST_RATE_LIMIT_PER_MINUTE", 20),
@@ -36,7 +37,7 @@ export async function handlePromptAssistRequest<S extends z.ZodType, R>(
   try {
     return NextResponse.json(route.responseSchema.parse(await route.handle(parsed.data)))
   } catch (error) {
-    console.error(`[prompt-assist] ${route.scope} failed:`, error)
+    logger.error(`[prompt-assist] ${route.scope} failed:`, { error })
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
 }

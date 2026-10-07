@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react"
 import React from "react"
 import { Divider } from "@/client/features/design-components/editor-controls/layout-divider"
+import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 
 jest.mock("@/client/features/design-components/editor-controls/component-selector-popover", () => ({
   ComponentSelectorPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -9,9 +10,11 @@ jest.mock("@/client/features/design-components/editor-controls/component-selecto
 describe("Divider", () => {
   it("gives bar and button the same contrast color on a dark background", () => {
     const { container } = render(
-      <div style={{ backgroundColor: "rgb(11, 16, 23)" }}>
-        <Divider orientation="horizontal" parentTag={"row" as never} onAddComponent={jest.fn()} index={0} isVisible />
-      </div>,
+      <DragDropProvider moveComponent={() => {}}>
+        <div style={{ backgroundColor: "rgb(11, 16, 23)" }}>
+          <Divider orientation="horizontal" parentTag={"row" as never} onAddComponent={jest.fn()} index={0} isVisible parentId="test" dividerIndex={0} />
+        </div>
+      </DragDropProvider>,
     )
     const bar = container.querySelector("div > div > div") as HTMLElement
     const button = container.querySelector("button") as HTMLElement
