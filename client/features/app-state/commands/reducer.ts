@@ -29,6 +29,7 @@ export const initialState: AppState = {
   pageBuilderMode: "edit",
   toolbarMinimized: false,
   showToolbar: true,
+  promptAssistEnabled: false,
   history: [],
   currentHistoryIndex: -1,
   historyPreviewIndex: null,
@@ -277,6 +278,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         showToolbar: action.payload,
+      }
+
+    case "SET_PROMPT_ASSIST_ENABLED":
+      return {
+        ...state,
+        promptAssistEnabled: action.payload,
       }
 
     case "ADD_TO_HISTORY": {

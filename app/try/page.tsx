@@ -54,6 +54,7 @@ export default function BuilderPage() {
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
@@ -376,6 +377,8 @@ export default function BuilderPage() {
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          dispatch={dispatch}
+          promptAssistEnabled={state.promptAssistEnabled}
         />
 
         <CommandPalette
@@ -394,6 +397,7 @@ export default function BuilderPage() {
           onImportJson={() => jsonFileInputRef.current?.click()}
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
           onDiscardChanges={handleDiscard}
+          onOpenAIAssistant={() => setAiAssistantOpen(true)}
         />
 
         <ValidationDialog
@@ -408,7 +412,7 @@ export default function BuilderPage() {
           onOpenChange={setValidationDialogOpen}
         />
 
-        <AssistChat dispatch={dispatch} />
+        <AssistChat dispatch={dispatch} enabled={state.promptAssistEnabled} open={aiAssistantOpen} onOpenChange={setAiAssistantOpen} />
       </div>
     </ComponentOperationsContext.Provider>
   )
