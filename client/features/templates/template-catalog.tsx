@@ -5,7 +5,7 @@ import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
 import { cn } from "@/client/lib/utils"
-import { Clock, Grid, List, Star, X } from "lucide-react"
+import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X } from "lucide-react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useTemplateCatalog, type CatalogTab, type CatalogViewMode } from "./use-template-catalog"
 
@@ -139,22 +139,77 @@ function CategoryTabs({
   activeTabId: string
   onChange: (tabId: string) => void
 }>) {
+  const listRef = React.useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false)
+  const [canScrollRight, setCanScrollRight] = React.useState(false)
+
+  const updateScrollState = React.useCallback(() => {
+    const node = listRef.current
+    if (!node) return
+    setCanScrollLeft(node.scrollLeft > 0)
+    setCanScrollRight(node.scrollLeft < node.scrollWidth - node.clientWidth)
+  }, [])
+
+  React.useEffect(() => {
+    const node = listRef.current
+    if (!node) return
+    updateScrollState()
+    node.addEventListener("scroll", updateScrollState, { passive: true })
+    const resizeObserver = new ResizeObserver(updateScrollState)
+    resizeObserver.observe(node)
+    return () => {
+      node.removeEventListener("scroll", updateScrollState)
+      resizeObserver.disconnect()
+    }
+  }, [updateScrollState])
+
+  const scrollByOne = (direction: "left" | "right") => {
+    const node = listRef.current
+    if (!node) return
+    const target = node.querySelector<HTMLElement>("[data-tabs-trigger]")
+    const step = target ? target.getBoundingClientRect().width : node.clientWidth / 2
+    node.scrollBy({ left: direction === "left" ? -step : step, behavior: "smooth" })
+  }
+
   return (
-    <Tabs value={activeTabId} onValueChange={onChange} className="min-w-0 flex-1">
-      {/* The list itself is the horizontal scroller; p-1 leaves room for the focus ring, which overflow would clip. */}
-      <TabsList
-        aria-label="Template categories"
-        className="flex h-auto w-full justify-start gap-1 overflow-x-auto overscroll-x-contain bg-transparent p-1 [scrollbar-width:thin]"
+    <div className="relative min-w-0 flex-1 border border-border flex rounded-md overflow-hidden">
+      <button
+        type="button"
+        aria-label="Scroll categories left"
+        disabled={!canScrollLeft}
+        onClick={() => scrollByOne("left")}
+        className="flex h-10 shrink-0 items-center justify-center rounded-l-md border-y border-l border-border bg-muted/40 px-1.5 text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {tabs.map((tab) => (
-          <TabsTrigger key={tab.id} value={tab.id} className={TAB_TRIGGER_CLASS}>
-            {tab.id === "favorites" && <Star className="h-3.5 w-3.5" aria-hidden="true" />}
-            {tab.id === "recent" && <Clock className="h-3.5 w-3.5" aria-hidden="true" />}
-            {tab.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+        <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+      </button>
+      <div className="relative min-w-0 flex-1 overflow-hidden ![scrollbar-width:none]">
+        <Tabs value={activeTabId} onValueChange={onChange} className="min-w-0 flex-1">
+          {/* The list itself is the horizontal scroller; p-1 leaves room for the focus ring, which overflow would clip. */}
+          <TabsList
+            ref={listRef}
+            aria-label="Template categories"
+            className="flex h-10 flex-1 justify-start gap-1 overflow-x-auto overscroll-x-contain bg-transparent p-1 ![scrollbar-width:none]"
+          >
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id} data-tabs-trigger className={TAB_TRIGGER_CLASS}>
+                {tab.id === "favorites" && <Star className="h-3.5 w-3.5" aria-hidden="true" />}
+                {tab.id === "recent" && <Clock className="h-3.5 w-3.5" aria-hidden="true" />}
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
+      <button
+        type="button"
+        aria-label="Scroll categories right"
+        disabled={!canScrollRight}
+        onClick={() => scrollByOne("right")}
+        className="flex h-10 shrink-0 items-center justify-center rounded-r-md border-y border-r border-border bg-muted/40 px-1.5 text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <ChevronRight className="h-4 w-4" aria-hidden="true" />
+      </button>
+    </div>
   )
 }
 
@@ -163,7 +218,7 @@ function ViewModeToggle({
   onChange,
 }: Readonly<{ value: CatalogViewMode; onChange: (mode: CatalogViewMode) => void }>) {
   return (
-    <div role="group" aria-label="Template layout" className="flex shrink-0 items-center gap-0.5 rounded-md border border-border p-0.5">
+    <div role="group" aria-label="Template layout" className="flex h-10 shrink-0 items-center gap-0.5 rounded-md border border-border p-0.5">
       {VIEW_MODES.map(({ mode, label, Icon }) => (
         <button
           key={mode}
