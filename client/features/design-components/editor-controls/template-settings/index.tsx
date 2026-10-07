@@ -74,6 +74,7 @@ export function TemplateTabContent({
     <TemplateCatalog
       templates={templates}
       onApplyTemplate={handleApplyTemplate}
+      viewMode="list"
     />
   )
 }

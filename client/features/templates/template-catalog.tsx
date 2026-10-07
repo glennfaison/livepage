@@ -7,10 +7,13 @@ import { Clock, Grid, List, Star } from "lucide-react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useTemplateCatalog, type CatalogTab, type CatalogViewMode } from "./use-template-catalog"
 
+export type { CatalogViewMode } from "./use-template-catalog"
+
 interface TemplateCatalogProps {
   templates: ReadonlyArray<TemplateDisplaySummary>
   onApplyTemplate: (templateId: string) => void
   onClose?: () => void
+  viewMode?: CatalogViewMode
 }
 
 const TAB_TRIGGER_CLASS =
@@ -21,9 +24,10 @@ const VIEW_MODES: ReadonlyArray<Readonly<{ mode: CatalogViewMode; label: string;
   { mode: "list", label: "List view", Icon: List },
 ]
 
-export function TemplateCatalog({ templates, onApplyTemplate, onClose }: Readonly<TemplateCatalogProps>) {
+export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode: forcedViewMode }: Readonly<TemplateCatalogProps>) {
   const catalog = useTemplateCatalog(templates)
-  const { visibleTemplates, viewMode } = catalog
+  const visibleTemplates = catalog.visibleTemplates
+  const viewMode = forcedViewMode ?? catalog.viewMode
 
   const handleApplyTemplate = (templateId: string) => {
     catalog.recordApplied(templateId)
@@ -59,7 +63,7 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose }: Readonl
 
         <div className="flex items-center gap-2">
           <CategoryTabs tabs={catalog.tabs} activeTabId={catalog.activeTabId} onChange={catalog.setActiveTabId} />
-          <ViewModeToggle value={viewMode} onChange={catalog.setViewMode} />
+          {!forcedViewMode && <ViewModeToggle value={viewMode} onChange={catalog.setViewMode} />}
         </div>
       </div>
 
