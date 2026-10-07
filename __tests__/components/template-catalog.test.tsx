@@ -116,4 +116,59 @@ describe("TemplateCatalog", () => {
     expect(screen.queryByRole("tab", { name: "Favorites" })).not.toBeInTheDocument()
     expect(screen.queryByRole("tab", { name: "Recently used" })).not.toBeInTheDocument()
   })
+
+  it("persists view mode preference across remounts", async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute("aria-pressed", "true")
+    await user.click(screen.getByRole("button", { name: "List view" }))
+    expect(window.localStorage.getItem("livepage-template-view-mode")).toBe("list")
+    unmount()
+
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+    expect(screen.getByRole("button", { name: "List view" })).toHaveAttribute("aria-pressed", "true")
+  })
+
+  it("shows a template count and a clear search button when the search is active", async () => {
+    const user = userEvent.setup()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    expect(screen.getAllByText(`${templates.length} templates`)).toHaveLength(2)
+    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument()
+
+    const search = screen.getByRole("textbox", { name: "Search templates" })
+    await user.type(search, "resume")
+    const visibleCount = screen.getAllByText(/\d templates/)[0].textContent
+    expect(visibleCount).not.toBe(`${templates.length} templates`)
+    expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument()
+  })
+
+  it("clears the search when the clear button is clicked", async () => {
+    const user = userEvent.setup()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
+    await user.click(screen.getByRole("button", { name: "Clear search" }))
+
+    expect(screen.getByRole("textbox", { name: "Search templates" })).toHaveValue("")
+    expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument()
+  })
+
+  it("suggests clearing the search in the empty state", async () => {
+    const user = userEvent.setup()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
+    expect(screen.getByText("Clear your search")).toBeInTheDocument()
+  })
+
+  it("renders custom template items when renderTemplateItem is provided", async () => {
+    const user = userEvent.setup()
+    const renderTemplateItem = jest.fn(() => <div data-testid="custom-item">Custom</div>)
+    render(<TemplateCatalog templates={templates.slice(0, 2)} onApplyTemplate={jest.fn()} renderTemplateItem={renderTemplateItem} />)
+
+    expect(screen.getAllByTestId("custom-item")).toHaveLength(2)
+    expect(renderTemplateItem).toHaveBeenCalledTimes(2)
+  })
 })

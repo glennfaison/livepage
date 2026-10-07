@@ -1,9 +1,11 @@
 "use client"
 
+import React from "react"
+import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
 import { cn } from "@/client/lib/utils"
-import { Clock, Grid, List, Star } from "lucide-react"
+import { Clock, Grid, List, Star, X } from "lucide-react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useTemplateCatalog, type CatalogTab, type CatalogViewMode } from "./use-template-catalog"
 
@@ -14,6 +16,7 @@ interface TemplateCatalogProps {
   onApplyTemplate: (templateId: string) => void
   onClose?: () => void
   viewMode?: CatalogViewMode
+  renderTemplateItem?: (template: TemplateDisplaySummary, itemProps: TemplateItemProps) => React.ReactNode
 }
 
 const TAB_TRIGGER_CLASS =
@@ -24,9 +27,9 @@ const VIEW_MODES: ReadonlyArray<Readonly<{ mode: CatalogViewMode; label: string;
   { mode: "list", label: "List view", Icon: List },
 ]
 
-export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode: forcedViewMode }: Readonly<TemplateCatalogProps>) {
+export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode: forcedViewMode, renderTemplateItem }: Readonly<TemplateCatalogProps>) {
   const catalog = useTemplateCatalog(templates)
-  const visibleTemplates = catalog.visibleTemplates
+  const { visibleTemplates, searchTerm } = catalog
   const viewMode = forcedViewMode ?? catalog.viewMode
 
   const handleApplyTemplate = (templateId: string) => {
@@ -42,24 +45,47 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
       onToggleFavorite: () => catalog.toggleFavorite(template.id),
       onApply: () => handleApplyTemplate(template.id),
     }
+    if (renderTemplateItem) return <React.Fragment key={template.id}>{renderTemplateItem(template, itemProps)}</React.Fragment>
     return viewMode === "grid" ? <TemplateCard key={template.id} {...itemProps} /> : <TemplateListItem key={template.id} {...itemProps} />
   }
+
+  const handleClearSearch = () => catalog.setSearchTerm("")
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="shrink-0 space-y-3 p-4 pb-3">
         <div className="space-y-1.5">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Template catalog</h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Template catalog</h2>
+            <span className="text-xs text-muted-foreground">
+              {visibleTemplates.length} {visibleTemplates.length === 1 ? "template" : "templates"}
+            </span>
+          </div>
           <p className="text-sm text-muted-foreground">Choose a starting point tailored to the kind of page you want to build.</p>
         </div>
 
-        <Input
-          value={catalog.searchTerm}
-          onChange={(event) => catalog.setSearchTerm(event.target.value)}
-          placeholder="Search templates by name, tag, or category"
-          aria-label="Search templates"
-          autoComplete="off"
-        />
+        <div className="relative">
+          <Input
+            value={catalog.searchTerm}
+            onChange={(event) => catalog.setSearchTerm(event.target.value)}
+            placeholder="Search templates by name, tag, or category"
+            aria-label="Search templates"
+            autoComplete="off"
+            className={cn(searchTerm && "pr-9")}
+          />
+          {searchTerm && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Clear search"
+              onClick={handleClearSearch}
+              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </Button>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           <CategoryTabs tabs={catalog.tabs} activeTabId={catalog.activeTabId} onChange={catalog.setActiveTabId} />
@@ -78,6 +104,17 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
         {visibleTemplates.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
             {catalog.emptyMessage}
+            {searchTerm && (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={handleClearSearch}
+                className="mt-1 inline-block text-xs"
+              >
+                Clear your search
+              </Button>
+            )}
           </p>
         ) : (
           <div
@@ -225,7 +262,7 @@ function TemplateThumbnail({ template, className }: Readonly<{ template: Templat
   )
 }
 
-function TemplateCard({ template, isFavorite, onToggleFavorite, onApply }: Readonly<TemplateItemProps>) {
+export function TemplateCard({ template, isFavorite, onToggleFavorite, onApply }: Readonly<TemplateItemProps>) {
   return (
     <div className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-background p-3 transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/35">
       <div className="relative">
@@ -252,7 +289,7 @@ function TemplateCard({ template, isFavorite, onToggleFavorite, onApply }: Reado
   )
 }
 
-function TemplateListItem({ template, isFavorite, onToggleFavorite, onApply }: Readonly<TemplateItemProps>) {
+export function TemplateListItem({ template, isFavorite, onToggleFavorite, onApply }: Readonly<TemplateItemProps>) {
   return (
     <div className="group relative flex items-center gap-3 rounded-xl border border-border bg-background p-3 transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/35">
       <TemplateThumbnail template={template} className="w-20 shrink-0 rounded-lg" />
