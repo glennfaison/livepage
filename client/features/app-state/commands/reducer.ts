@@ -1,5 +1,6 @@
 import type { AppAction, AppNode, AppState, HistoryEntry } from "@/client/features/types"
 import { generateId } from "@/client/lib/utils"
+import { logger } from "@/client/lib/logger"
 import {
   insertComponent,
   updateComponent,
@@ -110,7 +111,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         updated,
       })
       if (!updated.value) {
-        console.error(`Invalid component ID: ${componentId}`)
+        logger.error(`Invalid component ID: ${componentId}`)
         return { ...state }
       }
       return withHistory(

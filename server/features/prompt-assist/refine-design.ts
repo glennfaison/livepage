@@ -3,6 +3,7 @@ import { askJev, isJevConfigured, JevUnavailableError } from "@/server/services/
 import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/server/services/openai"
 import { describeRequest } from "./request"
 import { designEditSchema, filterDesignEdits, type DesignEdit, type PageDescription, type PageRequest, type RefineResponse } from "@/shared/features/prompt-assist"
+import { logger } from "@/server/lib/logger"
 
 /** Jev's yes-probability at or above which the page is considered to match the request. */
 const SATISFIED_AT = 0.8
@@ -25,7 +26,7 @@ async function judgeSatisfaction(goal: string, page: PageDescription): Promise<n
     return satisfied.noul
   } catch (error) {
     if (!(error instanceof JevUnavailableError)) throw error
-    console.warn("[prompt-assist] Jev unavailable for satisfaction check:", error.message)
+    logger.warn("[prompt-assist] Jev unavailable for satisfaction check:", { error: error.message })
     return null
   }
 }
@@ -73,7 +74,7 @@ export async function refineDesign(request: PageRequest, page: PageDescription):
     return { satisfaction, done: stop || edits.length === 0, edits }
   } catch (error) {
     if (!(error instanceof OpenAiUnavailableError)) throw error
-    console.warn("[prompt-assist] design proposal failed:", error.message)
+    logger.warn("[prompt-assist] design proposal failed:", { error: error.message })
     return { satisfaction, done: true, edits: [] }
   }
 }
