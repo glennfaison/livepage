@@ -2,11 +2,12 @@
 import { spawnSync } from "node:child_process"
 
 const GITFLOW_BRANCH_PATTERN =
-  /^(?:main|develop|(?:feature|hotfix|bugfix)\/[a-z0-9]+(?:-[a-z0-9]+)*|release\/\d+(?:\.\d+)*|support\/\d+(?:\.\d+)*(?:\.x|x)?)$/
+  /^(?:main|develop|dependabot\/[a-z0-9._-]+(?:\/[a-z0-9._-]+)*|(?:feature|hotfix|bugfix)\/[a-z0-9]+(?:-[a-z0-9]+)*|release\/\d+(?:\.\d+)*|support\/\d+(?:\.\d+)*(?:\.x|x)?)$/
 
 export const ALLOWED_BRANCH_PATTERNS = [
   "main",
   "develop",
+  "dependabot/<dependency>",
   "feature/<topic>",
   "release/<version>",
   "hotfix/<topic>",
@@ -88,6 +89,8 @@ function selfTest() {
     "support/1.x",
     "support/1.4.x",
     "bugfix/null-deref",
+    "dependabot/dependencies/node/22",
+    "dependabot/github.com/glennfaison/livepage/1",
   ]
   const rejected = [
     "Feature/login",
@@ -98,6 +101,9 @@ function selfTest() {
     "cursor/add-tab",
     "release/v1.4.0",
     "support/one",
+    "dependabot/Dependencies/node/22",
+    "dependabot/",
+    "dependabot/feat login",
   ]
 
   for (const name of accepted) {
@@ -119,7 +125,7 @@ function selfTest() {
   if (prSourceBranchError("develop", "develop") !== "PRs into develop must originate from a gitflow branch.\nThis PR originates from develop, which is not allowed.") {
     throw new Error("Unexpected develop develop source branch error.")
   }
-  if (prSourceBranchError("develop", "fix/login") !== "PRs into develop must originate from a gitflow branch.\nThis PR originates from fix/login, which does not follow gitflow.\n  Branch name \"fix/login\" does not follow gitflow.\n  Allowed patterns (topic and version segments are lowercase kebab-case):\n    - main\n    - develop\n    - feature/<topic>\n    - release/<version>\n    - hotfix/<topic>\n    - support/<version-line>\n    - bugfix/<topic>\n  Examples:\n    - feature/login-flow\n    - release/1.4.0\n    - hotfix/crash-on-start\n    - support/1.x\n    - bugfix/null-deref\n  Rename the branch and push again. This rule applies to humans, agents, and automation.") {
+  if (prSourceBranchError("develop", "fix/login") !== "PRs into develop must originate from a gitflow branch.\nThis PR originates from fix/login, which does not follow gitflow.\n  Branch name \"fix/login\" does not follow gitflow.\n  Allowed patterns (topic and version segments are lowercase kebab-case):\n    - main\n    - develop\n    - dependabot/<dependency>\n    - feature/<topic>\n    - release/<version>\n    - hotfix/<topic>\n    - support/<version-line>\n    - bugfix/<topic>\n  Examples:\n    - feature/login-flow\n    - release/1.4.0\n    - hotfix/crash-on-start\n    - support/1.x\n    - bugfix/null-deref\n  Rename the branch and push again. This rule applies to humans, agents, and automation.") {
     throw new Error("Unexpected develop non-gitflow source branch error.")
   }
   if (prSourceBranchError("main", "develop") !== "") {

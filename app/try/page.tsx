@@ -380,11 +380,6 @@ export default function BuilderPage() {
           onRedo={handleRedo}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
-          selectedComponentId={state.selectedComponentId}
-          componentOperations={{
-            updateComponent: componentOperations.updateComponent,
-            findComponentById: componentOperations.findComponentById,
-          }}
         />
 
         <CommandPalette

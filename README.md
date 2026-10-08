@@ -98,19 +98,20 @@ The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, 
 
 ### Branch names
 
-Pushes must use a gitflow branch name. The check applies to people, agents, and other automation. Topic segments are lowercase kebab-case.
+Pushes must use a gitflow branch name, or a `dependabot/<dependency>` branch for automated dependency updates. The check applies to people, agents, and other automation. Topic segments are lowercase kebab-case.
 
 | Branch type | Pattern | Example |
 | --- | --- | --- |
 | main | `main` | `main` |
 | develop | `develop` | `develop` |
+| dependabot | `dependabot/<dependency>` | `dependabot/dependencies/node/22` |
 | feature | `feature/<topic>` | `feature/login-flow` |
 | release | `release/<version>` | `release/1.4.0` |
 | hotfix | `hotfix/<topic>` | `hotfix/crash-on-start` |
 | support | `support/<version-line>` | `support/1.x` |
 | bugfix | `bugfix/<topic>` | `bugfix/null-deref` |
 
-A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. `git config core.hooksPath scripts/git-hooks` enables an advisory local pre-push hook. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
+A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. `git config core.hooksPath scripts/git-hooks` enables a local pre-push gate that refuses non-compliant branches. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
 
 ## Project layout
 
