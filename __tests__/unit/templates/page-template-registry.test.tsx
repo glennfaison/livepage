@@ -122,7 +122,7 @@ describe("page template registry", () => {
 
     expect(await screen.findByText("Template catalog")).toBeInTheDocument()
     expect(screen.getAllByText("Best for resume")).toHaveLength(3)
-    expect(screen.getByLabelText("Personal CV / Resume preview")).toHaveStyle({ backgroundImage: 'url("/template-thumbnails/cv-resume-personal.svg")' })
+    expect(screen.getByAltText("Personal CV / Resume preview")).toHaveAttribute("src", "/template-thumbnails/cv-resume-personal.svg")
     expect(screen.getByRole("dialog")).toHaveClass("max-h-[min(80vh,48rem)]", "overflow-hidden")
     expect(screen.getByRole("region", { name: "Available templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden")
 
