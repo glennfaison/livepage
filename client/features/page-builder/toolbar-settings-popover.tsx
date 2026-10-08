@@ -7,7 +7,6 @@ import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Pale
 import type React from "react"
 import { useCallback, useRef, useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
-import { selectCurrentPage } from "@/client/features/app-state"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
@@ -18,6 +17,7 @@ type ToolbarSettingsPopoverProps = Readonly<{
   onToolbarLayoutChange: (layout: "horizontal" | "vertical") => void
   pageTitle: string
   onPageTitleChange: (title: string) => void
+  pageComponent: AppNode
   children: React.ReactNode
   componentTree: ReadonlyArray<AppNode>
   dispatch: React.Dispatch<AppAction>
@@ -31,6 +31,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   onToolbarLayoutChange,
   pageTitle,
   onPageTitleChange,
+  pageComponent,
   children,
   componentTree,
   dispatch,
@@ -70,7 +71,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     setIsDragging(false)
   }
 
-  const currentPage = selectCurrentPage({ componentTree, activePage: "" }) ?? componentTree[0]
+  const currentPage = pageComponent
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(componentTree, window.location.origin)
