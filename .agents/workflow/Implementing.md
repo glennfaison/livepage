@@ -14,7 +14,7 @@ The goal is to implement the goal of the issue.
 
 5. **Monitor PR**: Watch the PR as it goes through the checks and fix any issues that pop up.
 
-6. **Mark for review**: When the PR is ready for review and passes all checks, tag it `ready-for-review` and remove the `ready-for-agent` tag.
+6. **Mark for review**: After checks pass, post the required `/handoff` comment on the PR with the changes, decisions, risks, verification, and reviewer focus.
 
 ## References
 
