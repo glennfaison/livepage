@@ -5,7 +5,7 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, Copy, ClipboardPaste, GripVertical, History, Maximize, Minimize, Paintbrush, RotateCw, Save, Settings, X } from "lucide-react"
+import { Bot, Command, Copy, ClipboardPaste, GripVertical, History, Maximize, Minimize, Paintbrush, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
@@ -275,6 +275,33 @@ export const Toolbar: React.FC<Readonly<{
               <History className="h-4 w-4" />
             </Button>
           </HistoryPopover>
+
+          {/* Undo */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onUndo}
+            disabled={!canUndo}
+            title={`Undo (${formatShortcut("Z")})`}
+            className="shrink-0"
+            aria-label="Undo"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+
+          {/* Redo */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRedo}
+            disabled={!canRedo}
+            title={`Redo (${formatShortcut("Z")})`}
+            className="shrink-0"
+            aria-label="Redo"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+
           <ToolbarSettingsPopover
             isOpen={settingsPopoverOpen}
             onOpenChange={setSettingsPopoverOpen}
@@ -368,6 +395,32 @@ export const Toolbar: React.FC<Readonly<{
             title="Maximize"
           >
             <Maximize className="h-4 w-4" />
+          </Button>
+
+          {/* Undo */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onUndo}
+            disabled={!canUndo}
+            title={`Undo (${formatShortcut("Z")})`}
+            className="shrink-0"
+            aria-label="Undo"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+
+          {/* Redo */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRedo}
+            disabled={!canRedo}
+            title={`Redo (${formatShortcut("Z")})`}
+            className="shrink-0"
+            aria-label="Redo"
+          >
+            <Redo className="h-4 w-4" />
           </Button>
 
           <div
