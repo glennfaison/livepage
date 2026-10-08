@@ -24,7 +24,7 @@ This is a small project. I aim to acknowledge reports within a week and will kee
 Some behavior is intentional. Reports about these are still welcome, but they are not vulnerabilities by themselves:
 
 - **Author-supplied code is trusted.** Generated-data and parse functions in a page's data-source settings run as code in the browser, in the editor, in previews, and in exported pages. Only open pages you trust.
-- **HTML exports load React from esm.sh.** Exported files fetch pinned React and ReactDOM builds from `https://esm.sh` when opened, so they need network access.
+- **HTML exports load React from esm.sh.** The default export fetches pinned React and ReactDOM builds from `https://esm.sh` when opened, so it needs network access. Self-contained export bundles that runtime into the file and does not contact esm.sh.
 - **REST data sources go through the browser.** They depend on the target server's CORS policy, and exported pages send requests from the viewer's browser.
 
 Problems in this project's handling of untrusted input are in scope, for example a crafted JSON, shortcode, or template that runs code without the user having opted in, or that escapes the intended rendering.

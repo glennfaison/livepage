@@ -1,6 +1,6 @@
 import { selectCurrentPage } from "@/client/features/app-state"
 import { decodeDataSourceSettings, encodeDataSourceSettings } from "@/client/features/data-sources"
-import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/client/features/serializers"
+import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, serializeAppStateAsSelfContainedHtml, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/client/features/serializers"
 import { validateImportedFile } from "@/client/features/page-builder"
 import type { AppNode } from "@/client/features/types"
 
@@ -122,5 +122,49 @@ describe("app-state selectors and serializers", () => {
     expect(html).toContain('new Function("data"')
     expect(html).toContain("__datasource__")
     expect(html).not.toContain("const browserRuntime")
+  })
+
+  it("exports a self-contained file with inlined css, embedded images, and no external runtime", async () => {
+    const tree = [
+      {
+        tag: "page",
+        attributes: { title: "Offline", favicon: "/favicon.svg" },
+        children: [{
+          tag: "image",
+          attributes: { src: "/avatars/ada.svg", fallbackSrc: "https://cdn.example/missing.png" },
+          children: [],
+        }],
+      },
+    ] satisfies ReadonlyArray<AppNode>
+
+    const html = await serializeAppStateAsSelfContainedHtml(tree, {
+      assetBaseUrl: "https://livepage.example",
+      fetchAsset: async (url) => {
+        if (url === "https://livepage.example/avatars/ada.svg" || url === "https://livepage.example/favicon.svg") {
+          const bytes = Buffer.from("<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>")
+          return {
+            ok: true,
+            headers: { get: () => "image/svg+xml" },
+            arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+          }
+        }
+        return {
+          ok: false,
+          headers: { get: () => null },
+          arrayBuffer: async () => new ArrayBuffer(0),
+        }
+      },
+    })
+
+    const head = html.slice(0, html.indexOf("</head>"))
+    expect(html).toContain('data-livepage-export="self-contained"')
+    expect(html).toContain("data:image/svg+xml;base64,")
+    expect(html).toContain("ui-sans-serif, system-ui, sans-serif")
+    expect(head).not.toContain("https://esm.sh/")
+    expect(head).not.toContain("fonts.googleapis.com")
+    expect(head).not.toContain("fonts.gstatic.com")
+    expect(html).not.toContain("https://livepage.example/avatars/ada.svg")
+    expect(html).toContain("https://cdn.example/missing.png")
+    expect(html).toContain("<style>")
   })
 })
