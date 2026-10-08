@@ -78,6 +78,7 @@ export const Toolbar: React.FC<Readonly<{
   onDiscardHistory,
   historyPreviewIndex,
   onOpenCommandPalette,
+  onOpenAIAssistant,
   pageComponent,
   componentTree,
   onPageTitleChange,

@@ -78,6 +78,7 @@ function renderPalette(stateOverrides: Partial<AppState> = {}) {
       onImportJson={jest.fn()}
       onImportShortcode={jest.fn()}
       onDiscardChanges={jest.fn()}
+      onOpenAIAssistant={jest.fn()}
     />,
   )
 
@@ -166,6 +167,7 @@ describe("CommandPalette", () => {
         onImportJson={jest.fn()}
         onImportShortcode={jest.fn()}
         onDiscardChanges={jest.fn()}
+        onOpenAIAssistant={jest.fn()}
       />,
     )
 
