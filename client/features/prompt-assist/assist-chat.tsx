@@ -41,6 +41,7 @@ function GatedAssistChat(props: Readonly<{ dispatch: (action: AppAction) => void
 function AssistChatSession(props: Readonly<{ dispatch: (action: AppAction) => void; open?: boolean; onOpenChange?: (open: boolean) => void }>) {
   const [open, setOpen] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
+  const [showBubbleTooltip, setShowBubbleTooltip] = useState(false)
   const chat = usePromptAssist({ dispatch: props.dispatch })
 
   // Sync with controlled props if provided
@@ -61,6 +62,20 @@ function AssistChatSession(props: Readonly<{ dispatch: (action: AppAction) => vo
     }
   }, [open])
 
+  // Show bubble tooltip on hover when chat is closed
+  const handleBubbleMouseEnter = () => {
+    if (!open && typeof window !== "undefined") {
+      const dismissed = window.localStorage.getItem(TOOLTIP_DISMISSED_KEY)
+      if (!dismissed) {
+        setShowBubbleTooltip(true)
+      }
+    }
+  }
+
+  const handleBubbleMouseLeave = () => {
+    setShowBubbleTooltip(false)
+  }
+
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
     props.onOpenChange?.(nextOpen)
@@ -68,6 +83,7 @@ function AssistChatSession(props: Readonly<{ dispatch: (action: AppAction) => vo
 
   const dismissTooltip = () => {
     setShowTooltip(false)
+    setShowBubbleTooltip(false)
     if (typeof window !== "undefined") {
       window.localStorage.setItem(TOOLTIP_DISMISSED_KEY, "true")
     }
@@ -79,12 +95,14 @@ function AssistChatSession(props: Readonly<{ dispatch: (action: AppAction) => vo
         <button
           type="button"
           onClick={() => handleOpenChange(true)}
+          onMouseEnter={handleBubbleMouseEnter}
+          onMouseLeave={handleBubbleMouseLeave}
           aria-label="Open page assistant"
           className="fixed bottom-4 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
         >
           <MessageCircle className="h-5 w-5" />
         </button>
-        {showTooltip && (
+        {(showTooltip || showBubbleTooltip) && (
           <div className="fixed bottom-18 right-4 z-40 max-w-xs animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2">
             <div className="bg-background border rounded-lg shadow-lg p-3">
               <div className="flex items-start gap-2">
@@ -93,6 +111,9 @@ function AssistChatSession(props: Readonly<{ dispatch: (action: AppAction) => vo
                   <p className="text-sm font-medium">AI Assistant</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Click to describe a page in plain language. I'll pick a template, draft its content, and tune the design.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Or press <kbd className="px-1.5 py-0.5 bg-muted rounded">⌘K</kbd> and search "Open AI Assistant"
                   </p>
                 </div>
                 <button

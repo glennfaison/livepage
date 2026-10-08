@@ -372,6 +372,7 @@ export default function BuilderPage() {
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onOpenAIAssistant={() => setAiAssistantOpen(true)}
           pageComponent={currentPage}
           componentTree={state.componentTree}
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
