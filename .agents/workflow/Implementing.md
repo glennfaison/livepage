@@ -4,7 +4,7 @@ The goal is to implement the goal of the issue.
 
 ## Process
 
-1. **Pick up the issue**: When you pick up an issue, remove the `ready-for-agent` tag and set an `agent:in-progress` tag.
+1. **Pick up the issue**: When you pick up an issue, remove the `ready-for-agent` tag and set an `agent-in-progress` tag.
 
 2. **Read context**: Read through the issue, its open comments, the associated ADRs, and relevant code.
 
