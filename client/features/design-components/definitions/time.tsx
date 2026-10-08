@@ -78,6 +78,7 @@ export const componentMetadata = {
   attributes,
   Icon: <Clock3 className="size-4" />,
   htmlTag: "time",
+  category: "Data",
   PreviewModeComponent: Component,
   EditModeComponent: withEditorControls(withTextEditing(Component)),
 } as const satisfies Metadata

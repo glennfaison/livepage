@@ -227,6 +227,8 @@ export interface Metadata {
   /** HTML element used by the format-neutral HTML serializer. */
   readonly htmlTag?: string
   readonly htmlClassName?: string
+  /** Component category for grouping in UI (e.g., Layout, Typography, Media, Data). */
+  readonly category?: string
 }
 
 export type Operations = Readonly<{

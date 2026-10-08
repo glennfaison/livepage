@@ -14,6 +14,7 @@ import {
   Redo2,
   RotateCcw,
   Search,
+  Star,
   Undo2,
   Upload,
   Bot,
@@ -26,10 +27,11 @@ import {
   Link,
   Utensils,
   GraduationCap,
-  Newspaper,
   HeartPulse,
   User,
   Building2,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -51,7 +53,20 @@ type PaletteCommand = Readonly<{
   keywords?: ReadonlyArray<string>
   icon?: React.ReactNode
   onSelect: () => void
+  category?: string
+  isRecent?: boolean
+  isFavorite?: boolean
 }>
+
+const COMPONENT_CATEGORIES = [
+  "Layout",
+  "Typography",
+  "Media",
+  "Data",
+  "Interactive",
+] as const
+
+type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number]
 
 function getCategoryIcon(category: string): React.ReactNode {
   const iconMap: Record<string, React.ReactNode> = {
@@ -67,6 +82,11 @@ function getCategoryIcon(category: string): React.ReactNode {
     "CV/Resume/Personal": <User className="h-4 w-4" />,
     Blog: <Newspaper className="h-4 w-4" />,
     Dashboard: <HeartPulse className="h-4 w-4" />,
+    Layout: <LayoutTemplate className="h-4 w-4" />,
+    Typography: <FileText className="h-4 w-4" />,
+    Media: <Image className="h-4 w-4" />,
+    Data: <Building2 className="h-4 w-4" />,
+    Interactive: <Link className="h-4 w-4" />,
   }
   return iconMap[category] ?? <FileText className="h-4 w-4" />
 }
@@ -109,6 +129,50 @@ function previewText(node: AppNode): string | undefined {
   return firstStringChild?.slice(0, 40)
 }
 
+function getRecentlyUsedComponents(): ReadonlyArray<string> {
+  if (typeof window === "undefined") return []
+  try {
+    const stored = localStorage.getItem("livepage-recently-used-components")
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function addRecentlyUsedComponent(tag: string): void {
+  if (typeof window === "undefined") return
+  try {
+    const recent = getRecentlyUsedComponents()
+    const filtered = recent.filter((t) => t !== tag)
+    const updated = [tag, ...filtered].slice(0, 5)
+    localStorage.setItem("livepage-recently-used-components", JSON.stringify(updated))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+function getFavoriteComponents(): ReadonlyArray<string> {
+  if (typeof window === "undefined") return []
+  try {
+    const stored = localStorage.getItem("livepage-favorite-components")
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function toggleFavoriteComponent(tag: string): void {
+  if (typeof window === "undefined") return
+  try {
+    const favorites = getFavoriteComponents()
+    const isFavorite = favorites.includes(tag)
+    const updated = isFavorite ? favorites.filter((t) => t !== tag) : [tag, ...favorites].slice(0, 10)
+    localStorage.setItem("livepage-favorite-components", JSON.stringify(updated))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export const CommandPalette: React.FC<
   Readonly<{
     open: boolean
@@ -147,13 +211,20 @@ export const CommandPalette: React.FC<
   onOpenAIAssistant,
 }) => {
   const [search, setSearch] = useState("")
+  const [insertSearch, setInsertSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const insertInputRef = useRef<HTMLInputElement>(null)
+  const [recentComponents, setRecentComponents] = useState<ReadonlyArray<string>>([])
+  const [favoriteComponents, setFavoriteComponents] = useState<ReadonlyArray<string>>([])
 
   useEffect(() => {
     if (!open) return
     setSearch("")
+    setInsertSearch("")
     setActiveIndex(0)
+    setRecentComponents(getRecentlyUsedComponents())
+    setFavoriteComponents(getFavoriteComponents())
     const id = window.setTimeout(() => inputRef.current?.focus(), 0)
     return () => window.clearTimeout(id)
   }, [open])
@@ -316,17 +387,41 @@ export const CommandPalette: React.FC<
       ? componentOperations.findComponentById(state.componentTree, state.selectedComponentId)
       : currentPage
     const insertParentId = insertParent?.attributes.id
-    const insertCommands: PaletteCommand[] = (insertParent ? getComponentsAllowedIn(insertParent.tag) : []).map(({ tag }) => {
+    const allowedComponents = insertParent ? getComponentsAllowedIn(insertParent.tag) : []
+    
+    // Build insert commands with categories, recent, and favorites
+    const insertCommands: PaletteCommand[] = allowedComponents.map(({ tag }) => {
       const info = getComponentInfo(tag)
+      const category = info.category ?? "Other"
+      const isRecent = recentComponents.includes(tag)
+      const isFavorite = favoriteComponents.includes(tag)
       return {
         id: `insert-${tag}`,
         group: "Insert component",
         label: `Insert ${info.label}`,
         description: state.selectedComponentId ? "Inside the selected component" : "Onto the current page",
-        keywords: [tag, ...info.keywords],
+        keywords: [tag, ...info.keywords, category.toLowerCase()],
         icon: info.Icon,
-        onSelect: () => componentOperations.addComponent({ tag, parentId: insertParentId }),
+        category,
+        isRecent,
+        isFavorite,
+        onSelect: () => {
+          componentOperations.addComponent({ tag, parentId: insertParentId })
+          addRecentlyUsedComponent(tag)
+          setRecentComponents(getRecentlyUsedComponents())
+        },
       }
+    })
+
+    // Sort: favorites first, then recent, then alphabetical by category then label
+    insertCommands.sort((a, b) => {
+      if (a.isFavorite && !b.isFavorite) return -1
+      if (!a.isFavorite && b.isFavorite) return 1
+      if (a.isRecent && !b.isRecent) return -1
+      if (!a.isRecent && b.isRecent) return 1
+      const categoryOrder = COMPONENT_CATEGORIES.indexOf(a.category as ComponentCategory) - COMPONENT_CATEGORIES.indexOf(b.category as ComponentCategory)
+      if (categoryOrder !== 0) return categoryOrder
+      return a.label.localeCompare(b.label)
     })
 
     const templateCommands: PaletteCommand[] = templates.map((template) => ({
@@ -379,18 +474,35 @@ export const CommandPalette: React.FC<
     onSaveAsShortcode,
     onImportJson,
     onImportShortcode,
+    recentComponents,
+    favoriteComponents,
   ])
 
+  // Filter commands: global search applies to all, insert search only to insert components
   const filteredCommands = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return commands
+    const globalTerm = search.trim().toLowerCase()
+    const insertTerm = insertSearch.trim().toLowerCase()
+    
     return commands.filter((command) => {
-      const haystack = [command.label, command.description ?? "", ...(command.keywords ?? [])]
-        .join(" ")
-        .toLowerCase()
-      return haystack.includes(term)
+      // Apply insert-specific search to insert component group
+      if (command.group === "Insert component" && insertTerm) {
+        const haystack = [command.label, command.description ?? "", ...(command.keywords ?? []), command.category ?? ""]
+          .join(" ")
+          .toLowerCase()
+        if (!haystack.includes(insertTerm)) return false
+      }
+      
+      // Apply global search to all commands
+      if (globalTerm) {
+        const haystack = [command.label, command.description ?? "", ...(command.keywords ?? [])]
+          .join(" ")
+          .toLowerCase()
+        if (!haystack.includes(globalTerm)) return false
+      }
+      
+      return true
     })
-  }, [commands, search])
+  }, [commands, search, insertSearch])
 
   // Precompute id -> index once per filter pass instead of calling
   // filteredCommands.indexOf(command) inside the render loop (O(n) per row,
@@ -401,6 +513,7 @@ export const CommandPalette: React.FC<
     return map
   }, [filteredCommands])
 
+  // Group commands, with special handling for Insert component group
   const groupedCommands = useMemo(() => {
     const groups = new Map<string, PaletteCommand[]>()
     for (const command of filteredCommands) {
@@ -413,7 +526,7 @@ export const CommandPalette: React.FC<
 
   useEffect(() => {
     setActiveIndex(0)
-  }, [search])
+  }, [search, insertSearch])
 
   const runCommand = useCallback(
     (command: PaletteCommand | undefined) => {
@@ -435,6 +548,197 @@ export const CommandPalette: React.FC<
       event.preventDefault()
       runCommand(filteredCommands[activeIndex])
     }
+  }
+
+  // Render insert component group with sub-search and categories
+  const renderInsertComponentGroup = (groupCommands: PaletteCommand[]) => {
+    const favorites = groupCommands.filter((c) => c.isFavorite)
+    const recent = groupCommands.filter((c) => c.isRecent && !c.isFavorite)
+    const others = groupCommands.filter((c) => !c.isFavorite && !c.isRecent)
+    
+    // Group others by category
+    const byCategory = new Map<string, PaletteCommand[]>()
+    for (const cmd of others) {
+      const cat = cmd.category ?? "Other"
+      const list = byCategory.get(cat) ?? []
+      list.push(cmd)
+      byCategory.set(cat, list)
+    }
+    
+    const categoryOrder = [...COMPONENT_CATEGORIES, "Other"]
+    const sortedCategories = Array.from(byCategory.entries()).sort((a, b) => 
+      categoryOrder.indexOf(a[0]) - categoryOrder.indexOf(b[0])
+    )
+
+    return (
+      <div className="mb-2">
+        {/* Sub-search for insert components */}
+        <div className="relative px-2 py-1">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50" />
+          <Input
+            ref={insertInputRef}
+            value={insertSearch}
+            onChange={(event) => setInsertSearch(event.target.value)}
+            placeholder="Filter components…"
+            className="h-8 border border-border bg-background pl-9 pr-3 text-sm shadow-none focus-visible:ring-0"
+            aria-label="Filter components"
+          />
+        </div>
+        
+        {(favorites.length > 0 || recent.length > 0) && (
+          <div className="space-y-1 px-2 pb-1 border-b border-border/50">
+            {favorites.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <span>Favorites</span>
+                </div>
+                {favorites.map((command) => {
+                  const index = commandIndexById.get(command.id) ?? 0
+                  const isActive = index === activeIndex
+                  return (
+                    <button
+                      key={command.id}
+                      type="button"
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onClick={() => runCommand(command)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm",
+                        isActive ? "bg-muted text-foreground" : "text-foreground/90 hover:bg-muted/60",
+                      )}
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-yellow-400">
+                        <Star className="h-3 w-3 fill-current" />
+                      </span>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground">
+                        {command.icon}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {command.label}
+                        {command.description ? (
+                          <span className="ml-2 truncate text-xs text-muted-foreground">{command.description}</span>
+                        ) : null}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavoriteComponent(command.id.replace("insert-", ""))
+                          setFavoriteComponents(getFavoriteComponents())
+                        }}
+                        className="shrink-0 p-1 text-muted-foreground hover:text-yellow-400"
+                        aria-label="Remove from favorites"
+                      >
+                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                      </button>
+                      {isActive ? <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+            
+            {recent.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <span>Recent</span>
+                </div>
+                {recent.map((command) => {
+                  const index = commandIndexById.get(command.id) ?? 0
+                  const isActive = index === activeIndex
+                  return (
+                    <button
+                      key={command.id}
+                      type="button"
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onClick={() => runCommand(command)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm",
+                        isActive ? "bg-muted text-foreground" : "text-foreground/90 hover:bg-muted/60",
+                      )}
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                      </span>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground">
+                        {command.icon}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {command.label}
+                        {command.description ? (
+                          <span className="ml-2 truncate text-xs text-muted-foreground">{command.description}</span>
+                        ) : null}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavoriteComponent(command.id.replace("insert-", ""))
+                          setFavoriteComponents(getFavoriteComponents())
+                        }}
+                        className="shrink-0 p-1 text-muted-foreground hover:text-yellow-400"
+                        aria-label={command.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        <Star className={cn("h-3.5 w-3.5", command.isFavorite ? "fill-yellow-400 text-yellow-400" : "")} />
+                      </button>
+                      {isActive ? <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {sortedCategories.map(([category, commands]) => (
+          <div key={category} className="space-y-1 px-2 py-1">
+            <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {getCategoryIcon(category)}
+              <span>{category}</span>
+            </div>
+            {commands.map((command) => {
+              const index = commandIndexById.get(command.id) ?? 0
+              const isActive = index === activeIndex
+              return (
+                <button
+                  key={command.id}
+                  type="button"
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => runCommand(command)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm",
+                    isActive ? "bg-muted text-foreground" : "text-foreground/90 hover:bg-muted/60",
+                  )}
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground">
+                    {command.icon}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {command.label}
+                    {command.description ? (
+                      <span className="ml-2 truncate text-xs text-muted-foreground">{command.description}</span>
+                    ) : null}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleFavoriteComponent(command.id.replace("insert-", ""))
+                      setFavoriteComponents(getFavoriteComponents())
+                    }}
+                    className="shrink-0 p-1 text-muted-foreground hover:text-yellow-400"
+                    aria-label={command.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Star className={cn("h-3.5 w-3.5", command.isFavorite ? "fill-yellow-400 text-yellow-400" : "")} />
+                  </button>
+                  {isActive ? <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
+                </button>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (

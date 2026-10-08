@@ -88,6 +88,7 @@ export const componentMetadata = {
   defaultChildren: [],
   attributes,
   Icon,
+  category: "Data",
   PreviewModeComponent: withDataSource(Component),
   EditModeComponent: withEditorControls(withDataSource(Component)),
 } as const satisfies Metadata

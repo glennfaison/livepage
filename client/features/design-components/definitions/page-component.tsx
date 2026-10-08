@@ -194,6 +194,7 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon: null,
+	category: "Layout",
 	PreviewModeComponent: PreviewModeComponent,
 	EditModeComponent: EditModeComponent,
 } as const satisfies Metadata

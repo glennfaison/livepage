@@ -33,4 +33,4 @@ const Component = (props: Props) => {
   return <aside className={cn("flex items-start gap-3 rounded-lg border px-4 py-3 text-sm leading-6", tones[tone] || tones.neutral, readCustomClasses(props.component.attributes), props.childClassName)} role="note" {...accessibilityAttrs}><Megaphone className="mt-1 size-4 shrink-0" aria-hidden="true" /><span>{content as React.ReactNode}</span></aside>
 }
 
-export const componentMetadata = { tag, label, keywords, defaultChildren: ["Share an important update."], attributes, Icon, htmlTag: "aside", PreviewModeComponent: withDataSource(Component), EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))) } as const satisfies Metadata
+export const componentMetadata = { tag, label, keywords, defaultChildren: ["Share an important update."], attributes, Icon, htmlTag: "aside", category: "Interactive", PreviewModeComponent: withDataSource(Component), EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))) } as const satisfies Metadata

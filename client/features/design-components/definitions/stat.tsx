@@ -27,4 +27,4 @@ const Component = (props: Props) => {
   return <section className={cn("rounded-xl border bg-card p-5 shadow-sm", readCustomClasses(props.component.attributes), props.childClassName)} {...accessibilityAttrs}><p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p><p className="mt-1 text-sm text-muted-foreground">{labelText as React.ReactNode}</p></section>
 }
 
-export const componentMetadata = { tag, label, keywords, defaultChildren: ["Monthly visitors"], attributes, Icon, htmlTag: "section", PreviewModeComponent: withDataSource(Component), EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))) } as const satisfies Metadata
+export const componentMetadata = { tag, label, keywords, defaultChildren: ["Monthly visitors"], attributes, Icon, htmlTag: "section", category: "Data", PreviewModeComponent: withDataSource(Component), EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))) } as const satisfies Metadata

@@ -224,6 +224,7 @@ export const componentMetadata = {
 	defaultChildren: [],
 	attributes,
 	Icon,
+	category: "Layout",
 	PreviewModeComponent: withDataSource(PreviewModeComponent as React.ComponentType<Props>),
 	EditModeComponent: withEditorControls(withDataSource(EditModeComponent as React.ComponentType<Props>)),
 } as const satisfies Metadata
