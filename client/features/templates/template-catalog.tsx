@@ -5,9 +5,10 @@ import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
 import { cn } from "@/client/lib/utils"
-import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X, FileText, Briefcase, Image, Mic, Mail, Utensils, GraduationCap, Newspaper, HeartPulse, Link, Monitor, Calendar, Code, User, Building2 } from "lucide-react"
+import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X, FileText, Briefcase, Image, Mic, Mail, Utensils, GraduationCap, Newspaper, HeartPulse, Link, Monitor, Calendar, Code, User, Building2, Eye } from "lucide-react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useTemplateCatalog, type CatalogTab, type CatalogViewMode } from "./use-template-catalog"
+import { TemplatePreviewModal } from "./template-preview-modal"
 
 export type { CatalogViewMode } from "./use-template-catalog"
 
@@ -49,11 +50,20 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
   const catalog = useTemplateCatalog(templates)
   const { visibleTemplates, searchTerm } = catalog
   const viewMode = forcedViewMode ?? catalog.viewMode
+  const [previewTemplateId, setPreviewTemplateId] = React.useState<string | null>(null)
 
   const handleApplyTemplate = (templateId: string) => {
     catalog.recordApplied(templateId)
     onApplyTemplate(templateId)
     onClose?.()
+  }
+
+  const handlePreviewTemplate = (templateId: string) => {
+    setPreviewTemplateId(templateId)
+  }
+
+  const handleClosePreview = () => {
+    setPreviewTemplateId(null)
   }
 
   const renderTemplate = (template: TemplateDisplaySummary) => {
@@ -62,6 +72,7 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
       isFavorite: catalog.isFavorite(template.id),
       onToggleFavorite: () => catalog.toggleFavorite(template.id),
       onApply: () => handleApplyTemplate(template.id),
+      onPreview: () => handlePreviewTemplate(template.id),
     }
     if (renderTemplateItem) return <React.Fragment key={template.id}>{renderTemplateItem(template, itemProps)}</React.Fragment>
     return viewMode === "grid" ? <TemplateCard key={template.id} {...itemProps} /> : <TemplateListItem key={template.id} {...itemProps} />
@@ -70,7 +81,8 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
   const handleClearSearch = () => catalog.setSearchTerm("")
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <React.Fragment>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="shrink-0 space-y-3 p-4 pb-3">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between gap-2">
@@ -145,7 +157,14 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
         )}
       </div>
     </div>
-  )
+    <TemplatePreviewModal
+      templateId={previewTemplateId ?? ""}
+      isOpen={previewTemplateId !== null}
+      onClose={handleClosePreview}
+      onApplyTemplate={onApplyTemplate}
+    />
+  </React.Fragment>
+)
 }
 
 function CategoryTabs({
@@ -261,6 +280,7 @@ interface TemplateItemProps {
   isFavorite: boolean
   onToggleFavorite: () => void
   onApply: () => void
+  onPreview: () => void
 }
 
 /**
@@ -350,7 +370,7 @@ function TemplateThumbnail({ template, className }: Readonly<{ template: Templat
   )
 }
 
-export function TemplateCard({ template, isFavorite, onToggleFavorite, onApply }: Readonly<TemplateItemProps>) {
+export function TemplateCard({ template, isFavorite, onToggleFavorite, onApply, onPreview }: Readonly<TemplateItemProps>) {
   return (
     <div className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-background p-3 transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/35">
       <div className="relative">
@@ -369,7 +389,19 @@ export function TemplateCard({ template, isFavorite, onToggleFavorite, onApply }
           <h3 className="font-medium text-foreground">{template.name}</h3>
           <p className="text-sm text-muted-foreground">{template.description}</p>
         </div>
-        <FavoriteButton isFavorite={isFavorite} onToggle={onToggleFavorite} />
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onPreview}
+            aria-label={`Preview ${template.name} template`}
+            title="Preview template"
+            className="relative z-10 shrink-0"
+          >
+            <Eye className="h-4 w-4" aria-hidden="true" />
+          </Button>
+          <FavoriteButton isFavorite={isFavorite} onToggle={onToggleFavorite} />
+        </div>
       </div>
       <TemplateTags template={template} />
       <ApplyTemplateButton template={template} onApply={onApply} className="rounded-2xl" />
@@ -377,7 +409,7 @@ export function TemplateCard({ template, isFavorite, onToggleFavorite, onApply }
   )
 }
 
-export function TemplateListItem({ template, isFavorite, onToggleFavorite, onApply }: Readonly<TemplateItemProps>) {
+export function TemplateListItem({ template, isFavorite, onToggleFavorite, onApply, onPreview }: Readonly<TemplateItemProps>) {
   return (
     <div className="group relative flex items-center gap-3 rounded-xl border border-border bg-background p-3 transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/35">
       <TemplateThumbnail template={template} className="w-20 shrink-0 rounded-lg" />
@@ -387,7 +419,18 @@ export function TemplateListItem({ template, isFavorite, onToggleFavorite, onApp
         <p className="line-clamp-2 text-sm text-muted-foreground">{template.description}</p>
         <TemplateTags template={template} />
       </div>
-      <FavoriteButton isFavorite={isFavorite} onToggle={onToggleFavorite} />
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onPreview}
+          aria-label={`Preview ${template.name} template`}
+          title="Preview template"
+        >
+          <Eye className="h-4 w-4" aria-hidden="true" />
+        </Button>
+        <FavoriteButton isFavorite={isFavorite} onToggle={onToggleFavorite} />
+      </div>
       <ApplyTemplateButton template={template} onApply={onApply} className="rounded-xl" />
     </div>
   )
