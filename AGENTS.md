@@ -35,14 +35,13 @@ Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
 ## Git hooks (required)
 
 Local git hooks enforce branch-name compliance at commit and push time.
-They are enabled via the setup script (`.kilo/setup-script.sh`) for Agent Manager
-worktrees, or manually:
+Enable them at **session start**:
 
 ```bash
 git config core.hooksPath scripts/git-hooks
 ```
 
-Agents must run this at session start if not using Agent Manager.
+This must be run before any commits or pushes. The hooks validate branch names against the gitflow patterns in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
 
 ## README.md is user-facing and hand-maintained
 
