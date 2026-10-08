@@ -2,6 +2,7 @@
 
 import { HistoryPopover } from "@/client/features/page-builder/history-popover"
 import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
+import { OPEN_COMPONENT_SETTINGS_EVENT } from "@/client/features/design-components/editor-controls/shared/editor-chrome"
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
@@ -270,6 +271,22 @@ export const Toolbar: React.FC<Readonly<{
               <History className="h-4 w-4" />
             </Button>
           </HistoryPopover>
+          {selectedComponentId ? (
+            <Button
+              variant="outline"
+              size="sm"
+              title="Settings for selected component"
+              className="shrink-0 border-primary text-primary"
+              aria-label="Open settings for selected component"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent(OPEN_COMPONENT_SETTINGS_EVENT, { detail: selectedComponentId }))
+                const trigger = document.querySelector(`[data-settings-trigger="${CSS.escape(selectedComponentId)}"]`)
+                if (trigger instanceof HTMLElement) trigger.focus()
+              }}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          ) : null}
           <ToolbarSettingsPopover
             isOpen={settingsPopoverOpen}
             onOpenChange={setSettingsPopoverOpen}
@@ -280,11 +297,20 @@ export const Toolbar: React.FC<Readonly<{
             componentTree={componentTree}
             dispatch={dispatch ?? (() => {})}
             promptAssistEnabled={promptAssistEnabled ?? false}
+            hasSelectedComponent={Boolean(selectedComponentId)}
           >
-            <Button variant="outline" size="sm" title="Settings" className="shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              title={selectedComponentId ? "Page settings" : "Settings"}
+              className="shrink-0"
+              aria-label={selectedComponentId ? "Page settings" : "Settings"}
+            >
               <Settings className="h-4 w-4" />
+              {selectedComponentId ? <span className="text-xs">Page</span> : null}
             </Button>
           </ToolbarSettingsPopover>
+
 
           {/* Format Painter - Copy Styles */}
           <Button

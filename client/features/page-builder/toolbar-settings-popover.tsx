@@ -22,6 +22,7 @@ type ToolbarSettingsPopoverProps = Readonly<{
   componentTree: ReadonlyArray<AppNode>
   dispatch: React.Dispatch<AppAction>
   promptAssistEnabled: boolean
+  hasSelectedComponent?: boolean
 }>
 
 export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
@@ -35,6 +36,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   componentTree,
   dispatch,
   promptAssistEnabled,
+  hasSelectedComponent = false,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -149,6 +151,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
           </div>
 
           <div className="p-4 space-y-4">
+            {!hasSelectedComponent && (
+              <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/40 p-3 text-sm text-muted-foreground" role="status">
+                No component is selected. Click a component on the canvas to select it, then use Settings to edit it. Page settings are below.
+              </div>
+            )}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Page</h3>
               <div className="space-y-2">
