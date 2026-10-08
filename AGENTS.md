@@ -15,6 +15,15 @@ Finish checklists; the [PR template](./.github/pull_request_template.md) and
 All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
 find the right skill, then read its `SKILL.md` before following its workflow.
 
+## Workflows
+
+Agent workflows live in [.agents/workflow/](./.agents/workflow/):
+
+- [Grooming.md](./.agents/workflow/Grooming.md) — Issue grooming process
+- [Implementing.md](./.agents/workflow/Implementing.md) — Implementation workflow
+- [Reviewing.md](./.agents/workflow/Reviewing.md) — PR review process
+- [Exploring.md](./.agents/workflow/Exploring.md) — Application/codebase exploration workflow
+
 ## Branch names
 
 Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
