@@ -17,6 +17,7 @@ import {
   Undo2,
   Upload,
   Bot,
+  Copy as CopyIcon,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -28,6 +29,7 @@ import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { formatDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { cn } from "@/client/lib/utils"
 
 type PaletteCommand = Readonly<{
@@ -195,6 +197,15 @@ export const CommandPalette: React.FC<
         keywords: ["discard", "reset", "revert"],
         icon: <RotateCcw className="h-4 w-4" />,
         onSelect: onDiscardChanges,
+      },
+      {
+        id: "action-duplicate-page",
+        group: "Actions",
+        label: "Duplicate page",
+        description: formatDuplicatePageShortcut(),
+        keywords: ["duplicate", "clone", "copy", "page"],
+        icon: <CopyIcon className="h-4 w-4" />,
+        onSelect: () => dispatch({ type: "DUPLICATE_PAGE" }),
       },
       {
         id: "action-save-json",

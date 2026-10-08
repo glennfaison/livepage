@@ -166,6 +166,10 @@ export default function BuilderPage() {
     }
   }
 
+  const handleDuplicatePage = () => {
+    dispatch({ type: "DUPLICATE_PAGE" })
+  }
+
   const applyTemplate = (templateId: string) => {
     const template = getPageTemplateById(templateId)
     if (!template) {
@@ -378,6 +382,7 @@ export default function BuilderPage() {
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onDuplicatePage={handleDuplicatePage}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
           selectedComponentId={state.selectedComponentId}

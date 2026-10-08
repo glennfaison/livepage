@@ -38,6 +38,7 @@ export type AppAction =
   | Readonly<{ type: "ADD_PAGE"; payload: AppNode }>
   | Readonly<{ type: "UPDATE_PAGE"; payload: Readonly<{ id: string; updates: Partial<AppNode> }> }>
   | Readonly<{ type: "SET_ACTIVE_PAGE"; payload: string }>
+  | Readonly<{ type: "DUPLICATE_PAGE" }>
   | Readonly<{
       type: "INSERT_COMPONENT"
       payload: Readonly<{ newComponent?: AppNode; newComponentTag?: AppNodeTag; parentId?: string; index?: number }>

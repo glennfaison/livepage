@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, formatPainterShortcut, useCopyStylesShortcut, useHistoryShortcut, usePasteStylesShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, formatPainterShortcut, formatDuplicatePageShortcut, formatRedoShortcut, useCopyStylesShortcut, useHistoryShortcut, usePasteStylesShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useFormatPainter } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
@@ -62,6 +62,8 @@ export const Toolbar: React.FC<Readonly<{
   onUndo?: () => void
   /** Redo callback */
   onRedo?: () => void
+  /** Duplicate page callback */
+  onDuplicatePage?: () => void
   /** App dispatch for settings */
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
@@ -92,6 +94,7 @@ export const Toolbar: React.FC<Readonly<{
   onPageTitleChange,
   onUndo,
   onRedo,
+  onDuplicatePage,
   dispatch,
   promptAssistEnabled,
   selectedComponentId,
@@ -120,6 +123,7 @@ export const Toolbar: React.FC<Readonly<{
   useHistoryShortcut(() => setHistoryPopoverOpen(true))
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
+  useDuplicatePageShortcut(() => onDuplicatePage?.())
   useCopyStylesShortcut(() => {
     if (pageComponent) {
       copyStyles(pageComponent)
@@ -295,11 +299,23 @@ export const Toolbar: React.FC<Readonly<{
             size="sm"
             onClick={onRedo}
             disabled={!canRedo}
-            title={`Redo (${formatShortcut("Z")})`}
+            title={`Redo (${formatRedoShortcut()})`}
             className="shrink-0"
             aria-label="Redo"
           >
             <Redo className="h-4 w-4" />
+          </Button>
+
+          {/* Duplicate Page */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDuplicatePage}
+            title={`Duplicate page (${formatDuplicatePageShortcut()})`}
+            className="shrink-0"
+            aria-label="Duplicate page"
+          >
+            <Copy className="h-4 w-4" />
           </Button>
 
           <ToolbarSettingsPopover
@@ -416,11 +432,23 @@ export const Toolbar: React.FC<Readonly<{
             size="sm"
             onClick={onRedo}
             disabled={!canRedo}
-            title={`Redo (${formatShortcut("Z")})`}
+            title={`Redo (${formatRedoShortcut()})`}
             className="shrink-0"
             aria-label="Redo"
           >
             <Redo className="h-4 w-4" />
+          </Button>
+
+          {/* Duplicate Page */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDuplicatePage}
+            title={`Duplicate page (${formatDuplicatePageShortcut()})`}
+            className="shrink-0"
+            aria-label="Duplicate page"
+          >
+            <Copy className="h-4 w-4" />
           </Button>
 
           <div

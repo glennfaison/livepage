@@ -97,6 +97,21 @@ export function usePasteStylesShortcut(onPasteStyles: () => void) {
   }, [onPasteStyles])
 }
 
+export function useDuplicatePageShortcut(onDuplicatePage: () => void) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      if (isModifierPressed && event.shiftKey && event.key.toLowerCase() === "d") {
+        event.preventDefault()
+        onDuplicatePage()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onDuplicatePage])
+}
+
 export function formatShortcut(key: string): string {
   if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
     return `⌘${key.toUpperCase()}`
@@ -109,4 +124,18 @@ export function formatPainterShortcut(key: string): string {
     return `⌘⌥${key.toUpperCase()}`
   }
   return `Ctrl+Alt+${key.toUpperCase()}`
+}
+
+export function formatDuplicatePageShortcut(): string {
+  if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
+    return "⌘⇧D"
+  }
+  return "Ctrl+Shift+D"
+}
+
+export function formatRedoShortcut(): string {
+  if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
+    return "⌘⇧Z"
+  }
+  return "Ctrl+Shift+Z"
 }

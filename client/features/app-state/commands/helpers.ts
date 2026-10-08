@@ -38,6 +38,36 @@ function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
 }
 
 /**
+ * Duplicates a page component tree, generating new IDs for all nodes.
+ * The duplicate gets a new page ID and a distinct title.
+ */
+export function duplicatePage(
+  page: AppNode,
+  existingPageIds: ReadonlyArray<string>,
+): AppNode {
+  const idSuffix = `-copy-${Date.now()}`
+  let baseTitle = page.attributes.title ?? "Page"
+  // If title ends with " Copy", " Copy 2", etc., increment the number
+  const copyMatch = baseTitle.match(/^(.+?)(?: Copy(?: (\d+))?)?$/)
+  if (copyMatch) {
+    const base = copyMatch[1]
+    const num = copyMatch[2] ? parseInt(copyMatch[2], 10) + 1 : 2
+    baseTitle = `${base} Copy ${num}`
+  } else {
+    baseTitle = `${baseTitle} Copy`
+  }
+
+  const duplicatedPage = cloneNodeWithNewIds(page, idSuffix)
+  return {
+    ...duplicatedPage,
+    attributes: {
+      ...duplicatedPage.attributes,
+      title: baseTitle,
+    },
+  }
+}
+
+/**
  * Finds the ancestry path (parent chain) from the root to a component.
  * Returns an array of components from the target up to the root (target first),
  * or an empty array if the component is not found.
