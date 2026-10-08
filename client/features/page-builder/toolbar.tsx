@@ -106,6 +106,7 @@ export const Toolbar: React.FC<Readonly<{
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
+  const currentPage = pageComponent ?? componentTree[0]
   const canUndo = currentHistoryIndex > 0
   const canRedo = currentHistoryIndex < history.length - 1
 
@@ -277,6 +278,7 @@ export const Toolbar: React.FC<Readonly<{
             onToolbarLayoutChange={setToolbarLayout}
             pageTitle={pageTitle}
             onPageTitleChange={onPageTitleChange ?? (() => {})}
+            pageComponent={currentPage}
             componentTree={componentTree}
             dispatch={dispatch ?? (() => {})}
             promptAssistEnabled={promptAssistEnabled ?? false}
