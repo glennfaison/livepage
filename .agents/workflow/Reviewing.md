@@ -16,7 +16,7 @@ The goal is to review a PR and determine if it can be merged by an agent.
 
 6. **Escalate if needed**: If you are unable to fix it, tag it `ready-for-agent` or `ready-for-human` depending on whether it needs to be resolved by a human or agent.
 
-7. **No double-review concern**: Here we don't care much about double-reviewing.
+7. **Prevent overlapping reviews**: Use per-PR concurrency so only one review or fix attempt runs at a time.
 
 ## References
 
