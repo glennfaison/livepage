@@ -5,13 +5,13 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import { Command, Copy, GripVertical, History, Maximize, Minimize, Paintbrush, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, formatAltShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useCopyStylesShortcut, usePasteStylesShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -64,6 +64,16 @@ export const Toolbar: React.FC<Readonly<{
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
   promptAssistEnabled?: boolean
+  /** Currently selected component ID */
+  selectedComponentId?: string
+  /** Copied styles for format painter */
+  copiedStyles?: Readonly<Record<string, string>> | null
+  /** Source component tag of copied styles */
+  copiedStylesSourceTag?: string | null
+  /** Copy styles callback */
+  onCopyStyles?: (componentId: string) => void
+  /** Paste styles callback */
+  onPasteStyles?: (componentId: string) => void
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -84,6 +94,11 @@ export const Toolbar: React.FC<Readonly<{
   onRedo,
   dispatch,
   promptAssistEnabled,
+  selectedComponentId,
+  copiedStyles,
+  copiedStylesSourceTag,
+  onCopyStyles,
+  onPasteStyles,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -96,12 +111,16 @@ export const Toolbar: React.FC<Readonly<{
   const pageTitle = pageComponent?.attributes?.title ?? ""
   const canUndo = currentHistoryIndex > 0
   const canRedo = currentHistoryIndex < history.length - 1
+  const canCopyStyles = !!selectedComponentId && !!onCopyStyles
+  const canPasteStyles = !!selectedComponentId && !!copiedStyles && !!onPasteStyles
 
   // Keyboard shortcuts
   useSaveShortcut(savePage)
   useHistoryShortcut(() => setHistoryPopoverOpen(true))
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
+  useCopyStylesShortcut(() => onCopyStyles?.(selectedComponentId!), canCopyStyles)
+  usePasteStylesShortcut(() => onPasteStyles?.(selectedComponentId!), canPasteStyles)
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -246,6 +265,31 @@ export const Toolbar: React.FC<Readonly<{
               <Settings className="h-4 w-4" />
             </Button>
           </ToolbarSettingsPopover>
+
+          {/* Format Painter - Copy Styles */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onCopyStyles?.(selectedComponentId!)}
+            disabled={!canCopyStyles}
+            title={`Copy Styles ${formatAltShortcut("C")}`}
+            className="shrink-0"
+          >
+            <Paintbrush className="h-4 w-4" />
+          </Button>
+
+          {/* Format Painter - Paste Styles */}
+          <Button
+            variant={copiedStyles ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPasteStyles?.(selectedComponentId!)}
+            disabled={!canPasteStyles}
+            title={`Paste Styles ${formatAltShortcut("V")}${copiedStylesSourceTag ? ` (from ${copiedStylesSourceTag})` : ""}`}
+            className="shrink-0"
+          >
+            <Paintbrush className="h-4 w-4" />
+            {copiedStyles && <Copy className="h-3 w-3 ml-1" />}
+          </Button>
 
           <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
             <Minimize className="h-4 w-4" />

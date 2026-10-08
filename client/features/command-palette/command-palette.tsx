@@ -10,6 +10,7 @@ import {
   FileText,
   LayoutTemplate,
   MonitorPlay,
+  Paintbrush,
   Pencil,
   Redo2,
   RotateCcw,
@@ -260,6 +261,28 @@ export const CommandPalette: React.FC<
         icon: <Bot className="h-4 w-4" />,
         onSelect: onOpenAIAssistant,
       },
+      {
+        id: "action-copy-styles",
+        group: "Actions",
+        label: "Copy Styles (Format Painter)",
+        description: state.selectedComponentId ? undefined : "Select a component first",
+        keywords: ["format", "painter", "copy", "styles", "brush"],
+        icon: <Paintbrush className="h-4 w-4" />,
+        onSelect: () => componentOperations.copyComponentStyles(state.selectedComponentId),
+      },
+      {
+        id: "action-paste-styles",
+        group: "Actions",
+        label: "Paste Styles (Format Painter)",
+        description: state.copiedStyles && state.selectedComponentId
+          ? `Paste ${Object.keys(state.copiedStyles).length} styles${state.copiedStylesSourceTag ? ` from ${state.copiedStylesSourceTag}` : ""}`
+          : state.copiedStyles
+            ? "Select a target component"
+            : "Copy styles first",
+        keywords: ["format", "painter", "paste", "styles", "brush"],
+        icon: <Paintbrush className="h-4 w-4" />,
+        onSelect: () => componentOperations.pasteComponentStyles(state.selectedComponentId),
+      },
     ]
 
     const insertParent = state.selectedComponentId
@@ -315,6 +338,8 @@ export const CommandPalette: React.FC<
     state.selectedComponentId,
     state.currentHistoryIndex,
     state.history,
+    state.copiedStyles,
+    state.copiedStylesSourceTag,
     canUndo,
     canRedo,
     currentPage,

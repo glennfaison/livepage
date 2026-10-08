@@ -39,6 +39,8 @@ function buildState(overrides: Partial<AppState> = {}): AppState {
     currentHistoryIndex: 1,
     historyPreviewIndex: null,
     originalHistoryState: null,
+    copiedStyles: null,
+    copiedStylesSourceTag: null,
     ...overrides,
   } as AppState
 }
@@ -78,6 +80,7 @@ function renderPalette(stateOverrides: Partial<AppState> = {}) {
       onImportJson={jest.fn()}
       onImportShortcode={jest.fn()}
       onDiscardChanges={jest.fn()}
+      onOpenAIAssistant={jest.fn()}
     />,
   )
 
@@ -166,6 +169,7 @@ describe("CommandPalette", () => {
         onImportJson={jest.fn()}
         onImportShortcode={jest.fn()}
         onDiscardChanges={jest.fn()}
+        onOpenAIAssistant={jest.fn()}
       />,
     )
 

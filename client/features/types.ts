@@ -31,6 +31,8 @@ export type AppState = Readonly<{
   currentHistoryIndex: number
   historyPreviewIndex: number | null
   originalHistoryState: ReadonlyArray<AppNode> | null
+  copiedStyles: Readonly<Record<string, string>> | null
+  copiedStylesSourceTag: string | null
 }>
 
 export type AppAction =
@@ -59,6 +61,9 @@ export type AppAction =
   | Readonly<{ type: "SET_ORIGINAL_HISTORY_STATE"; payload: ReadonlyArray<AppNode> | null }>
   | Readonly<{ type: "RESTORE_FROM_HISTORY"; payload: Readonly<{ historyIndex: number }> }>
   | Readonly<{ type: "DISCARD_CHANGES" }>
+  | Readonly<{ type: "COPY_COMPONENT_STYLES"; payload: Readonly<{ styles: Readonly<Record<string, string>>; sourceTag: string }> }>
+  | Readonly<{ type: "PASTE_COMPONENT_STYLES"; payload: Readonly<{ componentId: string }> }>
+  | Readonly<{ type: "CLEAR_COPIED_STYLES" }>
 
 export type SettingsValue = string | number | boolean | ReadonlyArray<string>
 export type SettingsFormData = Readonly<Record<string, SettingsValue>>
@@ -238,4 +243,7 @@ export type Operations = Readonly<{
   addComponent: (args: { tag: string; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: string) => void
   findComponentById: (components: ReadonlyArray<AppNode | string>, id: string) => AppNode | null
+  copyComponentStyles: (componentId: string) => void
+  pasteComponentStyles: (componentId: string) => void
+  clearCopiedStyles: () => void
 }>

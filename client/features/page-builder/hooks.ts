@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
 import type { AppState, AppAction, AppNode } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { createDesignComponentInstance } from "@/client/features/design-components"
+import { createDesignComponentInstance, getComponentInfo } from "@/client/features/design-components"
 import { generateId } from "@/client/lib/utils"
 import { toast } from "@/client/components/ui/use-toast"
 import {
@@ -330,6 +330,59 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch])
 
+  // Copy component styles (format painter - copy)
+  const copyComponentStyles = useCallback((componentId: string) => {
+    const component = findComponentById(state.componentTree, componentId)
+    if (!component) {
+      toast({
+        title: "Component not found",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Extract stylable attributes (exclude id, content, and other non-style attributes)
+    const nonStyleAttributes = new Set(["id", "content"])
+    const styles: Record<string, string> = {}
+    for (const [key, value] of Object.entries(component.attributes)) {
+      if (!nonStyleAttributes.has(key) && value !== "") {
+        styles[key] = value
+      }
+    }
+
+    if (Object.keys(styles).length === 0) {
+      toast({
+        title: "No styles to copy",
+        description: "The selected component has no stylable attributes.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    dispatch({
+      type: "COPY_COMPONENT_STYLES",
+      payload: { styles, sourceTag: component.tag },
+    })
+
+    toast({
+      title: "Styles copied",
+      description: `Copied ${Object.keys(styles).length} style attributes from ${component.tag}.`,
+    })
+  }, [dispatch, state.componentTree])
+
+  // Paste component styles (format painter - paste)
+  const pasteComponentStyles = useCallback((componentId: string) => {
+    dispatch({
+      type: "PASTE_COMPONENT_STYLES",
+      payload: { componentId },
+    })
+  }, [dispatch])
+
+  // Clear copied styles
+  const clearCopiedStyles = useCallback(() => {
+    dispatch({ type: "CLEAR_COPIED_STYLES" })
+  }, [dispatch])
+
   return {
     addComponent,
     updateComponent,
@@ -339,6 +392,9 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     replaceComponent,
     moveComponent,
     findComponentById,
+    copyComponentStyles,
+    pasteComponentStyles,
+    clearCopiedStyles,
   }
 }
 

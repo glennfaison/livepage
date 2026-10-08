@@ -11,6 +11,7 @@ import {
   findComponentParentTree,
   findComponentById,
 } from "./helpers"
+import { getComponentInfo } from "@/client/features/design-components"
 
 export const initialState: AppState = {
   componentTree: [
@@ -34,6 +35,8 @@ export const initialState: AppState = {
   currentHistoryIndex: -1,
   historyPreviewIndex: null,
   originalHistoryState: null,
+  copiedStyles: null,
+  copiedStylesSourceTag: null,
 }
 
 /**
@@ -335,6 +338,64 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         }
       }
       return state
+    }
+
+    case "COPY_COMPONENT_STYLES": {
+      return {
+        ...state,
+        copiedStyles: action.payload.styles,
+        copiedStylesSourceTag: action.payload.sourceTag,
+      }
+    }
+
+    case "PASTE_COMPONENT_STYLES": {
+      const { componentId } = action.payload
+      if (!state.copiedStyles || !findComponentById(state.componentTree, componentId)) {
+        return state
+      }
+      const targetComponent = findComponentById(state.componentTree, componentId)
+      if (!targetComponent) return state
+
+      // Filter copied styles to only include attributes valid for the target component type
+      const targetMetadata = getComponentInfo(targetComponent.tag)
+      const validAttributeIds = new Set(targetMetadata.attributes.map((attr) => attr.id))
+      
+      const filteredStyles: Record<string, string> = {}
+      for (const [key, value] of Object.entries(state.copiedStyles)) {
+        if (validAttributeIds.has(key)) {
+          filteredStyles[key] = value
+        }
+      }
+
+      if (Object.keys(filteredStyles).length === 0) {
+        return state
+      }
+
+      const updated = { value: false }
+      const newComponentTree = updateComponent({
+        components: state.componentTree,
+        componentId,
+        updates: { attributes: filteredStyles },
+        updated,
+      })
+      if (!updated.value) return state
+
+      return withHistory(
+        {
+          ...state,
+          componentTree: newComponentTree,
+        },
+        newComponentTree,
+        `Pasted styles to ${componentId}`,
+      )
+    }
+
+    case "CLEAR_COPIED_STYLES": {
+      return {
+        ...state,
+        copiedStyles: null,
+        copiedStylesSourceTag: null,
+      }
     }
 
     default:

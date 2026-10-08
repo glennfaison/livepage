@@ -65,9 +65,50 @@ export function useRedoShortcut(onRedo: () => void, canRedo: boolean) {
   }, [onRedo, canRedo])
 }
 
+export function useCopyStylesShortcut(onCopyStyles: () => void, canCopy: boolean) {
+  useEffect(() => {
+    if (!canCopy) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isMetaOrCtrl = event.metaKey || event.ctrlKey
+      const isAlt = event.altKey
+      if (isMetaOrCtrl && isAlt && event.key.toLowerCase() === "c") {
+        event.preventDefault()
+        onCopyStyles()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onCopyStyles, canCopy])
+}
+
+export function usePasteStylesShortcut(onPasteStyles: () => void, canPaste: boolean) {
+  useEffect(() => {
+    if (!canPaste) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isMetaOrCtrl = event.metaKey || event.ctrlKey
+      const isAlt = event.altKey
+      if (isMetaOrCtrl && isAlt && event.key.toLowerCase() === "v") {
+        event.preventDefault()
+        onPasteStyles()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onPasteStyles, canPaste])
+}
+
 export function formatShortcut(key: string): string {
   if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
     return `⌘${key.toUpperCase()}`
   }
   return `Ctrl+${key.toUpperCase()}`
+}
+
+export function formatAltShortcut(key: string): string {
+  if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
+    return `⌘⌥${key.toUpperCase()}`
+  }
+  return `Ctrl+Alt+${key.toUpperCase()}`
 }

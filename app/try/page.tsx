@@ -379,6 +379,11 @@ export default function BuilderPage() {
           onRedo={handleRedo}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
+          selectedComponentId={state.selectedComponentId}
+          copiedStyles={state.copiedStyles}
+          copiedStylesSourceTag={state.copiedStylesSourceTag}
+          onCopyStyles={componentOperations.copyComponentStyles}
+          onPasteStyles={componentOperations.pasteComponentStyles}
         />
 
         <CommandPalette
