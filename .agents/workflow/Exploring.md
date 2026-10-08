@@ -8,18 +8,19 @@ The goal is to explore the live application (EXPLORE_BASE_URL = https://livepage
 
 2. **Explore the codebase**: Review the codebase to understand the architecture, find technical debt, identify refactoring opportunities, and discover missing functionality.
 
-3. **Report findings**: Create new Issues for:
+3. **Keep exploration read-only**: Do not perform destructive actions against the target; use test data only.
+
+4. **Deduplicate findings**: Search open and recently closed issues and `.out-of-scope/` before filing. Comment on an existing issue instead of creating a duplicate.
+
+5. **Report findings**: Create new Issues for:
    - Bugfixes
    - New features
    - Refactors
    - Technical debt
    - Any other improvements
 
-4. **PR Review** (when reviewing PRs from exploration):
-   - Leave notes in the comments if the PR is not ready to be merged. Use a handoff skill.
-   - If the PR has passed all checks and is judged as mergeable by an agent, merge it. Otherwise, leave a comment with the handoff skill.
-   - If the PR cannot be merged after your review, try to fix it. If you are unable to, tag it `ready-for-agent` or `ready-for-human` depending on whether it needs to be resolved by a human or agent.
-   - Here we don't care much about double-reviewing.
+   - Apply `needs-triage`, `agent-found`, and a category label.
+   - Never apply `ready-for-agent`; triage decides readiness.
 
 ## References
 
