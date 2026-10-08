@@ -26,6 +26,14 @@ minimized mode. Drag handles are not counted as buttons.
 
 `L - R = 1`, which is valid.
 
+## Current arrangement (minimized mode)
+
+- **Left of pivot (0):** drag handle (not counted as a button)
+- **Pivot:** maximize
+- **Right of pivot (0):** drag handle (not counted as a button)
+
+`L - R = 0`, which is valid.
+
 ## Rationale
 
 - **Balance.** Even distribution keeps the toolbar from leaning to one side as
