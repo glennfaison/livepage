@@ -65,6 +65,21 @@ export function useRedoShortcut(onRedo: () => void, canRedo: boolean) {
   }, [onRedo, canRedo])
 }
 
+export function useDuplicatePageShortcut(onDuplicate: () => void) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      if (isModifierPressed && event.shiftKey && event.key.toLowerCase() === "d") {
+        event.preventDefault()
+        onDuplicate()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onDuplicate])
+}
+
 export function formatShortcut(key: string): string {
   if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
     return `⌘${key.toUpperCase()}`

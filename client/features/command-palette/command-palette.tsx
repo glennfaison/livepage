@@ -127,6 +127,7 @@ export const CommandPalette: React.FC<
     onImportShortcode: () => void
     onDiscardChanges: () => void
     onOpenAIAssistant: () => void
+    onDuplicatePage: () => void
   }>
 > = ({
   open,
@@ -145,6 +146,7 @@ export const CommandPalette: React.FC<
   onImportShortcode,
   onDiscardChanges,
   onOpenAIAssistant,
+  onDuplicatePage,
 }) => {
   const [search, setSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
@@ -310,6 +312,14 @@ export const CommandPalette: React.FC<
         icon: <Bot className="h-4 w-4" />,
         onSelect: onOpenAIAssistant,
       },
+      {
+        id: "action-duplicate-page",
+        group: "Actions",
+        label: "Duplicate page",
+        keywords: ["duplicate", "copy", "page", "clone"],
+        icon: <Copy className="h-4 w-4" />,
+        onSelect: onDuplicatePage,
+      },
     ]
 
     const insertParent = state.selectedComponentId
@@ -379,6 +389,7 @@ export const CommandPalette: React.FC<
     onSaveAsShortcode,
     onImportJson,
     onImportShortcode,
+    onDuplicatePage,
   ])
 
   const filteredCommands = useMemo(() => {

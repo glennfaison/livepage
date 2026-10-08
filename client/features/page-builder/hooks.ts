@@ -330,11 +330,21 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch])
 
+  // Duplicate page
+  const duplicatePage = useCallback(() => {
+    dispatch({ type: "DUPLICATE_PAGE" })
+    toast({
+      title: "Page duplicated",
+      description: "The page has been duplicated successfully.",
+    })
+  }, [dispatch])
+
   return {
     addComponent,
     updateComponent,
     removeComponent,
     duplicateComponent,
+    duplicatePage,
     setSelectedComponent,
     replaceComponent,
     moveComponent,
