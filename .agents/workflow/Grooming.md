@@ -4,9 +4,9 @@ The goal is to groom the issue, making it ready for an agent to implement.
 
 ## Process
 
-1. **Tag the issue** as `agent:grooming` when starting work on it.
+1. **Tag the issue** as `agent:triage` when starting work on it.
 
-2. **Check for stale grooming**: If an issue has had the `agent:grooming` tag for more than 1 hour, assume it is not currently being groomed and can be picked up.
+2. **Check for stale grooming**: If an issue has had the `agent:triage` tag for more than 1 hour, assume it is not currently being groomed and can be picked up.
 
 3. **Find duplicates**: Search for duplicate issues and merge them into new issues, closing the pre-existing duplicates.
 
@@ -24,7 +24,7 @@ The goal is to groom the issue, making it ready for an agent to implement.
    - If an issue is ready for implementation and an agent can get all the necessary context to implement between the issue and the codebase, mark the issue as `ready-for-agent`
    - If a human is needed, mark as `ready-for-human`
 
-10. **Cleanup**: When done with an issue, remove the `agent:grooming` tag.
+10. **Cleanup**: When done with an issue, remove the `agent:triage` tag.
 
 ## References
 
