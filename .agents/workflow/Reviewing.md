@@ -14,7 +14,7 @@ The goal is to review a PR and determine if it can be merged by an agent.
 
 5. **Attempt to fix**: If the PR cannot be merged after your review, try to fix it.
 
-6. **Escalate if needed**: If you are unable to fix it, tag it `ready-for-agent` or `ready-for-human` depending on whether it needs to be resolved by a human or agent.
+6. **Escalate if needed**: After three failed fix attempts, or for a fork PR, comment with the blocker, apply `agent-stuck`, request human review, and stop.
 
 7. **Prevent overlapping reviews**: Use per-PR concurrency so only one review or fix attempt runs at a time.
 
