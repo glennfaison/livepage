@@ -2,7 +2,7 @@ import React from "react"
 import { Table2 } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
-import type { Metadata, Props, SettingsField } from "@/client/features/types"
+import type { Metadata, Props, SettingsField, ComponentCategory } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, parseJsonSetting, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
@@ -81,13 +81,14 @@ const Component = (props: Props) => {
 }
 
 export const componentMetadata = {
-  tag,
-  htmlTag: "section",
-  label,
-  keywords,
-  defaultChildren: [],
-  attributes,
-  Icon,
-  PreviewModeComponent: withDataSource(Component),
-  EditModeComponent: withEditorControls(withDataSource(Component)),
+	tag,
+	htmlTag: "section",
+	label,
+	category: "Data" as ComponentCategory,
+	keywords,
+	defaultChildren: [],
+	attributes,
+	Icon,
+	PreviewModeComponent: withDataSource(Component),
+	EditModeComponent: withEditorControls(withDataSource(Component)),
 } as const satisfies Metadata

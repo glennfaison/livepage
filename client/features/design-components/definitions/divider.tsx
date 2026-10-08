@@ -2,7 +2,7 @@ import React from "react"
 import { Minus } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
-import type { Metadata, Props, SettingsField } from "@/client/features/types"
+import type { Metadata, Props, SettingsField, ComponentCategory } from "@/client/features/types"
 import { createColorAttribute, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
@@ -25,8 +25,8 @@ const Component = (props: Props) => {
 }
 
 export const componentMetadata = {
-  tag, label, keywords, defaultChildren: [], attributes, Icon, htmlTag: "hr",
-  PreviewModeComponent: withDataSource(Component),
-  EditModeComponent: withEditorControls(withDataSource(Component)),
+	tag, label, category: "Feedback" as ComponentCategory, keywords, defaultChildren: [], attributes, Icon, htmlTag: "hr",
+	PreviewModeComponent: withDataSource(Component),
+	EditModeComponent: withEditorControls(withDataSource(Component)),
 } as const satisfies Metadata
 

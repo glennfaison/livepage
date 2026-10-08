@@ -207,6 +207,8 @@ export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "preview">
 }>
 
+export type ComponentCategory = "Layout" | "Typography" | "Media" | "Data" | "Feedback" | "Navigation" | "Other"
+
 export interface Metadata {
   readonly tag: string
   /** Whether app nodes with this tag can contain child app nodes. */
@@ -216,6 +218,7 @@ export interface Metadata {
   /** Restricts which design-component tags this parent may contain. */
   readonly allowedChildTags?: ReadonlyArray<AppNodeTag>
   readonly label: string
+  readonly category: ComponentCategory
   readonly keywords: string[]
   readonly Icon: ReactNode
   readonly defaultChildren: ReadonlyArray<AppNode | string>
