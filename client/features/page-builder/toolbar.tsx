@@ -5,13 +5,14 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import { Bot, Command, Copy, ClipboardPaste, GripVertical, History, Maximize, Minimize, Paintbrush, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, formatPainterShortcut, useCopyStylesShortcut, useHistoryShortcut, usePasteStylesShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { useFormatPainter } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -65,6 +66,13 @@ export const Toolbar: React.FC<Readonly<{
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
   promptAssistEnabled?: boolean
+  /** Currently selected component ID */
+  selectedComponentId?: string
+  /** Component operations for format painter */
+  componentOperations?: {
+    updateComponent: (id: string, updates: Partial<AppNode>) => void
+    findComponentById: (components: ReadonlyArray<AppNode | string>, id: string) => AppNode | null
+  }
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -86,6 +94,8 @@ export const Toolbar: React.FC<Readonly<{
   onRedo,
   dispatch,
   promptAssistEnabled,
+  selectedComponentId,
+  componentOperations,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -99,11 +109,27 @@ export const Toolbar: React.FC<Readonly<{
   const canUndo = currentHistoryIndex > 0
   const canRedo = currentHistoryIndex < history.length - 1
 
+  // Format painter
+  const { copyStyles, pasteStyles, hasCopiedStyles, copiedFromTag } = useFormatPainter()
+
   // Keyboard shortcuts
   useSaveShortcut(savePage)
   useHistoryShortcut(() => setHistoryPopoverOpen(true))
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
+  useCopyStylesShortcut(() => {
+    if (pageComponent) {
+      copyStyles(pageComponent)
+    }
+  })
+  usePasteStylesShortcut(() => {
+    if (selectedComponentId && componentOperations && pageComponent) {
+      const selectedComponent = componentOperations.findComponentById(componentTree, selectedComponentId)
+      if (selectedComponent && selectedComponent !== pageComponent) {
+        pasteStyles(selectedComponent, componentOperations)
+      }
+    }
+  })
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -259,6 +285,38 @@ export const Toolbar: React.FC<Readonly<{
               <Settings className="h-4 w-4" />
             </Button>
           </ToolbarSettingsPopover>
+
+          {/* Format Painter - Copy Styles */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => pageComponent && copyStyles(pageComponent)}
+            title={hasCopiedStyles ? `Copied from ${copiedFromTag} (${formatPainterShortcut("C")})` : `Copy styles (${formatPainterShortcut("C")})`}
+            className={cn("shrink-0", hasCopiedStyles && "bg-primary/10 text-primary border-primary/50")}
+            aria-label={hasCopiedStyles ? "Copy styles (overwrites previous)" : "Copy styles"}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+
+          {/* Format Painter - Paste Styles */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (selectedComponentId && componentOperations && pageComponent) {
+                const selectedComponent = componentOperations.findComponentById(componentTree, selectedComponentId)
+                if (selectedComponent && selectedComponent !== pageComponent) {
+                  pasteStyles(selectedComponent, componentOperations)
+                }
+              }
+            }}
+            disabled={!hasCopiedStyles || !selectedComponentId || !componentOperations}
+            title={hasCopiedStyles ? `Paste styles from ${copiedFromTag} (${formatPainterShortcut("V")})` : `Paste styles (${formatPainterShortcut("V")}) - copy first`}
+            className="shrink-0"
+            aria-label={hasCopiedStyles ? `Paste styles from ${copiedFromTag}` : "Paste styles (no styles copied)"}
+          >
+            <ClipboardPaste className="h-4 w-4" />
+          </Button>
 
           <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
             <Minimize className="h-4 w-4" />
