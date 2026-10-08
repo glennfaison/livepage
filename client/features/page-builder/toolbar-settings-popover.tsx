@@ -70,6 +70,8 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     setIsDragging(false)
   }
 
+  const currentPage = selectCurrentPage({ componentTree, activePage: "" }) ?? componentTree[0]
+
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(componentTree, window.location.origin)
     setValidationResult(validation)
@@ -160,6 +162,97 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   onChange={(e) => onPageTitleChange(e.target.value)}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter page title"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-description" className="text-sm font-medium">
+                  Description (SEO)
+                </label>
+                <textarea
+                  id="page-description"
+                  value={currentPage?.attributes.description ?? ""}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { description: e.target.value } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Enter page description for SEO"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-favicon" className="text-sm font-medium">
+                  Favicon URL
+                </label>
+                <input
+                  id="page-favicon"
+                  type="url"
+                  value={currentPage?.attributes.favicon ?? ""}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { favicon: e.target.value } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="https://example.com/favicon.ico"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-og-image" className="text-sm font-medium">
+                  Open Graph Image
+                </label>
+                <input
+                  id="page-og-image"
+                  type="url"
+                  value={currentPage?.attributes.ogImage ?? ""}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { ogImage: e.target.value } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="https://example.com/og-image.png"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-canonical-url" className="text-sm font-medium">
+                  Canonical URL
+                </label>
+                <input
+                  id="page-canonical-url"
+                  type="url"
+                  value={currentPage?.attributes.canonicalUrl ?? ""}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { canonicalUrl: e.target.value } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="https://example.com/page"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-custom-head" className="text-sm font-medium">
+                  Custom {"<head>"} HTML
+                </label>
+                <textarea
+                  id="page-custom-head"
+                  value={Array.isArray(currentPage?.attributes.customHead) ? currentPage.attributes.customHead.join("\n") : (currentPage?.attributes.customHead ?? "")}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customHead: e.target.value.split("\n").join("\n") } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
+                  placeholder={`<meta name="analytics" content="...">&#10;<link rel="preconnect" href="https://fonts.googleapis.com">`}
+                  rows={4}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-custom-css" className="text-sm font-medium">
+                  Custom CSS
+                </label>
+                <textarea
+                  id="page-custom-css"
+                  value={Array.isArray(currentPage?.attributes.customCss) ? currentPage.attributes.customCss.join("\n") : (currentPage?.attributes.customCss ?? "")}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customCss: e.target.value.split("\n").join("\n") } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
+                  placeholder={`/* Custom styles injected in export *&#47;&#10;:root { --custom-color: #123; }`}
+                  rows={4}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="page-custom-js" className="text-sm font-medium">
+                  Custom JavaScript
+                </label>
+                <textarea
+                  id="page-custom-js"
+                  value={Array.isArray(currentPage?.attributes.customJs) ? currentPage.attributes.customJs.join("\n") : (currentPage?.attributes.customJs ?? "")}
+                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customJs: e.target.value.split("\n").join("\n") } } } })}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
+                  placeholder={`// Custom JS injected in export&#10;console.log('Page loaded');`}
+                  rows={4}
                 />
               </div>
             </div>

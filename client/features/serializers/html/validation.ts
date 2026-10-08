@@ -167,6 +167,15 @@ export function validateHtmlExport(
         componentTag: pageNode.tag,
       })
     }
+    const description = pageNode.attributes.description
+    if (!description || description.trim() === "") {
+      issues.push({
+        type: "warning",
+        message: "Page description is empty - exported HTML will not have meta description for SEO",
+        componentId: pageNode.attributes.id,
+        componentTag: pageNode.tag,
+      })
+    }
   }
 
   const hasErrors = issues.some((issue) => issue.type === "error")
