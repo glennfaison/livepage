@@ -86,6 +86,11 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
+  const saveAsSelfContainedHTML = () => {
+    savePageAsHtmlMutation.mutate({ componentTree: state.componentTree, selfContained: true })
+    setSaveDropdownOpen(false)
+  }
+
   const previewExport = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
     setValidationResult(validation)
@@ -284,6 +289,10 @@ export default function BuilderPage() {
                     <Download className="h-4 w-4 mr-2" />
                     {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download as HTML"}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={saveAsSelfContainedHTML} disabled={savePageAsHtmlMutation.isPending}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download self-contained HTML"}
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={previewExport}>
                     <Eye className="h-4 w-4 mr-2" />
@@ -398,6 +407,7 @@ export default function BuilderPage() {
           onSaveAsJson={saveAsJSON}
           onSaveAsShortcode={saveAsShortcode}
           onSaveAsHtml={saveAsHTML}
+          onSaveAsSelfContainedHtml={saveAsSelfContainedHTML}
           onPreviewExport={previewExport}
           onCopyHtml={copyHtmlToClipboard}
           onImportJson={() => jsonFileInputRef.current?.click()}

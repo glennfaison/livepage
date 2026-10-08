@@ -120,9 +120,10 @@ Application code is organized by runtime: browser features and UI live in [`clie
 
 An HTML export is a single file that opens directly in a modern browser, with no LivePage server needed. It bundles the same registered preview-component implementations and compiled Tailwind CSS generated from the builder's global stylesheet. Keep these limits in mind:
 
-- The file loads pinned React and ReactDOM builds from [esm.sh](https://esm.sh), and Inter from Google Fonts, so the browser needs network access when it opens the file.
+- The default file loads pinned React and ReactDOM builds from [esm.sh](https://esm.sh), and Inter from Google Fonts, so the browser needs network access when it opens the file.
+- Self-contained export (`Download self-contained HTML`, or the command palette action) is a single file that inlines the compiled CSS, embeds image, favicon, and Open Graph assets as base64 data URLs, and bundles React locally. It does not load esm.sh or Google Fonts. Assets that cannot be fetched at export time stay as URLs.
 - The export runtime uses the registered preview data-source implementations. Network-backed sources must allow the exported page's origin through CORS.
-- Image and other asset URLs stay as references. They are not embedded. Root-relative public image paths are made absolute against the builder's origin so they can load when the exported file is opened locally.
+- Image and other asset URLs stay as references in the default export. They are not embedded. Root-relative public image paths are made absolute against the builder's origin so they can load when the exported file is opened locally. Self-contained export embeds fetchable images instead.
 - Template parity covers initial content and layout at desktop and mobile sizes; live data-source runtime states are not guaranteed to remain visually identical.
 
 ## Bundled templates
