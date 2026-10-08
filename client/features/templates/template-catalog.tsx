@@ -5,11 +5,29 @@ import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
 import { cn } from "@/client/lib/utils"
-import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X } from "lucide-react"
+import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X, FileText, Briefcase, Image, Mic, Mail, Utensils, GraduationCap, Newspaper, HeartPulse, Link, Monitor, Calendar, Code, User, Building2 } from "lucide-react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useTemplateCatalog, type CatalogTab, type CatalogViewMode } from "./use-template-catalog"
 
 export type { CatalogViewMode } from "./use-template-catalog"
+
+function getCategoryIcon(category: string): React.ReactNode {
+  const iconMap: Record<string, React.ReactNode> = {
+    "Landing Page": <Monitor className="h-4 w-4" />,
+    Event: <Calendar className="h-4 w-4" />,
+    Podcast: <Mic className="h-4 w-4" />,
+    "Contact/About": <Mail className="h-4 w-4" />,
+    Business: <Briefcase className="h-4 w-4" />,
+    Portfolio: <Image className="h-4 w-4" />,
+    "Link in Bio": <Link className="h-4 w-4" />,
+    Restaurant: <Utensils className="h-4 w-4" />,
+    "CV/Resume": <GraduationCap className="h-4 w-4" />,
+    "CV/Resume/Personal": <User className="h-4 w-4" />,
+    Blog: <Newspaper className="h-4 w-4" />,
+    Dashboard: <HeartPulse className="h-4 w-4" />,
+  }
+  return iconMap[category] ?? <FileText className="h-4 w-4" />
+}
 
 interface TemplateCatalogProps {
   templates: ReadonlyArray<TemplateDisplaySummary>
@@ -307,12 +325,27 @@ function TemplateTags({ template }: Readonly<{ template: TemplateDisplaySummary 
 }
 
 function TemplateThumbnail({ template, className }: Readonly<{ template: TemplateDisplaySummary; className?: string }>) {
+  const [imageError, setImageError] = React.useState(false)
+  const fallbackIcon = getCategoryIcon(template.category)
+
+  if (imageError) {
+    return (
+      <div
+        role="img"
+        aria-label={`${template.name} preview (fallback)`}
+        className={cn("aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted flex items-center justify-center", className)}
+      >
+        <div className="text-muted-foreground/50">{fallbackIcon}</div>
+      </div>
+    )
+  }
+
   return (
-    <div
-      role="img"
-      aria-label={`${template.name} preview`}
-      className={cn("aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted bg-cover bg-center bg-no-repeat shadow-sm", className)}
-      style={{ backgroundImage: `url(${template.thumbnail})` }}
+    <img
+      src={template.thumbnail}
+      alt={`${template.name} preview`}
+      onError={() => setImageError(true)}
+      className={cn("aspect-[4/3] w-full h-full object-cover rounded-xl border border-border bg-muted shadow-sm", className)}
     />
   )
 }
