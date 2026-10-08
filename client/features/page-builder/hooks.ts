@@ -3,10 +3,10 @@
 import type React from "react"
 
 import { useMutation } from "@tanstack/react-query"
-import { useCallback } from "react"
-import type { AppState, AppAction, AppNode } from "@/client/features/app-state"
+import { useCallback, useState } from "react"
+import type { AppState, AppAction, AppNode, Metadata, SettingsField } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { createDesignComponentInstance } from "@/client/features/design-components"
+import { createDesignComponentInstance, getComponentInfo } from "@/client/features/design-components"
 import { generateId } from "@/client/lib/utils"
 import { toast } from "@/client/components/ui/use-toast"
 import {
@@ -397,5 +397,157 @@ export function useHistoryOperations(dispatch: React.Dispatch<AppAction>, state:
     handleHistoryAccept,
     handleHistoryDiscard,
     handleDiscard,
+  }
+}
+
+// Stylable attribute IDs that can be copied between components
+const STYLABLE_ATTRIBUTE_IDS = [
+  "custom-classes",
+  "padding-top",
+  "padding-right",
+  "padding-bottom",
+  "padding-left",
+  "margin-top",
+  "margin-right",
+  "margin-bottom",
+  "margin-left",
+  "align-items",
+  "justify-content",
+  "gap",
+  "text-align",
+  "font-size",
+  "font-weight",
+  "font-style",
+  "text-color",
+  "line-height",
+  "child-sizing",
+  "wrap",
+]
+
+/**
+ * Extracts stylable attributes from a component.
+ * Returns a record of attribute IDs to their values.
+ */
+export function extractStylableAttributes(component: AppNode): Record<string, string> {
+  const stylableAttrs: Record<string, string> = {}
+  for (const attrId of STYLABLE_ATTRIBUTE_IDS) {
+    const value = component.attributes[attrId]
+    if (value !== undefined && value !== "") {
+      stylableAttrs[attrId] = value
+    }
+  }
+  return stylableAttrs
+}
+
+/**
+ * Filters stylable attributes to only include those valid for the target component type.
+ * Checks the target component's metadata to see which attributes it supports.
+ */
+export function filterAttributesForComponent(
+  attributes: Record<string, string>,
+  targetComponentTag: string
+): Record<string, string> {
+  try {
+    const metadata = getComponentInfo(targetComponentTag)
+    const validAttrIds = new Set(
+      metadata.attributes
+        .filter((attr) => attr.type !== "group" && attr.type !== "divider")
+        .map((attr) => attr.id)
+    )
+    
+    // Also include nested group fields
+    for (const attr of metadata.attributes) {
+      if (attr.type === "group") {
+        for (const field of attr.fields) {
+          validAttrIds.add(field.id)
+        }
+      }
+    }
+    
+    const filtered: Record<string, string> = {}
+    for (const [attrId, value] of Object.entries(attributes)) {
+      if (validAttrIds.has(attrId)) {
+        filtered[attrId] = value
+      }
+    }
+    return filtered
+  } catch {
+    // If component metadata not found, return all attributes
+    return attributes
+  }
+}
+
+/**
+ * Hook for format painter (copy/paste styles) functionality.
+ */
+export function useFormatPainter() {
+  const [copiedStyles, setCopiedStyles] = useState<Record<string, string> | null>(null)
+  const [copiedFromTag, setCopiedFromTag] = useState<string | null>(null)
+
+  const copyStyles = useCallback((component: AppNode) => {
+    const styles = extractStylableAttributes(component)
+    if (Object.keys(styles).length === 0) {
+      toast({
+        title: "No styles to copy",
+        description: "The selected component has no stylable attributes.",
+      })
+      return false
+    }
+    setCopiedStyles(styles)
+    setCopiedFromTag(component.tag)
+    toast({
+      title: "Styles copied",
+      description: `Copied ${Object.keys(styles).length} style attribute(s) from ${component.tag}.`,
+    })
+    return true
+  }, [])
+
+  const pasteStyles = useCallback((
+    targetComponent: AppNode,
+    componentOperations: { updateComponent: (id: string, updates: Partial<AppNode>) => void }
+  ) => {
+    if (!copiedStyles) {
+      toast({
+        title: "No styles to paste",
+        description: "Copy styles from a component first (⌘⌥C).",
+      })
+      return false
+    }
+
+    const filteredStyles = filterAttributesForComponent(copiedStyles, targetComponent.tag)
+    
+    if (Object.keys(filteredStyles).length === 0) {
+      toast({
+        title: "No compatible styles",
+        description: `None of the copied styles apply to ${targetComponent.tag} components.`,
+      })
+      return false
+    }
+
+    componentOperations.updateComponent(targetComponent.attributes.id, {
+      attributes: filteredStyles,
+    })
+
+    toast({
+      title: "Styles pasted",
+      description: `Applied ${Object.keys(filteredStyles).length} style attribute(s) to ${targetComponent.tag}.`,
+    })
+    return true
+  }, [copiedStyles])
+
+  const clearStyles = useCallback(() => {
+    setCopiedStyles(null)
+    setCopiedFromTag(null)
+  }, [])
+
+  const hasCopiedStyles = copiedStyles !== null
+
+  return {
+    copyStyles,
+    pasteStyles,
+    clearStyles,
+    hasCopiedStyles,
+    copiedStyles,
+    copiedFromTag,
   }
 }
