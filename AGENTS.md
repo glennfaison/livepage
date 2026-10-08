@@ -43,6 +43,20 @@ git config core.hooksPath scripts/git-hooks
 
 This must be run before any commits or pushes. The hooks validate branch names against the gitflow patterns in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
 
+## PR descriptions and closing issues
+
+When opening a PR that resolves multiple issues, use separate `Closes` statements for each issue. GitHub only auto-links the first issue in a single sentence.
+
+**Correct:**
+```
+Closes #122. Closes #123. Closes #124. Closes #125.
+```
+
+**Incorrect (only closes #122):**
+```
+Closes #122, #123, #124, #125
+```
+
 ## README.md is user-facing and hand-maintained
 
 `README.md` is a hand-maintained project overview (features, setup, development
