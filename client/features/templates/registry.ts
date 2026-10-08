@@ -11,23 +11,23 @@ import { farmLogisticsLandingPageTemplate } from "@/client/features/templates/de
 import { patientHealthDashboardTemplate } from "@/client/features/templates/definitions/patient-health-dashboard"
 import { podcastShowPageTemplate } from "@/client/features/templates/definitions/podcast-show-page"
 import { neighborhoodCafePageTemplate } from "@/client/features/templates/definitions/neighborhood-cafe-page"
-import { parsePageTemplateDefinition, type PageTemplateDefinition } from "@/client/features/templates/schema"
+import { validateAndMigrateTemplate, type PageTemplateDefinition } from "@/client/features/templates/schema"
 
 export const pageTemplateRegistry = [
-  parsePageTemplateDefinition(cvResumePersonalTemplate),
-  parsePageTemplateDefinition(cvResumeEngineerDarkTemplate),
-  parsePageTemplateDefinition(cvResumeEngineerLightTemplate),
-  parsePageTemplateDefinition(portfolioPersonalSiteTemplate),
-  parsePageTemplateDefinition(linkInBioTemplate),
-  parsePageTemplateDefinition(landingPageSaasTemplate),
-  parsePageTemplateDefinition(farmLogisticsLandingPageTemplate),
-  parsePageTemplateDefinition(blogArticlePageTemplate),
-  parsePageTemplateDefinition(agencyHomepageTemplate),
-  parsePageTemplateDefinition(eventConferencePageTemplate),
-  parsePageTemplateDefinition(contactAboutPageTemplate),
-  parsePageTemplateDefinition(patientHealthDashboardTemplate),
-  parsePageTemplateDefinition(podcastShowPageTemplate),
-  parsePageTemplateDefinition(neighborhoodCafePageTemplate),
+  validateAndMigrateTemplate(cvResumePersonalTemplate),
+  validateAndMigrateTemplate(cvResumeEngineerDarkTemplate),
+  validateAndMigrateTemplate(cvResumeEngineerLightTemplate),
+  validateAndMigrateTemplate(portfolioPersonalSiteTemplate),
+  validateAndMigrateTemplate(linkInBioTemplate),
+  validateAndMigrateTemplate(landingPageSaasTemplate),
+  validateAndMigrateTemplate(farmLogisticsLandingPageTemplate),
+  validateAndMigrateTemplate(blogArticlePageTemplate),
+  validateAndMigrateTemplate(agencyHomepageTemplate),
+  validateAndMigrateTemplate(eventConferencePageTemplate),
+  validateAndMigrateTemplate(contactAboutPageTemplate),
+  validateAndMigrateTemplate(patientHealthDashboardTemplate),
+  validateAndMigrateTemplate(podcastShowPageTemplate),
+  validateAndMigrateTemplate(neighborhoodCafePageTemplate),
 ] as const
 
 /**
