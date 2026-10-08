@@ -36,6 +36,8 @@ points you to the right instructions.
   find and explore opportunities to deepen modules.
 - [`/setup-matt-pocock-skills`](../setup-matt-pocock-skills/SKILL.md):
   configure the issue tracker, triage labels, and domain docs for these skills.
+- [`/merge-safety`](../merge-safety/SKILL.md): decide whether a PR is safe for an
+  agent to merge.
 - [`/template-authoring`](../template-authoring/SKILL.md): add, redesign, or
   fix a LivePage Template.
 - [`/template-design-review`](../template-design-review/SKILL.md): evaluate
