@@ -28,9 +28,9 @@ minimized mode. Drag handles are not counted as buttons.
 
 ## Current arrangement (minimized mode)
 
-- **Left of pivot (0):** drag handle (not counted as a button)
+- **Left of pivot (1):** undo
 - **Pivot:** maximize
-- **Right of pivot (0):** drag handle (not counted as a button)
+- **Right of pivot (1):** redo
 
 `L - R = 0`, which is valid.
 
