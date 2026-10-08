@@ -17,6 +17,19 @@ import {
   Undo2,
   Upload,
   Bot,
+  Calendar,
+  Monitor,
+  Mic,
+  Mail,
+  Briefcase,
+  Image,
+  Link,
+  Utensils,
+  GraduationCap,
+  Newspaper,
+  HeartPulse,
+  User,
+  Building2,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -39,6 +52,43 @@ type PaletteCommand = Readonly<{
   icon?: React.ReactNode
   onSelect: () => void
 }>
+
+function getCategoryIcon(category: string): React.ReactNode {
+  const iconMap: Record<string, React.ReactNode> = {
+    "Landing Page": <Monitor className="h-4 w-4" />,
+    Event: <Calendar className="h-4 w-4" />,
+    Podcast: <Mic className="h-4 w-4" />,
+    "Contact/About": <Mail className="h-4 w-4" />,
+    Business: <Briefcase className="h-4 w-4" />,
+    Portfolio: <Image className="h-4 w-4" />,
+    "Link in Bio": <Link className="h-4 w-4" />,
+    Restaurant: <Utensils className="h-4 w-4" />,
+    "CV/Resume": <GraduationCap className="h-4 w-4" />,
+    "CV/Resume/Personal": <User className="h-4 w-4" />,
+    Blog: <Newspaper className="h-4 w-4" />,
+    Dashboard: <HeartPulse className="h-4 w-4" />,
+  }
+  return iconMap[category] ?? <FileText className="h-4 w-4" />
+}
+
+function TemplateThumbnailIcon({ template }: Readonly<{ template: TemplateDisplaySummary }>) {
+  const [imageError, setImageError] = useState(false)
+  const fallbackIcon = getCategoryIcon(template.category)
+
+  if (imageError) {
+    return <div className="flex h-6 w-6 items-center justify-center text-muted-foreground/50">{fallbackIcon}</div>
+  }
+
+  return (
+    <img
+      src={template.thumbnail}
+      alt=""
+      onError={() => setImageError(true)}
+      className="h-6 w-6 rounded-md object-cover"
+      aria-hidden="true"
+    />
+  )
+}
 
 /** Depth-first walk of a page's children, skipping string (text) nodes. */
 function flattenPageTree(
@@ -285,7 +335,7 @@ export const CommandPalette: React.FC<
       label: `Apply template: ${template.name}`,
       description: template.description,
       keywords: [template.category, ...template.tags],
-      icon: <LayoutTemplate className="h-4 w-4" />,
+      icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
         onApplyTemplate(template.id)
         toast({ title: "Template applied", description: template.name })
