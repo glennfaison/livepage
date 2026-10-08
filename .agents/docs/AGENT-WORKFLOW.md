@@ -29,6 +29,20 @@ Work through these in order. Skip items that clearly do not apply to the change.
 - [ ] Open that pull request from a **gitflow branch**. Allowed names are `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, `support/<version-line>`, `develop`, and `main`. See [branch names](./BRANCH-NAMES.md). A non-matching push is rejected by GitHub and fails CI.
 - [ ] Check whether the change introduces or renames entities, relationships, or domain terms. If it does, update [the glossary](./GLOSSARY.md) before finishing.
 
+## PR review and merge authority
+
+Agents are authorized to merge safe pull requests and **must merge** when all of
+these conditions are met:
+
+- All unskipped checks pass.
+- The deployment is successful.
+- If the PR changes behavior, that behavior is covered by written Playwright or
+  Jest tests.
+- The change does not infringe on any existing ADR.
+
+Use the [merge-safety skill](../skills/merge-safety/SKILL.md) to assess and
+document these conditions. Do not bypass branch protection when merging.
+
 ## Orchestration
 
 - For anything beyond a focused fix, follow the [agent orchestration skill](../skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the [handoff skill](../skills/handoff/SKILL.md) and iterating until the goal is met.
