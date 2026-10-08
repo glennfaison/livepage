@@ -233,6 +233,14 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   When enabled, the AI Assistant chat bubble appears in the bottom-right corner.
                   Use it to describe a page and get a template with drafted content and tuned design.
                 </p>
+                <div className="text-xs text-muted-foreground ml-6 space-y-1 border-l border-muted/50 pl-3">
+                  <p><strong>How to use:</strong></p>
+                  <p>1. Click the <Bot className="h-3 w-3 inline-block align-middle mr-1" /> button in the toolbar or press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">⌘K</kbd> and search "Open AI Assistant"</p>
+                  <p>2. Describe the page you want in plain language (e.g., "A landing page for a coffee shop with menu and contact info")</p>
+                  <p>3. The assistant picks a template, drafts copy, and tunes the design</p>
+                  <p>4. Review the proposal and click "Apply" to add it to your page</p>
+                  <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded">.env.local</code></p>
+                </div>
               </div>
             </div>
 

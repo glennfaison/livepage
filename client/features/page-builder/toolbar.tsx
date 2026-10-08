@@ -5,7 +5,7 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
+import { Bot, Command, GripVertical, History, Maximize, Minimize, RotateCw, Save, Settings, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
@@ -48,8 +48,9 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory: (index: number) => void
   onDiscardHistory: () => void
   historyPreviewIndex: number | null
-  /** Optional: renders a command-palette trigger button when provided. */
   onOpenCommandPalette?: () => void
+  /** Optional: renders an AI Assistant trigger button when provided and prompt assist is enabled. */
+  onOpenAIAssistant?: () => void
   /** Page component for settings popover */
   pageComponent?: AppNode
   /** Full component tree for export validation */
@@ -77,6 +78,7 @@ export const Toolbar: React.FC<Readonly<{
   onDiscardHistory,
   historyPreviewIndex,
   onOpenCommandPalette,
+  onOpenAIAssistant,
   pageComponent,
   componentTree,
   onPageTitleChange,
@@ -215,6 +217,17 @@ export const Toolbar: React.FC<Readonly<{
           {onOpenCommandPalette ? (
             <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette" className="shrink-0">
               <Command className="h-4 w-4" />
+            </Button>
+          ) : null}
+          {onOpenAIAssistant && promptAssistEnabled ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenAIAssistant}
+              title="Open AI Assistant"
+              className="shrink-0"
+            >
+              <Bot className="h-4 w-4" />
             </Button>
           ) : null}
           <HistoryPopover
