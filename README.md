@@ -128,13 +128,13 @@ An HTML export is a single file that opens directly in a modern browser, with no
 
 ## Bundled templates
 
-Templates live in [`shared/features/templates/definitions/`](./shared/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
+Templates live in [`client/features/templates/definitions/`](./client/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
 
 To add a template:
 
-1. Create a definition in `shared/features/templates/definitions/` using only supported design-component tags.
+1. Create a definition in `client/features/templates/definitions/` using only supported design-component tags.
 2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
-3. Validate it with `pageTemplateDefinitionSchema` and register it in `shared/features/templates/registry.ts`.
+3. Validate it with `pageTemplateDefinitionSchema` and register it in `client/features/templates/registry.ts`.
 4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
 
 The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.
