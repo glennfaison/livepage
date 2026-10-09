@@ -329,18 +329,32 @@ export const CommandPalette: React.FC<
       }
     })
 
-    const templateCommands: PaletteCommand[] = templates.map((template) => ({
-      id: `template-${template.id}`,
-      group: "Templates",
-      label: `Apply template: ${template.name}`,
-      description: template.description,
-      keywords: [template.category, ...template.tags],
-      icon: <TemplateThumbnailIcon template={template} />,
-      onSelect: () => {
-        onApplyTemplate(template.id)
-        toast({ title: "Template applied", description: template.name })
+    const templateCommands: PaletteCommand[] = templates.flatMap((template) => [
+      {
+        id: `template-${template.id}`,
+        group: "Templates",
+        label: `Apply template: ${template.name}`,
+        description: template.description,
+        keywords: [template.category, ...template.tags],
+        icon: <TemplateThumbnailIcon template={template} />,
+        onSelect: () => {
+          onApplyTemplate(template.id)
+          toast({ title: "Template applied", description: template.name })
+        },
       },
-    }))
+      {
+        id: `template-preview-${template.id}`,
+        group: "Templates",
+        label: `Preview template: ${template.name}`,
+        description: `Open preview of ${template.name}`,
+        keywords: [template.category, ...template.tags, "preview"],
+        icon: <Eye className="h-4 w-4" />,
+        onSelect: () => {
+          window.open(`/preview/${template.id}`, "_blank")
+          toast({ title: "Opening preview", description: template.name })
+        },
+      },
+    ])
 
     const jumpCommands: PaletteCommand[] =
       state.pageBuilderMode === "edit" && currentPage
