@@ -20,13 +20,13 @@ Requires `gh` (authenticated), `jq` and GNU `date`.
 
 ## Interactive skills
 
-`/triage` and `/grill-with-docs` were written for a maintainer at the keyboard: they "wait for direction", wait for answers, and update `GLOSSARY.md` and ADRs inline. `/implement` and `/implement-spec` assume a branch to commit to. No human is present in a workflow run, so follow the skill, with these overrides:
+The [triage](../../skills/matt-pocock-skills/skills/engineering/triage/SKILL.md) and [grill-with-docs](../../skills/matt-pocock-skills/skills/engineering/grill-with-docs/SKILL.md) skills were written for a maintainer at the keyboard: they "wait for direction", wait for answers, and update `GLOSSARY.md` and ADRs inline. The [implement](../../skills/matt-pocock-skills/skills/engineering/implement/SKILL.md) and [implement-spec](../../skills/matt-pocock-skills/skills/engineering/implement-spec/SKILL.md) skills assume a branch to commit to. No human is present in a workflow run, so follow the skill, with these overrides:
 
 1. **The step file is your direction.** Do not stop to wait for a reply.
 2. **One round, then `needs-info`.** Where a skill would ask a human something, put every question that is ready to ask into a single comment, with your recommended answer for each. Look up every fact yourself first. Then set `needs-info` and finish. A human answers and removes the label, and the next Grooming pass continues.
 3. **Grooming and Exploring do not change the repository.** No commits, no branches, no edits to `GLOSSARY.md`, ADRs or `.out-of-scope/`. Put proposed changes in a comment.
 4. **No unattended `wontfix`.** If a skill concludes a request is already implemented or should be rejected, do not close it. Set `ready-for-human` and give the recommendation and reason in the comment. (The triage skill itself says a human confirms matches against prior rejections.)
-5. **Keep a skill's mandatory text.** Comments `/triage` writes must begin with its AI disclaimer.
+5. **Keep a skill's mandatory text.** Comments the triage skill writes must begin with its AI disclaimer.
 
 ## Leases
 

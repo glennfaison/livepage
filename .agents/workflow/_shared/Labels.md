@@ -5,7 +5,7 @@ Single source of truth for every label the workflow reads or writes. If a step f
 ## Conventions
 
 - `agent:*` labels belong to this workflow.
-- The flat labels belong to the triage skill: the states `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`, and the categories `bug` and `enhancement`. Keep their names exactly. The workflow itself only ever **sets** `needs-info`, `ready-for-agent` and `ready-for-human`. `/triage` applies the category and `needs-triage` during Grooming, and Grooming removes `needs-triage` when it sets the final state. The workflow never applies `wontfix`.
+- The flat labels belong to the [triage](../../skills/matt-pocock-skills/skills/engineering/triage/SKILL.md) skill: the states `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`, and the categories `bug` and `enhancement`. Keep their names exactly. The workflow itself only ever **sets** `needs-info`, `ready-for-agent` and `ready-for-human`. The triage skill applies the category and `needs-triage` during Grooming, and Grooming removes `needs-triage` when it sets the final state. The workflow never applies `wontfix`.
 - Two kinds of label:
   - **Lease**: "an agent is working on this right now." Temporary. Expires (see `_shared/Protocol.md`).
   - **State**: "where this item is in its life." Durable. Changed only as part of a transition below.
