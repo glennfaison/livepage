@@ -4,6 +4,20 @@ Explore the live app and the codebase, then file the most valuable findings as i
 
 **Read first:** `_shared/Protocol.md`, `_shared/Dedupe.md`, `_shared/IssueFormat.md`, `_shared/Log.md`, `_shared/config.env`. Then `source scripts/agent/lib.sh`.
 
+## Inputs
+
+- The monthly run log (`read_logs "$EXPLORE_LOG_LOOKBACK_DAYS"`): deferred candidates from earlier Exploring runs, recurring problems (failures, escalations, flaky checks, repeatedly skipped items), and automation suggestions.
+- The live app at `$EXPLORE_BASE_URL` (read-only; test data only).
+- The codebase (read-only).
+
+Exploring does **not** select by label, claim work, or take a lease. It only reads.
+
+## Outputs
+
+- Up to `$EXPLORE_ISSUE_CAP` new GitHub issues, filed with **no labels** and no assignee. Body follows `_shared/IssueFormat.md` (category tables, use case for features, visuals note when screenshots cannot be attached), plus a `Category:` line and `Filed by Exploring run <RUN_ID>`.
+- Comments on existing issues when a candidate is a duplicate (`_shared/Dedupe.md`); those comments do not count toward the cap.
+- A run-log entry (`_shared/Log.md`) listing issues filed, dedupe comments, dropped duplicates, and **Deferred candidates** (the rest of the ranked list, at most 20 lines).
+
 ## Trigger
 
 Scheduled. No guard and no lease: Exploring only reads, and the only thing it writes is new issues.
