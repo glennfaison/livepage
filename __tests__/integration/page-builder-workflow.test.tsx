@@ -306,7 +306,7 @@ describe("BuilderPage Integration", () => {
     await userEvent.click(screen.getByRole("button", { name: /templates/i }))
     expect(await screen.findByText("Personal CV / Resume")).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole("button", { name: /apply personal cv \/ resume/i }))
+    await userEvent.click(screen.getByRole("button", { name: "Apply Personal CV / Resume template" }))
 
     expect(mockDispatch.mock.calls.map(([action]: [{ type: string }]) => action.type)).toEqual([
       "SET_PAGES",

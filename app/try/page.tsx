@@ -166,6 +166,10 @@ export default function BuilderPage() {
     }
   }
 
+  const handleDuplicatePage = () => {
+    componentOperations.duplicatePage?.()
+  }
+
   const applyTemplate = (templateId: string) => {
     const template = getPageTemplateById(templateId)
     if (!template) {
@@ -228,11 +232,7 @@ export default function BuilderPage() {
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
               </Button>
-              <TemplateCatalogPopover
-                templates={templateDisplayCatalog}
-                onApplyTemplate={applyTemplate}
-                onPreviewTemplate={(templateId) => window.open(`/preview/${templateId}`, "_blank")}
-              />
+              <TemplateCatalogPopover templates={templateDisplayCatalog} onApplyTemplate={applyTemplate} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Import page">
@@ -382,6 +382,7 @@ export default function BuilderPage() {
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onDuplicatePage={handleDuplicatePage}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
         />
@@ -403,6 +404,7 @@ export default function BuilderPage() {
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
+          onDuplicatePage={handleDuplicatePage}
         />
 
         <ValidationDialog

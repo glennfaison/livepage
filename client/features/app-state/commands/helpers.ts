@@ -232,6 +232,43 @@ export function duplicateComponent({
 }
 
 /**
+ * Duplicates a page (root-level component with tag "page") and adds it to the component tree.
+ * The duplicate gets a new unique ID and title.
+ */
+export function duplicatePage({
+  components,
+  pageId,
+}: {
+  components: ReadonlyArray<AppNode>
+  pageId: string
+}): AppNode[] {
+  const pageIndex = components.findIndex(
+    (p) => p.tag === "page" && p.attributes.id === pageId
+  )
+  if (pageIndex === -1) return components as unknown as AppNode[]
+
+  const originalPage = components[pageIndex]
+  const idSuffix = `-copy-${Date.now()}`
+  const duplicatedPage = cloneNodeWithNewIds(originalPage, idSuffix)
+
+  // Update the title to indicate it's a copy
+  const originalTitle = originalPage.attributes.title ?? "Page"
+  const duplicatedPageWithTitle: AppNode = {
+    ...duplicatedPage,
+    attributes: {
+      ...duplicatedPage.attributes,
+      title: `${originalTitle} (copy)`,
+    },
+  }
+
+  return [
+    ...components.slice(0, pageIndex + 1),
+    duplicatedPageWithTitle,
+    ...components.slice(pageIndex + 1),
+  ]
+}
+
+/**
  * Replaces a component in the tree with a new component.
  * Returns a new tree with the component replaced.
  */

@@ -17,12 +17,23 @@ find the right skill, then read its `SKILL.md` before following its workflow.
 
 ## Workflows
 
-Agent workflows live in [.agents/workflow/](./.agents/workflow/):
+Agent workflows live in [.agents/workflow/](./.agents/workflow/). Each step file
+documents its **Inputs** (what it selects and claims) and **Outputs** (labels,
+comments, and artifacts it produces). Shared material is in
+[.agents/workflow/_shared/](./.agents/workflow/_shared/).
 
-- [Grooming.md](./.agents/workflow/Grooming.md) — Issue grooming process
-- [Implementing.md](./.agents/workflow/Implementing.md) — Implementation workflow
-- [Reviewing.md](./.agents/workflow/Reviewing.md) — PR review process
-- [Exploring.md](./.agents/workflow/Exploring.md) — Application/codebase exploration workflow
+**Shared (read first for labels and protocol):**
+
+- [Labels.md](./.agents/workflow/_shared/Labels.md) — Every label the workflows use, and the state transitions between them
+- [Protocol.md](./.agents/workflow/_shared/Protocol.md) — Claim/lease rules, helpers, and interactive-skill overrides
+
+**Steps** (independent; may run in any order or in parallel):
+
+- [Exploring.md](./.agents/workflow/Exploring.md) — Explore app/codebase; file unlabeled issues
+- [Grooming.md](./.agents/workflow/Grooming.md) — Triage and mark issues ready-for-agent or ready-for-human
+- [Implementing.md](./.agents/workflow/Implementing.md) — Implement a ready-for-agent issue and open a PR
+- [Shepherding.md](./.agents/workflow/Shepherding.md) — Get a PR through checks and post the review handoff
+- [Reviewing.md](./.agents/workflow/Reviewing.md) — Review a ready PR and merge when safe
 
 ## Branch names
 
@@ -49,7 +60,18 @@ When opening a PR that resolves multiple issues, use separate `Closes` statement
 
 **Correct:**
 ```
-Closes #122. Closes #123. Closes #124. Closes #125.
+- Closes #122. 
+- Closes #123. 
+- Closes #124. 
+- Closes #125.
+```
+
+**Correct:**
+```
+- Related to #122. 
+- Related to #123. 
+- Related to #124. 
+- Related to #125.
 ```
 
 **Incorrect (only closes #122):**

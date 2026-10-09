@@ -22,9 +22,14 @@ minimized mode. Drag handles are not counted as buttons.
 
 - **Left of pivot (5):** command palette, AI assistant, history, undo, redo
 - **Pivot:** minimize
-- **Right of pivot (4):** save, discard, settings, layout toggle
+- **Right of pivot (5):** save, discard, duplicate page, settings, layout toggle
 
-`L - R = 1`, which is valid.
+`L - R = 0`, which is valid. With the AI assistant button hidden the row is
+4 vs 5, so `L - R = -1`, also valid.
+
+The counts are computed from the buttons the component actually renders and
+passed to `assertToolbarButtonBalance` on every render outside production, so a
+button added on one side without rebalancing fails fast.
 
 ## Current arrangement (minimized mode)
 
@@ -32,7 +37,8 @@ minimized mode. Drag handles are not counted as buttons.
 - **Pivot:** maximize
 - **Right of pivot (0):** drag handle (not counted as a button)
 
-`L - R = 0`, which is valid.
+`L - R = 0`, which is valid. The minimized toolbar shows the maximize pivot
+only; undo/redo stay reachable through their keyboard shortcuts.
 
 ## Rationale
 

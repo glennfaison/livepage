@@ -10,11 +10,9 @@ import { TemplateCatalog } from "./template-catalog"
 export function TemplateCatalogPopover({
   templates,
   onApplyTemplate,
-  onPreviewTemplate,
 }: Readonly<{
   templates: ReadonlyArray<TemplateDisplaySummary>
   onApplyTemplate: (templateId: string) => void
-  onPreviewTemplate?: (templateId: string) => void
 }>) {
   const [open, setOpen] = React.useState(false)
 
@@ -30,7 +28,6 @@ export function TemplateCatalogPopover({
         <TemplateCatalog
           templates={templates}
           onApplyTemplate={onApplyTemplate}
-          onPreviewTemplate={onPreviewTemplate}
           onClose={() => setOpen(false)}
         />
       </PopoverContent>
