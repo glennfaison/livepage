@@ -6,14 +6,23 @@ This document is written for coding agents. **Human contributors** can follow th
 
 ## Agent Workflow Files
 
-The following workflow files in [.agents/workflow/](../../.agents/workflow/) define the processes for different agent activities:
+Workflow steps live in [.agents/workflow/](../../.agents/workflow/). Each step
+documents its **Inputs** and **Outputs**. Shared material (labels, protocol,
+dedupe, handoff, log, etc.) is under
+[.agents/workflow/_shared/](../../.agents/workflow/_shared/).
 
-- [Grooming.md](../../.agents/workflow/Grooming.md) — Issue grooming process (triage, deduplication, readiness marking)
-- [Implementing.md](../../.agents/workflow/Implementing.md) — Implementation workflow (pickup, context reading, PR creation)
-- [Shepherding.md](../../.agents/workflow/Shepherding.md) — Gets a PR through checks and posts the review handoff
-- [Reviewing.md](../../.agents/workflow/Reviewing.md) — PR review process (merge-safety, code review, escalation)
-- [Exploring.md](../../.agents/workflow/Exploring.md) — Application/codebase exploration workflow (live app + codebase)
-- [Labels.md](../../.agents/workflow/Labels.md) — The labels and state transitions that let the workflows run in any order
+**Shared:**
+
+- [Labels.md](../../.agents/workflow/_shared/Labels.md) — Labels and state transitions (read this first)
+- [Protocol.md](../../.agents/workflow/_shared/Protocol.md) — Claim/lease rules and helpers
+
+**Steps:**
+
+- [Exploring.md](../../.agents/workflow/Exploring.md) — Explore app/codebase; file unlabeled issues
+- [Grooming.md](../../.agents/workflow/Grooming.md) — Triage and mark issues ready-for-agent or ready-for-human
+- [Implementing.md](../../.agents/workflow/Implementing.md) — Implement a ready-for-agent issue and open a PR
+- [Shepherding.md](../../.agents/workflow/Shepherding.md) — Get a PR through checks and post the review handoff
+- [Reviewing.md](../../.agents/workflow/Reviewing.md) — Review a ready PR and merge when safe
 
 ## Scope
 
@@ -28,7 +37,8 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 - [ ] Run the **narrowest relevant Jest selector first** (e.g. `npm test -- --runInBand path/to/test.test.tsx`), then broader checks.
 - [ ] Record **known baseline failures** separately. Do not treat unrelated user-modified expectations as regressions.
-- [ ] **Restart the development server** before browser testing so the browser validates the current application state.
+- [ ] Run `npm run lint` and `npx tsc --noEmit` when the change touches TypeScript or shared types.
+- [ ] Restart the **dev server** before browser testing so the browser validates the current application state.
 - [ ] For editor controls, decorators, and other positioned UI: check **real geometry after scroll and resize**. Also check client-only and portal rendering for SSR and hydration safety. Passing TypeScript is not enough.
 - [ ] When merging a module's exports into a barrel, run the narrowest relevant Jest selector. Eager circular imports can throw at runtime even when `tsc` reports no errors.
 - [ ] **UI work is not done until you have seen it in a browser.** For Templates, judge the preview-mode render (`/try?template=<id>&mode=preview`), not the code or edit mode. Follow the [template skills](../skills/template-authoring/SKILL.md).
