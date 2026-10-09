@@ -1,9 +1,15 @@
 import { render, screen } from "@testing-library/react"
 import { Toolbar } from "@/client/features/page-builder/toolbar"
 import type { AppNode, PageBuilderMode } from "@/client/features/types"
+import type { HistoryEntry } from "@/client/features/types"
 
 const componentTree: ReadonlyArray<AppNode> = [
   { tag: "page", attributes: { id: "page-1" }, children: [] },
+]
+
+const historyWithEntries: ReadonlyArray<HistoryEntry> = [
+  { id: "h0", action: "Inserted header1", timestamp: new Date(), pageState: componentTree },
+  { id: "h1", action: "Updated header-1", timestamp: new Date(), pageState: componentTree },
 ]
 
 const baseProps = {
@@ -12,7 +18,7 @@ const baseProps = {
   savePage: jest.fn(),
   handleDiscard: jest.fn(),
   pageBuilderMode: "edit" as PageBuilderMode,
-  history: [],
+  history: [] as ReadonlyArray<HistoryEntry>,
   currentHistoryIndex: -1,
   onSelectHistory: jest.fn(),
   onAcceptHistory: jest.fn(),
@@ -70,5 +76,58 @@ describe("Toolbar button layout", () => {
     const right = titles.length - pivotIndex - 1
 
     expect([-1, 0, 1]).toContain(left - right)
+  })
+})
+
+describe("Toolbar undo/redo button state", () => {
+  it("disables Undo and Redo when history is empty", () => {
+    render(<Toolbar {...baseProps} />)
+
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Redo" })).toBeDisabled()
+  })
+
+  it("enables Undo when there are previous history entries", () => {
+    render(
+      <Toolbar
+        {...baseProps}
+        history={historyWithEntries}
+        currentHistoryIndex={1}
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "Undo" })).not.toBeDisabled()
+    expect(screen.getByRole("button", { name: "Redo" })).toBeDisabled()
+  })
+
+  it("enables Redo after undo when not at latest history", () => {
+    render(
+      <Toolbar
+        {...baseProps}
+        history={historyWithEntries}
+        currentHistoryIndex={0}
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Redo" })).not.toBeDisabled()
+  })
+
+  it("enables both Undo and Redo when in middle of history", () => {
+    const threeEntryHistory: ReadonlyArray<HistoryEntry> = [
+      ...historyWithEntries,
+      { id: "h2", action: "Inserted div", timestamp: new Date(), pageState: componentTree },
+    ]
+
+    render(
+      <Toolbar
+        {...baseProps}
+        history={threeEntryHistory}
+        currentHistoryIndex={1}
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "Undo" })).not.toBeDisabled()
+    expect(screen.getByRole("button", { name: "Redo" })).not.toBeDisabled()
   })
 })
