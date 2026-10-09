@@ -60,7 +60,10 @@ When opening a PR that resolves multiple issues, use separate `Closes` statement
 
 **Correct:**
 ```
-Closes #122. Closes #123. Closes #124. Closes #125.
+- Closes #122. 
+- Closes #123. 
+- Closes #124. 
+- Closes #125.
 ```
 
 **Correct:**
