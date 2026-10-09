@@ -366,13 +366,6 @@ export const Toolbar: React.FC<Readonly<{
             <Maximize className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" size="sm" onClick={onUndo} disabled={!canUndo} title={`Undo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Undo">
-            <Undo className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Redo">
-            <Redo className="h-4 w-4" />
-          </Button>
-
           <div
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
