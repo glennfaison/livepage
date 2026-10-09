@@ -263,17 +263,27 @@ export const CommandPalette: React.FC<
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceedForAction(action)
+      return
+    }
     setValidationResult(validation)
     setPendingExportAction(action)
     setValidationDialogOpen(true)
     onOpenChange(false)
   }
 
-  const handleValidationProceed = () => {
-    if (pendingExportAction === "preview") {
+  const handleValidationProceedForAction = (action: "preview" | "copy") => {
+    if (action === "preview") {
       onPreviewExport()
-    } else if (pendingExportAction === "copy") {
+    } else if (action === "copy") {
       onCopyHtml()
+    }
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction) {
+      handleValidationProceedForAction(pendingExportAction)
     }
     setValidationDialogOpen(false)
     setPendingExportAction(null)

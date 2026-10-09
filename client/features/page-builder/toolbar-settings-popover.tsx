@@ -75,14 +75,18 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceedForAction(action)
+      return
+    }
     setValidationResult(validation)
     setPendingExportAction(action)
     setValidationDialogOpen(true)
     onOpenChange(false)
   }
 
-  const handleValidationProceed = () => {
-    if (pendingExportAction === "preview") {
+  const handleValidationProceedForAction = (action: "preview" | "copy") => {
+    if (action === "preview") {
       const html = serializeAppStateAsHtml(componentTree, { assetBaseUrl: window.location.origin })
       const blob = new Blob([html], { type: "text/html" })
       const url = URL.createObjectURL(blob)
@@ -95,7 +99,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
         })
         URL.revokeObjectURL(url)
       }
-    } else if (pendingExportAction === "copy") {
+    } else if (action === "copy") {
       const html = serializeAppStateAsHtml(componentTree, { assetBaseUrl: window.location.origin })
       navigator.clipboard.writeText(html).then(
         () => {
@@ -112,6 +116,12 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
           })
         },
       )
+    }
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction) {
+      handleValidationProceedForAction(pendingExportAction)
     }
     setValidationDialogOpen(false)
     setPendingExportAction(null)
