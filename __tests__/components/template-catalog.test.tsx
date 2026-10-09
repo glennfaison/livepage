@@ -200,4 +200,29 @@ describe("TemplateCatalog", () => {
     expect(screen.getAllByTestId("custom-item")).toHaveLength(2)
     expect(renderTemplateItem).toHaveBeenCalledTimes(2)
   })
+
+  it("displays template thumbnails in grid view", () => {
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    const images = screen.getAllByRole("img", { name: /preview$/ })
+    expect(images.length).toBe(templates.length)
+    for (const img of images) {
+      expect(img).toHaveAttribute("src")
+      expect(img.getAttribute("src")?.length).toBeGreaterThan(0)
+    }
+  })
+
+  it("displays template thumbnails in list view", async () => {
+    const user = userEvent.setup()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    await user.click(screen.getByRole("button", { name: "List view" }))
+
+    const images = screen.getAllByRole("img", { name: /preview$/ })
+    expect(images.length).toBe(templates.length)
+    for (const img of images) {
+      expect(img).toHaveAttribute("src")
+      expect(img.getAttribute("src")?.length).toBeGreaterThan(0)
+    }
+  })
 })
