@@ -214,6 +214,21 @@ export const Toolbar: React.FC<Readonly<{
 
   if (pageBuilderMode === "preview" as PageBuilderMode) return null
 
+  // ADR 0005 — the pivot is the minimize button when expanded and the maximize
+  // button when minimized. Drag handles are not buttons, so they never count.
+  if (process.env.NODE_ENV !== "production") {
+    if (toolbarMinimized) {
+      assertToolbarButtonBalance(0, 0)
+    } else {
+      const leftButtonCount =
+        (onOpenCommandPalette ? 1 : 0) +
+        (onOpenAIAssistant && promptAssistEnabled ? 1 : 0) +
+        3 // history, undo, redo
+      const rightButtonCount = 5 // save, discard, duplicate page, settings, layout toggle
+      assertToolbarButtonBalance(leftButtonCount, rightButtonCount)
+    }
+  }
+
   return (
     <div
       ref={toolbarRef}
@@ -275,9 +290,6 @@ export const Toolbar: React.FC<Readonly<{
           <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Redo">
             <Redo className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
-            <Copy className="h-4 w-4" />
-          </Button>
 
           <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
             <Minimize className="h-4 w-4" />
@@ -288,6 +300,9 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
           <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard" className="shrink-0">
             <X className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
+            <Copy className="h-4 w-4" />
           </Button>
 
           <ToolbarSettingsPopover
@@ -332,29 +347,6 @@ export const Toolbar: React.FC<Readonly<{
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onUndo}
-            disabled={!canUndo}
-            title={`Undo (${formatShortcut("Z")})`}
-            className="shrink-0"
-            aria-label="Undo"
-          >
-            <Undo className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onRedo}
-            disabled={!canRedo}
-            title={`Redo (${formatShortcut("Z")})`}
-            className="shrink-0"
-            aria-label="Redo"
-          >
-            <Redo className="h-4 w-4" />
-          </Button>
 
           <Button
             variant="ghost"
