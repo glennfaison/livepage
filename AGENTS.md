@@ -23,6 +23,10 @@ Agent workflows live in [.agents/workflow/](./.agents/workflow/):
 - [Implementing.md](./.agents/workflow/Implementing.md) — Implementation workflow
 - [Reviewing.md](./.agents/workflow/Reviewing.md) — PR review process
 - [Exploring.md](./.agents/workflow/Exploring.md) — Application/codebase exploration workflow
+- [Shepherding.md](./.agents/workflow/Shepherding.md) — Gets a PR through checks and posts the review handoff
+- [Labels.md](./.agents/workflow/Labels.md) — Every label the workflows use, and the state transitions between them (read this first)
+
+The workflows are independent steps that select work by label, so they can run in any order or in parallel. Shared procedures are in [.agents/workflow/_shared/](./.agents/workflow/_shared/).
 
 ## Branch names
 

@@ -9,9 +9,11 @@ This document is written for coding agents. **Human contributors** can follow th
 The following workflow files in [.agents/workflow/](../../.agents/workflow/) define the processes for different agent activities:
 
 - [Grooming.md](../../.agents/workflow/Grooming.md) — Issue grooming process (triage, deduplication, readiness marking)
-- [Implementing.md](../../.agents/workflow/Implementing.md) — Implementation workflow (pickup, context reading, PR creation, monitoring)
+- [Implementing.md](../../.agents/workflow/Implementing.md) — Implementation workflow (pickup, context reading, PR creation)
+- [Shepherding.md](../../.agents/workflow/Shepherding.md) — Gets a PR through checks and posts the review handoff
 - [Reviewing.md](../../.agents/workflow/Reviewing.md) — PR review process (merge-safety, code review, escalation)
 - [Exploring.md](../../.agents/workflow/Exploring.md) — Application/codebase exploration workflow (live app + codebase)
+- [Labels.md](../../.agents/workflow/Labels.md) — The labels and state transitions that let the workflows run in any order
 
 ## Scope
 
@@ -42,7 +44,7 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 - For anything beyond a focused fix, follow the [agent orchestration skill](../skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the [handoff skill](../skills/handoff/SKILL.md) and iterating until the goal is met.
 - Whenever you write non-trivial code, have a fresh review sub-agent review it (trivial edits such as typos and one-line fixes only need your own check). The reviewer fixes the issues it finds rather than only reporting them, so the main agent's context stays small. It must not edit tests or allowlists to get green; you read its diff before accepting.
-- End the task by suggesting which parts of the process could be automated deterministically to reduce token use.
+- End the task by suggesting which parts of the process could be automated deterministically to reduce token use. In an unattended workflow run, nobody is there to read it: put the suggestions in the run log instead, as [Log.md](../workflow/_shared/Log.md) describes.
 
 ## Sub-agents
 
