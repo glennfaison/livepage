@@ -15,6 +15,15 @@ Finish checklists; the [PR template](./.github/pull_request_template.md) and
 All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
 find the right skill, then read its `SKILL.md` before following its workflow.
 
+## Workflows
+
+Agent workflows live in [.agents/workflow/](./.agents/workflow/):
+
+- [Grooming.md](./.agents/workflow/Grooming.md) — Issue grooming process
+- [Implementing.md](./.agents/workflow/Implementing.md) — Implementation workflow
+- [Reviewing.md](./.agents/workflow/Reviewing.md) — PR review process
+- [Exploring.md](./.agents/workflow/Exploring.md) — Application/codebase exploration workflow
+
 ## Branch names
 
 Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
@@ -22,6 +31,31 @@ Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
 `main`. Topics are lowercase kebab-case. Do not invent prefixes such as `cursor/`,
 `fix/`, or `templates/`. Full patterns and the four layers of enforcement are in
 [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
+## Git hooks (required)
+
+Local git hooks enforce branch-name compliance at commit and push time.
+Enable them at **session start**:
+
+```bash
+git config core.hooksPath scripts/git-hooks
+```
+
+This must be run before any commits or pushes. The hooks validate branch names against the gitflow patterns in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
+## PR descriptions and closing issues
+
+When opening a PR that resolves multiple issues, use separate `Closes` statements for each issue. GitHub only auto-links the first issue in a single sentence.
+
+**Correct:**
+```
+Closes #122. Closes #123. Closes #124. Closes #125.
+```
+
+**Incorrect (only closes #122):**
+```
+Closes #122, #123, #124, #125
+```
 
 ## README.md is user-facing and hand-maintained
 
