@@ -37,7 +37,7 @@ describe("RootErrorBoundary", () => {
     // Expand error details to see the error message
     await userEvent.click(screen.getByText("Error details"))
     expect(screen.getByText((content, element) => 
-      element.tagName === "PRE" && content.includes("Test error")
+      element?.tagName === "PRE" && content.includes("Test error")
     )).toBeInTheDocument()
     
     // Unknown category has "Try Again" button (retry action)

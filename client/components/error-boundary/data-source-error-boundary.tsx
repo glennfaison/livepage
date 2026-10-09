@@ -156,7 +156,7 @@ export class DataSourceErrorBoundary extends React.Component<
         return this.props.fallback
       }
 
-      const isPreview = this.props.isPreviewMode
+      const isPreview = this.props.isPreviewMode ?? false
       const classified = this.state.classifiedError
       const categoryIcon = classified ? getCategoryIcon(classified.category) : (
         isPreview ? <WifiOff className="h-8 w-8" aria-hidden="true" /> : <AlertTriangle className="h-8 w-8" aria-hidden="true" />

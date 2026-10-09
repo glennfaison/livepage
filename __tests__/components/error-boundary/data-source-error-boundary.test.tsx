@@ -37,7 +37,7 @@ describe("DataSourceErrorBoundary", () => {
     // Expand error details to see the error message
     await userEvent.click(screen.getByText("Error details"))
     expect(screen.getByText((content, element) => 
-      element.tagName === "PRE" && content.includes("Test data source error")
+      element?.tagName === "PRE" && content.includes("Test data source error")
     )).toBeInTheDocument()
     
     expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument()
@@ -62,7 +62,7 @@ describe("DataSourceErrorBoundary", () => {
     // Expand error details to see the error message
     await userEvent.click(screen.getByText("Error details"))
     expect(screen.getByText((content, element) => 
-      element.tagName === "PRE" && content.includes("Test data source error")
+      element?.tagName === "PRE" && content.includes("Test data source error")
     )).toBeInTheDocument()
     
     expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument()
