@@ -2,6 +2,11 @@ import type { AppNode } from "@/client/features/types"
 import { findComponentById } from "@/client/features/app-state/tree"
 export { findComponentById } from "@/client/features/app-state/tree"
 
+/**
+ * Finds the parent component of a given component ID in the component tree.
+ * Returns the parent component if found, or null if the component is a root
+ * or not found.
+ */
 export function findComponentParent({
   components,
   componentId,
@@ -32,6 +37,11 @@ function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
   }
 }
 
+/**
+ * Finds the ancestry path (parent chain) from the root to a component.
+ * Returns an array of components from the target up to the root (target first),
+ * or an empty array if the component is not found.
+ */
 export function findComponentParentTree({
   components,
   componentId,
@@ -56,6 +66,11 @@ export function findComponentParentTree({
   return []
 }
 
+/**
+ * Inserts a new component into the component tree at the specified position.
+ * If parentId is not provided, inserts at the root level.
+ * If index is not provided, appends to the end of the parent's children.
+ */
 export function insertComponent({
   components,
   newComponent,
@@ -111,6 +126,10 @@ export function insertComponent({
   }, [])
 }
 
+/**
+ * Updates a component's attributes and/or children in the component tree.
+ * Uses an `updated` object to track whether the component was found and modified.
+ */
 export function updateComponent({
   components,
   componentId,
@@ -148,6 +167,10 @@ export function updateComponent({
   })
 }
 
+/**
+ * Removes a component from the component tree by its ID.
+ * Returns a new tree without the component.
+ */
 export function removeComponent({
   components,
   componentId,
@@ -173,6 +196,10 @@ export function removeComponent({
   }, [])
 }
 
+/**
+ * Duplicates a component and inserts the copy immediately after the original.
+ * The duplicate gets a new unique ID with a timestamp suffix.
+ */
 export function duplicateComponent({
   components,
   componentId,
@@ -204,6 +231,47 @@ export function duplicateComponent({
   }, [])
 }
 
+/**
+ * Duplicates a page (root-level component with tag "page") and adds it to the component tree.
+ * The duplicate gets a new unique ID and title.
+ */
+export function duplicatePage({
+  components,
+  pageId,
+}: {
+  components: ReadonlyArray<AppNode>
+  pageId: string
+}): AppNode[] {
+  const pageIndex = components.findIndex(
+    (p) => p.tag === "page" && p.attributes.id === pageId
+  )
+  if (pageIndex === -1) return components as unknown as AppNode[]
+
+  const originalPage = components[pageIndex]
+  const idSuffix = `-copy-${Date.now()}`
+  const duplicatedPage = cloneNodeWithNewIds(originalPage, idSuffix)
+
+  // Update the title to indicate it's a copy
+  const originalTitle = originalPage.attributes.title ?? "Page"
+  const duplicatedPageWithTitle: AppNode = {
+    ...duplicatedPage,
+    attributes: {
+      ...duplicatedPage.attributes,
+      title: `${originalTitle} (copy)`,
+    },
+  }
+
+  return [
+    ...components.slice(0, pageIndex + 1),
+    duplicatedPageWithTitle,
+    ...components.slice(pageIndex + 1),
+  ]
+}
+
+/**
+ * Replaces a component in the tree with a new component.
+ * Returns a new tree with the component replaced.
+ */
 export function replaceComponent({
   components,
   oldComponentId,
@@ -246,6 +314,12 @@ export function patchComponent(
   return updateComponent({ components, componentId, updates, updated: { value: false } })
 }
 
+/**
+ * Moves a component to a new parent at the specified index.
+ * Prevents moving a component into its own descendant.
+ * Returns the original tree if the component or new parent is not found,
+ * or if the move would create a cycle.
+ */
 export function moveComponent({
   components,
   componentId,

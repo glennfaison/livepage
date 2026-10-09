@@ -6,6 +6,14 @@ export type DataSourceSettings = Readonly<{
   settings: Readonly<Record<string, unknown>>
 }>
 
+/**
+ * Decodes a base64-encoded data source settings string (from the browser
+ * registry format) into its component ID and settings object.
+ * Handles both browser (atob) and Node.js (Buffer) environments.
+ *
+ * @param encoded - Base64-encoded settings string
+ * @returns DataSourceSettings object or null if decoding fails
+ */
 export function decodeBrowserDataSourceSettings(encoded: string): DataSourceSettings | null {
   try {
     const binary = typeof atob === "function"
@@ -22,6 +30,16 @@ export function decodeBrowserDataSourceSettings(encoded: string): DataSourceSett
   }
 }
 
+/**
+ * Replaces placeholders in a component's attributes and children with
+ * actual data from a data source. Returns a new component with replaced
+ * values, leaving the original unchanged.
+ *
+ * @param originalComponent - The component to process
+ * @param dataFromSource - Data returned from the data source
+ * @param now - Current date for date placeholders (defaults to now)
+ * @returns New component with placeholders replaced
+ */
 export function replaceDataSourceComponentProperties<T extends AppNode>(
   originalComponent: T,
   dataFromSource: unknown,
@@ -43,6 +61,16 @@ export function replaceDataSourceComponentProperties<T extends AppNode>(
   } as T
 }
 
+/**
+ * Loads data from a browser-side data source. Supports generated-data
+ * (executes user-provided code) and rest-api (fetches from URL with
+ * optional result parsing).
+ *
+ * @param settings - Data source settings including ID and configuration
+ * @param fetcher - Fetch implementation to use (defaults to global fetch)
+ * @returns Promise resolving to the data from the source
+ * @throws Error if data source ID is unknown
+ */
 export async function loadBrowserDataSource(
   settings: DataSourceSettings,
   fetcher: typeof fetch = fetch,

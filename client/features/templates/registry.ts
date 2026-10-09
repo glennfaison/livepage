@@ -11,25 +11,31 @@ import { farmLogisticsLandingPageTemplate } from "@/client/features/templates/de
 import { patientHealthDashboardTemplate } from "@/client/features/templates/definitions/patient-health-dashboard"
 import { podcastShowPageTemplate } from "@/client/features/templates/definitions/podcast-show-page"
 import { neighborhoodCafePageTemplate } from "@/client/features/templates/definitions/neighborhood-cafe-page"
-import { parsePageTemplateDefinition, type PageTemplateDefinition } from "@/client/features/templates/schema"
+import { validateAndMigrateTemplate, type PageTemplateDefinition } from "@/client/features/templates/schema"
 
 export const pageTemplateRegistry = [
-  parsePageTemplateDefinition(cvResumePersonalTemplate),
-  parsePageTemplateDefinition(cvResumeEngineerDarkTemplate),
-  parsePageTemplateDefinition(cvResumeEngineerLightTemplate),
-  parsePageTemplateDefinition(portfolioPersonalSiteTemplate),
-  parsePageTemplateDefinition(linkInBioTemplate),
-  parsePageTemplateDefinition(landingPageSaasTemplate),
-  parsePageTemplateDefinition(farmLogisticsLandingPageTemplate),
-  parsePageTemplateDefinition(blogArticlePageTemplate),
-  parsePageTemplateDefinition(agencyHomepageTemplate),
-  parsePageTemplateDefinition(eventConferencePageTemplate),
-  parsePageTemplateDefinition(contactAboutPageTemplate),
-  parsePageTemplateDefinition(patientHealthDashboardTemplate),
-  parsePageTemplateDefinition(podcastShowPageTemplate),
-  parsePageTemplateDefinition(neighborhoodCafePageTemplate),
+  validateAndMigrateTemplate(cvResumePersonalTemplate),
+  validateAndMigrateTemplate(cvResumeEngineerDarkTemplate),
+  validateAndMigrateTemplate(cvResumeEngineerLightTemplate),
+  validateAndMigrateTemplate(portfolioPersonalSiteTemplate),
+  validateAndMigrateTemplate(linkInBioTemplate),
+  validateAndMigrateTemplate(landingPageSaasTemplate),
+  validateAndMigrateTemplate(farmLogisticsLandingPageTemplate),
+  validateAndMigrateTemplate(blogArticlePageTemplate),
+  validateAndMigrateTemplate(agencyHomepageTemplate),
+  validateAndMigrateTemplate(eventConferencePageTemplate),
+  validateAndMigrateTemplate(contactAboutPageTemplate),
+  validateAndMigrateTemplate(patientHealthDashboardTemplate),
+  validateAndMigrateTemplate(podcastShowPageTemplate),
+  validateAndMigrateTemplate(neighborhoodCafePageTemplate),
 ] as const
 
+/**
+ * Finds a template by its ID in the registry.
+ *
+ * @param id - The template ID to search for
+ * @returns The template definition if found, undefined otherwise
+ */
 export function getPageTemplateById(id: string): PageTemplateDefinition | undefined {
   return pageTemplateRegistry.find((template) => template.id === id)
 }
@@ -43,6 +49,12 @@ export type TemplateDisplaySummary = Readonly<{
   thumbnail: string
 }>
 
+/**
+ * Returns a summary of all registered templates for display in the catalog UI,
+ * including thumbnail images.
+ *
+ * @returns Array of template display summaries
+ */
 export function describeTemplateDisplayCatalog(): ReadonlyArray<TemplateDisplaySummary> {
   return pageTemplateRegistry.map(({ id, metadata }) => ({
     id,
@@ -63,7 +75,12 @@ export type TemplateSummary = Readonly<{
   tags: ReadonlyArray<string>
 }>
 
-/** Describes every registered template from its own metadata, so selection logic never hard-codes the catalog. */
+/**
+ * Returns a summary of all registered templates for selection logic, without
+ * page content or thumbnails.
+ *
+ * @returns Array of template summaries
+ */
 export function describeTemplateCatalog(): ReadonlyArray<TemplateSummary> {
   return pageTemplateRegistry.map(({ id, metadata }) => ({
     id,

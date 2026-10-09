@@ -11,11 +11,17 @@ import { TemplateTabContent, useTemplateSettingsEditor } from "./template-settin
 export function SettingsPopover({
   component,
   children,
+  open,
+  onOpenChange,
 }: Readonly<{
   component: AppNode
   children: React.ReactNode
+  open?: boolean
+  onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>
 }>): React.JSX.Element {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
+  const isOpen = open ?? uncontrolledOpen
+  const setIsOpen = onOpenChange ?? setUncontrolledOpen
   const componentSettingsEditor = useComponentSettingsEditor({ component, setIsOpen })
   const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component })
   const templateSettingsEditor = useTemplateSettingsEditor({ component, setIsOpen })
@@ -24,8 +30,8 @@ export function SettingsPopover({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-full sm:w-96 p-0 z-50" side="bottom" align="end" sideOffset={8}>
-        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[600px] max-h-[600px] sm:max-h-[600px] max-h-[90vh] overflow-clip flex flex-col">
+      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0 z-50" side="bottom" align="end" sideOffset={8} collisionPadding={12}>
+        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[min(600px,90vh)] overflow-clip flex flex-col">
           <div className="bg-foreground text-background p-3 rounded-t-lg">
             <h2 className="text-sm font-semibold">{componentInfo.label}</h2>
           </div>

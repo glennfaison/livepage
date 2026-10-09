@@ -6,7 +6,7 @@ import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
 import type { Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
-import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
+import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, createTextareaAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { useDragDrop } from "../editor-controls/drag-drop-context"
 
 const tag = "page" as const
@@ -19,6 +19,48 @@ const attributes: SettingsField[] = [
 		label: "Title",
 		placeholder: "Enter page title",
 		defaultValue: "Page Title 1",
+	}),
+	createTextAttribute({
+		id: "description",
+		label: "Description",
+		placeholder: "Enter page description for SEO",
+		defaultValue: "",
+	}),
+	createTextAttribute({
+		id: "favicon",
+		label: "Favicon URL",
+		placeholder: "https://example.com/favicon.ico",
+		defaultValue: "",
+	}),
+	createTextAttribute({
+		id: "ogImage",
+		label: "Open Graph Image",
+		placeholder: "https://example.com/og-image.png",
+		defaultValue: "",
+	}),
+	createTextAttribute({
+		id: "canonicalUrl",
+		label: "Canonical URL",
+		placeholder: "https://example.com/page",
+		defaultValue: "",
+	}),
+	createTextareaAttribute({
+		id: "customHead",
+		label: "Custom <head> HTML",
+		placeholder: "<meta name=\"analytics\" content=\"...\">\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">",
+		defaultValue: [],
+	}),
+	createTextareaAttribute({
+		id: "customCss",
+		label: "Custom CSS",
+		placeholder: "/* Custom styles injected in export */\n:root { --custom-color: #123; }",
+		defaultValue: [],
+	}),
+	createTextareaAttribute({
+		id: "customJs",
+		label: "Custom JavaScript",
+		placeholder: "// Custom JS injected in export\nconsole.log('Page loaded');",
+		defaultValue: [],
 	}),
 	...createSpacingAttributes("padding"),
 ]

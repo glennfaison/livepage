@@ -49,6 +49,7 @@ function buildComponentOperations(): Operations {
     updateComponent: jest.fn(),
     removeComponent: jest.fn(),
     duplicateComponent: jest.fn(),
+    duplicatePage: jest.fn(),
     setSelectedComponent: jest.fn(),
     replaceComponent: jest.fn(),
     findComponentById: jest.fn(),
@@ -73,9 +74,13 @@ function renderPalette(stateOverrides: Partial<AppState> = {}) {
       onSaveAsJson={jest.fn()}
       onSaveAsShortcode={jest.fn()}
       onSaveAsHtml={jest.fn()}
+      onPreviewExport={jest.fn()}
+      onCopyHtml={jest.fn()}
       onImportJson={jest.fn()}
       onImportShortcode={jest.fn()}
       onDiscardChanges={jest.fn()}
+      onOpenAIAssistant={jest.fn()}
+      onDuplicatePage={jest.fn()}
     />,
   )
 
@@ -159,9 +164,13 @@ describe("CommandPalette", () => {
         onSaveAsJson={jest.fn()}
         onSaveAsShortcode={jest.fn()}
         onSaveAsHtml={jest.fn()}
+        onPreviewExport={jest.fn()}
+        onCopyHtml={jest.fn()}
         onImportJson={jest.fn()}
         onImportShortcode={jest.fn()}
         onDiscardChanges={jest.fn()}
+        onOpenAIAssistant={jest.fn()}
+        onDuplicatePage={jest.fn()}
       />,
     )
 

@@ -3,6 +3,12 @@
 import { useEffect } from "react"
 import type { Dispatch, SetStateAction } from "react"
 
+/**
+ * Hook that registers a global keyboard shortcut (Cmd/Ctrl+K) to toggle
+ * the command palette open/closed.
+ *
+ * @param setCommandPaletteOpen - Setter function for the command palette open state
+ */
 export function useCommandPaletteShortcut(
   setCommandPaletteOpen: Dispatch<SetStateAction<boolean>>,
 ) {
