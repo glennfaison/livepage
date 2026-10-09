@@ -5,7 +5,7 @@ description: Orchestrate a non-trivial task through design, coding and review su
 
 # Agent orchestration
 
-The main agent coordinates. It keeps its own context small by delegating each phase to a fresh sub-agent and passing work along with the [handoff skill](../matt-pocock-skills/skills/productivity/handoff/SKILL.md).
+The main agent coordinates. It keeps its own context small by delegating each phase to a fresh sub-agent and passing work along with the `/handoff` skill.
 
 Skip the design phase for focused fixes (a single obvious change). Never skip review.
 

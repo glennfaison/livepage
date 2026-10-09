@@ -1,6 +1,6 @@
 # Handoff comments
 
-The [handoff](../../skills/matt-pocock-skills/skills/productivity/handoff/SKILL.md) skill compacts a conversation into a document for another agent and saves it to the OS temp directory. In this workflow a handoff is a **comment**, so:
+The `/handoff` skill compacts a conversation into a document for another agent and saves it to the OS temp directory. In this workflow a handoff is a **comment**, so:
 
 - Follow the skill's rules: write for a fresh agent with none of your context, reference artifacts (PR, issue, commit, check run) by link instead of copying them, and redact secrets and personal data.
 - Compose it in a file in the OS temp directory, then post it with `gh pr comment N --body-file FILE`. **Never write it into the repository.**
@@ -15,4 +15,4 @@ The [handoff](../../skills/matt-pocock-skills/skills/productivity/handoff/SKILL.
 
 ## Issues
 
-Issues do not use the handoff skill. For an issue, the comment the triage skill writes is the handoff: an **Agent Brief** for `ready-for-agent`, the same structure plus why it cannot be delegated for `ready-for-human`, or **Triage Notes** for `needs-info`. A conversation summary on top would only duplicate it.
+Issues do not use `/handoff`. For an issue, the comment `/triage` writes is the handoff: an **Agent Brief** for `ready-for-agent`, the same structure plus why it cannot be delegated for `ready-for-human`, or **Triage Notes** for `needs-info`. A conversation summary on top would only duplicate it.

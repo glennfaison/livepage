@@ -52,7 +52,7 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 ## Orchestration
 
-- For anything beyond a focused fix, follow the [agent orchestration skill](../skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the [handoff skill](../skills/matt-pocock-skills/skills/productivity/handoff/SKILL.md) and iterating until the goal is met.
+- For anything beyond a focused fix, follow the [agent orchestration skill](../skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the `/handoff` skill and iterating until the goal is met.
 - Whenever you write non-trivial code, have a fresh review sub-agent review it (trivial edits such as typos and one-line fixes only need your own check). The reviewer fixes the issues it finds rather than only reporting them, so the main agent's context stays small. It must not edit tests or allowlists to get green; you read its diff before accepting.
 - End the task by suggesting which parts of the process could be automated deterministically to reduce token use. In an unattended workflow run, nobody is there to read it: put the suggestions in the run log instead, as [Log.md](../workflow/_shared/Log.md) describes.
 
