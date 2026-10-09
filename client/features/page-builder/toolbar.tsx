@@ -91,6 +91,9 @@ export const Toolbar: React.FC<Readonly<{
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
   promptAssistEnabled?: boolean
+  /** Pre-computed undo/redo availability from parent to avoid stale closure issues */
+  canUndo?: boolean
+  canRedo?: boolean
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -113,6 +116,8 @@ export const Toolbar: React.FC<Readonly<{
   onDuplicatePage,
   dispatch,
   promptAssistEnabled,
+  canUndo: canUndoProp,
+  canRedo: canRedoProp,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -126,8 +131,8 @@ export const Toolbar: React.FC<Readonly<{
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
   const currentPage = pageComponent ?? componentTree[0]
-  const canUndo = currentHistoryIndex > 0
-  const canRedo = currentHistoryIndex < history.length - 1
+  const canUndo = canUndoProp ?? currentHistoryIndex > 0
+  const canRedo = canRedoProp ?? currentHistoryIndex < history.length - 1
 
   // Discard confirmation
   const {
