@@ -163,6 +163,35 @@ describe("TemplateCatalog", () => {
     expect(screen.getByText("Clear your search")).toBeInTheDocument()
   })
 
+  it("previews a template in a modal without applying it", async () => {
+    const user = userEvent.setup()
+    const onApplyTemplate = jest.fn()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} />)
+
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} template` }))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText(templates[0].name)).toBeInTheDocument()
+    expect(within(dialog).getByText(templates[0].category)).toBeInTheDocument()
+    expect(onApplyTemplate).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Close preview" }))
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("applies a template from the preview modal", async () => {
+    const user = userEvent.setup()
+    const onApplyTemplate = jest.fn()
+    const onClose = jest.fn()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} onClose={onClose} />)
+
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} template` }))
+    await user.click(await screen.findByRole("button", { name: "Apply Template" }))
+
+    expect(onApplyTemplate).toHaveBeenCalledWith(templates[0].id)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
   it("renders custom template items when renderTemplateItem is provided", async () => {
     const user = userEvent.setup()
     const renderTemplateItem = jest.fn(() => <div data-testid="custom-item">Custom</div>)

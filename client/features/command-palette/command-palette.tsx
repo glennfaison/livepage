@@ -40,6 +40,7 @@ import type { AppAction, AppNode, AppState, Operations } from "@/client/features
 import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
+import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
@@ -150,6 +151,7 @@ export const CommandPalette: React.FC<
 }) => {
   const [search, setSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
+  const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -344,7 +346,7 @@ export const CommandPalette: React.FC<
       group: "Templates",
       label: `Apply template: ${template.name}`,
       description: template.description,
-      keywords: [template.category, ...template.tags],
+      keywords: [template.category, ...template.tags, "preview"],
       icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
         onApplyTemplate(template.id)
@@ -444,7 +446,16 @@ export const CommandPalette: React.FC<
       setActiveIndex((index) => Math.max(index - 1, 0))
     } else if (event.key === "Enter") {
       event.preventDefault()
-      runCommand(filteredCommands[activeIndex])
+      if (event.shiftKey) {
+        // Shift+Enter: preview template
+        const command = filteredCommands[activeIndex]
+        if (command?.id.startsWith("template-")) {
+          const templateId = command.id.replace("template-", "")
+          setPreviewTemplateId(templateId)
+        }
+      } else {
+        runCommand(filteredCommands[activeIndex])
+      }
     }
   }
 
@@ -517,9 +528,19 @@ export const CommandPalette: React.FC<
           <span className="flex items-center gap-1">
             <CommandIcon className="h-3 w-3" /> K to toggle
           </span>
-          <span>↑↓ to navigate · ↵ to run · Esc to close</span>
+          <span>↑↓ to navigate · ↵ to run · ⇧↵ to preview · Esc to close</span>
         </div>
       </DialogContent>
+
+      <TemplatePreviewModal
+        templateId={previewTemplateId ?? ""}
+        isOpen={previewTemplateId !== null}
+        onClose={() => setPreviewTemplateId(null)}
+        onApplyTemplate={(templateId) => {
+          onApplyTemplate(templateId)
+          onOpenChange(false)
+        }}
+      />
 
       <ValidationDialog
         validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
