@@ -17,7 +17,7 @@ export function SettingsPopover({
   component: AppNode
   children: React.ReactNode
   open?: boolean
-  onOpenChange?: (open: boolean) => void
+  onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>
 }>): React.JSX.Element {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const isOpen = open ?? uncontrolledOpen
