@@ -2,18 +2,16 @@
 
 import { HistoryPopover } from "@/client/features/page-builder/history-popover"
 import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
-import { OPEN_COMPONENT_SETTINGS_EVENT } from "@/client/features/design-components/editor-controls/shared/editor-chrome"
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, Copy, ClipboardPaste, GripVertical, History, Maximize, Minimize, Paintbrush, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
+import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, formatPainterShortcut, useCopyStylesShortcut, useHistoryShortcut, usePasteStylesShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
-import { useFormatPainter } from "@/client/features/page-builder/hooks"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -84,13 +82,6 @@ export const Toolbar: React.FC<Readonly<{
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
   promptAssistEnabled?: boolean
-  /** Currently selected component ID */
-  selectedComponentId?: string
-  /** Component operations for format painter */
-  componentOperations?: {
-    updateComponent: (id: string, updates: Partial<AppNode>) => void
-    findComponentById: (components: ReadonlyArray<AppNode | string>, id: string) => AppNode | null
-  }
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
@@ -113,8 +104,6 @@ export const Toolbar: React.FC<Readonly<{
   onDuplicatePage,
   dispatch,
   promptAssistEnabled,
-  selectedComponentId,
-  componentOperations,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -123,14 +112,13 @@ export const Toolbar: React.FC<Readonly<{
   const [settingsPopoverOpen, setSettingsPopoverOpen] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
+  const isDraggingRef = useRef(isDragging)
+  const dragOffsetRef = useRef(dragOffset)
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
   const currentPage = pageComponent ?? componentTree[0]
   const canUndo = currentHistoryIndex > 0
   const canRedo = currentHistoryIndex < history.length - 1
-
-  // Format painter
-  const { copyStyles, pasteStyles, hasCopiedStyles, copiedFromTag } = useFormatPainter()
 
   // Keyboard shortcuts
   useSaveShortcut(savePage)
@@ -138,19 +126,6 @@ export const Toolbar: React.FC<Readonly<{
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
   useDuplicatePageShortcut(() => onDuplicatePage?.())
-  useCopyStylesShortcut(() => {
-    if (pageComponent) {
-      copyStyles(pageComponent)
-    }
-  })
-  usePasteStylesShortcut(() => {
-    if (selectedComponentId && componentOperations && pageComponent) {
-      const selectedComponent = componentOperations.findComponentById(componentTree, selectedComponentId)
-      if (selectedComponent && selectedComponent !== pageComponent) {
-        pasteStyles(selectedComponent, componentOperations)
-      }
-    }
-  })
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -196,44 +171,46 @@ export const Toolbar: React.FC<Readonly<{
     const gripCenterX = rect.left + rect.width / 2
     const gripCenterY = rect.top + rect.height / 2
 
-    setDragOffset({
+    const offset = {
       x: e.clientX - gripCenterX,
       y: e.clientY - gripCenterY,
-    })
+    }
+    setDragOffset(offset)
+    dragOffsetRef.current = offset
     setIsDragging(true)
+    isDraggingRef.current = true
   }
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging && toolbarRef.current) {
+  useEffect(() => {
+    if (pageBuilderMode === "preview") return
+
+    const handleMove = (e: MouseEvent) => {
+      if (isDraggingRef.current && toolbarRef.current) {
         const rect = toolbarRef.current.getBoundingClientRect()
+        const offset = dragOffsetRef.current
         setPosition(clampToolbarCenter(
-          e.clientX - dragOffset.x,
-          e.clientY - dragOffset.y,
+          e.clientX - offset.x,
+          e.clientY - offset.y,
           rect.width,
           rect.height,
           window.innerWidth,
           window.innerHeight,
         ))
       }
-    },
-    [isDragging, dragOffset.x, dragOffset.y],
-  )
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
-
-  useEffect(() => {
-    if (pageBuilderMode === "preview" || !isDragging) return
-
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseup", handleMouseUp)
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [isDragging, dragOffset, handleMouseMove, pageBuilderMode])
+
+    const handleUp = () => {
+      isDraggingRef.current = false
+      setIsDragging(false)
+    }
+
+    document.addEventListener("mousemove", handleMove)
+    document.addEventListener("mouseup", handleUp)
+    return () => {
+      document.removeEventListener("mousemove", handleMove)
+      document.removeEventListener("mouseup", handleUp)
+    }
+  }, [pageBuilderMode])
 
   if (pageBuilderMode === "preview" as PageBuilderMode) return null
 
@@ -291,78 +268,6 @@ export const Toolbar: React.FC<Readonly<{
               <History className="h-4 w-4" />
             </Button>
           </HistoryPopover>
-          {selectedComponentId ? (
-            <Button
-              variant="outline"
-              size="sm"
-              title="Settings for selected component"
-              className="shrink-0 border-primary text-primary"
-              aria-label="Open settings for selected component"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent(OPEN_COMPONENT_SETTINGS_EVENT, { detail: selectedComponentId }))
-                const trigger = document.querySelector(`[data-settings-trigger="${CSS.escape(selectedComponentId)}"]`)
-                if (trigger instanceof HTMLElement) trigger.focus()
-              }}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          ) : null}
-          <ToolbarSettingsPopover
-            isOpen={settingsPopoverOpen}
-            onOpenChange={setSettingsPopoverOpen}
-            toolbarLayout={toolbarLayout}
-            onToolbarLayoutChange={setToolbarLayout}
-            pageTitle={pageTitle}
-            onPageTitleChange={onPageTitleChange ?? (() => {})}
-            componentTree={componentTree}
-            dispatch={dispatch ?? (() => {})}
-            promptAssistEnabled={promptAssistEnabled ?? false}
-            hasSelectedComponent={Boolean(selectedComponentId)}
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              title={selectedComponentId ? "Page settings" : "Settings"}
-              className="shrink-0"
-              aria-label={selectedComponentId ? "Page settings" : "Settings"}
-            >
-              <Settings className="h-4 w-4" />
-              {selectedComponentId ? <span className="text-xs">Page</span> : null}
-            </Button>
-          </ToolbarSettingsPopover>
-
-
-          {/* Format Painter - Copy Styles */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => pageComponent && copyStyles(pageComponent)}
-            title={hasCopiedStyles ? `Copied from ${copiedFromTag} (${formatPainterShortcut("C")})` : `Copy styles (${formatPainterShortcut("C")})`}
-            className={cn("shrink-0", hasCopiedStyles && "bg-primary/10 text-primary border-primary/50")}
-            aria-label={hasCopiedStyles ? "Copy styles (overwrites previous)" : "Copy styles"}
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-
-          {/* Format Painter - Paste Styles */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (selectedComponentId && componentOperations && pageComponent) {
-                const selectedComponent = componentOperations.findComponentById(componentTree, selectedComponentId)
-                if (selectedComponent && selectedComponent !== pageComponent) {
-                  pasteStyles(selectedComponent, componentOperations)
-                }
-              }
-            }}
-            disabled={!hasCopiedStyles || !selectedComponentId || !componentOperations}
-            title={hasCopiedStyles ? `Paste styles from ${copiedFromTag} (${formatPainterShortcut("V")})` : `Paste styles (${formatPainterShortcut("V")}) - copy first`}
-            className="shrink-0"
-            aria-label={hasCopiedStyles ? `Paste styles from ${copiedFromTag}` : "Paste styles (no styles copied)"}
-          >
-            <ClipboardPaste className="h-4 w-4" />
-          </Button>
 
           <Button variant="outline" size="sm" onClick={onUndo} disabled={!canUndo} title={`Undo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Undo">
             <Undo className="h-4 w-4" />
@@ -384,6 +289,23 @@ export const Toolbar: React.FC<Readonly<{
           <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard" className="shrink-0">
             <X className="h-4 w-4" />
           </Button>
+
+          <ToolbarSettingsPopover
+            isOpen={settingsPopoverOpen}
+            onOpenChange={setSettingsPopoverOpen}
+            toolbarLayout={toolbarLayout}
+            onToolbarLayoutChange={setToolbarLayout}
+            pageTitle={pageTitle}
+            onPageTitleChange={onPageTitleChange ?? (() => {})}
+            pageComponent={currentPage}
+            componentTree={componentTree}
+            dispatch={dispatch ?? (() => {})}
+            promptAssistEnabled={promptAssistEnabled ?? false}
+          >
+            <Button variant="outline" size="sm" title="Settings" className="shrink-0">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </ToolbarSettingsPopover>
 
           <Button
             variant="outline"
