@@ -334,6 +334,29 @@ export const Toolbar: React.FC<Readonly<{
           </div>
 
           <Button
+            variant="outline"
+            size="sm"
+            onClick={onUndo}
+            disabled={!canUndo}
+            title={`Undo (${formatShortcut("Z")})`}
+            className="shrink-0"
+            aria-label="Undo"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRedo}
+            disabled={!canRedo}
+            title={`Redo (${formatShortcut("Z")})`}
+            className="shrink-0"
+            aria-label="Redo"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+
+          <Button
             variant="ghost"
             size="sm"
             onClick={() => setToolbarMinimized(false)}
