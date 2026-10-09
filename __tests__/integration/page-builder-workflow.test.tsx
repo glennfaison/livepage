@@ -65,6 +65,14 @@ jest.mock("@/client/features/page-builder/hooks", () => ({
     handleHistoryDiscard: jest.fn(),
     handleDiscard: jest.fn(),
   })),
+  useDiscardConfirmation: jest.fn(() => ({
+    showConfirmation: false,
+    askBeforeDiscard: true,
+    handleDiscardWithConfirmation: jest.fn(),
+    handleConfirm: jest.fn(),
+    handleCancel: jest.fn(),
+    handleAskBeforeDiscardChange: jest.fn(),
+  })),
 }))
 
 // Mock the page-builder toolbar (page rendering is handled by the real components in tests)
