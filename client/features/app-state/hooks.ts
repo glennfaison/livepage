@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useReducer, useRef, useCallback } from "react"
-import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
+import { appReducer, initialState, createInitialState } from "@/client/features/app-state/commands/reducer"
 import type { AppState } from "@/client/features/types"
 
 const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
@@ -120,6 +120,15 @@ export function useAppState() {
       }
     }
   }, [])
+
+  // Persist promptAssistEnabled to localStorage (also handled in dispatch above for immediate sync)
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PROMPT_ASSIST_ENABLED_KEY, String(state.promptAssistEnabled))
+    } catch {
+      // Ignore localStorage errors (e.g., private browsing, quota exceeded)
+    }
+  }, [state.promptAssistEnabled])
 
   return { state, dispatch }
 }

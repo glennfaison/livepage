@@ -35,11 +35,15 @@ import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
 import { Input } from "@/client/components/ui/input"
+import { Label } from "@/client/components/ui/label"
+import { Switch } from "@/client/components/ui/switch"
+import { Button } from "@/client/components/ui/button"
 import { toast } from "@/client/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
+import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
@@ -150,6 +154,7 @@ export const CommandPalette: React.FC<
 }) => {
   const [search, setSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
+  const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -184,6 +189,77 @@ export const CommandPalette: React.FC<
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+
+  // Discard confirmation
+  const DISCARD_CONFIRMATION_KEY = "livepage-discard-confirmation"
+  const getDiscardConfirmationPreference = (): boolean => {
+    if (typeof window === "undefined") return true
+    try {
+      const value = window.localStorage.getItem(DISCARD_CONFIRMATION_KEY)
+      return value !== "false"
+    } catch {
+      return true
+    }
+  }
+  const setDiscardConfirmationPreference = (show: boolean) => {
+    if (typeof window === "undefined") return
+    try {
+      window.localStorage.setItem(DISCARD_CONFIRMATION_KEY, String(show))
+    } catch {
+    }
+  }
+
+  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false)
+  const [dontAskAgain, setDontAskAgain] = useState(getDiscardConfirmationPreference())
+  const [pendingDiscard, setPendingDiscard] = useState(false)
+
+  const hasChanges = state.history.length > 1
+
+  const handleDiscardWithConfirmation = useCallback(() => {
+    if (!hasChanges) {
+      dispatch({ type: "DISCARD_CHANGES" })
+      toast({
+        title: "Nothing to discard",
+        description: "No changes have been made yet.",
+      })
+      return
+    }
+
+    if (dontAskAgain) {
+      executeDiscard()
+      return
+    }
+
+    setPendingDiscard(true)
+    setShowDiscardConfirmation(true)
+  }, [dispatch, hasChanges, dontAskAgain])
+
+  const executeDiscard = useCallback(() => {
+    dispatch({ type: "DISCARD_CHANGES" })
+    toast({
+      title: "Changes discarded",
+      description: "Your page has been reset to its initial state.",
+    })
+    setPendingDiscard(false)
+  }, [dispatch])
+
+  const handleDiscardConfirm = useCallback(() => {
+    if (pendingDiscard) {
+      executeDiscard()
+    }
+    setShowDiscardConfirmation(false)
+    setPendingDiscard(false)
+  }, [executeDiscard, pendingDiscard])
+
+  const handleDiscardCancel = useCallback(() => {
+    setShowDiscardConfirmation(false)
+    setPendingDiscard(false)
+  }, [])
+
+  const handleDontAskAgainChange = useCallback((checked: boolean) => {
+    setDontAskAgain(checked)
+    setDiscardConfirmationPreference(checked)
+  }, [])
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
@@ -246,7 +322,7 @@ export const CommandPalette: React.FC<
         label: "Discard all changes",
         keywords: ["discard", "reset", "revert"],
         icon: <RotateCcw className="h-4 w-4" />,
-        onSelect: onDiscardChanges,
+        onSelect: handleDiscardWithConfirmation,
       },
       {
         id: "action-save-json",
@@ -344,7 +420,7 @@ export const CommandPalette: React.FC<
       group: "Templates",
       label: `Apply template: ${template.name}`,
       description: template.description,
-      keywords: [template.category, ...template.tags],
+      keywords: [template.category, ...template.tags, "preview"],
       icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
         onApplyTemplate(template.id)
@@ -444,7 +520,16 @@ export const CommandPalette: React.FC<
       setActiveIndex((index) => Math.max(index - 1, 0))
     } else if (event.key === "Enter") {
       event.preventDefault()
-      runCommand(filteredCommands[activeIndex])
+      if (event.shiftKey) {
+        // Shift+Enter: preview template
+        const command = filteredCommands[activeIndex]
+        if (command?.id.startsWith("template-")) {
+          const templateId = command.id.replace("template-", "")
+          setPreviewTemplateId(templateId)
+        }
+      } else {
+        runCommand(filteredCommands[activeIndex])
+      }
     }
   }
 
@@ -517,9 +602,19 @@ export const CommandPalette: React.FC<
           <span className="flex items-center gap-1">
             <CommandIcon className="h-3 w-3" /> K to toggle
           </span>
-          <span>↑↓ to navigate · ↵ to run · Esc to close</span>
+          <span>↑↓ to navigate · ↵ to run · ⇧↵ to preview · Esc to close</span>
         </div>
       </DialogContent>
+
+      <TemplatePreviewModal
+        templateId={previewTemplateId ?? ""}
+        isOpen={previewTemplateId !== null}
+        onClose={() => setPreviewTemplateId(null)}
+        onApplyTemplate={(templateId) => {
+          onApplyTemplate(templateId)
+          onOpenChange(false)
+        }}
+      />
 
       <ValidationDialog
         validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
@@ -532,6 +627,39 @@ export const CommandPalette: React.FC<
         isOpen={validationDialogOpen}
         onOpenChange={setValidationDialogOpen}
       />
+
+      {/* Discard Confirmation Dialog */}
+      <Dialog open={showDiscardConfirmation} onOpenChange={handleDiscardCancel}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5 text-destructive" />
+              Discard all changes?
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              This will reset the page to its initial state. This action cannot be undone.
+            </p>
+          </DialogHeader>
+          <div className="flex items-center gap-2 py-2">
+            <Switch
+              id="dont-ask-again-palette"
+              checked={dontAskAgain}
+              onCheckedChange={handleDontAskAgainChange}
+            />
+            <Label htmlFor="dont-ask-again-palette" className="text-sm font-normal">
+              Don't ask again
+            </Label>
+          </div>
+          <div className="flex justify-end gap-2 border-t px-4 py-3">
+            <Button variant="ghost" onClick={handleDiscardCancel}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDiscardConfirm}>
+              Discard
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }
