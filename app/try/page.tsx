@@ -88,9 +88,24 @@ export default function BuilderPage() {
 
   const previewExport = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
-    setValidationResult(validation)
-    setPendingExportAction("preview")
-    setValidationDialogOpen(true)
+    if (validation.hasErrors || validation.hasWarnings) {
+      setValidationResult(validation)
+      setPendingExportAction("preview")
+      setValidationDialogOpen(true)
+    } else {
+      const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+      const blob = new Blob([html], { type: "text/html" })
+      const url = URL.createObjectURL(blob)
+      const previewWindow = window.open(url, "_blank")
+      if (!previewWindow) {
+        toast({
+          title: "Preview blocked",
+          description: "Please allow popups for this site to preview the export.",
+          variant: "destructive",
+        })
+        URL.revokeObjectURL(url)
+      }
+    }
     setSaveDropdownOpen(false)
   }
 
@@ -133,9 +148,28 @@ export default function BuilderPage() {
 
   const copyHtmlToClipboard = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
-    setValidationResult(validation)
-    setPendingExportAction("copy")
-    setValidationDialogOpen(true)
+    if (validation.hasErrors || validation.hasWarnings) {
+      setValidationResult(validation)
+      setPendingExportAction("copy")
+      setValidationDialogOpen(true)
+    } else {
+      const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+      navigator.clipboard.writeText(html).then(
+        () => {
+          toast({
+            title: "HTML copied",
+            description: "Exported HTML has been copied to clipboard.",
+          })
+        },
+        () => {
+          toast({
+            title: "Copy failed",
+            description: "Failed to copy HTML to clipboard.",
+            variant: "destructive",
+          })
+        },
+      )
+    }
     setSaveDropdownOpen(false)
   }
 
