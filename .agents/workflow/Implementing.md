@@ -2,7 +2,24 @@
 
 Implement one `ready-for-agent` issue and open a PR. Getting the PR through checks is **Shepherding's** job, not this step's. This step never waits on CI.
 
-**Read first:** `Labels.md`, `_shared/Protocol.md`, `_shared/Escalate.md`, `_shared/IssueFormat.md`, `_shared/Log.md`, `_shared/config.env`, `AGENTS.md` and `.agents/docs/AGENT-WORKFLOW.md`. Then `source scripts/agent/lib.sh` and `git config core.hooksPath scripts/git-hooks`.
+**Read first:** `_shared/Labels.md`, `_shared/Protocol.md`, `_shared/Escalate.md`, `_shared/IssueFormat.md`, `_shared/Log.md`, `_shared/config.env`, `AGENTS.md` and `.agents/docs/AGENT-WORKFLOW.md`. Then `source scripts/agent/lib.sh` and `git config core.hooksPath scripts/git-hooks`.
+
+## Inputs
+
+- Open issues labelled `ready-for-agent`, without `agent:stuck`, and without a live `agent:in-progress` lease.
+- Oldest first, at most `$IMPLEMENT_BATCH` per run.
+- The latest **Agent Brief** comment (or the description if filed from the "Ready for agent" template), open comments, linked ADRs, relevant code, and every image in the issue/comments.
+
+Claims with `claim N issue agent:in-progress Implementing "$LEASE_TTL_IMPLEMENT"`. **Leave `ready-for-agent` in place** until the PR is open (or bail-out). Release on every exit path.
+
+## Outputs
+
+- On success: a new PR against `$PR_BASE_BRANCH` with body ending in `<!-- agent:implements issue=N -->` and `Closes #N.`, labelled `agent:needs-work`; the issue loses `ready-for-agent` and gains `agent:pr-open`.
+- On existing OPEN PR for the issue: no second PR; swap issue to `agent:pr-open` and ensure the PR has `agent:needs-work` if it carries the implements marker.
+- On MERGED PR already: close the issue.
+- On only CLOSED PRs: swap to `ready-for-human` (do not retry unattended).
+- On bail-out (not actually ready): swap `ready-for-agent` for `needs-info` or `ready-for-human` with a Triage Notes comment.
+- Lease released. One log line (`_shared/Log.md`).
 
 ## Trigger
 
@@ -37,5 +54,4 @@ If it has `agent:in-progress`, skip it when `lease_live N` succeeds.
 
 - Wait for checks, fix CI, or post the reviewer handoff. Shepherding does that.
 - Push to `main`, or open a PR against `main`.
-- Remove `ready-for-agent` before the PR exists.
-- Open a second PR for an issue that already has an `OPEN` one, whoever opened it.
+- Open a second PR for an issue that already has one.

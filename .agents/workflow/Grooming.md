@@ -2,7 +2,27 @@
 
 Make an issue ready for an agent to implement, or route it to a human.
 
-**Read first:** `Labels.md`, `_shared/Protocol.md` (including **Interactive skills**: `/triage` and `/grill-with-docs` need its overrides), `_shared/Dedupe.md`, `_shared/IssueFormat.md`, `_shared/Log.md`, `_shared/config.env`. Then `source scripts/agent/lib.sh`.
+**Read first:** `_shared/Labels.md`, `_shared/Protocol.md` (including **Interactive skills**: `/triage` and `/grill-with-docs` need its overrides), `_shared/Dedupe.md`, `_shared/IssueFormat.md`, `_shared/Log.md`, `_shared/config.env`. Then `source scripts/agent/lib.sh`.
+
+## Inputs
+
+- Open issues that have **none** of: `ready-for-agent`, `ready-for-human`, `needs-info`, `agent:pr-open`, `agent:stuck`, `agent:log`. (`needs-triage` does not exclude; it means an earlier pass did not finish.)
+- Skip any issue that carries `agent:triage` or `agent:in-progress` when `lease_live N` succeeds.
+- Oldest first, at most `$GROOM_BATCH` per run.
+- Housekeeping input (before selection): every open issue labelled `agent:pr-open`, inspected via `prs_for_issue N`.
+
+Claims with `claim N issue agent:triage Grooming "$LEASE_TTL_TRIAGE"`. Release on every exit path.
+
+## Outputs
+
+- On the claimed issue, exactly one state label after the pass:
+  - `needs-info` — open questions remain (including a missing required section); only a human removes this label.
+  - `ready-for-agent` — an agent can implement from the issue, comments, images, ADRs and codebase.
+  - `ready-for-human` — needs a human (product decision, access, judgment); also used when `/triage` would recommend `wontfix` (issue is not closed).
+- Outcome comment as the last comment of the pass: **Agent Brief**, **Triage Notes**, or the ready-for-human structure (see `/triage` and `_shared/Handoff.md`).
+- Optional description updates and minimized resolved comments.
+- Housekeeping may close an issue (PR merged) or swap `agent:pr-open` → `ready-for-human` (every PR closed unmerged).
+- Lease released (`release N issue agent:triage`). One log line per issue (`_shared/Log.md`).
 
 ## Trigger
 
