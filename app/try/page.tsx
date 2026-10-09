@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/client/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/client/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/client/components/ui/dropdown-menu"
 import { selectCurrentPage } from "@/client/features/app-state"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
@@ -18,11 +18,13 @@ import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/com
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Download, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
+import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { toast } from "@/client/components/ui/use-toast"
 
 const templateDisplayCatalog = describeTemplateDisplayCatalog()
 
@@ -49,6 +51,10 @@ export default function BuilderPage() {
   const [saveDropdownOpen, setSaveDropdownOpen] = useState(false)
   const [loadDropdownOpen, setLoadDropdownOpen] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false)
+  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
@@ -80,6 +86,59 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
+  const previewExport = () => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    setValidationResult(validation)
+    setPendingExportAction("preview")
+    setValidationDialogOpen(true)
+    setSaveDropdownOpen(false)
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction === "preview") {
+      const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+      const blob = new Blob([html], { type: "text/html" })
+      const url = URL.createObjectURL(blob)
+      const previewWindow = window.open(url, "_blank")
+      if (!previewWindow) {
+        toast({
+          title: "Preview blocked",
+          description: "Please allow popups for this site to preview the export.",
+          variant: "destructive",
+        })
+        URL.revokeObjectURL(url)
+      }
+    } else if (pendingExportAction === "copy") {
+      const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
+      navigator.clipboard.writeText(html).then(
+        () => {
+          toast({
+            title: "HTML copied",
+            description: "Exported HTML has been copied to clipboard.",
+          })
+        },
+        () => {
+          toast({
+            title: "Copy failed",
+            description: "Failed to copy HTML to clipboard.",
+            variant: "destructive",
+          })
+        },
+      )
+    }
+    setValidationDialogOpen(false)
+    setPendingExportAction(null)
+    setValidationResult(null)
+  }
+
+  const copyHtmlToClipboard = () => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    setValidationResult(validation)
+    setPendingExportAction("copy")
+    setValidationDialogOpen(true)
+    setSaveDropdownOpen(false)
+  }
+
   const canUndo = state.currentHistoryIndex > 0
   const canRedo = state.currentHistoryIndex < state.history.length - 1
 
@@ -105,6 +164,10 @@ export default function BuilderPage() {
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
       dispatch({ type: "SET_ORIGINAL_HISTORY_STATE", payload: null })
     }
+  }
+
+  const handleDuplicatePage = () => {
+    componentOperations.duplicatePage?.()
   }
 
   const applyTemplate = (templateId: string) => {
@@ -225,6 +288,15 @@ export default function BuilderPage() {
                     <Download className="h-4 w-4 mr-2" />
                     {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download as HTML"}
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={previewExport}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview Export
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={copyHtmlToClipboard}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy HTML to Clipboard
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
@@ -304,10 +376,15 @@ export default function BuilderPage() {
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onOpenAIAssistant={() => setAiAssistantOpen(true)}
           pageComponent={currentPage}
+          componentTree={state.componentTree}
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onDuplicatePage={handleDuplicatePage}
+          dispatch={dispatch}
+          promptAssistEnabled={state.promptAssistEnabled}
         />
 
         <CommandPalette
@@ -321,12 +398,28 @@ export default function BuilderPage() {
           onSaveAsJson={saveAsJSON}
           onSaveAsShortcode={saveAsShortcode}
           onSaveAsHtml={saveAsHTML}
+          onPreviewExport={previewExport}
+          onCopyHtml={copyHtmlToClipboard}
           onImportJson={() => jsonFileInputRef.current?.click()}
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
           onDiscardChanges={handleDiscard}
+          onOpenAIAssistant={() => setAiAssistantOpen(true)}
+          onDuplicatePage={handleDuplicatePage}
         />
 
-        <AssistChat dispatch={dispatch} />
+        <ValidationDialog
+          validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+          onProceed={handleValidationProceed}
+          onCancel={() => {
+            setValidationDialogOpen(false)
+            setPendingExportAction(null)
+            setValidationResult(null)
+          }}
+          isOpen={validationDialogOpen}
+          onOpenChange={setValidationDialogOpen}
+        />
+
+        <AssistChat dispatch={dispatch} enabled={state.promptAssistEnabled} open={aiAssistantOpen} onOpenChange={setAiAssistantOpen} />
       </div>
     </ComponentOperationsContext.Provider>
   )

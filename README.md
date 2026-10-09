@@ -9,7 +9,7 @@ LivePage is a visual page builder. You compose a page from design components in 
 - **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, callouts, charts, metric cards, and data tables. Includes undo/redo history and a command palette.
 - **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, generated data, or an authorized LinkedIn OIDC profile through placeholders.
 - **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
-- **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`, and even then hidden unless the page is opened with `?prompt-assist=1`; see [Optional: page assistant](#optional-page-assistant).
+- **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`. Once enabled, toggle it on in the Settings popover (toolbar) to show the chat bubble (bottom-right) without needing a URL parameter. Includes a command palette action ("Open AI Assistant"), first-visit tooltip, and in-app help; see [Optional: page assistant](#optional-page-assistant).
 - **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
 
 ## Getting started
@@ -25,7 +25,18 @@ Open [http://localhost:3000](http://localhost:3000) for the landing page, or go 
 
 ### Optional: page assistant
 
-The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and rebuild (the value is inlined at build time) to turn it on; then the chat bubble (bottom-right of `/try`) appears only when you open the builder with `?prompt-assist=1` (for example `/try?prompt-assist=1`). With the flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md#prompt-assist).
+The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and rebuild (the value is inlined at build time) to turn it on. Once enabled, the chat bubble (bottom-right of `/try`) can be shown in two ways:
+
+1. **Per-visit URL parameter:** Open the builder with `?prompt-assist=1` (e.g., `/try?prompt-assist=1`).
+2. **Persistent setting:** Toggle "Enable AI Assistant" in the Settings popover (toolbar gear icon). This persists across visits in localStorage and does not require the URL parameter.
+
+With the deployment flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md#prompt-assist).
+
+**Discoverability features:**
+- **Toolbar toggle:** Enable/disable the AI Assistant from the Settings popover.
+- **Command palette:** Press `⌘K` and search "Open AI Assistant" to open the chat.
+- **First-visit tooltip:** A helpful tooltip appears on first visit explaining the feature.
+- **In-app help:** The Settings popover includes a description of the AI Assistant.
 
 ### Optional: LinkedIn profile data source
 
@@ -87,19 +98,20 @@ The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, 
 
 ### Branch names
 
-Pushes must use a gitflow branch name. The check applies to people, agents, and other automation. Topic segments are lowercase kebab-case.
+Pushes must use a gitflow branch name, or a `dependabot/<dependency>` branch for automated dependency updates. The check applies to people, agents, and other automation. Topic segments are lowercase kebab-case.
 
 | Branch type | Pattern | Example |
 | --- | --- | --- |
 | main | `main` | `main` |
 | develop | `develop` | `develop` |
+| dependabot | `dependabot/<dependency>` | `dependabot/dependencies/node/22` |
 | feature | `feature/<topic>` | `feature/login-flow` |
 | release | `release/<version>` | `release/1.4.0` |
 | hotfix | `hotfix/<topic>` | `hotfix/crash-on-start` |
 | support | `support/<version-line>` | `support/1.x` |
 | bugfix | `bugfix/<topic>` | `bugfix/null-deref` |
 
-A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. `git config core.hooksPath scripts/git-hooks` enables an advisory local pre-push hook. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
+A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. `git config core.hooksPath scripts/git-hooks` enables a local pre-push gate that refuses non-compliant branches. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
 
 ## Project layout
 
@@ -116,13 +128,13 @@ An HTML export is a single file that opens directly in a modern browser, with no
 
 ## Bundled templates
 
-Templates live in [`shared/features/templates/definitions/`](./shared/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
+Templates live in [`client/features/templates/definitions/`](./client/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
 
 To add a template:
 
-1. Create a definition in `shared/features/templates/definitions/` using only supported design-component tags.
+1. Create a definition in `client/features/templates/definitions/` using only supported design-component tags.
 2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
-3. Validate it with `pageTemplateDefinitionSchema` and register it in `shared/features/templates/registry.ts`.
+3. Validate it with `pageTemplateDefinitionSchema` and register it in `client/features/templates/registry.ts`.
 4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
 
 The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.

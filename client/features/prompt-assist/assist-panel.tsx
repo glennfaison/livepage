@@ -51,9 +51,17 @@ export function AssistPanel(props: Readonly<{ chat: PromptAssist; onClose: () =>
 
       <div role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto p-3">
         {chat.messages.length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            Describe the page you want, in your own words, and I&apos;ll pick a template, draft its text, and tune its design to fit.
-          </p>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Describe the page you want, in your own words, and I&apos;ll pick a template, draft its text, and tune its design to fit.
+            </p>
+            <div className="text-xs text-muted-foreground space-y-1 border-l border-muted/50 pl-3">
+              <p><strong>Try something like:</strong></p>
+              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">"A landing page for a coffee shop with menu and contact info"</p>
+              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">"A personal portfolio site for a graphic designer"</p>
+              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">"An event page for a tech conference with schedule and speakers"</p>
+            </div>
+          </div>
         )}
 
         {chat.messages.map((message) => {

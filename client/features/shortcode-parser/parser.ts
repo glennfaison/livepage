@@ -95,6 +95,14 @@ function tokenize(shortcode: string): Token[] {
 	return tokens;
 }
 
+/**
+ * Parses a shortcode string into a tree of nodes. Optionally filters to only
+ * accept specific tag names.
+ *
+ * @param input - The shortcode string to parse
+ * @param acceptedTags - Optional array of tag names to accept; others are treated as text
+ * @returns Array of nodes and text strings representing the parsed structure
+ */
 export function parse(input: string, acceptedTags?: string[]): (Node | string)[] {
 	const tokens = tokenize(input);
 	const output: (Node | string)[] = [];
@@ -172,6 +180,12 @@ export function parse(input: string, acceptedTags?: string[]): (Node | string)[]
 	return output;
 }
 
+/**
+ * Converts a tree of nodes back into a shortcode string.
+ *
+ * @param elements - Array of nodes and text strings to serialize
+ * @returns Shortcode string representation
+ */
 export function stringify(elements: (Node | string)[]): string {
 	function serializeElement(element: (Node | string)): string {
 		if (typeof element === 'string') {

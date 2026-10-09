@@ -26,6 +26,7 @@ export type AppState = Readonly<{
   pageBuilderMode: PageBuilderMode
   toolbarMinimized: boolean
   showToolbar: boolean
+  promptAssistEnabled: boolean
   history: ReadonlyArray<HistoryEntry>
   currentHistoryIndex: number
   historyPreviewIndex: number | null
@@ -51,12 +52,14 @@ export type AppAction =
   | Readonly<{ type: "SET_PAGE_BUILDER_MODE"; payload: PageBuilderMode }>
   | Readonly<{ type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }>
   | Readonly<{ type: "SET_SHOW_TOOLBAR"; payload: boolean }>
+  | Readonly<{ type: "SET_PROMPT_ASSIST_ENABLED"; payload: boolean }>
   | Readonly<{ type: "ADD_TO_HISTORY"; payload: Readonly<{ action: string; pageState: ReadonlyArray<AppNode> }> }>
   | Readonly<{ type: "SET_CURRENT_HISTORY_INDEX"; payload: number }>
   | Readonly<{ type: "SET_HISTORY_PREVIEW_INDEX"; payload: number | null }>
   | Readonly<{ type: "SET_ORIGINAL_HISTORY_STATE"; payload: ReadonlyArray<AppNode> | null }>
   | Readonly<{ type: "RESTORE_FROM_HISTORY"; payload: Readonly<{ historyIndex: number }> }>
   | Readonly<{ type: "DISCARD_CHANGES" }>
+  | Readonly<{ type: "DUPLICATE_PAGE" }>
 
 export type SettingsValue = string | number | boolean | ReadonlyArray<string>
 export type SettingsFormData = Readonly<Record<string, SettingsValue>>
@@ -232,6 +235,7 @@ export type Operations = Readonly<{
   updateComponent: (componentId: string, updates: Partial<AppNode>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
+  duplicatePage?: () => void
   moveComponent?: (componentId: string, newParentId: string, index?: number) => void
   addComponent: (args: { tag: string; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: string) => void

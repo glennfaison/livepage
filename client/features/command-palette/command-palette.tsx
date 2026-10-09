@@ -3,7 +3,9 @@
 import {
   Command as CommandIcon,
   CornerDownLeft,
+  Copy,
   Download,
+  Eye,
   FileJson,
   FileText,
   LayoutTemplate,
@@ -14,6 +16,20 @@ import {
   Search,
   Undo2,
   Upload,
+  Bot,
+  Calendar,
+  Monitor,
+  Mic,
+  Mail,
+  Briefcase,
+  Image,
+  Link,
+  Utensils,
+  GraduationCap,
+  Newspaper,
+  HeartPulse,
+  User,
+  Building2,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -24,6 +40,8 @@ import type { AppAction, AppNode, AppState, Operations } from "@/client/features
 import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
+import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
+import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
 type PaletteCommand = Readonly<{
@@ -35,6 +53,43 @@ type PaletteCommand = Readonly<{
   icon?: React.ReactNode
   onSelect: () => void
 }>
+
+function getCategoryIcon(category: string): React.ReactNode {
+  const iconMap: Record<string, React.ReactNode> = {
+    "Landing Page": <Monitor className="h-4 w-4" />,
+    Event: <Calendar className="h-4 w-4" />,
+    Podcast: <Mic className="h-4 w-4" />,
+    "Contact/About": <Mail className="h-4 w-4" />,
+    Business: <Briefcase className="h-4 w-4" />,
+    Portfolio: <Image className="h-4 w-4" />,
+    "Link in Bio": <Link className="h-4 w-4" />,
+    Restaurant: <Utensils className="h-4 w-4" />,
+    "CV/Resume": <GraduationCap className="h-4 w-4" />,
+    "CV/Resume/Personal": <User className="h-4 w-4" />,
+    Blog: <Newspaper className="h-4 w-4" />,
+    Dashboard: <HeartPulse className="h-4 w-4" />,
+  }
+  return iconMap[category] ?? <FileText className="h-4 w-4" />
+}
+
+function TemplateThumbnailIcon({ template }: Readonly<{ template: TemplateDisplaySummary }>) {
+  const [imageError, setImageError] = useState(false)
+  const fallbackIcon = getCategoryIcon(template.category)
+
+  if (imageError) {
+    return <div className="flex h-6 w-6 items-center justify-center text-muted-foreground/50">{fallbackIcon}</div>
+  }
+
+  return (
+    <img
+      src={template.thumbnail}
+      alt=""
+      onError={() => setImageError(true)}
+      className="h-6 w-6 rounded-md object-cover"
+      aria-hidden="true"
+    />
+  )
+}
 
 /** Depth-first walk of a page's children, skipping string (text) nodes. */
 function flattenPageTree(
@@ -67,9 +122,13 @@ export const CommandPalette: React.FC<
     onSaveAsJson: () => void
     onSaveAsShortcode: () => void
     onSaveAsHtml: () => void
+    onPreviewExport: () => void
+    onCopyHtml: () => void
     onImportJson: () => void
     onImportShortcode: () => void
     onDiscardChanges: () => void
+    onOpenAIAssistant: () => void
+    onDuplicatePage: () => void
   }>
 > = ({
   open,
@@ -82,12 +141,17 @@ export const CommandPalette: React.FC<
   onSaveAsJson,
   onSaveAsShortcode,
   onSaveAsHtml,
+  onPreviewExport,
+  onCopyHtml,
   onImportJson,
   onImportShortcode,
   onDiscardChanges,
+  onOpenAIAssistant,
+  onDuplicatePage,
 }) => {
   const [search, setSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
+  const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -118,6 +182,29 @@ export const CommandPalette: React.FC<
     },
     [dispatch, state.currentHistoryIndex, state.history],
   )
+
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false)
+  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+
+  const runValidation = (action: "preview" | "copy") => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    setValidationResult(validation)
+    setPendingExportAction(action)
+    setValidationDialogOpen(true)
+    onOpenChange(false)
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction === "preview") {
+      onPreviewExport()
+    } else if (pendingExportAction === "copy") {
+      onCopyHtml()
+    }
+    setValidationDialogOpen(false)
+    setPendingExportAction(null)
+    setValidationResult(null)
+  }
 
   const commands = useMemo<ReadonlyArray<PaletteCommand>>(() => {
     const actionCommands: PaletteCommand[] = [
@@ -188,6 +275,22 @@ export const CommandPalette: React.FC<
         onSelect: onSaveAsHtml,
       },
       {
+        id: "action-preview-export",
+        group: "Actions",
+        label: "Preview export",
+        keywords: ["preview", "export", "html", "validate"],
+        icon: <Eye className="h-4 w-4" />,
+        onSelect: () => runValidation("preview"),
+      },
+      {
+        id: "action-copy-html",
+        group: "Actions",
+        label: "Copy HTML to clipboard",
+        keywords: ["copy", "html", "clipboard", "export"],
+        icon: <Copy className="h-4 w-4" />,
+        onSelect: () => runValidation("copy"),
+      },
+      {
         id: "action-import-json",
         group: "Actions",
         label: "Import page from JSON",
@@ -202,6 +305,22 @@ export const CommandPalette: React.FC<
         keywords: ["import", "load", "shortcode", "upload"],
         icon: <Upload className="h-4 w-4" />,
         onSelect: onImportShortcode,
+      },
+      {
+        id: "action-open-ai-assistant",
+        group: "Actions",
+        label: "Open AI Assistant",
+        keywords: ["ai", "assistant", "prompt", "chat"],
+        icon: <Bot className="h-4 w-4" />,
+        onSelect: onOpenAIAssistant,
+      },
+      {
+        id: "action-duplicate-page",
+        group: "Actions",
+        label: "Duplicate page",
+        keywords: ["duplicate", "copy", "page", "clone"],
+        icon: <Copy className="h-4 w-4" />,
+        onSelect: onDuplicatePage,
       },
     ]
 
@@ -227,8 +346,8 @@ export const CommandPalette: React.FC<
       group: "Templates",
       label: `Apply template: ${template.name}`,
       description: template.description,
-      keywords: [template.category, ...template.tags],
-      icon: <LayoutTemplate className="h-4 w-4" />,
+      keywords: [template.category, ...template.tags, "preview"],
+      icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
         onApplyTemplate(template.id)
         toast({ title: "Template applied", description: template.name })
@@ -272,6 +391,7 @@ export const CommandPalette: React.FC<
     onSaveAsShortcode,
     onImportJson,
     onImportShortcode,
+    onDuplicatePage,
   ])
 
   const filteredCommands = useMemo(() => {
@@ -326,7 +446,16 @@ export const CommandPalette: React.FC<
       setActiveIndex((index) => Math.max(index - 1, 0))
     } else if (event.key === "Enter") {
       event.preventDefault()
-      runCommand(filteredCommands[activeIndex])
+      if (event.shiftKey) {
+        // Shift+Enter: preview template
+        const command = filteredCommands[activeIndex]
+        if (command?.id.startsWith("template-")) {
+          const templateId = command.id.replace("template-", "")
+          setPreviewTemplateId(templateId)
+        }
+      } else {
+        runCommand(filteredCommands[activeIndex])
+      }
     }
   }
 
@@ -399,9 +528,31 @@ export const CommandPalette: React.FC<
           <span className="flex items-center gap-1">
             <CommandIcon className="h-3 w-3" /> K to toggle
           </span>
-          <span>↑↓ to navigate · ↵ to run · Esc to close</span>
+          <span>↑↓ to navigate · ↵ to run · ⇧↵ to preview · Esc to close</span>
         </div>
       </DialogContent>
+
+      <TemplatePreviewModal
+        templateId={previewTemplateId ?? ""}
+        isOpen={previewTemplateId !== null}
+        onClose={() => setPreviewTemplateId(null)}
+        onApplyTemplate={(templateId) => {
+          onApplyTemplate(templateId)
+          onOpenChange(false)
+        }}
+      />
+
+      <ValidationDialog
+        validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+        onProceed={handleValidationProceed}
+        onCancel={() => {
+          setValidationDialogOpen(false)
+          setPendingExportAction(null)
+          setValidationResult(null)
+        }}
+        isOpen={validationDialogOpen}
+        onOpenChange={setValidationDialogOpen}
+      />
     </Dialog>
   )
 }

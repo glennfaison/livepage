@@ -2,10 +2,14 @@ import type { AppNode } from "@/client/features/types"
 import browserRuntime from "./generated/browser-runtime.js"
 import browserStyles from "./generated/browser-styles.js"
 import { appNodeTreeSchema } from "@/client/features/serializers/schema"
+import { validateHtmlExport, type ValidationResult, type ValidationIssue } from "./validation"
+import { ValidationDialog } from "./validation-dialog"
 
 type HtmlExportOptions = Readonly<{
   assetBaseUrl?: string
 }>
+
+export { validateHtmlExport, type ValidationResult, type ValidationIssue, ValidationDialog }
 
 function resolvePublicImageUrls(node: AppNode, assetBaseUrl: URL): AppNode {
   const attributes = node.tag === "image"
@@ -26,6 +30,16 @@ function resolvePublicImageUrls(node: AppNode, assetBaseUrl: URL): AppNode {
   }
 }
 
+/**
+ * Serializes the app state (component tree) as a standalone HTML document.
+ * The HTML includes the serialized component tree as JSON data, the browser
+ * runtime, and styles for rendering. Relative image URLs can be resolved
+ * against an optional asset base URL.
+ *
+ * @param componentTree - The array of page components to serialize
+ * @param options.assetBaseUrl - Optional base URL to resolve relative image URLs
+ * @returns A complete HTML document as a string
+ */
 export function serializeAppStateAsHtml(
   componentTree: ReadonlyArray<AppNode>,
   options: HtmlExportOptions = {},
@@ -37,13 +51,37 @@ export function serializeAppStateAsHtml(
     : validatedTree
   const page = tree[0]
   const title = page?.attributes.title ?? "Untitled Page"
+  const description = page?.attributes.description ?? ""
+  const favicon = page?.attributes.favicon ?? ""
+  const ogImage = page?.attributes.ogImage ?? ""
+  const canonicalUrl = page?.attributes.canonicalUrl ?? ""
+  const customHead = Array.isArray(page?.attributes.customHead) ? page.attributes.customHead.join("\n") : (page?.attributes.customHead ?? "")
+  const customCss = Array.isArray(page?.attributes.customCss) ? page.attributes.customCss.join("\n") : (page?.attributes.customCss ?? "")
+  const customJs = Array.isArray(page?.attributes.customJs) ? page.attributes.customJs.join("\n") : (page?.attributes.customJs ?? "")
   const escapedTitle = title
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;")
+  const escapedDescription = description
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
   const data = JSON.stringify(tree).replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("&", "\\u0026")
+
+  const metaTags = []
+  if (description) metaTags.push(`  <meta name="description" content="${escapedDescription}">`)
+  if (ogImage) metaTags.push(`  <meta property="og:image" content="${ogImage}">`)
+  if (canonicalUrl) metaTags.push(`  <link rel="canonical" href="${canonicalUrl}">`)
+
+  const headExtras = []
+  if (favicon) headExtras.push(`  <link rel="icon" href="${favicon}">`)
+  if (customHead) headExtras.push(customHead)
+  if (customCss) headExtras.push(`  <style>${customCss}</style>`)
+  if (customJs) headExtras.push(`  <script>${customJs}</script>`)
 
   return `
 <!DOCTYPE html>
@@ -52,6 +90,8 @@ export function serializeAppStateAsHtml(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapedTitle}</title>
+${metaTags.join("\n")}
+${headExtras.join("\n")}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">

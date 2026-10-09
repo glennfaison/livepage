@@ -2,6 +2,7 @@ import type React from "react"
 import "@/app/globals.css"
 import { Inter } from "next/font/google"
 import { ClientProviders } from "@/client/components/client-providers"
+import { RootErrorBoundary } from "@/client/components/error-boundary"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ClientProviders>
-          {children}
+          <RootErrorBoundary>
+            {children}
+          </RootErrorBoundary>
         </ClientProviders>
       </body>
     </html>

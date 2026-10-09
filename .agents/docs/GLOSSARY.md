@@ -20,6 +20,30 @@ _Avoid_: Widget, block
 The boundary for reading from and mutating app state through explicit commands and selectors.
 _Avoid_: Facade, helper layer
 
+**App state reducer**:
+The pure `(state, action) => state` function in `client/features/app-state/commands/reducer.ts` that is the single source of truth for the application. All commands, actions, and state checks flow through it; it is event based (driven by `AppAction` events) and non-blocking (persistence is a debounced side effect in the `useAppState` hook, not a command).
+_Avoid_: Store, state machine
+
+**Command**:
+A named, dispatchable intent — such as `Undo`, `Save`, or `Insert component` — that changes app state through the reducer. Commands are exposed through the command palette and keyboard shortcuts.
+_Avoid_: Action, button
+
+**Command palette**:
+The `⌘K` dialog that lists every command, filtered by search term, with commands contextually sorted so the most relevant ones appear first based on where it is opened from.
+_Avoid_: Command menu, action picker
+
+**Floating toolbar**:
+The draggable, minimizable control strip that floats over the canvas in edit mode. It is icon-only and balanced around the minimize/maximize pivot.
+_Avoid_: Floating bar, tool palette
+
+**Minimize/maximize pivot**:
+The center control of the floating toolbar: the minimize button when expanded, the maximize button when minimized. Buttons are distributed evenly to its left and right so that `L - R` is always `-1`, `0`, or `1`.
+_Avoid_: Center button
+
+**History entry**:
+A saved snapshot of the page state, appended by the reducer for every state-changing command.
+_Avoid_: Undo point, checkpoint
+
 **Serializers**:
 Modules that transform app state to and from external formats such as JSON, shortcode, and HTML.
 _Avoid_: Exporters, importers
