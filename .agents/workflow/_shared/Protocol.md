@@ -6,7 +6,28 @@ Every step file starts by pointing here. Read it once per run. The commands belo
 source scripts/agent/lib.sh   # loads _shared/config.env, sets RUN_ID, defines the helpers
 ```
 
-Requires `gh` (authenticated), `jq` and GNU `date`.
+With a shell, this requires `gh` (authenticated), `jq` and GNU `date`. Without one, see **Running without a shell** below.
+
+## Unattended runs
+
+A runner's scheduler or webhook starts every run with a one-line prompt that names the step:
+
+> Run the `<Step>` step of the agent workflow in github.com/glennfaison/livepage: read `.agents/workflow/<Step>.md` and follow it.
+
+The runner decides when and how often. These files decide what the run does. Nothing here depends on the schedule.
+
+- **No human is present, and nobody answers questions.** Do not stop to ask. Decide from the item's labels and comments. Where you would ask, use the step's own route: `needs-info`, `ready-for-human` or `_shared/Escalate.md`.
+- **A run may find nothing to do, or start while another is running.** Both are normal. Rules 1, 3, 5 and 6 below cover them.
+- **If you cannot do something the step requires, do not improvise.** Record it under **Problems** in the run log, release any lease you hold, and move on to the next item.
+
+## Running without a shell
+
+Some runners (for example a chat automation with a GitHub connector) cannot run `scripts/agent/lib.sh`, `gh`, `git` or `npm`. In that case:
+
+1. The helpers and the `gh` and `git` commands in these files say *what* to do, not how. Do the same operation with the tools you have: the same labels, the same markers, in the same order. Skip `source scripts/agent/lib.sh` and `git config core.hooksPath`.
+2. Set `RUN_ID` to the current UTC time as `YYYYMMDDTHHMMSSZ`, followed by `-` and the runner's name.
+3. Where a step says to check out a branch and push, commit to that branch through your tools instead.
+4. If a tool a step needs is missing (editing labels, reading check logs, merging), the last rule under **Unattended runs** applies.
 
 ## Rules every step follows
 
@@ -20,7 +41,7 @@ Requires `gh` (authenticated), `jq` and GNU `date`.
 
 ## Interactive skills
 
-`/triage` and `/grill-with-docs` were written for a maintainer at the keyboard: they "wait for direction", wait for answers, and update `GLOSSARY.md` and ADRs inline. `/implement` and `/implement-spec` assume a branch to commit to. No human is present in a workflow run, so follow the skill, with these overrides:
+`/triage` and `/grill-with-docs` were written for a maintainer at the keyboard: they "wait for direction", wait for answers, and update `GLOSSARY.md` and ADRs inline. `/implement` and `/implement-spec` assume a branch to commit to. No human is present in a workflow run, so follow the skill, with these overrides. If your runner cannot invoke the skill at all, do its work yourself under the same overrides:
 
 1. **The step file is your direction.** Do not stop to wait for a reply.
 2. **One round, then `needs-info`.** Where a skill would ask a human something, put every question that is ready to ask into a single comment, with your recommended answer for each. Look up every fact yourself first. Then set `needs-info` and finish. A human answers and removes the label, and the next Grooming pass continues.

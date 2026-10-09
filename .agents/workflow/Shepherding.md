@@ -53,7 +53,7 @@ gh pr checks N --json bucket --jq '[.[].bucket]
    - Checks `green` and `open_findings N` is 0: go to step 5.
 4. **Fix.**
    1. If `shepherd_attempts N` is at least `$MAX_SHEPHERD_ATTEMPTS`, follow `_shared/Escalate.md` and stop.
-   2. Read the failing logs (`gh run view <run-id> --log-failed`) and, if `open_findings N` is above 0, the newest `kind=review` handoff comment.
+   2. Read the failing logs (`gh run view <run-id> --log-failed`) and, if `open_findings N` is above 0, the newest `kind=review` handoff comment. If you cannot read enough of the failing output to find the cause, do not guess: record the PR under **Problems** in the log, go to step 6, and move on. This does not count as an attempt.
    3. Check out the PR branch and fix the cause. Run the narrowest relevant test first, as `AGENT-WORKFLOW.md` says.
    4. **Never edit tests, snapshots or allowlists to make a check pass.** If a test looks wrong, say so in the attempt comment and leave it.
    5. Push. Post a short comment on what you tried, ending with `<!-- agent:attempt step=shepherding sha=<new head SHA> -->`.

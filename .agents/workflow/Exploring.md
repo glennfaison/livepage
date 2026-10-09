@@ -20,7 +20,7 @@ Exploring does **not** select by label, claim work, or take a lease. It only rea
 
 ## Trigger
 
-Scheduled. No guard and no lease: Exploring only reads, and the only thing it writes is new issues.
+Started by the runner, on whatever schedule or webhook it is configured with. No guard and no lease: Exploring only reads, and the only thing it writes is new issues.
 
 ## Process
 
@@ -29,7 +29,7 @@ Scheduled. No guard and no lease: Exploring only reads, and the only thing it wr
    - **Problems** that recur: repeated failures, escalations, flaky checks, items skipped again and again.
    - **Automation suggestions**.
    Each becomes a candidate in step 4.
-2. **Explore the live app.** Open `$EXPLORE_BASE_URL` and use it as a user would. Look for bugs, rough edges and missing features.
+2. **Explore the live app.** Open `$EXPLORE_BASE_URL` and use it as a user would. Look for bugs, rough edges and missing features. If you cannot browse it, skip this step and say so in the log.
 3. **Explore the codebase.** Read for architecture problems, technical debt, refactor opportunities and missing functionality.
    - The live app and the code are read-only. Use test data only. Take no destructive action against the target.
 4. **Build the candidate list. Do not cap it.** For each: a title, a category (`bugfix`, `feature`, `refactor`, `debt`), the evidence for that category (see `_shared/IssueFormat.md`), and the impact. **For a feature, write the use case before anything else:** who the user is, what they are trying to do, and why that falls short today. If you cannot state a use case, it is not a feature candidate: drop it or reword it as a question in the log. While exploring the live app, capture screenshots for bugs and for the screen where a feature would live.
