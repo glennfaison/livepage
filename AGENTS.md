@@ -56,6 +56,14 @@ When opening a PR that resolves multiple issues, use separate `Closes` statement
 Closes #122. Closes #123. Closes #124. Closes #125.
 ```
 
+**Correct:**
+```
+- Related to #122. 
+- Related to #123. 
+- Related to #124. 
+- Related to #125.
+```
+
 **Incorrect (only closes #122):**
 ```
 Closes #122, #123, #124, #125
