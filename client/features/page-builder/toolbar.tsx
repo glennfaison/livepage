@@ -5,13 +5,13 @@ import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-s
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
+import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -76,6 +76,8 @@ export const Toolbar: React.FC<Readonly<{
   onUndo?: () => void
   /** Redo callback */
   onRedo?: () => void
+  /** Duplicate page callback */
+  onDuplicatePage?: () => void
   /** App dispatch for settings */
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
@@ -99,6 +101,7 @@ export const Toolbar: React.FC<Readonly<{
   onPageTitleChange,
   onUndo,
   onRedo,
+  onDuplicatePage,
   dispatch,
   promptAssistEnabled,
 }) => {
@@ -122,6 +125,7 @@ export const Toolbar: React.FC<Readonly<{
   useHistoryShortcut(() => setHistoryPopoverOpen(true))
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
+  useDuplicatePageShortcut(() => onDuplicatePage?.())
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -270,6 +274,9 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
           <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Redo">
             <Redo className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
+            <Copy className="h-4 w-4" />
           </Button>
 
           <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
