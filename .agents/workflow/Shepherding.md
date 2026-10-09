@@ -2,7 +2,23 @@
 
 Take a PR from "opened" to "reviewable": get checks green, address open review findings, then post the handoff. This step never polls. If checks are still running, it skips the PR and a later run picks it up.
 
-**Read first:** `Labels.md`, `_shared/Protocol.md`, `_shared/Handoff.md`, `_shared/Escalate.md`, `_shared/Log.md`, `_shared/config.env`, `.agents/docs/AGENT-WORKFLOW.md`. Then `source scripts/agent/lib.sh` and `git config core.hooksPath scripts/git-hooks`.
+**Read first:** `_shared/Labels.md`, `_shared/Protocol.md`, `_shared/Handoff.md`, `_shared/Escalate.md`, `_shared/Log.md`, `_shared/config.env`, `.agents/docs/AGENT-WORKFLOW.md`. Then `source scripts/agent/lib.sh` and `git config core.hooksPath scripts/git-hooks`.
+
+## Inputs
+
+- Open PRs labelled `agent:needs-work`, without `agent:stuck`, and without a live `agent:in-progress` lease.
+- Oldest first, at most `$SHEPHERD_BATCH` per run.
+- Check state must be `failing` or `green` (skip `pending` / `no-checks-yet`).
+- When fixing: failing check logs and, if `open_findings N` > 0, the newest `kind=review` handoff comment.
+
+Claims with `claim N pr agent:in-progress Shepherding "$LEASE_TTL_PR"`. Release on every exit path.
+
+## Outputs
+
+- Fix path: push a commit, post an attempt comment ending with `<!-- agent:attempt step=shepherding sha=<new head SHA> -->`; PR stays `agent:needs-work`.
+- Ready path: "ready" handoff comment ending with `<!-- agent:handoff kind=ready sha=<head SHA> -->`; swap `agent:needs-work` → `agent:ready-for-review`.
+- Escalation to `agent:stuck` when attempts exceed `$MAX_SHEPHERD_ATTEMPTS` or the PR is a fork (`_shared/Escalate.md`).
+- Lease released. One log line (`_shared/Log.md`).
 
 ## Trigger
 
