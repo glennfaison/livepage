@@ -354,6 +354,7 @@ function TemplateThumbnail({ template, className }: Readonly<{ template: Templat
         role="img"
         aria-label={`${template.name} preview (fallback)`}
         className={cn("aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted flex items-center justify-center", className)}
+        data-testid="thumbnail-fallback"
       >
         <div className="text-muted-foreground/50">{fallbackIcon}</div>
       </div>
