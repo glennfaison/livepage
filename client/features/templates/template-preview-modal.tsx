@@ -4,9 +4,18 @@ import React from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
 import { Button } from "@/client/components/ui/button"
 import { CanvasRenderer } from "@/client/features/page-builder/canvas-renderer"
-import { getPageTemplateById, cloneTemplatePages } from "@/client/features/templates"
-import type { PageTemplateDefinition } from "@/client/features/templates/schema"
+import type { AppNode } from "@/client/features/types"
+import { getPageTemplateById, type PageTemplateDefinition } from "./catalog-data"
 import { X, Maximize, Minimize, ExternalLink } from "lucide-react"
+
+// Import from ./catalog-data (a leaf module) rather than the templates
+// barrel: the barrel pulls in ./registry -> ./schema -> serializers ->
+// design-components, which is mid-initialization when this module is
+// reached from the design-components subtree (template-settings ->
+// template-catalog -> here), causing a circular-import TDZ error.
+function cloneTemplatePages(template: PageTemplateDefinition): ReadonlyArray<AppNode> {
+  return JSON.parse(JSON.stringify(template.content.pages))
+}
 
 interface TemplatePreviewModalProps {
   templateId: string

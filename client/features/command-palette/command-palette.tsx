@@ -525,7 +525,10 @@ export const CommandPalette: React.FC<
         templateId={previewTemplateId ?? ""}
         isOpen={previewTemplateId !== null}
         onClose={() => setPreviewTemplateId(null)}
-        onApplyTemplate={onApplyTemplate}
+        onApplyTemplate={(templateId) => {
+          onApplyTemplate(templateId)
+          onOpenChange(false)
+        }}
       />
 
       <ValidationDialog

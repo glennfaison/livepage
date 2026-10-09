@@ -161,7 +161,7 @@ export function TemplateCatalog({ templates, onApplyTemplate, onClose, viewMode:
       templateId={previewTemplateId ?? ""}
       isOpen={previewTemplateId !== null}
       onClose={handleClosePreview}
-      onApplyTemplate={onApplyTemplate}
+      onApplyTemplate={handleApplyTemplate}
     />
   </React.Fragment>
 )
@@ -426,6 +426,7 @@ export function TemplateListItem({ template, isFavorite, onToggleFavorite, onApp
           onClick={onPreview}
           aria-label={`Preview ${template.name} template`}
           title="Preview template"
+          className="relative z-10 shrink-0"
         >
           <Eye className="h-4 w-4" aria-hidden="true" />
         </Button>
