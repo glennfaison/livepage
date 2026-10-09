@@ -65,36 +65,19 @@ export function useRedoShortcut(onRedo: () => void, canRedo: boolean) {
   }, [onRedo, canRedo])
 }
 
-export function useCopyStylesShortcut(onCopyStyles: () => void) {
+export function useDuplicatePageShortcut(onDuplicate: () => void) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const isModifierPressed = event.metaKey || event.ctrlKey
-      const isAltPressed = event.altKey
-      if (isModifierPressed && isAltPressed && event.key.toLowerCase() === "c") {
+      if (isModifierPressed && event.shiftKey && event.key.toLowerCase() === "d") {
         event.preventDefault()
-        onCopyStyles()
+        onDuplicate()
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [onCopyStyles])
-}
-
-export function usePasteStylesShortcut(onPasteStyles: () => void) {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const isModifierPressed = event.metaKey || event.ctrlKey
-      const isAltPressed = event.altKey
-      if (isModifierPressed && isAltPressed && event.key.toLowerCase() === "v") {
-        event.preventDefault()
-        onPasteStyles()
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [onPasteStyles])
+  }, [onDuplicate])
 }
 
 export function formatShortcut(key: string): string {
@@ -102,11 +85,4 @@ export function formatShortcut(key: string): string {
     return `⌘${key.toUpperCase()}`
   }
   return `Ctrl+${key.toUpperCase()}`
-}
-
-export function formatPainterShortcut(key: string): string {
-  if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
-    return `⌘⌥${key.toUpperCase()}`
-  }
-  return `Ctrl+Alt+${key.toUpperCase()}`
 }

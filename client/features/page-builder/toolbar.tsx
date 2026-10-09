@@ -6,17 +6,32 @@ import { OPEN_COMPONENT_SETTINGS_EVENT } from "@/client/features/design-componen
 import { Button } from "@/client/components/ui/button"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, Copy, ClipboardPaste, GripVertical, History, Maximize, Minimize, Paintbrush, RotateCw, Save, Settings, X } from "lucide-react"
+import { Bot, Command, Copy, ClipboardPaste, GripVertical, History, Maximize, Minimize, Paintbrush, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, formatPainterShortcut, useCopyStylesShortcut, useHistoryShortcut, usePasteStylesShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, formatPainterShortcut, useCopyStylesShortcut, useHistoryShortcut, usePasteStylesShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useFormatPainter } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
+
+/**
+ * Asserts that the floating toolbar's action buttons are balanced around the
+ * minimize/maximize pivot. `L` is the button count to the left of the pivot,
+ * `R` the count to the right; the difference must be -1, 0, or 1. Any other
+ * value means a button was added or removed without rebalancing the row.
+ */
+export function assertToolbarButtonBalance(leftCount: number, rightCount: number): void {
+  const difference = leftCount - rightCount
+  if (difference < -1 || difference > 1) {
+    throw new Error(
+      `Toolbar button imbalance: ${leftCount} buttons left of the minimize/maximize pivot, ${rightCount} right (L - R = ${difference}). Expected -1, 0, or 1.`,
+    )
+  }
+}
 
 export function clampToolbarCenter(
   x: number,
@@ -63,6 +78,8 @@ export const Toolbar: React.FC<Readonly<{
   onUndo?: () => void
   /** Redo callback */
   onRedo?: () => void
+  /** Duplicate page callback */
+  onDuplicatePage?: () => void
   /** App dispatch for settings */
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
@@ -93,6 +110,7 @@ export const Toolbar: React.FC<Readonly<{
   onPageTitleChange,
   onUndo,
   onRedo,
+  onDuplicatePage,
   dispatch,
   promptAssistEnabled,
   selectedComponentId,
@@ -107,6 +125,7 @@ export const Toolbar: React.FC<Readonly<{
   const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
+  const currentPage = pageComponent ?? componentTree[0]
   const canUndo = currentHistoryIndex > 0
   const canRedo = currentHistoryIndex < history.length - 1
 
@@ -118,6 +137,7 @@ export const Toolbar: React.FC<Readonly<{
   useHistoryShortcut(() => setHistoryPopoverOpen(true))
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
+  useDuplicatePageShortcut(() => onDuplicatePage?.())
   useCopyStylesShortcut(() => {
     if (pageComponent) {
       copyStyles(pageComponent)
@@ -344,6 +364,16 @@ export const Toolbar: React.FC<Readonly<{
             <ClipboardPaste className="h-4 w-4" />
           </Button>
 
+          <Button variant="outline" size="sm" onClick={onUndo} disabled={!canUndo} title={`Undo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Undo">
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Redo">
+            <Redo className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
+            <Copy className="h-4 w-4" />
+          </Button>
+
           <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
             <Minimize className="h-4 w-4" />
           </Button>
@@ -354,6 +384,7 @@ export const Toolbar: React.FC<Readonly<{
           <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard" className="shrink-0">
             <X className="h-4 w-4" />
           </Button>
+
           <Button
             variant="outline"
             size="sm"

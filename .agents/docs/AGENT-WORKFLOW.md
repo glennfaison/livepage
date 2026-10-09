@@ -4,6 +4,15 @@ How to scope, verify, and finish a task in this repository. For what the code sh
 
 This document is written for coding agents. **Human contributors** can follow the same steps; the [PR template](../../.github/pull_request_template.md) and `npm run verify` (when available) encode the same checks in a lighter form.
 
+## Agent Workflow Files
+
+The following workflow files in [.agents/workflow/](../../.agents/workflow/) define the processes for different agent activities:
+
+- [Grooming.md](../../.agents/workflow/Grooming.md) — Issue grooming process (triage, deduplication, readiness marking)
+- [Implementing.md](../../.agents/workflow/Implementing.md) — Implementation workflow (pickup, context reading, PR creation, monitoring)
+- [Reviewing.md](../../.agents/workflow/Reviewing.md) — PR review process (merge-safety, code review, escalation)
+- [Exploring.md](../../.agents/workflow/Exploring.md) — Application/codebase exploration workflow (live app + codebase)
+
 ## Scope
 
 - **Redesign over minimal diffs.** Do not optimize for the smallest diff. After a change, the code you touched should look as it would if it had been designed strategically from scratch with this requirement in mind. Refactor, rename, extract, and restructure the affected code and its callers whenever that yields a cleaner result than patching around the old shape. This rule takes priority over the two bullets below and over any instinct to keep a change small. Only explicit user requirements (see the last bullet) override it. It does not license unrelated rewrites of code the task has no reason to touch.

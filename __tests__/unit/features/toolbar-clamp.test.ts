@@ -1,4 +1,4 @@
-import { clampToolbarCenter } from "@/client/features/page-builder/toolbar"
+import { clampToolbarCenter, assertToolbarButtonBalance } from "@/client/features/page-builder/toolbar"
 
 describe("clampToolbarCenter", () => {
   it("keeps a toolbar centered near the right edge inside a phone viewport", () => {
@@ -11,5 +11,19 @@ describe("clampToolbarCenter", () => {
 
   it("leaves an already visible desktop position unchanged", () => {
     expect(clampToolbarCenter(900, 400, 48, 280, 1280, 800)).toEqual({ x: 900, y: 400 })
+  })
+})
+
+describe("assertToolbarButtonBalance", () => {
+  it("accepts a balanced row (L - R of -1, 0, or 1)", () => {
+    expect(() => assertToolbarButtonBalance(0, 1)).not.toThrow()
+    expect(() => assertToolbarButtonBalance(1, 1)).not.toThrow()
+    expect(() => assertToolbarButtonBalance(5, 4)).not.toThrow()
+    expect(() => assertToolbarButtonBalance(4, 5)).not.toThrow()
+  })
+
+  it("rejects an unbalanced row", () => {
+    expect(() => assertToolbarButtonBalance(5, 3)).toThrow(/Toolbar button imbalance/)
+    expect(() => assertToolbarButtonBalance(0, 2)).toThrow(/Toolbar button imbalance/)
   })
 })
