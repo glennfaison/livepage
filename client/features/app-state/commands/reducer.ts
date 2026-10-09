@@ -6,35 +6,52 @@ import {
   updateComponent,
   removeComponent,
   duplicateComponent,
+  duplicatePage,
   replaceComponent,
   moveComponent,
   findComponentParentTree,
   findComponentById,
 } from "./helpers"
 
-export const initialState: AppState = {
-  componentTree: [
-    {
-      tag: "page",
-      attributes: {
-        id: "page-1",
-        title: "Home Page",
-      },
-      children: [],
-    },
-  ],
-  activePage: "page-1",
-  selectedComponentId: "",
-  selectedComponentAncestors: [],
-  pageBuilderMode: "edit",
-  toolbarMinimized: false,
-  showToolbar: true,
-  promptAssistEnabled: false,
-  history: [],
-  currentHistoryIndex: -1,
-  historyPreviewIndex: null,
-  originalHistoryState: null,
+const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
+
+function getInitialPromptAssistEnabled(): boolean {
+  if (typeof window === "undefined") return false
+  try {
+    const value = window.localStorage.getItem(PROMPT_ASSIST_ENABLED_KEY)
+    return value === "true"
+  } catch {
+    return false
+  }
 }
+
+export function createInitialState(): AppState {
+  return {
+    componentTree: [
+      {
+        tag: "page",
+        attributes: {
+          id: "page-1",
+          title: "Home Page",
+        },
+        children: [],
+      },
+    ],
+    activePage: "page-1",
+    selectedComponentId: "",
+    selectedComponentAncestors: [],
+    pageBuilderMode: "edit",
+    toolbarMinimized: false,
+    showToolbar: true,
+    promptAssistEnabled: getInitialPromptAssistEnabled(),
+    history: [],
+    currentHistoryIndex: -1,
+    historyPreviewIndex: null,
+    originalHistoryState: null,
+  }
+}
+
+export const initialState = createInitialState()
 
 /**
  * Appends a new history entry, discarding any "future" entries left over
@@ -285,6 +302,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         promptAssistEnabled: action.payload,
       }
+
+    case "DUPLICATE_PAGE": {
+      const activePage = state.componentTree.find(
+        (p) => p.tag === "page" && p.attributes.id === state.activePage
+      )
+      if (!activePage) return state
+
+      const newComponentTree = duplicatePage({
+        components: state.componentTree,
+        pageId: state.activePage,
+      })
+
+      const newPage = newComponentTree.find(
+        (p) => p.tag === "page" && p.attributes.id !== activePage.attributes.id && p.attributes.title === `${activePage.attributes.title ?? "Page"} (copy)`
+      )
+
+      return withHistory(
+        {
+          ...state,
+          componentTree: newComponentTree,
+          activePage: newPage?.attributes.id ?? state.activePage,
+        },
+        newComponentTree,
+        `Duplicated page ${activePage.attributes.id}`,
+      )
+    }
 
     case "ADD_TO_HISTORY": {
       const { action: historyAction, pageState } = action.payload

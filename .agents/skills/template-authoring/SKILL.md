@@ -18,8 +18,9 @@ Templates are typed data, not components. Each lives in
 
 1. **Read** the template and one finished sibling (for example
    `patient-health-dashboard.ts` or `link-in-bio-page.ts`).
-2. **Branch.** Work on a branch named `templates/<template-id>`. Never commit
-   Template work straight to `main`.
+2. **Branch.** Work on a branch named `feature/templates-<template-id>` (e.g.
+   `feature/templates-farm-logistics-landing-page`). Never commit Template work
+   straight to `main`.
 3. **Edit** the definition and its assets (rules below). If the design needs
    something the Design Components cannot express, extend them (next section).
 4. **Static checks:** `npx tsc --noEmit`, `npx eslint <changed files>`, and

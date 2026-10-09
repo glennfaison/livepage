@@ -17,3 +17,6 @@ export const editorChromeButtonClassName = [
   "text-popover-foreground",
   "hover:bg-accent hover:text-accent-foreground",
 ].join(" ")
+
+/** Dispatched by the toolbar Settings control to open the selected component's settings popover. */
+export const OPEN_COMPONENT_SETTINGS_EVENT = "livepage:open-component-settings"
