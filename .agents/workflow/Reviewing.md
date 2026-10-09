@@ -2,7 +2,23 @@
 
 Review one PR and merge it if an agent can safely do so. If not, record why and, when the fix is small, fix it.
 
-**Read first:** `Labels.md`, `_shared/Protocol.md`, `_shared/Handoff.md`, `_shared/Escalate.md`, `_shared/Log.md`, `_shared/config.env`. Then `source scripts/agent/lib.sh` and `git config core.hooksPath scripts/git-hooks`.
+**Read first:** `_shared/Labels.md`, `_shared/Protocol.md`, `_shared/Handoff.md`, `_shared/Escalate.md`, `_shared/Log.md`, `_shared/config.env`. Then `source scripts/agent/lib.sh` and `git config core.hooksPath scripts/git-hooks`.
+
+## Inputs
+
+- Open, non-draft PRs labelled `agent:ready-for-review`, without `agent:stuck`, and without a live `agent:in-progress` lease.
+- Oldest first, at most `$REVIEW_BATCH` per run.
+- Head SHA must match `ready_sha N` and checks must be green; otherwise the PR is not ready.
+- PR title, body, comments, linked issue(s); merge-safety and code-review skills run against the pinned SHA.
+
+Claims with `claim N pr agent:in-progress Reviewing "$LEASE_TTL_PR"`. Release on every exit path.
+
+## Outputs
+
+- Mergeable: merge pinned to the reviewed SHA (`gh pr merge N --match-head-commit "$SHA" --"$MERGE_METHOD"`); for each linked issue, remove `agent:pr-open` and close with "Implemented in #N."
+- Not mergeable: optional small fix (no design decision, only code this PR already changes); "review" handoff ending with `<!-- agent:handoff kind=review sha=$SHA open=<unfixed count> -->`; swap `agent:ready-for-review` → `agent:needs-work`.
+- Escalation to `agent:stuck` if `review_rounds N` ≥ `$MAX_REVIEW_ROUNDS` or the PR is a fork.
+- Lease released. One log line (`_shared/Log.md`).
 
 ## Trigger
 
