@@ -6,23 +6,22 @@ This document is written for coding agents. **Human contributors** can follow th
 
 ## Agent Workflow Files
 
-The GitHub workflows are skills under [.agents/skills/](../../.agents/skills/). Each
-step has a group skill that selects work and an item skill that does the work on
-one issue or PR. Shared material (labels, protocol, dedupe, handoff, log, etc.) is in
-[github-workflow-protocol](../../.agents/skills/github-workflow-protocol/SKILL.md).
+The GitHub workflows are the [github-agent-workflow-skills](../../.agents/skills/github-agent-workflow-skills/README.md) package. Each
+step has a group skill that selects work and an item skill that does the work on one issue or PR.
+LivePage's settings for it are in [github-workflow.env](../../docs/agents/github-workflow.env).
 
 **Shared:**
 
-- [github-workflow-protocol](../../.agents/skills/github-workflow-protocol/SKILL.md) — Claim/lease rules and helpers
-- [labels.md](../../.agents/skills/github-workflow-protocol/references/labels.md) — Labels and state transitions (read this first)
+- [github-workflow-protocol](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/github-workflow-protocol/SKILL.md): Claim/lease rules and helpers
+- [labels.md](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/github-workflow-protocol/references/labels.md): Labels and state transitions (read this first)
 
 **Skills** (group → item):
 
-- [explore-github-repo](../../.agents/skills/explore-github-repo/SKILL.md) → [file-github-issue](../../.agents/skills/file-github-issue/SKILL.md) — Explore app/codebase; file unlabeled issues
-- [triage-github-issues](../../.agents/skills/triage-github-issues/SKILL.md) → [triage-github-issue](../../.agents/skills/triage-github-issue/SKILL.md) — Triage and mark issues ready-for-agent or ready-for-human
-- [implement-github-issues](../../.agents/skills/implement-github-issues/SKILL.md) → [implement-github-issue](../../.agents/skills/implement-github-issue/SKILL.md) — Implement a ready-for-agent issue and open a PR
-- [shepherd-github-prs](../../.agents/skills/shepherd-github-prs/SKILL.md) → [shepherd-github-pr](../../.agents/skills/shepherd-github-pr/SKILL.md) — Get a PR through checks and post the review handoff
-- [review-github-prs](../../.agents/skills/review-github-prs/SKILL.md) → [review-github-pr](../../.agents/skills/review-github-pr/SKILL.md) — Review a ready PR and merge when safe
+- [explore-github-repo](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/explore-github-repo/SKILL.md) → [file-github-issue](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/file-github-issue/SKILL.md): Explore app/codebase; file unlabeled issues
+- [triage-github-issues](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/triage-github-issues/SKILL.md) → [triage-github-issue](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/triage-github-issue/SKILL.md): Triage and mark issues ready-for-agent or ready-for-human
+- [implement-github-issues](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/implement-github-issues/SKILL.md) → [implement-github-issue](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/implement-github-issue/SKILL.md): Implement a ready-for-agent issue and open a PR
+- [shepherd-github-prs](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/shepherd-github-prs/SKILL.md) → [shepherd-github-pr](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/shepherd-github-pr/SKILL.md): Get a PR through checks and post the review handoff
+- [review-github-prs](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/review-github-prs/SKILL.md) → [review-github-pr](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/review-github-pr/SKILL.md): Review a ready PR and merge when safe
 
 ## Scope
 
@@ -54,7 +53,7 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 - For anything beyond a focused fix, follow the [agent orchestration skill](../skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the `/handoff` skill and iterating until the goal is met.
 - Whenever you write non-trivial code, have a fresh review sub-agent review it (trivial edits such as typos and one-line fixes only need your own check). The reviewer fixes the issues it finds rather than only reporting them, so the main agent's context stays small. It must not edit tests or allowlists to get green; you read its diff before accepting.
-- End the task by suggesting which parts of the process could be automated deterministically to reduce token use. In an unattended workflow run, nobody is there to read it: put the suggestions in the run log instead, as [log.md](../skills/github-workflow-protocol/references/log.md) describes.
+- End the task by suggesting which parts of the process could be automated deterministically to reduce token use. In an unattended workflow run, nobody is there to read it: put the suggestions in the run log instead, as [log.md](../../.agents/skills/github-agent-workflow-skills/skills/github-workflow/github-workflow-protocol/references/log.md) describes.
 
 ## Sub-agents
 

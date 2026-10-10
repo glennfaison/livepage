@@ -17,25 +17,35 @@ find the right skill, then read its `SKILL.md` before following its workflow.
 
 ## Workflows
 
-The GitHub workflows are skills in [.agents/skills/](./.agents/skills/). Each step
-has a **group skill** that selects work and an **item skill** that does the work
-on one issue or PR. Group skills dispatch to item skills, so both can be run
-directly: `/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
+The GitHub workflows come from the [github-agent-workflow-skills](./.agents/skills/github-agent-workflow-skills/README.md) package,
+which lives in this repository for now and is meant to move to its own repository. Its skills are
+linked into [.agents/skills/](./.agents/skills/) by `.agents/skills/github-agent-workflow-skills/scripts/link-skills.sh`, so agents find
+them by name. LivePage's settings for the package are in
+[docs/agents/github-workflow.env](./docs/agents/github-workflow.env).
+
+Each step has a **group skill** that selects work and an **item skill** that does the work on one
+issue or PR. Group skills dispatch to item skills, so both can be run directly:
+`/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
+Run `/setup-github-workflow` once to create the labels and settings.
 
 **Shared (read first for labels and protocol):**
 
-- [github-workflow-protocol](./.agents/skills/github-workflow-protocol/SKILL.md) — Claim/lease rules, helpers, unattended and no-shell rules, interactive-skill overrides
-- [labels.md](./.agents/skills/github-workflow-protocol/references/labels.md) — Every label the workflows use, and the state transitions between them
+- [github-workflow-protocol](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/github-workflow-protocol/SKILL.md): Claim/lease rules, helpers, unattended and no-shell rules
+- [labels.md](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/github-workflow-protocol/references/labels.md): Every label the workflows use, and the state transitions between them
 
 **Steps** (independent; may run in any order or in parallel):
 
 | Step | Group skill | Item skill |
 | --- | --- | --- |
-| Explore the app and codebase; file unlabelled issues | [explore-github-repo](./.agents/skills/explore-github-repo/SKILL.md) | [file-github-issue](./.agents/skills/file-github-issue/SKILL.md) |
-| Triage; mark issues ready-for-agent or ready-for-human | [triage-github-issues](./.agents/skills/triage-github-issues/SKILL.md) | [triage-github-issue](./.agents/skills/triage-github-issue/SKILL.md) |
-| Implement a ready-for-agent issue and open a PR | [implement-github-issues](./.agents/skills/implement-github-issues/SKILL.md) | [implement-github-issue](./.agents/skills/implement-github-issue/SKILL.md) |
-| Get a PR through checks and post the review handoff | [shepherd-github-prs](./.agents/skills/shepherd-github-prs/SKILL.md) | [shepherd-github-pr](./.agents/skills/shepherd-github-pr/SKILL.md) |
-| Review a ready PR and merge when safe | [review-github-prs](./.agents/skills/review-github-prs/SKILL.md) | [review-github-pr](./.agents/skills/review-github-pr/SKILL.md) |
+| Explore the app and codebase; file unlabelled issues | [explore-github-repo](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/explore-github-repo/SKILL.md) | [file-github-issue](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/file-github-issue/SKILL.md) |
+| Triage; mark issues ready-for-agent or ready-for-human | [triage-github-issues](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/triage-github-issues/SKILL.md) | [triage-github-issue](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/triage-github-issue/SKILL.md) |
+| Implement a ready-for-agent issue and open a PR | [implement-github-issues](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/implement-github-issues/SKILL.md) | [implement-github-issue](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/implement-github-issue/SKILL.md) |
+| Get a PR through checks and post the review handoff | [shepherd-github-prs](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/shepherd-github-prs/SKILL.md) | [shepherd-github-pr](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/shepherd-github-pr/SKILL.md) |
+| Review a ready PR and merge when safe | [review-github-prs](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/review-github-prs/SKILL.md) | [review-github-pr](./.agents/skills/github-agent-workflow-skills/skills/github-workflow/review-github-pr/SKILL.md) |
+
+The package's `merge-safety` skill gates merging, and `code-review` (this repository's own skill) is
+used before opening a PR and when reviewing one. The package also needs `tdd` from
+[mattpocock/skills](./.agents/skills/matt-pocock-skills/README.md).
 
 ## Branch names
 

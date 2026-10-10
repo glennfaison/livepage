@@ -18,6 +18,8 @@ points you to the right instructions.
 - [`/implement-github-issues`](../implement-github-issues/SKILL.md): implement the ready-for-agent issues (calls [`/implement-github-issue`](../implement-github-issue/SKILL.md)).
 - [`/shepherd-github-prs`](../shepherd-github-prs/SKILL.md): get agent PRs through CI (calls [`/shepherd-github-pr`](../shepherd-github-pr/SKILL.md)).
 - [`/review-github-prs`](../review-github-prs/SKILL.md): review and merge ready agent PRs (calls [`/review-github-pr`](../review-github-pr/SKILL.md)).
+- [`/setup-github-workflow`](../setup-github-workflow/SKILL.md): configure a repo for the GitHub workflow skills (settings, labels). Run once per repo.
+- [`/unattended-triage`](../unattended-triage/SKILL.md) and [`/unattended-grilling`](../unattended-grilling/SKILL.md): the triage decision and the one-round question list that `/triage-github-issue` uses. Called by other skills.
 - [`/github-workflow-protocol`](../github-workflow-protocol/SKILL.md): shared rules for the GitHub skills above. Reference only; read it, do not run it.
 - [`/template-authoring`](../template-authoring/SKILL.md): add, redesign, or fix a LivePage Template.
 - [`/template-design-review`](../template-design-review/SKILL.md): evaluate and improve a Template's preview-mode design in the browser.
