@@ -1,6 +1,7 @@
 "use client"
 
 import { HistoryPopover } from "@/client/features/page-builder/history-popover"
+import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
 import { Button } from "@/client/components/ui/button"
 import {
@@ -10,8 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/client/components/ui/dialog"
-import { Label } from "@/client/components/ui/label"
-import { Switch } from "@/client/components/ui/switch"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
 import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
@@ -138,11 +137,11 @@ export const Toolbar: React.FC<Readonly<{
   // Discard confirmation
   const {
     showConfirmation,
-    dontAskAgain,
+    askBeforeDiscard,
     handleDiscardWithConfirmation,
     handleConfirm,
     handleCancel,
-    handleDontAskAgainChange,
+    handleAskBeforeDiscardChange,
   } = useDiscardConfirmation(dispatch ?? (() => {}), {
     history,
     currentHistoryIndex,
@@ -399,38 +398,13 @@ export const Toolbar: React.FC<Readonly<{
       )}
     </div>
 
-      {/* Discard Confirmation Dialog */}
-      <Dialog open={showConfirmation} onOpenChange={handleCancel}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <X className="h-5 w-5 text-destructive" />
-              Discard all changes?
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              This will reset the page to its initial state. This action cannot be undone.
-            </p>
-          </DialogHeader>
-          <div className="flex items-center gap-2 py-2">
-            <Switch
-              id="dont-ask-again"
-              checked={dontAskAgain}
-              onCheckedChange={handleDontAskAgainChange}
-            />
-            <Label htmlFor="dont-ask-again" className="text-sm font-normal">
-              Don't ask again
-            </Label>
-          </div>
-          <div className="flex justify-end gap-2 border-t px-4 py-3">
-            <Button variant="ghost" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirm}>
-              Discard
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+    <DiscardConfirmationDialog
+      open={showConfirmation}
+      askBeforeDiscard={askBeforeDiscard}
+      onCancel={handleCancel}
+      onConfirm={handleConfirm}
+      onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
+    />
     </>
   )
 }

@@ -19,7 +19,8 @@ import {
 
 const DISCARD_CONFIRMATION_KEY = "livepage-discard-confirmation"
 
-function getDiscardConfirmationPreference(): boolean {
+/** Stored preference for whether a discard must be confirmed. Defaults to true. */
+function getAskBeforeDiscardPreference(): boolean {
   if (typeof window === "undefined") return true
   try {
     const value = window.localStorage.getItem(DISCARD_CONFIRMATION_KEY)
@@ -29,11 +30,12 @@ function getDiscardConfirmationPreference(): boolean {
   }
 }
 
-function setDiscardConfirmationPreference(show: boolean) {
+function setAskBeforeDiscardPreference(ask: boolean) {
   if (typeof window === "undefined") return
   try {
-    window.localStorage.setItem(DISCARD_CONFIRMATION_KEY, String(show))
+    window.localStorage.setItem(DISCARD_CONFIRMATION_KEY, String(ask))
   } catch {
+    // Ignore storage failures (private mode, quota) and keep the in-memory preference.
   }
 }
 
@@ -435,10 +437,17 @@ export function useDiscardConfirmation(
   state: AppState,
 ) {
   const [showConfirmation, setShowConfirmation] = useState(false)
-  const [dontAskAgain, setDontAskAgain] = useState(getDiscardConfirmationPreference())
-  const [pendingDiscard, setPendingDiscard] = useState(false)
+  const [askBeforeDiscard, setAskBeforeDiscard] = useState(getAskBeforeDiscardPreference)
 
   const hasChanges = state.history.length > 1
+
+  const executeDiscard = useCallback(() => {
+    dispatch({ type: "DISCARD_CHANGES" })
+    toast({
+      title: "Changes discarded",
+      description: "Your page has been reset to its initial state.",
+    })
+  }, [dispatch])
 
   const handleDiscardWithConfirmation = useCallback(() => {
     if (!hasChanges) {
@@ -450,48 +459,34 @@ export function useDiscardConfirmation(
       return
     }
 
-    if (dontAskAgain) {
+    if (!askBeforeDiscard) {
       executeDiscard()
       return
     }
 
-    setPendingDiscard(true)
     setShowConfirmation(true)
-  }, [dispatch, hasChanges, dontAskAgain])
-
-  const executeDiscard = useCallback(() => {
-    dispatch({ type: "DISCARD_CHANGES" })
-    toast({
-      title: "Changes discarded",
-      description: "Your page has been reset to its initial state.",
-    })
-    setPendingDiscard(false)
-  }, [dispatch])
+  }, [askBeforeDiscard, dispatch, executeDiscard, hasChanges])
 
   const handleConfirm = useCallback(() => {
-    if (pendingDiscard) {
-      executeDiscard()
-    }
+    executeDiscard()
     setShowConfirmation(false)
-    setPendingDiscard(false)
-  }, [executeDiscard, pendingDiscard])
+  }, [executeDiscard])
 
   const handleCancel = useCallback(() => {
     setShowConfirmation(false)
-    setPendingDiscard(false)
   }, [])
 
-  const handleDontAskAgainChange = useCallback((checked: boolean) => {
-    setDontAskAgain(checked)
-    setDiscardConfirmationPreference(checked)
+  const handleAskBeforeDiscardChange = useCallback((ask: boolean) => {
+    setAskBeforeDiscard(ask)
+    setAskBeforeDiscardPreference(ask)
   }, [])
 
   return {
     showConfirmation,
-    dontAskAgain,
+    askBeforeDiscard,
     handleDiscardWithConfirmation,
     handleConfirm,
     handleCancel,
-    handleDontAskAgainChange,
+    handleAskBeforeDiscardChange,
   }
 }
