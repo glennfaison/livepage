@@ -4,7 +4,7 @@ import { Button } from "@/client/components/ui/button"
 import { useComponentOperationsContext } from "../editor-controls/component-operations-context"
 import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
 import { useCallback } from "react"
-import type { Metadata, SettingsField, ViewModeProps, EditModeProps } from "@/client/features/types"
+import type { Metadata, SettingsField, ViewModeProps, EditModeProps, ComponentCategory } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSpacingAttributes, readBoxSpacing, createTextAttribute, createTextareaAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { useDragDrop } from "../editor-controls/drag-drop-context"
@@ -190,6 +190,7 @@ export const componentMetadata = {
 	htmlTag: "div",
 	htmlClassName: "column",
 	label: "Page",
+	category: "Layout" as ComponentCategory,
 	keywords: [],
 	defaultChildren: [],
 	attributes,

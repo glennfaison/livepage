@@ -3,7 +3,7 @@ import { Megaphone } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Metadata, Props, SettingsField } from "@/client/features/types"
+import type { Metadata, Props, SettingsField, ComponentCategory } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readCustomClasses, readTextChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
@@ -33,4 +33,4 @@ const Component = (props: Props) => {
   return <aside className={cn("flex items-start gap-3 rounded-lg border px-4 py-3 text-sm leading-6", tones[tone] || tones.neutral, readCustomClasses(props.component.attributes), props.childClassName)} role="note" {...accessibilityAttrs}><Megaphone className="mt-1 size-4 shrink-0" aria-hidden="true" /><span>{content as React.ReactNode}</span></aside>
 }
 
-export const componentMetadata = { tag, label, keywords, defaultChildren: ["Share an important update."], attributes, Icon, htmlTag: "aside", PreviewModeComponent: withDataSource(Component), EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))) } as const satisfies Metadata
+export const componentMetadata = { tag, label, category: "Feedback" as ComponentCategory, keywords, defaultChildren: ["Share an important update."], attributes, Icon, htmlTag: "aside", PreviewModeComponent: withDataSource(Component), EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))) } as const satisfies Metadata

@@ -42,6 +42,7 @@ import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/desi
 import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
+import type { ComponentCategory } from "@/client/features/types"
 import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
@@ -54,6 +55,7 @@ type PaletteCommand = Readonly<{
   keywords?: ReadonlyArray<string>
   icon?: React.ReactNode
   onSelect: () => void
+  category?: ComponentCategory
 }>
 
 function getCategoryIcon(category: string): React.ReactNode {
@@ -152,6 +154,7 @@ export const CommandPalette: React.FC<
   onDuplicatePage,
 }) => {
   const [search, setSearch] = useState("")
+  const [insertComponentSearch, setInsertComponentSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -159,6 +162,7 @@ export const CommandPalette: React.FC<
   useEffect(() => {
     if (!open) return
     setSearch("")
+    setInsertComponentSearch("")
     setActiveIndex(0)
     const id = window.setTimeout(() => inputRef.current?.focus(), 0)
     return () => window.clearTimeout(id)
@@ -340,7 +344,7 @@ export const CommandPalette: React.FC<
       ? componentOperations.findComponentById(state.componentTree, state.selectedComponentId)
       : currentPage
     const insertParentId = insertParent?.attributes.id
-    const insertCommands: PaletteCommand[] = (insertParent ? getComponentsAllowedIn(insertParent.tag) : []).map(({ tag }) => {
+    const insertCommands: PaletteCommand[] = (insertParent ? getComponentsAllowedIn(insertParent.tag) : []).map(({ tag, category }) => {
       const info = getComponentInfo(tag)
       return {
         id: `insert-${tag}`,
@@ -349,6 +353,7 @@ export const CommandPalette: React.FC<
         description: state.selectedComponentId ? "Inside the selected component" : "Onto the current page",
         keywords: [tag, ...info.keywords],
         icon: info.Icon,
+        category,
         onSelect: () => componentOperations.addComponent({ tag, parentId: insertParentId }),
       }
     })
@@ -408,14 +413,26 @@ export const CommandPalette: React.FC<
 
   const filteredCommands = useMemo(() => {
     const term = search.trim().toLowerCase()
-    if (!term) return commands
+    const insertTerm = insertComponentSearch.trim().toLowerCase()
+    if (!term && !insertTerm) return commands
     return commands.filter((command) => {
-      const haystack = [command.label, command.description ?? "", ...(command.keywords ?? [])]
-        .join(" ")
-        .toLowerCase()
-      return haystack.includes(term)
+      // For insert component commands, also check the insert component search term
+      if (command.group === "Insert component" && insertTerm) {
+        const insertHaystack = [command.label, command.description ?? "", ...(command.keywords ?? []), command.category ?? ""]
+          .join(" ")
+          .toLowerCase()
+        if (!insertHaystack.includes(insertTerm)) return false
+      }
+      // Global search term
+      if (term) {
+        const haystack = [command.label, command.description ?? "", ...(command.keywords ?? [])]
+          .join(" ")
+          .toLowerCase()
+        if (!haystack.includes(term)) return false
+      }
+      return true
     })
-  }, [commands, search])
+  }, [commands, search, insertComponentSearch])
 
   // Precompute id -> index once per filter pass instead of calling
   // filteredCommands.indexOf(command) inside the render loop (O(n) per row,
@@ -429,16 +446,24 @@ export const CommandPalette: React.FC<
   const groupedCommands = useMemo(() => {
     const groups = new Map<string, PaletteCommand[]>()
     for (const command of filteredCommands) {
-      const list = groups.get(command.group) ?? []
-      list.push(command)
-      groups.set(command.group, list)
+      // For "Insert component" group, create subgroups by category
+      if (command.group === "Insert component" && command.category) {
+        const subGroup = `Insert component: ${command.category}`
+        const list = groups.get(subGroup) ?? []
+        list.push(command)
+        groups.set(subGroup, list)
+      } else {
+        const list = groups.get(command.group) ?? []
+        list.push(command)
+        groups.set(command.group, list)
+      }
     }
     return Array.from(groups.entries())
   }, [filteredCommands])
 
   useEffect(() => {
     setActiveIndex(0)
-  }, [search])
+  }, [search, insertComponentSearch])
 
   const runCommand = useCallback(
     (command: PaletteCommand | undefined) => {
@@ -504,6 +529,17 @@ export const CommandPalette: React.FC<
                 <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group}
                 </p>
+                {group.startsWith("Insert component:") && (
+                  <div className="px-2 pb-2">
+                    <Input
+                      value={insertComponentSearch}
+                      onChange={(event) => setInsertComponentSearch(event.target.value)}
+                      placeholder={`Filter ${group.replace("Insert component: ", "")} components…`}
+                      className="h-8 text-sm"
+                      aria-label={`Filter ${group} components`}
+                    />
+                  </div>
+                )}
                 {groupCommands.map((command) => {
                   const index = commandIndexById.get(command.id) ?? 0
                   const isActive = index === activeIndex

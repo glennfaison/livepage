@@ -3,7 +3,7 @@ import { Tag } from "lucide-react"
 import { withDataSource } from "@/client/features/data-sources"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Metadata, Props, SettingsField } from "@/client/features/types"
+import type { Metadata, Props, SettingsField, ComponentCategory } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createSelectAttribute, createTextAttribute, readCustomClasses, readTextChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
@@ -37,8 +37,8 @@ const Component = (props: Props) => {
 }
 
 export const componentMetadata = {
-  tag, label, keywords, defaultChildren: ["New"], attributes, Icon, htmlTag: "span",
-  PreviewModeComponent: withDataSource(Component),
-  EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))),
+	tag, label, category: "Feedback" as ComponentCategory, keywords, defaultChildren: ["New"], attributes, Icon, htmlTag: "span",
+	PreviewModeComponent: withDataSource(Component),
+	EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))),
 } as const satisfies Metadata
 
