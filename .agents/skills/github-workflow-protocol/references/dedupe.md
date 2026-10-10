@@ -1,6 +1,6 @@
 # Dedupe
 
-Used by Exploring (before filing) and Grooming (on a claimed issue).
+Used by `file-github-issue` (the Exploring column below, before filing) and `triage-github-issue` (the Grooming column, on a claimed issue).
 
 ## Search
 

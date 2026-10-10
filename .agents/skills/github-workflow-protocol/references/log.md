@@ -10,7 +10,7 @@ This is deliberately not a file in the repository. A committed log would need a 
 
 ## What to write
 
-Write the entry to a temp file, then run `log_run FILE`. Keep it short. Use this shape:
+A group skill writes one entry per run, covering all the items it dispatched. An item skill run on its own (not dispatched by a group skill) writes an entry for its one item. Write the entry to a temp file, then run `log_run FILE`. Keep it short. Use this shape:
 
 ```markdown
 **Step:** Grooming  **Run:** 20261009T033000Z-1234  **Runner:** grok
