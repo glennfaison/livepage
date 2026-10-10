@@ -6,6 +6,7 @@ import {
   updateComponent,
   removeComponent,
   duplicateComponent,
+  duplicatePage,
   replaceComponent,
   moveComponent,
   findComponentParentTree,
@@ -301,6 +302,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         promptAssistEnabled: action.payload,
       }
+
+    case "DUPLICATE_PAGE": {
+      const activePage = state.componentTree.find(
+        (p) => p.tag === "page" && p.attributes.id === state.activePage
+      )
+      if (!activePage) return state
+
+      const newComponentTree = duplicatePage({
+        components: state.componentTree,
+        pageId: state.activePage,
+      })
+
+      const newPage = newComponentTree.find(
+        (p) => p.tag === "page" && p.attributes.id !== activePage.attributes.id && p.attributes.title === `${activePage.attributes.title ?? "Page"} (copy)`
+      )
+
+      return withHistory(
+        {
+          ...state,
+          componentTree: newComponentTree,
+          activePage: newPage?.attributes.id ?? state.activePage,
+        },
+        newComponentTree,
+        `Duplicated page ${activePage.attributes.id}`,
+      )
+    }
 
     case "ADD_TO_HISTORY": {
       const { action: historyAction, pageState } = action.payload

@@ -21,13 +21,13 @@ The workflow mirrors the manual steps we used in this session:
 8. Clean up the temporary zip extraction folder.
 
 ## Usage
-
 ```bash
 node scripts/import-zip-branch.mjs /path/to/archive.zip
-node scripts/import-zip-branch.mjs /path/to/archive.zip --branch templates/farm-logistics-landing-page
+node scripts/import-zip-branch.mjs /path/to/archive.zip --branch feature/templates-farm-logistics-landing-page
 ```
 
-If a branch is not supplied, the script infers one from the patch filename. For template work, it prefers a `templates/<slug>` naming convention.
+If a branch is not supplied, the script infers one from the patch filename. For
+template work, it prefers a `feature/templates-<slug>` naming convention.
 
 ## Rules
 

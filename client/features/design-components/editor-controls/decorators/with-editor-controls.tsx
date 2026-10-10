@@ -3,11 +3,11 @@ import { SettingsPopover } from "../settings-popover";
 import { Button } from "@/client/components/ui/button";
 import { cn } from "@/client/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { EditModeProps, Metadata } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import { getComponentInfo } from "../../registry-store";
-import { editorChromeButtonClassName, editorChromeSurfaceClassName } from "../shared/editor-chrome";
+import { editorChromeButtonClassName, editorChromeSurfaceClassName, OPEN_COMPONENT_SETTINGS_EVENT } from "../shared/editor-chrome";
 import { getAccessibilityAttributes } from "../../primitives";
 import { useDragDrop } from "../drag-drop-context";
 
@@ -93,18 +93,33 @@ function EditorControls(props: EditModeProps) {
     e.dataTransfer.dropEffect = "move"
   }, [])
 
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  useEffect(() => {
+    const openSettings = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail
+      if (detail === component.attributes.id) {
+        setSettingsOpen(true)
+      }
+    }
+    window.addEventListener(OPEN_COMPONENT_SETTINGS_EVENT, openSettings)
+    return () => window.removeEventListener(OPEN_COMPONENT_SETTINGS_EVENT, openSettings)
+  }, [component.attributes.id])
+
   return (
-    <div className="absolute -top-8 right-0">
+    <div className="absolute -top-8 right-0 z-30 flex flex-col items-end">
       <AncestorTags {...props} />
-      <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)}>
+      <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls">
         <span className="flex items-center px-2 text-xs font-medium text-popover-foreground">{label}</span>
-        <SettingsPopover component={component}>
+        <SettingsPopover component={component} open={settingsOpen} onOpenChange={setSettingsOpen}>
           <Button
             variant="ghost"
             size="icon"
             className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
             aria-label="Settings"
             title="Settings"
+            data-testid="component-settings-trigger"
+            data-settings-trigger={component.attributes.id}
             onClick={(e) => e.stopPropagation()}
           >
             <SettingsIcon className="h-4 w-4" />
@@ -181,19 +196,24 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
       setSelectedComponent(props.component.attributes.id)
     }, [props.component.attributes.id, setSelectedComponent])
 
+    const editMode = props.pageBuilderMode === "edit"
+
     return (
       <div
         onClick={selectComponent}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
         className={cn(
-          "block relative border border-transparent transition-all",
-          showControls && "border-primary",
-          "hover:border-gray-300",
+          "relative block",
+          // Outline (not border) so selection chrome does not change content layout.
+          editMode && "outline outline-1 outline-offset-2 outline-transparent transition-shadow hover:outline-muted-foreground/50",
+          showControls && "outline-2 outline-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.18)] hover:outline-primary",
           childClassName,
         )}
         {...accessibilityAttrs}
         data-component-id={props.component.attributes.id}
+        data-selected={showControls ? "true" : "false"}
+        aria-selected={showControls}
       >
         {showControls && <EditorControls {...props} />}
         <WrappedComponent {...props} />

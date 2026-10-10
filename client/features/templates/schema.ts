@@ -15,9 +15,11 @@ const templateFieldMappingSchema = z.object({
   targets: z.array(templateFieldTargetSchema).min(1),
 })
 
+export const CURRENT_TEMPLATE_VERSION = 1
+
 export const pageTemplateDefinitionSchema = z.object({
   schema: z.literal("livepage-template"),
-  version: z.literal(1),
+  version: z.number().int().positive().max(CURRENT_TEMPLATE_VERSION),
   id: z.string().min(1),
   metadata: z.object({
     name: z.string().min(1),
@@ -51,4 +53,30 @@ export type PageTemplateDefinition = z.infer<typeof pageTemplateDefinitionSchema
 
 export function parsePageTemplateDefinition(input: unknown): PageTemplateDefinition {
   return pageTemplateDefinitionSchema.parse(input)
+}
+
+export type TemplateMigration = (
+  template: PageTemplateDefinition
+) => PageTemplateDefinition
+
+export const templateMigrations: Readonly<Record<number, TemplateMigration>> = {}
+
+export function migrateTemplateToCurrent(template: PageTemplateDefinition): PageTemplateDefinition {
+  let migrated = template
+  for (let version = template.version; version < CURRENT_TEMPLATE_VERSION; version++) {
+    const migration = templateMigrations[version]
+    if (!migration) {
+      throw new Error(`No migration found from version ${version} to ${version + 1}`)
+    }
+    migrated = migration(migrated)
+  }
+  return { ...migrated, version: CURRENT_TEMPLATE_VERSION }
+}
+
+export function validateAndMigrateTemplate(input: unknown): PageTemplateDefinition {
+  const parsed = pageTemplateDefinitionSchema.parse(input)
+  if (parsed.version < CURRENT_TEMPLATE_VERSION) {
+    return migrateTemplateToCurrent(parsed)
+  }
+  return parsed
 }

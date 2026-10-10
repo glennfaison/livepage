@@ -166,6 +166,10 @@ export default function BuilderPage() {
     }
   }
 
+  const handleDuplicatePage = () => {
+    componentOperations.duplicatePage?.()
+  }
+
   const applyTemplate = (templateId: string) => {
     const template = getPageTemplateById(templateId)
     if (!template) {
@@ -372,13 +376,17 @@ export default function BuilderPage() {
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onOpenAIAssistant={() => setAiAssistantOpen(true)}
           pageComponent={currentPage}
           componentTree={state.componentTree}
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onDuplicatePage={handleDuplicatePage}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
+          canUndo={canUndo}
+          canRedo={canRedo}
         />
 
         <CommandPalette
@@ -398,6 +406,7 @@ export default function BuilderPage() {
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
+          onDuplicatePage={handleDuplicatePage}
         />
 
         <ValidationDialog
