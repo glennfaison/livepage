@@ -205,6 +205,10 @@ export const CommandPalette: React.FC<
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceed()
+      return
+    }
     setValidationResult(validation)
     setPendingExportAction(action)
     setValidationDialogOpen(true)

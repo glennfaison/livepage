@@ -95,6 +95,10 @@ export default function BuilderPage() {
 
   const previewExport = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceed()
+      return
+    }
     setValidationResult(validation)
     setPendingExportAction("preview")
     setValidationDialogOpen(true)
@@ -140,6 +144,10 @@ export default function BuilderPage() {
 
   const copyHtmlToClipboard = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceed()
+      return
+    }
     setValidationResult(validation)
     setPendingExportAction("copy")
     setValidationDialogOpen(true)
