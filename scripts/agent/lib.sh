@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Shared helpers for the agent workflow (.agents/workflow/_shared/Protocol.md).
+# Shared helpers for the agent workflow (.agents/skills/github-workflow-protocol/SKILL.md).
 # Usage: source scripts/agent/lib.sh
 # Requires: gh (authenticated), jq, GNU date.
 
 AGENT_ROOT="$(git rev-parse --show-toplevel)"
 # shellcheck disable=SC1091
-source "$AGENT_ROOT/.agents/workflow/_shared/config.env"
+source "$AGENT_ROOT/.agents/skills/github-workflow-protocol/config.env"
 
 RUN_ID="${RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
 export RUN_ID

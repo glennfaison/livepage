@@ -4,7 +4,7 @@ The `/handoff` skill compacts a conversation into a document for another agent a
 
 - Follow the skill's rules: write for a fresh agent with none of your context, reference artifacts (PR, issue, commit, check run) by link instead of copying them, and redact secrets and personal data.
 - Compose it in a file in the OS temp directory, then post it with `gh pr comment N --body-file FILE`. **Never write it into the repository.**
-- End the comment with the marker the step requires (see `_shared/Protocol.md`).
+- End the comment with the marker the step requires (see `../SKILL.md`).
 
 ## Contents by author
 

@@ -1,6 +1,6 @@
 # Issue format
 
-What a well-formed issue contains. Exploring **writes** to this format, Grooming **checks** against it, and Implementing **reads** it. The headings mirror `.github/ISSUE_TEMPLATE/bug_report.yml` and `feature_request.yml`, so agent-filed and human-filed issues look alike.
+What a well-formed issue contains. `file-github-issue` **writes** to this format, `triage-github-issue` **checks** against it, and `implement-github-issue` **reads** it. The headings mirror `.github/ISSUE_TEMPLATE/bug_report.yml` and `feature_request.yml`, so agent-filed and human-filed issues look alike.
 
 Agents never apply labels when filing. (The templates add `bug` and `enhancement` for humans; agent-filed issues get their labels during Grooming.) Put the category on a `Category:` line in the body instead.
 
