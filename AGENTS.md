@@ -17,23 +17,25 @@ find the right skill, then read its `SKILL.md` before following its workflow.
 
 ## Workflows
 
-Agent workflows live in [.agents/workflow/](./.agents/workflow/). Each step file
-documents its **Inputs** (what it selects and claims) and **Outputs** (labels,
-comments, and artifacts it produces). Shared material is in
-[.agents/workflow/_shared/](./.agents/workflow/_shared/).
+The GitHub workflows are skills in [.agents/skills/](./.agents/skills/). Each step
+has a **group skill** that selects work and an **item skill** that does the work
+on one issue or PR. Group skills dispatch to item skills, so both can be run
+directly: `/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
 
 **Shared (read first for labels and protocol):**
 
-- [Labels.md](./.agents/workflow/_shared/Labels.md) — Every label the workflows use, and the state transitions between them
-- [Protocol.md](./.agents/workflow/_shared/Protocol.md) — Claim/lease rules, helpers, and interactive-skill overrides
+- [github-workflow-protocol](./.agents/skills/github-workflow-protocol/SKILL.md) — Claim/lease rules, helpers, unattended and no-shell rules, interactive-skill overrides
+- [labels.md](./.agents/skills/github-workflow-protocol/references/labels.md) — Every label the workflows use, and the state transitions between them
 
 **Steps** (independent; may run in any order or in parallel):
 
-- [Exploring.md](./.agents/workflow/Exploring.md) — Explore app/codebase; file unlabeled issues
-- [Grooming.md](./.agents/workflow/Grooming.md) — Triage and mark issues ready-for-agent or ready-for-human
-- [Implementing.md](./.agents/workflow/Implementing.md) — Implement a ready-for-agent issue and open a PR
-- [Shepherding.md](./.agents/workflow/Shepherding.md) — Get a PR through checks and post the review handoff
-- [Reviewing.md](./.agents/workflow/Reviewing.md) — Review a ready PR and merge when safe
+| Step | Group skill | Item skill |
+| --- | --- | --- |
+| Explore the app and codebase; file unlabelled issues | [explore-github-repo](./.agents/skills/explore-github-repo/SKILL.md) | [file-github-issue](./.agents/skills/file-github-issue/SKILL.md) |
+| Triage; mark issues ready-for-agent or ready-for-human | [triage-github-issues](./.agents/skills/triage-github-issues/SKILL.md) | [triage-github-issue](./.agents/skills/triage-github-issue/SKILL.md) |
+| Implement a ready-for-agent issue and open a PR | [implement-github-issues](./.agents/skills/implement-github-issues/SKILL.md) | [implement-github-issue](./.agents/skills/implement-github-issue/SKILL.md) |
+| Get a PR through checks and post the review handoff | [shepherd-github-prs](./.agents/skills/shepherd-github-prs/SKILL.md) | [shepherd-github-pr](./.agents/skills/shepherd-github-pr/SKILL.md) |
+| Review a ready PR and merge when safe | [review-github-prs](./.agents/skills/review-github-prs/SKILL.md) | [review-github-pr](./.agents/skills/review-github-pr/SKILL.md) |
 
 ## Branch names
 

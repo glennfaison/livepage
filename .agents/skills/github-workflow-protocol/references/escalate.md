@@ -15,6 +15,6 @@ Use when an agent should stop and hand an item to a human. Any step can call thi
 2. In one command, remove the item's state label and add `agent:stuck`. For a PR, request review from `HUMAN_REVIEWER`: `gh pr edit N --add-reviewer "$HUMAN_REVIEWER"`.
 3. For a PR with a linked issue, also post a one-line comment on the issue pointing at the PR.
 4. Release your lease (`release N issue|pr LABEL`).
-5. Log it (see `Log.md`). Stop work on this item.
+5. Log it (see `log.md`). Stop work on this item.
 
 `agent:stuck` makes every step ignore the item. Only a human removes it.
