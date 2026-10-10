@@ -199,4 +199,50 @@ describe("CommandPalette", () => {
 
     expect(dispatch).toHaveBeenCalledWith({ type: "DISCARD_CHANGES" })
   })
+  it("groups insert components by category and narrows them with the insert filter", async () => {
+    renderPalette()
+
+    // Insert commands are split into per-category groups (issue #210).
+    await waitFor(() => {
+      expect(screen.getByText("Insert component: Layout")).toBeInTheDocument()
+      expect(screen.getByText("Insert component: Typography")).toBeInTheDocument()
+      expect(screen.getByText("Insert component: Media")).toBeInTheDocument()
+    })
+
+    expect(screen.getByText("Insert Row")).toBeInTheDocument()
+    expect(screen.getByText("Insert Header 1")).toBeInTheDocument()
+
+    const layoutFilter = screen.getByRole("textbox", { name: "Filter Insert component: Layout components" })
+    await userEvent.type(layoutFilter, "column")
+
+    expect(screen.getByText("Insert Column")).toBeInTheDocument()
+    expect(screen.queryByText("Insert Row")).not.toBeInTheDocument()
+    // The insert filter is shared by every category group, so a Typography
+    // group without a match collapses instead of keeping stale entries.
+    expect(screen.queryByText("Insert component: Typography")).not.toBeInTheDocument()
+    // Typography entries do not match either, so the whole group collapses.
+    expect(screen.queryByText("Insert Header 1")).not.toBeInTheDocument()
+    // Non-insert groups are untouched by the insert filter.
+    expect(screen.getByText("Undo last change")).toBeInTheDocument()
+
+    await userEvent.clear(layoutFilter)
+
+    expect(screen.getByText("Insert Row")).toBeInTheDocument()
+    expect(screen.getByText("Insert component: Typography")).toBeInTheDocument()
+  })
+
+  it("keeps the insert-component filter independent from the global search", async () => {
+    renderPalette()
+
+    await waitFor(() => {
+      expect(screen.getByText("Insert component: Typography")).toBeInTheDocument()
+    })
+
+    const globalSearch = screen.getByPlaceholderText(/search actions, components, and templates/i)
+    await userEvent.type(globalSearch, "header")
+
+    // The global search still finds insert commands in their own groups.
+    expect(screen.getByText("Insert Header 1")).toBeInTheDocument()
+    expect(screen.queryByText("Undo last change")).not.toBeInTheDocument()
+  })
 })
