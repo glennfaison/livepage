@@ -347,7 +347,7 @@ export const Toolbar: React.FC<Readonly<{
             dispatch={dispatch ?? (() => {})}
             promptAssistEnabled={promptAssistEnabled ?? false}
           >
-            <Button variant="outline" size="sm" title="Settings" className="shrink-0">
+            <Button variant="outline" size="sm" title="Settings" className="shrink-0" data-testid="toolbar-settings-trigger">
               <Settings className="h-4 w-4" />
             </Button>
           </ToolbarSettingsPopover>

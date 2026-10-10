@@ -1,11 +1,11 @@
 "use client"
 
 import { Button } from "@/client/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger, POPOVER_PANEL_MAX_HEIGHT_CLASS } from "@/client/components/ui/popover"
 import { cn } from "@/client/lib/utils"
-import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Save, Settings } from "lucide-react"
+import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Settings } from "lucide-react"
 import type React from "react"
-import { useCallback, useRef, useState } from "react"
+import { useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
@@ -25,6 +25,9 @@ type ToolbarSettingsPopoverProps = Readonly<{
   promptAssistEnabled: boolean
 }>
 
+/** Space kept between the settings panel and the viewport edge. */
+const PANEL_VIEWPORT_MARGIN = 12
+
 export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   isOpen,
   onOpenChange,
@@ -38,43 +41,13 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   dispatch,
   promptAssistEnabled,
 }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [isPositioned, setIsPositioned] = useState(false)
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
-  const popoverRef = useRef<HTMLDivElement>(null)
 
   // Local draft committed on Enter/blur, so a title edit does not dispatch
   // (and add a history entry) for every keystroke.
   const pageTitleDraft = usePageTitleDraft(pageTitle, onPageTitleChange)
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (popoverRef.current) {
-      const rect = popoverRef.current.getBoundingClientRect()
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      })
-      setIsDragging(true)
-      setIsPositioned(true)
-    }
-  }
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y,
-      })
-    }
-  }, [dragOffset.x, dragOffset.y, isDragging])
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
 
   const currentPage = pageComponent
 
@@ -131,34 +104,20 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className={cn("w-72 p-0", isPositioned && "fixed z-50", isDragging && "cursor-grabbing")}
+        className="w-72 p-0"
         align="start"
-        style={
-          isPositioned
-            ? {
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-                position: "fixed",
-              }
-            : undefined
-        }
+        sideOffset={8}
+        collisionPadding={PANEL_VIEWPORT_MARGIN}
       >
-        <div ref={popoverRef} className="bg-background border rounded-lg shadow-lg">
-          <div
-            className={cn(
-              "bg-foreground text-background p-4 rounded-t-lg flex items-center justify-between cursor-grab active:cursor-grabbing",
-              isDragging && "cursor-grabbing",
-            )}
-            onMouseDown={handleMouseDown}
-          >
+        <div className={cn("flex flex-col overflow-hidden rounded-lg border bg-background shadow-lg", POPOVER_PANEL_MAX_HEIGHT_CLASS)}>
+          <div className="bg-foreground text-background p-4 rounded-t-lg flex items-center shrink-0">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Settings
             </h2>
-            <GripVertical className="h-4 w-4 opacity-60" />
           </div>
 
-          <div className="p-4 space-y-4">
+          <div data-testid="settings-panel-body" className="p-4 space-y-4 overflow-y-auto">
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Page</h3>
               <div className="space-y-2">
