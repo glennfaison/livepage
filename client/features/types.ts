@@ -59,6 +59,7 @@ export type AppAction =
   | Readonly<{ type: "SET_ORIGINAL_HISTORY_STATE"; payload: ReadonlyArray<AppNode> | null }>
   | Readonly<{ type: "RESTORE_FROM_HISTORY"; payload: Readonly<{ historyIndex: number }> }>
   | Readonly<{ type: "DISCARD_CHANGES" }>
+  | Readonly<{ type: "DUPLICATE_PAGE" }>
 
 export type SettingsValue = string | number | boolean | ReadonlyArray<string>
 export type SettingsFormData = Readonly<Record<string, SettingsValue>>
@@ -237,6 +238,7 @@ export type Operations = Readonly<{
   updateComponent: (componentId: string, updates: Partial<AppNode>) => void
   removeComponent: (id: string) => void
   duplicateComponent?: (id: string) => void
+  duplicatePage?: () => void
   moveComponent?: (componentId: string, newParentId: string, index?: number) => void
   addComponent: (args: { tag: string; parentId?: string; index?: number }) => void
   replaceComponent: (oldComponentId: string, newComponentTag: string) => void

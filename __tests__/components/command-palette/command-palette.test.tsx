@@ -1,5 +1,5 @@
 "use client"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@/client/features/design-components"
 import { CommandPalette } from "@/client/features/command-palette"
@@ -49,6 +49,7 @@ function buildComponentOperations(): Operations {
     updateComponent: jest.fn(),
     removeComponent: jest.fn(),
     duplicateComponent: jest.fn(),
+    duplicatePage: jest.fn(),
     setSelectedComponent: jest.fn(),
     replaceComponent: jest.fn(),
     findComponentById: jest.fn(),
@@ -79,6 +80,7 @@ function renderPalette(stateOverrides: Partial<AppState> = {}) {
       onImportShortcode={jest.fn()}
       onDiscardChanges={jest.fn()}
       onOpenAIAssistant={jest.fn()}
+      onDuplicatePage={jest.fn()}
     />,
   )
 
@@ -168,6 +170,7 @@ describe("CommandPalette", () => {
         onImportShortcode={jest.fn()}
         onDiscardChanges={jest.fn()}
         onOpenAIAssistant={jest.fn()}
+        onDuplicatePage={jest.fn()}
       />,
     )
 
@@ -179,5 +182,21 @@ describe("CommandPalette", () => {
 
     expect(onApplyTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
     expect(toast).toHaveBeenCalledWith({ title: "Template applied", description: "Personal CV / Resume" })
+  })
+
+  it("asks before discarding all changes, and only discards once confirmed", async () => {
+    window.localStorage.clear()
+    const user = userEvent.setup()
+    const { dispatch } = renderPalette()
+
+    await user.click(screen.getByText("Discard all changes"))
+
+    const dialog = within(screen.getByRole("dialog"))
+    expect(dialog.getByText("Discard all changes?")).toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalled()
+
+    await user.click(dialog.getByRole("button", { name: "Discard" }))
+
+    expect(dispatch).toHaveBeenCalledWith({ type: "DISCARD_CHANGES" })
   })
 })

@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
+import { useCallback, useState } from "react"
 
 import { useMutation } from "@tanstack/react-query"
-import { useCallback } from "react"
 import type { AppState, AppAction, AppNode } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { createDesignComponentInstance } from "@/client/features/design-components"
@@ -16,6 +16,28 @@ import {
   serializeAppStateAsJson,
   serializeAppStateAsShortcode,
 } from "@/client/features/serializers"
+
+const DISCARD_CONFIRMATION_KEY = "livepage-discard-confirmation"
+
+/** Stored preference for whether a discard must be confirmed. Defaults to true. */
+function getAskBeforeDiscardPreference(): boolean {
+  if (typeof window === "undefined") return true
+  try {
+    const value = window.localStorage.getItem(DISCARD_CONFIRMATION_KEY)
+    return value !== "false"
+  } catch {
+    return true
+  }
+}
+
+function setAskBeforeDiscardPreference(ask: boolean) {
+  if (typeof window === "undefined") return
+  try {
+    window.localStorage.setItem(DISCARD_CONFIRMATION_KEY, String(ask))
+  } catch {
+    // Ignore storage failures (private mode, quota) and keep the in-memory preference.
+  }
+}
 
 export function validateImportedFile(file: File, uploadType: "json" | "shortcode") {
   const expectedExtension = uploadType === "json" ? ".json" : ".txt"
@@ -330,11 +352,21 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch])
 
+  // Duplicate page
+  const duplicatePage = useCallback(() => {
+    dispatch({ type: "DUPLICATE_PAGE" })
+    toast({
+      title: "Page duplicated",
+      description: "The page has been duplicated successfully.",
+    })
+  }, [dispatch])
+
   return {
     addComponent,
     updateComponent,
     removeComponent,
     duplicateComponent,
+    duplicatePage,
     setSelectedComponent,
     replaceComponent,
     moveComponent,
@@ -397,5 +429,64 @@ export function useHistoryOperations(dispatch: React.Dispatch<AppAction>, state:
     handleHistoryAccept,
     handleHistoryDiscard,
     handleDiscard,
+  }
+}
+
+export function useDiscardConfirmation(
+  dispatch: React.Dispatch<AppAction>,
+  state: AppState,
+) {
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [askBeforeDiscard, setAskBeforeDiscard] = useState(getAskBeforeDiscardPreference)
+
+  const hasChanges = state.history.length > 1
+
+  const executeDiscard = useCallback(() => {
+    dispatch({ type: "DISCARD_CHANGES" })
+    toast({
+      title: "Changes discarded",
+      description: "Your page has been reset to its initial state.",
+    })
+  }, [dispatch])
+
+  const handleDiscardWithConfirmation = useCallback(() => {
+    if (!hasChanges) {
+      dispatch({ type: "DISCARD_CHANGES" })
+      toast({
+        title: "Nothing to discard",
+        description: "No changes have been made yet.",
+      })
+      return
+    }
+
+    if (!askBeforeDiscard) {
+      executeDiscard()
+      return
+    }
+
+    setShowConfirmation(true)
+  }, [askBeforeDiscard, dispatch, executeDiscard, hasChanges])
+
+  const handleConfirm = useCallback(() => {
+    executeDiscard()
+    setShowConfirmation(false)
+  }, [executeDiscard])
+
+  const handleCancel = useCallback(() => {
+    setShowConfirmation(false)
+  }, [])
+
+  const handleAskBeforeDiscardChange = useCallback((ask: boolean) => {
+    setAskBeforeDiscard(ask)
+    setAskBeforeDiscardPreference(ask)
+  }, [])
+
+  return {
+    showConfirmation,
+    askBeforeDiscard,
+    handleDiscardWithConfirmation,
+    handleConfirm,
+    handleCancel,
+    handleAskBeforeDiscardChange,
   }
 }

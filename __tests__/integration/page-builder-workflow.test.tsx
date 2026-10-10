@@ -65,6 +65,14 @@ jest.mock("@/client/features/page-builder/hooks", () => ({
     handleHistoryDiscard: jest.fn(),
     handleDiscard: jest.fn(),
   })),
+  useDiscardConfirmation: jest.fn(() => ({
+    showConfirmation: false,
+    askBeforeDiscard: true,
+    handleDiscardWithConfirmation: jest.fn(),
+    handleConfirm: jest.fn(),
+    handleCancel: jest.fn(),
+    handleAskBeforeDiscardChange: jest.fn(),
+  })),
 }))
 
 // Mock the page-builder toolbar (page rendering is handled by the real components in tests)
@@ -163,7 +171,7 @@ describe("BuilderPage Integration", () => {
     expect(new URLSearchParams(window.location.search).get("template")).toBe("patient-health-dashboard")
   })
 
-  it("updates page title when input changes", async () => {
+  it("saves the page title on Enter, not on every keystroke", async () => {
     const { useAppState } = jest.requireMock("@/client/features/app-state")
     const { useComponentOperations } = jest.requireMock("@/client/features/page-builder/hooks")
     const mockUpdateComponent = jest.fn()
@@ -197,9 +205,12 @@ describe("BuilderPage Integration", () => {
 
     const titleInput = screen.getByPlaceholderText("Page Title")
     await userEvent.clear(titleInput)
-    expect(titleInput).toHaveValue('')
     await userEvent.type(titleInput, "New Page Title")
+    expect(mockUpdateComponent).not.toHaveBeenCalled()
 
+    await userEvent.type(titleInput, "{Enter}")
+
+    expect(mockUpdateComponent).toHaveBeenCalledTimes(1)
     expect(mockUpdateComponent).toHaveBeenCalledWith("page-1", expect.objectContaining({ attributes: { title: "New Page Title" } }))
   })
 
@@ -306,7 +317,7 @@ describe("BuilderPage Integration", () => {
     await userEvent.click(screen.getByRole("button", { name: /templates/i }))
     expect(await screen.findByText("Personal CV / Resume")).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole("button", { name: /personal cv \/ resume/i }))
+    await userEvent.click(screen.getByRole("button", { name: "Apply Personal CV / Resume template" }))
 
     expect(mockDispatch.mock.calls.map(([action]: [{ type: string }]) => action.type)).toEqual([
       "SET_PAGES",

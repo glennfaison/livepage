@@ -58,6 +58,3 @@ next-env.d.ts
 
 # Fallow
 .fallow
-
-# Kilo
-.kilo/

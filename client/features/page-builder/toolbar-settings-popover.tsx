@@ -8,6 +8,7 @@ import type React from "react"
 import { useCallback, useRef, useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
 import { toast } from "@/client/components/ui/use-toast"
 
 type ToolbarSettingsPopoverProps = Readonly<{
@@ -45,6 +46,10 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
+
+  // Local draft committed on Enter/blur, so a title edit does not dispatch
+  // (and add a history entry) for every keystroke.
+  const pageTitleDraft = usePageTitleDraft(pageTitle, onPageTitleChange)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (popoverRef.current) {
@@ -159,9 +164,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 <input
                   id="page-title"
                   type="text"
-                  value={pageTitle}
-                  onChange={(e) => onPageTitleChange(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={pageTitleDraft.value}
+                  onChange={(e) => pageTitleDraft.changeDraft(e.target.value)}
+                  onKeyDown={pageTitleDraft.handleKeyDown}
+                  onBlur={pageTitleDraft.handleBlur}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 bg-transparent text-sm font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter page title"
                 />
               </div>

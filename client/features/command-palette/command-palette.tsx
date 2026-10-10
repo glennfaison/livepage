@@ -39,8 +39,11 @@ import { toast } from "@/client/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
+import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
+import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
 import type { ComponentCategory } from "@/client/features/types"
+import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
@@ -129,6 +132,7 @@ export const CommandPalette: React.FC<
     onImportShortcode: () => void
     onDiscardChanges: () => void
     onOpenAIAssistant: () => void
+    onDuplicatePage: () => void
   }>
 > = ({
   open,
@@ -147,10 +151,12 @@ export const CommandPalette: React.FC<
   onImportShortcode,
   onDiscardChanges,
   onOpenAIAssistant,
+  onDuplicatePage,
 }) => {
   const [search, setSearch] = useState("")
   const [insertComponentSearch, setInsertComponentSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
+  const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -186,6 +192,16 @@ export const CommandPalette: React.FC<
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+
+  // Discard confirmation, shared with the toolbar so both surfaces behave alike.
+  const {
+    showConfirmation: showDiscardConfirmation,
+    askBeforeDiscard,
+    handleDiscardWithConfirmation,
+    handleConfirm: handleDiscardConfirm,
+    handleCancel: handleDiscardCancel,
+    handleAskBeforeDiscardChange,
+  } = useDiscardConfirmation(dispatch, state)
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
@@ -248,7 +264,7 @@ export const CommandPalette: React.FC<
         label: "Discard all changes",
         keywords: ["discard", "reset", "revert"],
         icon: <RotateCcw className="h-4 w-4" />,
-        onSelect: onDiscardChanges,
+        onSelect: handleDiscardWithConfirmation,
       },
       {
         id: "action-save-json",
@@ -314,6 +330,14 @@ export const CommandPalette: React.FC<
         icon: <Bot className="h-4 w-4" />,
         onSelect: onOpenAIAssistant,
       },
+      {
+        id: "action-duplicate-page",
+        group: "Actions",
+        label: "Duplicate page",
+        keywords: ["duplicate", "copy", "page", "clone"],
+        icon: <Copy className="h-4 w-4" />,
+        onSelect: onDuplicatePage,
+      },
     ]
 
     const insertParent = state.selectedComponentId
@@ -339,7 +363,7 @@ export const CommandPalette: React.FC<
       group: "Templates",
       label: `Apply template: ${template.name}`,
       description: template.description,
-      keywords: [template.category, ...template.tags],
+      keywords: [template.category, ...template.tags, "preview"],
       icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
         onApplyTemplate(template.id)
@@ -384,6 +408,7 @@ export const CommandPalette: React.FC<
     onSaveAsShortcode,
     onImportJson,
     onImportShortcode,
+    onDuplicatePage,
   ])
 
   const filteredCommands = useMemo(() => {
@@ -458,7 +483,16 @@ export const CommandPalette: React.FC<
       setActiveIndex((index) => Math.max(index - 1, 0))
     } else if (event.key === "Enter") {
       event.preventDefault()
-      runCommand(filteredCommands[activeIndex])
+      if (event.shiftKey) {
+        // Shift+Enter: preview template
+        const command = filteredCommands[activeIndex]
+        if (command?.id.startsWith("template-")) {
+          const templateId = command.id.replace("template-", "")
+          setPreviewTemplateId(templateId)
+        }
+      } else {
+        runCommand(filteredCommands[activeIndex])
+      }
     }
   }
 
@@ -542,9 +576,19 @@ export const CommandPalette: React.FC<
           <span className="flex items-center gap-1">
             <CommandIcon className="h-3 w-3" /> K to toggle
           </span>
-          <span>↑↓ to navigate · ↵ to run · Esc to close</span>
+          <span>↑↓ to navigate · ↵ to run · ⇧↵ to preview · Esc to close</span>
         </div>
       </DialogContent>
+
+      <TemplatePreviewModal
+        templateId={previewTemplateId ?? ""}
+        isOpen={previewTemplateId !== null}
+        onClose={() => setPreviewTemplateId(null)}
+        onApplyTemplate={(templateId) => {
+          onApplyTemplate(templateId)
+          onOpenChange(false)
+        }}
+      />
 
       <ValidationDialog
         validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
@@ -556,6 +600,15 @@ export const CommandPalette: React.FC<
         }}
         isOpen={validationDialogOpen}
         onOpenChange={setValidationDialogOpen}
+      />
+
+      {/* Discard Confirmation Dialog */}
+      <DiscardConfirmationDialog
+        open={showDiscardConfirmation}
+        askBeforeDiscard={askBeforeDiscard}
+        onCancel={handleDiscardCancel}
+        onConfirm={handleDiscardConfirm}
+        onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
       />
     </Dialog>
   )

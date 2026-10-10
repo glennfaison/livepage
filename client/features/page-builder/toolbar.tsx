@@ -1,17 +1,26 @@
 "use client"
 
 import { HistoryPopover } from "@/client/features/page-builder/history-popover"
+import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
 import { Button } from "@/client/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/client/components/ui/dialog"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
+import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import type { HistoryEntry } from "@/client/features/types"
+import type { HistoryEntry, AppState } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { useDiscardConfirmation, useHistoryOperations } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -76,15 +85,20 @@ export const Toolbar: React.FC<Readonly<{
   onUndo?: () => void
   /** Redo callback */
   onRedo?: () => void
+  /** Duplicate page callback */
+  onDuplicatePage?: () => void
   /** App dispatch for settings */
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
   promptAssistEnabled?: boolean
+  /** Pre-computed undo/redo availability from parent to avoid stale closure issues */
+  canUndo?: boolean
+  canRedo?: boolean
 }>> = ({
   toolbarMinimized,
   setToolbarMinimized,
   savePage,
-  handleDiscard,
+  handleDiscard: _handleDiscard,
   pageBuilderMode,
   history,
   currentHistoryIndex,
@@ -99,8 +113,11 @@ export const Toolbar: React.FC<Readonly<{
   onPageTitleChange,
   onUndo,
   onRedo,
+  onDuplicatePage,
   dispatch,
   promptAssistEnabled,
+  canUndo: canUndoProp,
+  canRedo: canRedoProp,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -114,14 +131,30 @@ export const Toolbar: React.FC<Readonly<{
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
   const currentPage = pageComponent ?? componentTree[0]
-  const canUndo = currentHistoryIndex > 0
-  const canRedo = currentHistoryIndex < history.length - 1
+  const canUndo = canUndoProp ?? currentHistoryIndex > 0
+  const canRedo = canRedoProp ?? currentHistoryIndex < history.length - 1
+
+  // Discard confirmation
+  const {
+    showConfirmation,
+    askBeforeDiscard,
+    handleDiscardWithConfirmation,
+    handleConfirm,
+    handleCancel,
+    handleAskBeforeDiscardChange,
+  } = useDiscardConfirmation(dispatch ?? (() => {}), {
+    history,
+    currentHistoryIndex,
+    historyPreviewIndex,
+    originalHistoryState: null,
+  } as AppState)
 
   // Keyboard shortcuts
   useSaveShortcut(savePage)
   useHistoryShortcut(() => setHistoryPopoverOpen(true))
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
+  useDuplicatePageShortcut(() => onDuplicatePage?.())
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -210,21 +243,37 @@ export const Toolbar: React.FC<Readonly<{
 
   if (pageBuilderMode === "preview" as PageBuilderMode) return null
 
+  // ADR 0005 — the pivot is the minimize button when expanded and the maximize
+  // button when minimized. Drag handles are not buttons, so they never count.
+  if (process.env.NODE_ENV !== "production") {
+    if (toolbarMinimized) {
+      assertToolbarButtonBalance(0, 0)
+    } else {
+      const leftButtonCount =
+        (onOpenCommandPalette ? 1 : 0) +
+        (onOpenAIAssistant && promptAssistEnabled ? 1 : 0) +
+        3 // history, undo, redo
+      const rightButtonCount = 5 // save, discard, duplicate page, settings, layout toggle
+      assertToolbarButtonBalance(leftButtonCount, rightButtonCount)
+    }
+  }
+
   return (
-    <div
-      ref={toolbarRef}
-      className={cn(
-        "fixed max-h-[calc(100dvh-1rem)] max-w-[calc(100vw-1rem)] overflow-auto bg-background/50 backdrop-blur-sm shadow-lg border rounded-lg p-2 z-50 select-none",
-        toolbarMinimized && "p-1 w-auto",
-        isDragging && "cursor-grabbing",
-        !isDragging && "transition-all duration-300",
-      )}
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: "translate(-50%, -50%)",
-      }}
-    >
+    <>
+      <div
+        ref={toolbarRef}
+        className={cn(
+          "fixed max-h-[calc(100dvh-1rem)] max-w-[calc(100vw-1rem)] overflow-auto bg-background/50 backdrop-blur-sm shadow-lg border rounded-lg p-2 z-50 select-none",
+          toolbarMinimized && "p-1 w-auto",
+          isDragging && "cursor-grabbing",
+          !isDragging && "transition-all duration-300",
+        )}
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
       {!toolbarMinimized ? (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
@@ -279,8 +328,11 @@ export const Toolbar: React.FC<Readonly<{
           <Button variant="outline" size="sm" onClick={savePage} title="Save" className="shrink-0">
             <Save className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDiscard} title="Discard" className="shrink-0">
+          <Button variant="outline" size="sm" onClick={handleDiscardWithConfirmation} title="Discard" className="shrink-0">
             <X className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
+            <Copy className="h-4 w-4" />
           </Button>
 
           <ToolbarSettingsPopover
@@ -345,5 +397,14 @@ export const Toolbar: React.FC<Readonly<{
         </div>
       )}
     </div>
+
+    <DiscardConfirmationDialog
+      open={showConfirmation}
+      askBeforeDiscard={askBeforeDiscard}
+      onCancel={handleCancel}
+      onConfirm={handleConfirm}
+      onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
+    />
+    </>
   )
 }

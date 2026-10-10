@@ -15,6 +15,26 @@ Finish checklists; the [PR template](./.github/pull_request_template.md) and
 All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
 find the right skill, then read its `SKILL.md` before following its workflow.
 
+## Workflows
+
+Agent workflows live in [.agents/workflow/](./.agents/workflow/). Each step file
+documents its **Inputs** (what it selects and claims) and **Outputs** (labels,
+comments, and artifacts it produces). Shared material is in
+[.agents/workflow/_shared/](./.agents/workflow/_shared/).
+
+**Shared (read first for labels and protocol):**
+
+- [Labels.md](./.agents/workflow/_shared/Labels.md) — Every label the workflows use, and the state transitions between them
+- [Protocol.md](./.agents/workflow/_shared/Protocol.md) — Claim/lease rules, helpers, and interactive-skill overrides
+
+**Steps** (independent; may run in any order or in parallel):
+
+- [Exploring.md](./.agents/workflow/Exploring.md) — Explore app/codebase; file unlabeled issues
+- [Grooming.md](./.agents/workflow/Grooming.md) — Triage and mark issues ready-for-agent or ready-for-human
+- [Implementing.md](./.agents/workflow/Implementing.md) — Implement a ready-for-agent issue and open a PR
+- [Shepherding.md](./.agents/workflow/Shepherding.md) — Get a PR through checks and post the review handoff
+- [Reviewing.md](./.agents/workflow/Reviewing.md) — Review a ready PR and merge when safe
+
 ## Branch names
 
 Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
@@ -22,6 +42,42 @@ Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
 `main`. Topics are lowercase kebab-case. Do not invent prefixes such as `cursor/`,
 `fix/`, or `templates/`. Full patterns and the four layers of enforcement are in
 [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
+## Git hooks (required)
+
+Local git hooks enforce branch-name compliance at commit and push time.
+Enable them at **session start**:
+
+```bash
+git config core.hooksPath scripts/git-hooks
+```
+
+This must be run before any commits or pushes. The hooks validate branch names against the gitflow patterns in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
+## PR descriptions and closing issues
+
+When opening a PR that resolves multiple issues, use separate `Closes` statements for each issue. GitHub only auto-links the first issue in a single sentence.
+
+**Correct:**
+```
+- Closes #122. 
+- Closes #123. 
+- Closes #124. 
+- Closes #125.
+```
+
+**Correct:**
+```
+- Related to #122. 
+- Related to #123. 
+- Related to #124. 
+- Related to #125.
+```
+
+**Incorrect (only closes #122):**
+```
+Closes #122, #123, #124, #125
+```
 
 ## README.md is user-facing and hand-maintained
 

@@ -20,9 +20,10 @@ import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
 import { ChevronDown, Command, Copy, Download, Eye, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
-import React, { useRef, useState } from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
+import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
@@ -64,12 +65,18 @@ export default function BuilderPage() {
 
   // Get the current active page
   const currentPage = selectCurrentPage(state) ?? state.componentTree[0]
-  const updatePageTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!currentPage) return
-    componentOperations.updateComponent(currentPage.attributes.id, {
-      attributes: { title: e.target.value },
-    })
-  }
+  const commitPageTitle = useCallback(
+    (title: string) => {
+      if (!currentPage) return
+      componentOperations.updateComponent(currentPage.attributes.id, {
+        attributes: { title },
+      })
+    },
+    [componentOperations, currentPage],
+  )
+  // Edit the title locally and only write it on Enter/blur: saving per keystroke
+  // pushes a history entry for every character.
+  const pageTitleDraft = usePageTitleDraft(currentPage?.attributes?.title ?? "", commitPageTitle)
 
   const saveAsJSON = () => {
     savePageAsJsonMutation.mutate(state.componentTree)
@@ -164,6 +171,10 @@ export default function BuilderPage() {
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
       dispatch({ type: "SET_ORIGINAL_HISTORY_STATE", payload: null })
     }
+  }
+
+  const handleDuplicatePage = () => {
+    componentOperations.duplicatePage?.()
   }
 
   const applyTemplate = (templateId: string) => {
@@ -328,8 +339,10 @@ export default function BuilderPage() {
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Editing page</p>
                   <Input
                     key={currentPage?.attributes.id}
-                    defaultValue={currentPage?.attributes.title ?? ""}
-                    onChange={updatePageTitle}
+                    value={pageTitleDraft.value}
+                    onChange={(e) => pageTitleDraft.changeDraft(e.target.value)}
+                    onKeyDown={pageTitleDraft.handleKeyDown}
+                    onBlur={pageTitleDraft.handleBlur}
                     aria-label="Page title"
                     className="h-8 w-full min-w-0 max-w-full border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0 sm:max-w-sm"
                     id="page-title"
@@ -378,8 +391,11 @@ export default function BuilderPage() {
           onPageTitleChange={(title) => componentOperations.updateComponent(currentPage?.attributes.id ?? "", { attributes: { title } })}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onDuplicatePage={handleDuplicatePage}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
+          canUndo={canUndo}
+          canRedo={canRedo}
         />
 
         <CommandPalette
@@ -399,6 +415,7 @@ export default function BuilderPage() {
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
+          onDuplicatePage={handleDuplicatePage}
         />
 
         <ValidationDialog

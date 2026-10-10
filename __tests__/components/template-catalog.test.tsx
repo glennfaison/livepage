@@ -163,6 +163,35 @@ describe("TemplateCatalog", () => {
     expect(screen.getByText("Clear your search")).toBeInTheDocument()
   })
 
+  it("previews a template in a modal without applying it", async () => {
+    const user = userEvent.setup()
+    const onApplyTemplate = jest.fn()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} />)
+
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} template` }))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText(templates[0].name)).toBeInTheDocument()
+    expect(within(dialog).getByText(templates[0].category)).toBeInTheDocument()
+    expect(onApplyTemplate).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Close preview" }))
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("applies a template from the preview modal", async () => {
+    const user = userEvent.setup()
+    const onApplyTemplate = jest.fn()
+    const onClose = jest.fn()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} onClose={onClose} />)
+
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} template` }))
+    await user.click(await screen.findByRole("button", { name: "Apply Template" }))
+
+    expect(onApplyTemplate).toHaveBeenCalledWith(templates[0].id)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
   it("renders custom template items when renderTemplateItem is provided", async () => {
     const user = userEvent.setup()
     const renderTemplateItem = jest.fn(() => <div data-testid="custom-item">Custom</div>)
@@ -170,5 +199,30 @@ describe("TemplateCatalog", () => {
 
     expect(screen.getAllByTestId("custom-item")).toHaveLength(2)
     expect(renderTemplateItem).toHaveBeenCalledTimes(2)
+  })
+
+  it("displays template thumbnails in grid view", () => {
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    const images = screen.getAllByRole("img", { name: /preview$/ })
+    expect(images.length).toBe(templates.length)
+    for (const img of images) {
+      expect(img).toHaveAttribute("src")
+      expect(img.getAttribute("src")?.length).toBeGreaterThan(0)
+    }
+  })
+
+  it("displays template thumbnails in list view", async () => {
+    const user = userEvent.setup()
+    render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
+
+    await user.click(screen.getByRole("button", { name: "List view" }))
+
+    const images = screen.getAllByRole("img", { name: /preview$/ })
+    expect(images.length).toBe(templates.length)
+    for (const img of images) {
+      expect(img).toHaveAttribute("src")
+      expect(img.getAttribute("src")?.length).toBeGreaterThan(0)
+    }
   })
 })
