@@ -1,8 +1,9 @@
 "use client"
 
 import React from "react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/client/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger, POPOVER_PANEL_MAX_HEIGHT_CLASS } from "@/client/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
+import { cn } from "@/client/lib/utils"
 import type { AppNode } from "@/client/features/types"
 import { ComponentSettingsTabContent, useComponentSettingsEditor } from "./design-component-settings"
 import { DataSourceListViewTabContent, useDataSourceSettingsEditor } from "./data-source-settings"
@@ -31,7 +32,13 @@ export function SettingsPopover({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0 z-50" side="bottom" align="end" sideOffset={8} collisionPadding={12}>
-        <div className="bg-background border rounded-lg shadow-lg -m-1 h-[min(600px,90vh)] overflow-clip flex flex-col">
+        <div
+          data-testid="component-settings-panel"
+          className={cn(
+            "bg-background border rounded-lg shadow-lg -m-1 flex flex-col overflow-clip",
+            POPOVER_PANEL_MAX_HEIGHT_CLASS,
+          )}
+        >
           <div className="bg-foreground text-background p-3 rounded-t-lg">
             <h2 className="text-sm font-semibold">{componentInfo.label}</h2>
           </div>
