@@ -21,7 +21,7 @@ The GitHub workflows come from the [github-agent-workflow-skills](./.agents/skil
 which lives in this repository for now and is meant to move to its own repository. Its skills are
 linked into [.agents/skills/](./.agents/skills/) by `.agents/skills/github-agent-workflow-skills/scripts/link-skills.sh`, so agents find
 them by name. LivePage's settings for the package are in
-[docs/agents/github-workflow.env](./docs/agents/github-workflow.env).
+[.agents/docs/agents/github-workflow.env](./.agents/docs/agents/github-workflow.env).
 
 Each step has a **group skill** that selects work and an **item skill** that does the work on one
 issue or PR. Group skills dispatch to item skills, so both can be run directly:

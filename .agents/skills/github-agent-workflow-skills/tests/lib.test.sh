@@ -57,7 +57,7 @@ printf 'PR_BASE_BRANCH="develop"\nBUILD_CMD="npm run build"\n' > "$WORK/override
 check "override wins"                   develop "$(AGENT_REPO_CONFIG="$WORK/override.env" bash -c 'source "$1"; echo "$PR_BASE_BRANCH"' _ "$LIB")"
 check "override adds a value"           "npm run build" "$(AGENT_REPO_CONFIG="$WORK/override.env" bash -c 'source "$1"; echo "$BUILD_CMD"' _ "$LIB")"
 check "unset keys keep their default"   "squash" "$(AGENT_REPO_CONFIG="$WORK/override.env" bash -c 'source "$1"; echo "$MERGE_METHOD"' _ "$LIB")"
-mkdir -p docs/agents && printf 'MERGE_METHOD="rebase"\n' > docs/agents/github-workflow.env
+mkdir -p .agents/docs/agents && printf 'MERGE_METHOD="rebase"\n' > .agents/docs/agents/github-workflow.env
 check "repo file is found by default"   rebase "$(unset AGENT_REPO_CONFIG; bash -c 'source "$1"; echo "$MERGE_METHOD"' _ "$LIB")"
 rm -rf docs
 

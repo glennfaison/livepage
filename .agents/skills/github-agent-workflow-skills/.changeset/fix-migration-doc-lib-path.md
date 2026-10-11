@@ -2,6 +2,7 @@
 "github-agent-workflow-skills": patch
 ---
 
-Fix the `lib.sh` source path in `docs/agents/github-workflow-migration.md` so the
-one-time migration script points at the packaged protocol skill instead of the
-old flat `.agents/skills/github-workflow-protocol/` path that no longer exists.
+Move agent-facing docs from `docs/agents/` into `.agents/docs/agents/` per the
+new convention (ADR 0009). Update the GitHub workflow skills' config contract
+and all references to point at `.agents/docs/agents/github-workflow.env` instead
+of the old `docs/agents/github-workflow.env` path.

@@ -1,6 +1,6 @@
 # GitHub workflow: LivePage notes
 
-LivePage uses the [github-agent-workflow-skills](../../.agents/skills/github-agent-workflow-skills/README.md)
+LivePage uses the [github-agent-workflow-skills](../../../.agents/skills/github-agent-workflow-skills/README.md)
 package. Its repository settings are in [github-workflow.env](./github-workflow.env). The notes below are
 one-time migration steps from the workflow's earlier label names and PR conventions. Run them once, then
 this file can be deleted.

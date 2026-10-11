@@ -28,7 +28,7 @@ const LEAKS = [
   [/livepage/i, "mentions LivePage"],
   [/pagecrafter/i, "mentions pagecrafter"],
   [/glennfaison/i, "mentions glennfaison"],
-  [/\.agents\/docs\//, "points at .agents/docs/"],
+  [/\.agents\/docs\/(?!agents)/, "points at .agents/docs/ (except the sanctioned config path prefix)"],
   [/scripts\/agent\//, "points at scripts/agent/"],
   [/\.agents\/skills\/github-workflow-protocol/, "hard-codes the protocol skill's path"],
 ];

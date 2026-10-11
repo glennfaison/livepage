@@ -4,14 +4,14 @@
 # Requires: gh (authenticated), jq, GNU date.
 #
 # Config is layered: this skill's config.defaults.env first, then the repository's own
-# overrides in docs/agents/github-workflow.env (written by /setup-github-workflow).
+# overrides in .agents/docs/agents/github-workflow.env (written by /setup-github-workflow).
 # Set AGENT_REPO_CONFIG to read the overrides from somewhere else.
 
 AGENT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AGENT_ROOT="$(git rev-parse --show-toplevel)"
 # shellcheck disable=SC1091
 source "$AGENT_LIB_DIR/../config.defaults.env"
-AGENT_REPO_CONFIG="${AGENT_REPO_CONFIG:-$AGENT_ROOT/docs/agents/github-workflow.env}"
+AGENT_REPO_CONFIG="${AGENT_REPO_CONFIG:-$AGENT_ROOT/.agents/docs/agents/github-workflow.env}"
 if [ -f "$AGENT_REPO_CONFIG" ]; then
   # shellcheck disable=SC1090
   source "$AGENT_REPO_CONFIG"

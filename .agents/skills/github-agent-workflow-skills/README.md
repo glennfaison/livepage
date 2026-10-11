@@ -15,7 +15,7 @@ Each step is a pair of skills. A **group skill** selects the work (`/triage-gith
 ## Quickstart
 
 1. **Install** the skills and their dependencies (see [Install](#install)).
-2. **Set up the repository.** In an agent, run `/setup-github-workflow`. It checks the dependencies, asks for the repository's settings, writes `docs/agents/github-workflow.env`, and creates the labels.
+2. **Set up the repository.** In an agent, run `/setup-github-workflow`. It checks the dependencies, asks for the repository's settings, writes `.agents/docs/agents/github-workflow.env`, and creates the labels.
 3. **Try each step once by hand**, and read the run-log comment it leaves (a monthly `Agent log` issue). Reviewing merges PRs, so use a sandbox repository first.
 4. **Schedule** one prompt per step on your runner:
 
@@ -83,7 +83,7 @@ Commit the links. Run the script again after updating the package.
 
 ## Configuration
 
-Defaults ship in [config.defaults.env](./skills/github-workflow/github-workflow-protocol/config.defaults.env): batch sizes, lease lengths, escalation limits, the PR base branch, merge method, build command and more. A repository overrides any of them in `docs/agents/github-workflow.env`, which `/setup-github-workflow` writes. The repository's value wins.
+Defaults ship in [config.defaults.env](./skills/github-workflow/github-workflow-protocol/config.defaults.env): batch sizes, lease lengths, escalation limits, the PR base branch, merge method, build command and more. A repository overrides any of them in `.agents/docs/agents/github-workflow.env`, which `/setup-github-workflow` writes. The repository's value wins.
 
 ## Layout
 
