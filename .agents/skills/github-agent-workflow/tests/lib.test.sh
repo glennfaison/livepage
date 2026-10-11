@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for the shell helpers in agent-workflow-protocol/scripts/lib.sh, against a stub `gh`.
 #   bash tests/lib.test.sh
-# Needs bash, jq, git and GNU date. No network and no real `gh`.
+# Needs bash, jq, git and Python 3. No network and no real `gh`.
 set -u
 
 PKG="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
