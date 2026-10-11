@@ -19,7 +19,7 @@ Exploring no longer applies `needs-triage` or `agent-found`. Leave existing `age
 PRs opened by the old workflow have no markers or state labels. Mark them now, so nothing starts a second PR for an issue that already has one:
 
 ```bash
-source .agents/skills/github-workflow-protocol/scripts/lib.sh
+source .agents/skills/github-agent-workflow-skills/skills/github-workflow/github-workflow-protocol/scripts/lib.sh
 for pr in $(gh pr list --state open --json number --jq '.[].number'); do
   for issue in $(issue_for_pr "$pr"); do
     gh issue edit "$issue" --remove-label ready-for-agent --add-label agent:pr-open
