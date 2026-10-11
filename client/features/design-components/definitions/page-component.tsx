@@ -77,9 +77,9 @@ function PreviewModeComponent(props: ViewModeProps) {
 	const accessibilityAttrs = getAccessibilityAttributes(currentPage, metadata)
 
 	return (
-		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
+		<section className="flex-1 bg-muted overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
 			<div
-				className={cn("bg-white min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
+				className={cn("bg-card min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border border-border rounded-md mt-8", customClasses, childClassName)}
 				{...attributes}
 				style={{
 					padding: `${padding.top} ${padding.right} ${padding.bottom} ${padding.left}`,
@@ -140,9 +140,9 @@ function EditModeComponent(props: EditModeProps) {
 	}
 
 	return (
-		<section className="flex-1 bg-gray-50 overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
+		<section className="flex-1 bg-muted overflow-y-visible relative" id={attributes.id} {...accessibilityAttrs}>
 			<div
-				className={cn("bg-white min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border rounded-md mt-8", customClasses, childClassName)}
+				className={cn("bg-card min-h-[800px] w-full md:w-[90%] mx-auto shadow-sm border border-border rounded-md mt-8", customClasses, childClassName)}
 				onClick={() => setSelectedComponent("")}
 				onMouseMove={onMouseMove}
 				onMouseLeave={onMouseLeave}
@@ -162,7 +162,7 @@ function EditModeComponent(props: EditModeProps) {
 				<div
 					className={cn(
 						"flex flex-col items-center justify-center rounded-md p-4 min-h-24",
-						props.pageBuilderMode === "edit" && "border-2 border-dashed border-gray-200",
+						props.pageBuilderMode === "edit" && "border-2 border-dashed border-border",
 						isDropTarget && "bg-primary/20 ring-2 ring-primary ring-offset-2"
 					)}
 					onDragOver={handleDragOver}
