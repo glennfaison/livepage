@@ -14,61 +14,46 @@ both coding agents and human contributors. Humans can follow the same Verify and
 Finish checklists; the [PR template](./.github/pull_request_template.md) and
 `npm run verify` encode a lighter version of those checks.
 
+## Session start (required)
+
+Run both before any commit or push:
+
+```bash
+git submodule update --init --recursive   # skills live in submodules; without this, .agents/skills/ has dangling links
+git config core.hooksPath scripts/git-hooks   # branch-name checks at commit and push
+```
+
+The hooks validate branch names against [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
 ## Skills
 
-All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to
-find the right skill, then read its `SKILL.md` before following its workflow.
+All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to find the right skill, then read its `SKILL.md` before following its workflow. Some entries there are symlinks into submodules ([ADR 0011](./.agents/docs/adr/0011-agent-skills-as-submodules.md)): refer to a skill by its name, never by a path inside a submodule.
 
-## Workflows
+## GitHub workflow
 
-The GitHub workflows come from the [github-agent-workflow](./.agents/skills/github-agent-workflow/README.md) package,
-which lives in this repository for now and is meant to move to its own repository. Its skills are
-linked into [.agents/skills/](./.agents/skills/) by `.agents/skills/github-agent-workflow/scripts/link-skills.sh`, so agents find
-them by name. LivePage's settings for the package are in
-[.agents/docs/github-agent-workflow.env](./.agents/docs/github-agent-workflow.env).
-
-Each step has a **group skill** that selects work and an **item skill** that does the work on one
-issue or PR. Group skills dispatch to item skills, so both can be run directly:
-`/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
-Run `/setup-github-agent-workflow` once to create the labels and settings.
-
-**Shared (read first for labels and protocol):**
-
-- [agent-workflow-protocol](./.agents/skills/github-agent-workflow/skills/pipeline/agent-workflow-protocol/SKILL.md): Claim/lease rules, helpers, unattended and no-shell rules
-- [labels.md](./.agents/skills/github-agent-workflow/skills/pipeline/agent-workflow-protocol/references/labels.md): Every label the workflows use, and the state transitions between them
-
-**Steps** (independent; may run in any order or in parallel):
+The issue-to-merge pipeline is the [github-agent-workflow](./.agents/skills/github-agent-workflow/README.md) package, a pinned git submodule. `/pipeline-guide` is the map. Each step has a **group skill** that selects work and an **item skill** that does the work on one issue or PR, so both can be run directly: `/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
 
 | Step | Group skill | Item skill |
 | --- | --- | --- |
-| Explore the app and codebase; file unlabelled issues | [explore-github-repo](./.agents/skills/github-agent-workflow/skills/pipeline/explore-github-repo/SKILL.md) | [file-github-issue](./.agents/skills/github-agent-workflow/skills/pipeline/file-github-issue/SKILL.md) |
-| Triage; mark issues ready-for-agent or ready-for-human | [triage-github-issues](./.agents/skills/github-agent-workflow/skills/pipeline/triage-github-issues/SKILL.md) | [triage-github-issue](./.agents/skills/github-agent-workflow/skills/pipeline/triage-github-issue/SKILL.md) |
-| Implement a ready-for-agent issue and open a PR | [implement-github-issues](./.agents/skills/github-agent-workflow/skills/pipeline/implement-github-issues/SKILL.md) | [implement-github-issue](./.agents/skills/github-agent-workflow/skills/pipeline/implement-github-issue/SKILL.md) |
-| Get a PR through checks and post the review handoff | [shepherd-github-prs](./.agents/skills/github-agent-workflow/skills/pipeline/shepherd-github-prs/SKILL.md) | [shepherd-github-pr](./.agents/skills/github-agent-workflow/skills/pipeline/shepherd-github-pr/SKILL.md) |
-| Review a ready PR and merge when safe | [review-github-prs](./.agents/skills/github-agent-workflow/skills/pipeline/review-github-prs/SKILL.md) | [review-github-pr](./.agents/skills/github-agent-workflow/skills/pipeline/review-github-pr/SKILL.md) |
+| Explore the app and codebase; file unlabelled issues | `/explore-github-repo` | `/file-github-issue` |
+| Triage; mark issues ready-for-agent or ready-for-human | `/triage-github-issues` | `/triage-github-issue` |
+| Implement a ready-for-agent issue and open a PR | `/implement-github-issues` | `/implement-github-issue` |
+| Get a PR through checks and post the review handoff | `/shepherd-github-prs` | `/shepherd-github-pr` |
+| Review a ready PR and merge when safe | `/review-github-prs` | `/review-github-pr` |
 
-The package's `merge-safety` skill gates merging, and `code-review` (this repository's own skill) is
-used before opening a PR and when reviewing one. The package also needs `tdd` from
-[mattpocock/skills](./.agents/skills/matt-pocock-skills/README.md).
+Read `/agent-workflow-protocol` first: it holds the lease rules, the helpers, the unattended and no-shell rules, and (in `references/labels.md`) every label and state transition. `/merge-safety` gates merging. [code-review](./.agents/skills/code-review/SKILL.md) is this repository's own skill and is used before opening a PR and when reviewing one. `/tdd` comes from [mattpocock/skills](./.agents/skills/matt-pocock-skills/README.md).
+
+- Run `/setup-github-agent-workflow` once to create the labels and settings. LivePage's settings are in [.agents/docs/github-agent-workflow.env](./.agents/docs/github-agent-workflow.env).
+- Scheduled runs (Kilo Code, Grok) use the prompts in [.agents/docs/AUTOMATIONS.md](./.agents/docs/AUTOMATIONS.md). Nobody answers questions in them: follow the protocol's unattended rules and the [unattended section of the agent workflow](./.agents/docs/AGENT-WORKFLOW.md#unattended-runs).
 
 ## Branch names
 
 Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
 `hotfix/<topic>`, `release/<version>`, `support/<version-line>`, `develop`, or
 `main`. Topics are lowercase kebab-case. Do not invent prefixes such as `cursor/`,
-`fix/`, or `templates/`. Full patterns and the four layers of enforcement are in
-[.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
-
-## Git hooks (required)
-
-Local git hooks enforce branch-name compliance at commit and push time.
-Enable them at **session start**:
-
-```bash
-git config core.hooksPath scripts/git-hooks
-```
-
-This must be run before any commits or pushes. The hooks validate branch names against the gitflow patterns in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+`fix/`, or `templates/`. Open pull requests against `develop`; `main` only
+accepts PRs from `develop`. Full patterns and the four layers of enforcement are
+in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
 
 ## PR descriptions and closing issues
 

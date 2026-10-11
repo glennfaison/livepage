@@ -28,9 +28,8 @@ compatibility.
 
 ## Consequences
 
-- The GitHub workflow config lives at `.agents/docs/github-workflow.env`. This
-  supersedes the `.agents/docs/agents/` location in
-  [ADR 0009](./0009-agent-documentation-in-.agents.md); the old folder and its
-  temporary migration checklist are removed, not redirected.
+- The GitHub workflow config lives at `.agents/docs/github-agent-workflow.env`
+  (see [ADR 0009](./0009-agent-documentation-in-.agents.md)), with no redirect
+  from any other location.
 - Agent docs describe the current state only, with no "previously" or "moved
   from" notes.
