@@ -1,6 +1,6 @@
 # Agent-facing documentation lives in `.agents/`
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0010](./0010-fresh-start-no-compatibility.md) in part: the `.agents/docs/agents/` location is replaced by `.agents/docs/github-workflow.env`, and the migration notes below are historical. The rest of the decision stands.
 
 Agents and humans contributing to this repository read the same instructions. To
 make those instructions easy to find and to keep them separate from user-facing

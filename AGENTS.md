@@ -5,6 +5,10 @@ Before changing code, read the [project context](./.agents/docs/CONTEXT.md),
 [agent workflow](./.agents/docs/AGENT-WORKFLOW.md),
 [glossary](./.agents/docs/GLOSSARY.md), and relevant [ADRs](./.agents/docs/adr/).
 
+Treat every task, including agent-documentation changes, as a fresh start unless
+the user explicitly requests backward compatibility. For changes involving
+migrations or compatibility, follow [ADR 0010](./.agents/docs/adr/0010-fresh-start-no-compatibility.md).
+
 The [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) is the canonical process for
 both coding agents and human contributors. Humans can follow the same Verify and
 Finish checklists; the [PR template](./.github/pull_request_template.md) and
@@ -21,7 +25,7 @@ The GitHub workflows come from the [github-agent-workflow-skills](./.agents/skil
 which lives in this repository for now and is meant to move to its own repository. Its skills are
 linked into [.agents/skills/](./.agents/skills/) by `.agents/skills/github-agent-workflow-skills/scripts/link-skills.sh`, so agents find
 them by name. LivePage's settings for the package are in
-[.agents/docs/agents/github-workflow.env](./.agents/docs/agents/github-workflow.env).
+[.agents/docs/github-workflow.env](./.agents/docs/github-workflow.env).
 
 Each step has a **group skill** that selects work and an **item skill** that does the work on one
 issue or PR. Group skills dispatch to item skills, so both can be run directly:

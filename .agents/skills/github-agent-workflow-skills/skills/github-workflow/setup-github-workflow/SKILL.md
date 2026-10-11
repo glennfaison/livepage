@@ -24,9 +24,9 @@ Run once per repository, by a maintainer, before any other skill in this package
    - the build command to run before opening a PR (`BUILD_CMD`), or none (CI is then the only build gate)
    - a git hooks directory to use when committing (`GIT_HOOKS_PATH`), or none
    - the files that hold the repository's contributor rules (`REPO_GUIDANCE`). Default `AGENTS.md`. Offer `CLAUDE.md` if that is what exists.
-4. **Write `.agents/docs/agents/github-workflow.env`**, with only the values that differ from the defaults, each with a one-line comment. Show it and get a yes before writing. If the file already exists, show the difference and ask before changing anything.
+4. **Write `.agents/docs/github-workflow.env`**, with only the values that differ from the defaults, each with a one-line comment. Show it and get a yes before writing. If the file already exists, show the difference and ask before changing anything.
 5. **Create the labels.** Run the setup block in `references/labels.md`. It is safe to run twice.
-6. **Add a pointer to the repository's agent instructions.** Edit `CLAUDE.md` if it exists, otherwise `AGENTS.md`, and never create the second when the first exists. Add a short `## GitHub workflow` section saying the workflow's settings are in `.agents/docs/agents/github-workflow.env` and naming the group skills (`/explore-github-repo`, `/triage-github-issues`, `/implement-github-issues`, `/shepherd-github-prs`, `/review-github-prs`). If a section like it already exists, update it.
+6. **Add a pointer to the repository's agent instructions.** Edit `CLAUDE.md` if it exists, otherwise `AGENTS.md`, and never create the second when the first exists. Add a short `## GitHub workflow` section saying the workflow's settings are in `.agents/docs/github-workflow.env` and naming the group skills (`/explore-github-repo`, `/triage-github-issues`, `/implement-github-issues`, `/shepherd-github-prs`, `/review-github-prs`). If a section like it already exists, update it.
 7. **Check it works.** Run `gh label list` and confirm the `agent:` labels are there. If you have a shell, follow **Shell setup** in the protocol and print `PR_BASE_BRANCH` to confirm the repository's override was read.
 8. **Tell the user how to start.** Give them the one-line prompts to put in a scheduler, one per automation, with the repository filled in:
 
@@ -42,5 +42,5 @@ Run once per repository, by a maintainer, before any other skill in this package
 
 ## Never
 
-- Change anything outside `.agents/docs/agents/github-workflow.env`, the label set, and the pointer in step 6.
+- Change anything outside `.agents/docs/github-workflow.env`, the label set, and the pointer in step 6.
 - Overwrite an existing settings file or section without showing the change first.

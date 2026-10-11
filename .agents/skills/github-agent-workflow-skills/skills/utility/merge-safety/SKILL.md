@@ -19,14 +19,15 @@ full code or security review, and it does not authorize or perform a merge.
 3. Assess compatibility:
    - Identify affected public APIs, routes, serialized or exported formats,
      persisted data, schemas, defaults, configuration, and external consumers.
-   - Compare the old and new behavior. Decide whether existing users and
-     artifacts continue to work without changes.
+   - Compare the old and new behavior. Decide whether any explicitly required
+     compatibility still holds.
    - Treat an addition as breaking if it changes an existing contract or
      invalidates existing data or consumers. A new option or catalog entry is
      not breaking merely because it adds behavior.
-   - A breaking change needs an explicit compatibility or migration plan and
-     evidence that the transition is tested. Block on an unplanned or
-     unverified break.
+   - Do not require a migration or backward-compatibility plan by default.
+     Block a break only when the issue, PR, or user explicitly requires
+     compatibility, or when it breaks a contract the change did not set out
+     to alter, and the break is unplanned or untested.
 4. Assess reversibility:
    - Determine whether the change can be reverted after deployment, not just
      whether its diff is small or `git revert` is conflict-free.

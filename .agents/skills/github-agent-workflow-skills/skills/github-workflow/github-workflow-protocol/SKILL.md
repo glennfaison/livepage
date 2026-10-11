@@ -42,7 +42,7 @@ Two skills are **not part of this package**, and must be installed with it. Both
 
 ## Per-repository config
 
-Defaults ship in `config.defaults.env`, next to this file. A repository overrides any of them in `.agents/docs/agents/github-workflow.env`, which `/setup-github-workflow` writes. The repository's value wins. Skills refer to these names (`$PR_BASE_BRANCH`, `$BUILD_CMD`, `$REPO_GUIDANCE`, and so on). Without a shell, read both files and apply the same layering.
+Defaults ship in `config.defaults.env`, next to this file. A repository overrides any of them in `.agents/docs/github-workflow.env`, which `/setup-github-workflow` writes. The repository's value wins. Skills refer to these names (`$PR_BASE_BRANCH`, `$BUILD_CMD`, `$REPO_GUIDANCE`, and so on). Without a shell, read both files and apply the same layering.
 
 ## Starting a run
 

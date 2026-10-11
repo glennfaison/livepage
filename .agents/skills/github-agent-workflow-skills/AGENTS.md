@@ -19,7 +19,7 @@ skills/<bucket>/<skill>/SKILL.md     exactly three levels deep
 - **A skill's `description` must never contain an unquoted `: ` or ` #`.** It is invalid YAML and harnesses skip the skill. Reword it.
 - **Skills reach each other through the Skill tool, never through paths.** "Call the Skill tool with `name`". A skill's own files (`references/`, `scripts/`) are read relative to its `SKILL.md`. Where a skill lives depends on how the package was installed.
 - **A user-invoked skill (`disable-model-invocation: true`, with `allow_implicit_invocation: false` in `agents/openai.yaml`) can never be called by another skill.** Only `setup-github-workflow` is user-invoked. Group skills dispatch to item skills, so everything else must be model-invoked.
-- **Nothing repository-specific in `skills/`, `scripts/` or `tests/`.** Per-repo values go in `.agents/docs/agents/github-workflow.env` in the consuming repo. The validator fails on references to a particular repository.
+- **Nothing repository-specific in `skills/`, `scripts/` or `tests/`.** Per-repo values go in `.agents/docs/github-workflow.env` in the consuming repo. The validator fails on references to a particular repository.
 - **Shared files live in the skill that owns them.** Everything the skills share is in `github-workflow-protocol`.
 
 ## Dependencies

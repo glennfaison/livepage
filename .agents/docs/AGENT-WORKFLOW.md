@@ -8,7 +8,7 @@ This document is written for coding agents. **Human contributors** can follow th
 
 The GitHub workflows are the [github-agent-workflow-skills](../../.agents/skills/github-agent-workflow-skills/README.md) package. Each
 step has a group skill that selects work and an item skill that does the work on one issue or PR.
-LivePage's settings for it are in [github-workflow.env](./agents/github-workflow.env).
+LivePage's settings for it are in [github-workflow.env](./github-workflow.env).
 
 **Shared:**
 
