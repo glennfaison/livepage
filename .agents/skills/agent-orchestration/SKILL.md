@@ -22,6 +22,7 @@ Skip the design phase for focused fixes (a single obvious change). Never skip re
 
 - Use the lowest-cost model that meets each phase's needs.
 - Handoffs reference artifacts (files, diffs, issues) rather than copying them.
+- In an unattended run, `/handoff` cannot be called (it is user-invoked). Hand off with a plain message that links the artifacts and says what to return.
 - Sub-agents get a bounded objective and a stop condition.
 
 ## Finish: automation suggestions
