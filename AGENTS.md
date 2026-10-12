@@ -43,7 +43,7 @@ The issue-to-merge pipeline is the [github-agent-workflow](./.agents/skills/gith
 
 Read `/agent-workflow-protocol` first: it holds the lease rules, the helpers, the unattended and no-shell rules, and (in `references/labels.md`) every label and state transition. `/merge-safety` gates merging. [code-review](./.agents/skills/code-review/SKILL.md) is this repository's own skill and is used before opening a PR and when reviewing one. `/tdd` comes from [mattpocock/skills](./.agents/skills/matt-pocock-skills/README.md).
 
-- Run `/setup-github-agent-workflow` once to create the labels and settings. LivePage's settings are in [.agents/docs/github-agent-workflow.env](./.agents/docs/github-agent-workflow.env).
+- Run `/setup-github-agent-workflow` once to create the labels and record LivePage's values. The values are in [the live settings block](./.agents/docs/AGENT-WORKFLOW.md#livepages-settings), passed to each run as key-value inputs.
 - Scheduled runs (Kilo Code, Grok) use the prompts in [.agents/docs/AUTOMATIONS.md](./.agents/docs/AUTOMATIONS.md). Nobody answers questions in them: follow the protocol's unattended rules and the [unattended section of the agent workflow](./.agents/docs/AGENT-WORKFLOW.md#unattended-runs).
 
 ## Branch names

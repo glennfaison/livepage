@@ -17,8 +17,8 @@ change on their own schedule and other repositories use them too.
 - Documentation refers to a skill by its name or its `.agents/skills/<name>/`
   path, never by a path inside a submodule. A package that renames its buckets
   then breaks nothing here except the links.
-- The workflow's settings stay in this repository, in
-  `.agents/docs/github-agent-workflow.env`. The package holds nothing specific
+- The workflow's LivePage values stay in this repository, in the live settings
+  block of the agent workflow document. The package holds nothing specific
   to LivePage.
 
 ## Consequences

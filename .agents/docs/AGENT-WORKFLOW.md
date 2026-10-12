@@ -6,7 +6,22 @@ This document is written for coding agents. **Human contributors** can follow th
 
 ## Agent Workflow Files
 
-The GitHub workflows are the [github-agent-workflow](../skills/github-agent-workflow/README.md) package. [AGENTS.md](../../AGENTS.md#github-workflow) lists its steps and skills, and `/pipeline-guide` maps them. LivePage's settings for it are in [github-agent-workflow.env](./github-agent-workflow.env); prompts for scheduled runs are in [AUTOMATIONS.md](./AUTOMATIONS.md).
+The GitHub workflows are the [github-agent-workflow](../skills/github-agent-workflow/README.md) package. [AGENTS.md](../../AGENTS.md#github-workflow) lists its steps and skills, and `/pipeline-guide` maps them. Prompts for scheduled runs are in [AUTOMATIONS.md](./AUTOMATIONS.md).
+
+### LivePage's settings
+
+The skills have no config file: each default lives in the skill that uses it, and a repository's values are key-value inputs on the scheduler prompt. LivePage's values, all of which differ from a default or matter to a step, are:
+
+```
+pr_base_branch=develop
+merge_method=squash
+human_reviewer=glennfaison
+build_cmd=npm run build
+git_hooks_path=scripts/git-hooks
+repo_guidance=AGENTS.md .agents/docs/AGENT-WORKFLOW.md .agents/docs/CONVENTIONS.md .agents/docs/BRANCH-NAMES.md
+```
+
+Add the ones a step uses to its prompt, one per line. Exploring reads `app_url`, which is the deployed LivePage ending in `/try` and is set per prompt in [AUTOMATIONS.md](./AUTOMATIONS.md). Everything a prompt omits keeps the skill's default, listed in the package's [Inputs and defaults](../skills/github-agent-workflow/README.md#inputs-and-defaults).
 
 ## Scope
 

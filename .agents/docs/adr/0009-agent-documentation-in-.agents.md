@@ -14,9 +14,8 @@ MUST be placed inside the `.agents/` folder.** Specifically:
 
 - `.agents/docs/` holds the prose: project context, conventions, the agent
   workflow, the glossary, branch-name rules, the prompts for scheduled agent
-  runs, and the ADRs.
-- `.agents/docs/github-agent-workflow.env` holds the settings this repository
-  gives the GitHub workflow skills.
+  runs, and the ADRs. The agent workflow also records the values this
+  repository gives the GitHub workflow skills.
 - `.agents/skills/` holds the executable skills (each a `SKILL.md` plus its
   supporting files).
 
@@ -28,12 +27,8 @@ layout) and is hand-maintained. It must not be used to store agent instructions.
 
 ## Consequences
 
-- Every reference to an agent-facing document is relative to `.agents/`. The
-  GitHub workflow skills' config contract points at
-  `.agents/docs/github-agent-workflow.env`; a consuming repository that vendors
-  the package puts its overrides there.
+- Every reference to an agent-facing document is relative to `.agents/`.
 - The skill validator's "no repository-specific leakage" check treats a
-  reference to `.agents/docs/` as the sanctioned convention rather than a leak,
-  so skills may name the config file by its conventional path.
+  reference to `.agents/` as the sanctioned convention rather than a leak.
 - Adding agent-facing documentation means adding it under `.agents/`, and adding
   an ADR when the decision is not obvious from the file itself.

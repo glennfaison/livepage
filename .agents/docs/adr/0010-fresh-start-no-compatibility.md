@@ -28,8 +28,8 @@ compatibility.
 
 ## Consequences
 
-- The GitHub workflow config lives at `.agents/docs/github-agent-workflow.env`
-  (see [ADR 0009](./0009-agent-documentation-in-.agents.md)), with no redirect
-  from any other location.
+- The GitHub workflow's LivePage values live in the live settings block of the
+  agent workflow document (see [ADR 0009](./0009-agent-documentation-in-.agents.md)),
+  with no redirect from any other location.
 - Agent docs describe the current state only, with no "previously" or "moved
   from" notes.

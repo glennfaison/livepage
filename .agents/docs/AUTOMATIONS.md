@@ -5,10 +5,12 @@ Prompts for running the [github-agent-workflow](../skills/github-agent-workflow/
 | Value | LivePage |
 | --- | --- |
 | Repository | `glennfaison/livepage` |
-| PR base branch | `develop` (from [github-agent-workflow.env](./github-agent-workflow.env)) |
+| PR base branch | `develop`, passed as `pr_base_branch=develop` (see [the live settings](./AGENT-WORKFLOW.md#livepages-settings)) |
 | Skills repository | `glennfaison/github-agent-workflow` |
 | Pinned skills commit (`REF`) | `5de38962d954fe99dede4d27bc30a72c57dd505b`, the commit the submodule points at. Check with `git ls-tree HEAD .agents/skills/github-agent-workflow` |
-| App to explore (`APP_URL`) | The URL of the deployed LivePage, ending in `/try` |
+| App to explore (`app_url`) | The URL of the deployed LivePage, ending in `/try` |
+
+The skills read no config file. Everything a prompt below leaves out keeps the skill's own default, listed in the package's [Inputs and defaults](../skills/github-agent-workflow/README.md#inputs-and-defaults); only LivePage's differing values are set here.
 
 Update `REF` in the Grok prompts whenever the submodule pointer moves ([ADR 0011](./adr/0011-agent-skills-as-submodules.md)).
 
@@ -46,7 +48,7 @@ One scheduled trigger per step, each with the repository `glennfaison/livepage`.
 Exploring:
 
 ```text
-Run /explore-github-repo on github.com/glennfaison/livepage. App URL: https://APP_URL.
+Run /explore-github-repo on github.com/glennfaison/livepage. app_url=https://APP_URL.
 No human is present: do not ask questions. Runner: kilo.
 If /explore-github-repo is not recognised, call the Skill tool with explore-github-repo, or read .agents/skills/explore-github-repo/SKILL.md and follow it.
 ```
@@ -59,10 +61,14 @@ No human is present: do not ask questions. Runner: kilo.
 If /triage-github-issues is not recognised, call the Skill tool with triage-github-issues, or read .agents/skills/triage-github-issues/SKILL.md and follow it.
 ```
 
-Implementing:
+Implementing (LivePage sets a build step, a hooks path and its guidance files, not just the branch):
 
 ```text
 Run /implement-github-issues on github.com/glennfaison/livepage.
+pr_base_branch=develop
+build_cmd=npm run build
+git_hooks_path=scripts/git-hooks
+repo_guidance=AGENTS.md .agents/docs/AGENT-WORKFLOW.md .agents/docs/CONVENTIONS.md .agents/docs/BRANCH-NAMES.md
 No human is present: do not ask questions. Runner: kilo.
 If /implement-github-issues is not recognised, call the Skill tool with implement-github-issues, or read .agents/skills/implement-github-issues/SKILL.md and follow it.
 ```
@@ -78,7 +84,7 @@ If /shepherd-github-prs is not recognised, call the Skill tool with shepherd-git
 Reviewing:
 
 ```text
-Run /review-github-prs on github.com/glennfaison/livepage.
+Run /review-github-prs on github.com/glennfaison/livepage. merge_method=squash
 No human is present: do not ask questions. Runner: kilo.
 If /review-github-prs is not recognised, call the Skill tool with review-github-prs, or read .agents/skills/review-github-prs/SKILL.md and follow it.
 ```
@@ -99,10 +105,10 @@ Repository: glennfaison/livepage. Skills repository: glennfaison/github-agent-wo
 Read skills/pipeline/SKILL/SKILL.md from the skills repository and follow it.
 Where a skill says "Call the Skill tool with X", read skills/BUCKET/X/SKILL.md from the skills repository and follow it. BUCKET is utility for merge-safety, unattended-triage and unattended-grilling, and pipeline for every other skill.
 You have no shell: follow "Running without a shell" in skills/pipeline/agent-workflow-protocol/SKILL.md.
-Settings are in .agents/docs/github-agent-workflow.env and the repository's rules are in AGENTS.md, both in the repository.
+LivePage's settings are key-value inputs in the prompt above; the full list is in .agents/docs/AGENT-WORKFLOW.md, and the repository's rules are in AGENTS.md, both in the repository.
 ```
 
-For Exploring, add a last line: `App URL: https://APP_URL.`
+For Exploring, add a last line: `app_url=https://APP_URL.`
 
 To read the code, the connector needs to see `.agents/docs/` and the source, which are ordinary files in `glennfaison/livepage`.
 
@@ -112,7 +118,7 @@ Offset the minutes so runs do not start together.
 
 | Step | Every | Why |
 | --- | --- | --- |
-| Exploring | Week | Files at most 10 issues per run |
+| Exploring | Week | Files at most 5 issues per run |
 | Grooming | 2 hours | Takes at most 5 issues per run |
 | Implementing | 3 hours | One issue per run; the lease lasts 3 hours |
 | Shepherding | 1 hour | Skips PRs whose checks are still running |
