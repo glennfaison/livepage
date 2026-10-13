@@ -23,6 +23,24 @@ repo_guidance=AGENTS.md .agents/docs/AGENT-WORKFLOW.md .agents/docs/CONVENTIONS.
 
 Add the ones a step uses to its prompt, one per line. Exploring reads `app_url`, which is the deployed LivePage ending in `/try` and is set per prompt in [AUTOMATIONS.md](./AUTOMATIONS.md). Everything a prompt omits keeps the skill's default, listed in the package's [Inputs and defaults](https://github.com/glennfaison/github-agent-workflow#inputs-and-defaults).
 
+Workflow steps live in [.agents/workflow/](../../.agents/workflow/). Each step
+documents its **Inputs** and **Outputs**. Shared material (labels, protocol,
+dedupe, handoff, log, etc.) is under
+[.agents/workflow/_shared/](../../.agents/workflow/_shared/).
+
+**Shared:**
+
+- [Labels.md](../../.agents/workflow/_shared/Labels.md) — Labels and state transitions (read this first)
+- [Protocol.md](../../.agents/workflow/_shared/Protocol.md) — Claim/lease rules and helpers
+
+**Steps:**
+
+- [Exploring.md](../../.agents/workflow/Exploring.md) — Explore app/codebase; file unlabeled issues
+- [Grooming.md](../../.agents/workflow/Grooming.md) — Triage and mark issues ready-for-agent or ready-for-human
+- [Implementing.md](../../.agents/workflow/Implementing.md) — Implement a ready-for-agent issue and open a PR
+- [Shepherding.md](../../.agents/workflow/Shepherding.md) — Get a PR through checks and post the review handoff
+- [Reviewing.md](../../.agents/workflow/Reviewing.md) — Review a ready PR and merge when safe
+
 ## Scope
 
 - **Redesign over minimal diffs.** Do not optimize for the smallest diff. After a change, the code you touched should look as it would if it had been designed strategically from scratch with this requirement in mind. Refactor, rename, extract, and restructure the affected code and its callers whenever that yields a cleaner result than patching around the old shape. This rule takes priority over the two bullets below and over any instinct to keep a change small. Only explicit user requirements (see the last bullet) override it. It does not license unrelated rewrites of code the task has no reason to touch. When you work from an issue's Agent Brief, redesign inside the brief's scope: its **Out of scope** list overrides this rule.

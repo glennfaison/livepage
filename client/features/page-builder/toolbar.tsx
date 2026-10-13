@@ -16,11 +16,18 @@ import { cn } from "@/client/lib/utils"
 import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
+<<<<<<< HEAD
 import type { HistoryEntry, AppState } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useDiscardConfirmation, useHistoryOperations } from "@/client/features/page-builder/hooks"
+=======
+import type { HistoryEntry } from "@/client/features/types"
+import type { AppAction, AppNode } from "@/client/features/types"
+import { selectCurrentPage } from "@/client/features/app-state"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+>>>>>>> main
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -61,63 +68,63 @@ export function clampToolbarCenter(
 }
 
 export const Toolbar: React.FC<Readonly<{
-  toolbarMinimized: boolean
-  setToolbarMinimized: (minimized: boolean) => void
-  savePage: () => void
-  handleDiscard: () => void
-  pageBuilderMode: PageBuilderMode
-  history: ReadonlyArray<HistoryEntry>
-  currentHistoryIndex: number
-  onSelectHistory: (index: number) => void
-  onAcceptHistory: (index: number) => void
-  onDiscardHistory: () => void
-  historyPreviewIndex: number | null
-  onOpenCommandPalette?: () => void
-  /** Optional: renders an AI Assistant trigger button when provided and prompt assist is enabled. */
-  onOpenAIAssistant?: () => void
-  /** Page component for settings popover */
-  pageComponent?: AppNode
-  /** Full component tree for export validation */
-  componentTree: ReadonlyArray<AppNode>
-  /** Callback to update page title */
-  onPageTitleChange?: (title: string) => void
-  /** Undo callback */
-  onUndo?: () => void
-  /** Redo callback */
-  onRedo?: () => void
-  /** Duplicate page callback */
-  onDuplicatePage?: () => void
-  /** App dispatch for settings */
-  dispatch?: React.Dispatch<AppAction>
-  /** Whether AI Assistant is enabled */
-  promptAssistEnabled?: boolean
-  /** Pre-computed undo/redo availability from parent to avoid stale closure issues */
-  canUndo?: boolean
-  canRedo?: boolean
-}>> = ({
-  toolbarMinimized,
-  setToolbarMinimized,
-  savePage,
-  handleDiscard: _handleDiscard,
-  pageBuilderMode,
-  history,
-  currentHistoryIndex,
-  onSelectHistory,
-  onAcceptHistory,
-  onDiscardHistory,
-  historyPreviewIndex,
-  onOpenCommandPalette,
-  onOpenAIAssistant,
-  pageComponent,
-  componentTree,
-  onPageTitleChange,
-  onUndo,
-  onRedo,
-  onDuplicatePage,
-  dispatch,
-  promptAssistEnabled,
-  canUndo: canUndoProp,
-  canRedo: canRedoProp,
+   toolbarMinimized: boolean
+   setToolbarMinimized: (minimized: boolean) => void
+   savePage: () => void
+   handleDiscard: () => void
+   pageBuilderMode: PageBuilderMode
+   history: ReadonlyArray<HistoryEntry>
+   currentHistoryIndex: number
+   onSelectHistory: (index: number) => void
+   onAcceptHistory: (index: number) => void
+   onDiscardHistory: () => void
+   historyPreviewIndex: number | null
+   onOpenCommandPalette?: () => void
+   /** Optional: renders an AI Assistant trigger button when provided and prompt assist is enabled. */
+   onOpenAIAssistant?: () => void
+   /** Page component for settings popover */
+   pageComponent?: AppNode
+   /** Full component tree for export validation */
+   componentTree: ReadonlyArray<AppNode>
+   /** Callback to update page title */
+   onPageTitleChange?: (title: string) => void
+   /** Undo callback */
+   onUndo?: () => void
+   /** Redo callback */
+   onRedo?: () => void
+   /** Duplicate page callback */
+   onDuplicatePage?: () => void
+   /** App dispatch for settings */
+   dispatch?: React.Dispatch<AppAction>
+   /** Whether AI Assistant is enabled */
+   promptAssistEnabled?: boolean
+   /** Pre-computed undo/redo availability from parent to avoid stale closure issues */
+   canUndo?: boolean
+   canRedo?: boolean
+}}> = ({
+   toolbarMinimized,
+   setToolbarMinimized,
+   savePage,
+   handleDiscard: _handleDiscard,
+   pageBuilderMode,
+   history,
+   currentHistoryIndex,
+   onSelectHistory,
+   onAcceptHistory,
+   onDiscardHistory,
+   historyPreviewIndex,
+   onOpenCommandPalette,
+   onOpenAIAssistant,
+   pageComponent,
+   componentTree,
+   onPageTitleChange,
+   onUndo,
+   onRedo,
+   onDuplicatePage,
+   dispatch,
+   promptAssistEnabled,
+   canUndo: canUndoProp,
+   canRedo: canRedoProp,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)

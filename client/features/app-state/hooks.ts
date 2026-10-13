@@ -79,7 +79,6 @@ function readPersistedSession(): PersistedSession {
  */
 export function useAppState() {
   const [state, baseDispatch] = useReducer(appReducer, initialState)
-
   const dispatchRef = useRef(baseDispatch)
   dispatchRef.current = baseDispatch
 
@@ -122,6 +121,15 @@ export function useAppState() {
       }
     }
   }, [])
+
+  // Persist promptAssistEnabled to localStorage (also handled in dispatch above for immediate sync)
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PROMPT_ASSIST_ENABLED_KEY, String(state.promptAssistEnabled))
+    } catch {
+      // Ignore localStorage errors (e.g., private browsing, quota exceeded)
+    }
+  }, [state.promptAssistEnabled])
 
   return { state, dispatch }
 }

@@ -8,7 +8,7 @@ import type React from "react"
 import { useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
-import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
+import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft
 import { toast } from "@/client/components/ui/use-toast"
 
 type ToolbarSettingsPopoverProps = Readonly<{
@@ -41,6 +41,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   dispatch,
   promptAssistEnabled,
 }) => {
+<<<<<<< HEAD
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)

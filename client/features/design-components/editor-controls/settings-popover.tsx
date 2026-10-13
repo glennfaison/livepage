@@ -31,14 +31,14 @@ export function SettingsPopover({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0 z-50" side="bottom" align="end" sideOffset={8} collisionPadding={12}>
-        <div
-          data-testid="component-settings-panel"
-          className={cn(
-            "bg-background border rounded-lg shadow-lg -m-1 flex flex-col overflow-clip",
-            POPOVER_PANEL_MAX_HEIGHT_CLASS,
-          )}
-        >
+       <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0 z-50" side="bottom" align="end" sideOffset={8} collisionPadding={12}>
+         <div
+           data-testid="component-settings-panel"
+           className={cn(
+             "bg-background border rounded-lg shadow-lg -m-1 flex flex-col overflow-clip",
+             POPOVER_PANEL_MAX_HEIGHT_CLASS,
+           )}
+         >
           <div className="bg-foreground text-background p-3 rounded-t-lg">
             <h2 className="text-sm font-semibold">{componentInfo.label}</h2>
           </div>

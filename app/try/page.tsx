@@ -402,8 +402,11 @@ export default function BuilderPage() {
           onDuplicatePage={handleDuplicatePage}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
+<<<<<<< HEAD
           canUndo={canUndo}
           canRedo={canRedo}
+=======
+>>>>>>> main
         />
 
         <CommandPalette

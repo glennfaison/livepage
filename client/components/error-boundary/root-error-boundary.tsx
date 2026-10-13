@@ -2,21 +2,31 @@
 
 import React from "react"
 import { Button } from "@/client/components/ui/button"
+<<<<<<< HEAD
 import { RefreshCw, AlertTriangle, Bug, ExternalLink, Copy } from "lucide-react"
 import { cn } from "@/client/lib/utils"
 import { logger } from "@/client/lib/logger"
 import { classifyError, isDevelopmentMode, type ClassifiedError, type RecoveryAction } from "./error-classification"
+=======
+import { RefreshCw, AlertTriangle } from "lucide-react"
+import { cn } from "@/client/lib/utils"
+import { logger } from "@/client/lib/logger"
+>>>>>>> main
 
 interface RootErrorBoundaryState {
   hasError: boolean
   error: Error | null
+<<<<<<< HEAD
   classifiedError: ClassifiedError | null
   copied: boolean
+=======
+>>>>>>> main
 }
 
 interface RootErrorBoundaryProps {
   children: React.ReactNode
   fallback?: React.ReactNode
+<<<<<<< HEAD
   onReport?: (error: ClassifiedError) => void
 }
 
@@ -63,6 +73,8 @@ function renderRecoveryAction(
 
 function shouldRenderRootAction(action: RecoveryAction): boolean {
   return action.action === "retry" || action.action === "report"
+=======
+>>>>>>> main
 }
 
 export class RootErrorBoundary extends React.Component<
@@ -72,12 +84,19 @@ export class RootErrorBoundary extends React.Component<
   state: RootErrorBoundaryState = {
     hasError: false,
     error: null,
+<<<<<<< HEAD
     classifiedError: null,
     copied: false,
   }
 
   static getDerivedStateFromError(error: Error): RootErrorBoundaryState {
     return { hasError: true, error, classifiedError: classifyError(error), copied: false }
+=======
+  }
+
+  static getDerivedStateFromError(error: Error): RootErrorBoundaryState {
+    return { hasError: true, error }
+>>>>>>> main
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
@@ -89,6 +108,7 @@ export class RootErrorBoundary extends React.Component<
   }
 
   handleRetry = (): void => {
+<<<<<<< HEAD
     this.setState({ hasError: false, error: null, classifiedError: null, copied: false })
     window.location.reload()
   }
@@ -117,22 +137,32 @@ export class RootErrorBoundary extends React.Component<
     }
   }
 
+=======
+    this.setState({ hasError: false, error: null })
+    window.location.reload()
+  }
+
+>>>>>>> main
   render(): React.ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback
       }
 
+<<<<<<< HEAD
       const classified = this.state.classifiedError
       const title = classified?.category
         ? `${classified.category.charAt(0).toUpperCase() + classified.category.slice(1)} Error`
         : "Something went wrong"
       const description = classified?.userMessage ?? "An unexpected error occurred. The error has been logged to the console."
 
+=======
+>>>>>>> main
       return (
         <div className={cn("flex min-h-screen w-full items-center justify-center p-8")}>
           <div className="flex max-w-md flex-col items-center gap-4 text-center">
             <div className={cn("flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive")}>
+<<<<<<< HEAD
               <Bug className="h-8 w-8" aria-hidden="true" />
             </div>
             <div className="space-y-2">
@@ -185,6 +215,34 @@ export class RootErrorBoundary extends React.Component<
                 )}
               </Button>
             </div>
+=======
+              <AlertTriangle className="h-8 w-8" aria-hidden="true" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-foreground">Something went wrong</h2>
+              <p className="text-sm text-muted-foreground">
+                An unexpected error occurred. The error has been logged to the console.
+              </p>
+              {this.state.error && (
+                <details className="text-left w-full max-w-xs rounded-md bg-muted p-3 text-xs font-mono text-muted-foreground">
+                  <summary className="cursor-pointer font-medium text-foreground">Error details</summary>
+                  <pre className="mt-2 overflow-auto whitespace-pre-wrap">{this.state.error.message}</pre>
+                  {this.state.error.stack && (
+                    <pre className="mt-2 overflow-auto whitespace-pre-wrap">{this.state.error.stack}</pre>
+                  )}
+                </details>
+              )}
+            </div>
+            <Button
+              onClick={this.handleRetry}
+              className="gap-2"
+              variant="default"
+              size="lg"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Reload Application
+            </Button>
+>>>>>>> main
           </div>
         </div>
       )

@@ -13,6 +13,7 @@ import {
   findComponentById,
 } from "./helpers"
 
+<<<<<<< HEAD
 /**
  * The reducer's starting state. It must stay browser-free: the server and the
  * client's first render both use it, so any `window` or `localStorage` read
@@ -45,6 +46,46 @@ export function createInitialState(): AppState {
   }
 }
 
+=======
+const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
+
+function getInitialPromptAssistEnabled(): boolean {
+  if (typeof window === "undefined") return false
+  try {
+    const value = window.localStorage.getItem(PROMPT_ASSIST_ENABLED_KEY)
+    return value === "true"
+  } catch {
+    return false
+  }
+}
+
+export function createInitialState(): AppState {
+  return {
+    componentTree: [
+      {
+        tag: "page",
+        attributes: {
+          id: "page-1",
+          title: "Home Page",
+        },
+        children: [],
+      },
+    ],
+    activePage: "page-1",
+    selectedComponentId: "",
+    selectedComponentAncestors: [],
+    pageBuilderMode: "edit",
+    toolbarMinimized: false,
+    showToolbar: true,
+    promptAssistEnabled: getInitialPromptAssistEnabled(),
+    history: [],
+    currentHistoryIndex: -1,
+    historyPreviewIndex: null,
+    originalHistoryState: null,
+  }
+}
+
+>>>>>>> main
 export const initialState = createInitialState()
 
 /**
@@ -297,6 +338,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         promptAssistEnabled: action.payload,
       }
 
+<<<<<<< HEAD
     case "HYDRATE_FROM_STORAGE": {
       // Adopts the browser-persisted session after mount. Fields that were
       // never stored keep the current value, and the initial history entry is
@@ -318,6 +360,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       }
     }
 
+=======
+>>>>>>> main
     case "DUPLICATE_PAGE": {
       const activePage = state.componentTree.find(
         (p) => p.tag === "page" && p.attributes.id === state.activePage

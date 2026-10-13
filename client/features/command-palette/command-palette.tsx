@@ -193,6 +193,7 @@ export const CommandPalette: React.FC<
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
 
+<<<<<<< HEAD
   // Discard confirmation, shared with the toolbar so both surfaces behave alike.
   const {
     showConfirmation: showDiscardConfirmation,
@@ -594,26 +595,27 @@ export const CommandPalette: React.FC<
         }}
       />
 
-      <ValidationDialog
-        validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
-        onProceed={handleValidationProceed}
-        onCancel={() => {
-          setValidationDialogOpen(false)
-          setPendingExportAction(null)
-          setValidationResult(null)
-        }}
-        isOpen={validationDialogOpen}
-        onOpenChange={setValidationDialogOpen}
-      />
+       <ValidationDialog
+         validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+         onProceed={handleValidationProceed}
+         onCancel={() => {
+           setValidationDialogOpen(false)
+           setPendingExportAction(null)
+           setValidationResult(null)
+         }}
+         isOpen={validationDialogOpen}
+         onOpenChange={setValidationDialogOpen}
+       />
 
-      {/* Discard Confirmation Dialog */}
-      <DiscardConfirmationDialog
-        open={showDiscardConfirmation}
-        askBeforeDiscard={askBeforeDiscard}
-        onCancel={handleDiscardCancel}
-        onConfirm={handleDiscardConfirm}
-        onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
-      />
-    </Dialog>
-  )
-}
+       {/* Discard Confirmation Dialog */}
+       <DiscardConfirmationDialog
+         open={showDiscardConfirmation}
+         askBeforeDiscard={askBeforeDiscard}
+         onCancel={handleDiscardCancel}
+         onConfirm={handleDiscardConfirm}
+         onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
+       />
+     </Dialog>
+   )
+ }
+
