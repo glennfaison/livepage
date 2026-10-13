@@ -7,7 +7,7 @@ Prompts for running the [github-agent-workflow](../skills/github-agent-workflow/
 | Repository | `glennfaison/livepage` |
 | PR base branch | `develop`, passed as `pr_base_branch=develop` (see [the live settings](./AGENT-WORKFLOW.md#livepages-settings)) |
 | Skills repository | `glennfaison/github-agent-workflow` |
-| Pinned skills commit (`REF`) | `5de38962d954fe99dede4d27bc30a72c57dd505b`, the commit the submodule points at. Check with `git ls-tree HEAD .agents/skills/github-agent-workflow` |
+| Pinned skills commit (`REF`) | `34fd92cc0a2d939c2d284f4eb340362d7bb6e868`, the commit the submodule points at. Check with `git ls-tree HEAD .agents/skills/github-agent-workflow` |
 | App to explore (`app_url`) | The URL of the deployed LivePage, ending in `/try` |
 
 The skills read no config file. Everything a prompt below leaves out keeps the skill's own default, listed in the package's [Inputs and defaults](../skills/github-agent-workflow/README.md#inputs-and-defaults); only LivePage's differing values are set here.
@@ -103,8 +103,8 @@ A connector reading `glennfaison/livepage` sees only a pointer to the skills, no
 You are running unattended: no human will answer questions. Runner: grok.
 Repository: glennfaison/livepage. Skills repository: glennfaison/github-agent-workflow at REF.
 Read skills/pipeline/SKILL/SKILL.md from the skills repository and follow it.
-Where a skill says "Call the Skill tool with X", read skills/BUCKET/X/SKILL.md from the skills repository and follow it. BUCKET is utility for merge-safety, unattended-triage and unattended-grilling, and pipeline for every other skill.
-You have no shell: follow "Running without a shell" in skills/pipeline/agent-workflow-protocol/SKILL.md.
+Where a skill says "Call the Skill tool with X", read skills/BUCKET/X/SKILL.md from the skills repository and follow it. BUCKET is meta for agent-workflow-protocol, pipeline-guide and setup-github-agent-workflow; utility for merge-safety, unattended-triage and grill-via-github-comments; and pipeline for every other skill.
+You have no shell: follow "Running without a shell" in skills/meta/agent-workflow-protocol/SKILL.md.
 LivePage's settings are key-value inputs in the prompt above; the full list is in .agents/docs/AGENT-WORKFLOW.md, and the repository's rules are in AGENTS.md, both in the repository.
 ```
 

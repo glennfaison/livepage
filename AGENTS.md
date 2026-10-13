@@ -35,7 +35,7 @@ The issue-to-merge pipeline is the [github-agent-workflow](./.agents/skills/gith
 
 | Step | Group skill | Item skill |
 | --- | --- | --- |
-| Explore the app and codebase; file unlabelled issues | `/explore-github-repo` | `/file-github-issue` |
+| Explore the app and codebase; file unlabelled issues | `/explore-github-repo` | `/file-github-issues` |
 | Triage; mark issues ready-for-agent or ready-for-human | `/triage-github-issues` | `/triage-github-issue` |
 | Implement a ready-for-agent issue and open a PR | `/implement-github-issues` | `/implement-github-issue` |
 | Get a PR through checks and post the review handoff | `/shepherd-github-prs` | `/shepherd-github-pr` |
