@@ -14,6 +14,22 @@ both coding agents and human contributors. Humans can follow the same Verify and
 Finish checklists; the [PR template](./.github/pull_request_template.md) and
 `npm run verify` encode a lighter version of those checks.
 
+# Agent guidance
+
+Before changing code, read the [project context](./.agents/docs/CONTEXT.md),
+[conventions](./.agents/docs/CONVENTIONS.md),
+[agent workflow](./.agents/docs/AGENT-WORKFLOW.md),
+[glossary](./.agents/docs/GLOSSARY.md), and relevant [ADRs](./.agents/docs/adr/).
+
+Treat every task, including agent-documentation changes, as a fresh start unless
+the user explicitly requests backward compatibility. For changes involving
+migrations or compatibility, follow [ADR 0010](./.agents/docs/adr/0010-fresh-start-no-compatibility.md).
+
+The [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) is the canonical process for
+both coding agents and human contributors. Humans can follow the same Verify and
+Finish checklists; the [PR template](./.github/pull_request_template.md) and
+`npm run verify` encode a lighter version of those checks.
+
 ## Session start (required)
 
 Run before any commit or push:
@@ -23,6 +39,48 @@ git config core.hooksPath scripts/git-hooks   # branch-name checks at commit and
 ```
 
 The hooks validate branch names against [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
+## Repository configuration
+
+This repository is configured with the GitHub agent workflow:
+
+- **Default branch**: `develop`
+- **App URL**: *(none provided)*
+- **Human reviewer**: *(none provided)*
+- **Build command**: *(none provided)*
+- **Git hooks path**: *(none provided)*
+- **Repository guidance**: `AGENTS.md` (this file)
+
+The workflow labels and issue patterns were created by the setup process:
+
+### Workflow labels
+
+- `ready-for-agent` - Fully specified, ready for an AFK agent
+- `ready-for-human` - Requires human implementation
+- `needs-info` - Waiting on reporter for more information
+- `agent:log` - Run log issue; ignored by every step when selecting work
+- `agent:triage` - Workflow: automated issue triage
+- `agent:in-progress` - Agent is currently working this issue
+- `agent:pr-open` - Issue has an open PR
+- `agent:stuck` - Agent failed after max attempts; needs a human
+- `agent:difficulty` - Per-step difficulties issue; ignored when selecting work
+
+### Issue patterns
+
+- **Agent run log**: Issue titled `Agent log YYYY-MM-DD` (start date), labelled `agent:log`, with append-only run log comments covering roughly two weeks
+- **Agent difficulties**: One open issue per pipeline step titled `Agent difficulties: <Step>`, labelled `agent:difficulty`, for recording problems and suggestions
+
+### Next steps
+
+After setup, you can run the following pipeline steps:
+
+1. **Exploring**: `/explore-github-repo` - Discover bugs, rough edges, missing features, and file them as issues
+2. **Grooming**: `/triage-github-issues` - Triage unlabelled issues and mark them ready-for-agent or ready-for-human
+3. **Implementing**: `/implement-github-issues` - Implement ready-for-agent issues and open PRs
+4. **Shepherding**: `/shepherd-github-prs` - Get agent PRs through CI checks
+5. **Reviewing**: `/review-github-prs` - Review and merge agent PRs when safe
+
+All scheduled runs use the prompts in [.agents/docs/AUTOMATIONS.md](./.agents/docs/AUTOMATIONS.md) and follow the unattended execution rules from the agent workflow protocol.
 
 ## Skills
 
