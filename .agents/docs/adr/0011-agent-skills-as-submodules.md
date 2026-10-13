@@ -1,6 +1,6 @@
 # Shared agent skills are pinned submodules, exposed by symlinks
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0012](./0012-agent-skills-via-npx-skills.md)
 
 Three skill sets are not written in this repository: the GitHub workflow
 (`glennfaison/github-agent-workflow`), Matt Pocock's skills, and Fallow's. They

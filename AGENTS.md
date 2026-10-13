@@ -16,10 +16,9 @@ Finish checklists; the [PR template](./.github/pull_request_template.md) and
 
 ## Session start (required)
 
-Run both before any commit or push:
+Run before any commit or push:
 
 ```bash
-git submodule update --init --recursive   # skills live in submodules; without this, .agents/skills/ has dangling links
 git config core.hooksPath scripts/git-hooks   # branch-name checks at commit and push
 ```
 
@@ -27,11 +26,21 @@ The hooks validate branch names against [.agents/docs/BRANCH-NAMES.md](./.agents
 
 ## Skills
 
-All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to find the right skill, then read its `SKILL.md` before following its workflow. Some entries there are symlinks into submodules ([ADR 0011](./.agents/docs/adr/0011-agent-skills-as-submodules.md)): refer to a skill by its name, never by a path inside a submodule.
+All skills live in [.agents/skills/](./.agents/skills/). Invoke `/ask-glenn` to find the right skill, then read its `SKILL.md` before following its workflow. Skills from other repositories are installed with the skills CLI and committed in `.agents/skills/`, with `skills-lock.json` ([ADR 0012](./.agents/docs/adr/0012-agent-skills-via-npx-skills.md)). Nothing needs installing at session start.
+
+To install or refresh them, run the commands below and commit the changed folders and `skills-lock.json`. Do not edit installed skills here; fix them in their source repository. Do not commit `.grok/`.
+
+```bash
+npx skills@latest add glennfaison/github-agent-workflow --skill '*' -y --copy
+npx skills@latest add fallow-rs/fallow-skills --skill '*' -y --copy
+npx skills@latest add mattpocock/skills --skill ask-matt --skill code-review --skill codebase-design --skill diagnosing-bugs --skill domain-modeling --skill grill-with-docs --skill implement --skill implement-spec --skill improve-codebase-architecture --skill pr --skill prototype --skill research --skill retro --skill setup-matt-pocock-skills --skill tdd --skill to-spec --skill to-tickets --skill triage --skill wayfinder --skill wizard -y --copy
+```
+
+Two review skills exist. `/code-review` (Matt Pocock's) is the general standards-and-spec review. [`/livepage-code-review`](./.agents/skills/livepage-code-review/SKILL.md) is this repository's own, for LivePage architecture and convention checks.
 
 ## GitHub workflow
 
-The issue-to-merge pipeline is the [github-agent-workflow](./.agents/skills/github-agent-workflow/README.md) package, a pinned git submodule. `/pipeline-guide` is the map. Each step has a **group skill** that selects work and an **item skill** that does the work on one issue or PR, so both can be run directly: `/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
+The issue-to-merge pipeline is the [github-agent-workflow](https://github.com/glennfaison/github-agent-workflow) package, installed into `.agents/skills/`. `/pipeline-guide` is the map. Each step has a **group skill** that selects work and an **item skill** that does the work on one issue or PR, so both can be run directly: `/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
 
 | Step | Group skill | Item skill |
 | --- | --- | --- |
@@ -41,7 +50,7 @@ The issue-to-merge pipeline is the [github-agent-workflow](./.agents/skills/gith
 | Get a PR through checks and post the review handoff | `/shepherd-github-prs` | `/shepherd-github-pr` |
 | Review a ready PR and merge when safe | `/review-github-prs` | `/review-github-pr` |
 
-Read `/agent-workflow-protocol` first: it holds the lease rules, the helpers, the unattended and no-shell rules, and (in `references/labels.md`) every label and state transition. `/merge-safety` gates merging. [code-review](./.agents/skills/code-review/SKILL.md) is this repository's own skill and is used before opening a PR and when reviewing one. `/tdd` comes from [mattpocock/skills](./.agents/skills/matt-pocock-skills/README.md).
+Read `/agent-workflow-protocol` first: it holds the lease rules, the helpers, the unattended and no-shell rules, and (in `references/labels.md`) every label and state transition. `/merge-safety` gates merging. `/code-review` and `/livepage-code-review` are used before opening a PR and when reviewing one. `/tdd` comes from [mattpocock/skills](https://github.com/mattpocock/skills).
 
 - Run `/setup-github-agent-workflow` once to create the labels and record LivePage's values. The values are in [the live settings block](./.agents/docs/AGENT-WORKFLOW.md#livepages-settings), passed to each run as key-value inputs.
 - Scheduled runs (Kilo Code, Grok) use the prompts in [.agents/docs/AUTOMATIONS.md](./.agents/docs/AUTOMATIONS.md). Nobody answers questions in them: follow the protocol's unattended rules and the [unattended section of the agent workflow](./.agents/docs/AGENT-WORKFLOW.md#unattended-runs).

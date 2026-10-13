@@ -1,18 +1,15 @@
 # Scheduled agent runs
 
-Prompts for running the [github-agent-workflow](../skills/github-agent-workflow/README.md) steps from a scheduler. The runner decides when a run starts; the skills decide what it does. The package's `docs/RUNNERS.md` (in its repository) explains what a runner needs and why. This page holds LivePage's values.
+Prompts for running the [github-agent-workflow](https://github.com/glennfaison/github-agent-workflow) steps from a scheduler. The runner decides when a run starts; the skills decide what it does. The package's `docs/RUNNERS.md` (in its repository) explains what a runner needs and why. This page holds LivePage's values.
 
 | Value | LivePage |
 | --- | --- |
 | Repository | `glennfaison/livepage` |
 | PR base branch | `develop`, passed as `pr_base_branch=develop` (see [the live settings](./AGENT-WORKFLOW.md#livepages-settings)) |
-| Skills repository | `glennfaison/github-agent-workflow` |
-| Pinned skills commit (`REF`) | `34fd92cc0a2d939c2d284f4eb340362d7bb6e868`, the commit the submodule points at. Check with `git ls-tree HEAD .agents/skills/github-agent-workflow` |
+| Skills | Committed in `.agents/skills/` ([ADR 0012](./adr/0012-agent-skills-via-npx-skills.md)) |
 | App to explore (`app_url`) | The URL of the deployed LivePage, ending in `/try` |
 
-The skills read no config file. Everything a prompt below leaves out keeps the skill's own default, listed in the package's [Inputs and defaults](../skills/github-agent-workflow/README.md#inputs-and-defaults); only LivePage's differing values are set here.
-
-Update `REF` in the Grok prompts whenever the submodule pointer moves ([ADR 0011](./adr/0011-agent-skills-as-submodules.md)).
+The skills read no config file. Everything a prompt below leaves out keeps the skill's own default, listed in the package's [Inputs and defaults](https://github.com/glennfaison/github-agent-workflow#inputs-and-defaults); only LivePage's differing values are set here.
 
 ## Which runner for which step
 
@@ -36,7 +33,6 @@ One scheduled trigger per step, each with the repository `glennfaison/livepage`.
 - Setup commands, in order. Check that the image has `gh` and `jq`, and install them here if it does not:
 
   ```bash
-  git submodule update --init --recursive
   git config user.name "livepage-agent"
   git config user.email "livepage-agent@users.noreply.github.com"
   git config core.hooksPath scripts/git-hooks
@@ -93,18 +89,18 @@ If /review-github-prs is not recognised, call the Skill tool with review-github-
 
 ### With a shell (Grok Build)
 
-Use the Kilo prompts above with `Runner: grok`. Run them from a checkout where `git submodule update --init --recursive` and `git config core.hooksPath scripts/git-hooks` have been run, with `GH_TOKEN` exported.
+Use the Kilo prompts above with `Runner: grok`. Run them from a checkout where `git config core.hooksPath scripts/git-hooks` has been run, with `GH_TOKEN` exported.
 
 ### With a GitHub connector and no shell (automations)
 
-A connector reading `glennfaison/livepage` sees only a pointer to the skills, not the skills. These prompts read them from the skills repository instead. Replace `REF` with the pinned commit, and `SKILL` with one of `explore-github-repo`, `triage-github-issues`, `implement-github-issues`, `shepherd-github-prs`, `review-github-prs`:
+The skills are committed in `.agents/skills/` in `glennfaison/livepage`, so the connector reads them from this repository. Replace `SKILL` with one of `explore-github-repo`, `triage-github-issues`, `implement-github-issues`, `shepherd-github-prs`, `review-github-prs`:
 
 ```text
 You are running unattended: no human will answer questions. Runner: grok.
-Repository: glennfaison/livepage. Skills repository: glennfaison/github-agent-workflow at REF.
-Read skills/pipeline/SKILL/SKILL.md from the skills repository and follow it.
-Where a skill says "Call the Skill tool with X", read skills/BUCKET/X/SKILL.md from the skills repository and follow it. BUCKET is meta for agent-workflow-protocol, pipeline-guide and setup-github-agent-workflow; utility for merge-safety, unattended-triage and grill-via-github-comments; and pipeline for every other skill.
-You have no shell: follow "Running without a shell" in skills/meta/agent-workflow-protocol/SKILL.md.
+Repository: glennfaison/livepage.
+Read .agents/skills/SKILL/SKILL.md in this repository and follow it.
+Where a skill says "Call the Skill tool with X", read .agents/skills/X/SKILL.md in this repository and follow it.
+You have no shell: follow "Running without a shell" in .agents/skills/agent-workflow-protocol/SKILL.md.
 LivePage's settings are key-value inputs in the prompt above; the full list is in .agents/docs/AGENT-WORKFLOW.md, and the repository's rules are in AGENTS.md, both in the repository.
 ```
 

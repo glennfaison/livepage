@@ -6,7 +6,7 @@ This document is written for coding agents. **Human contributors** can follow th
 
 ## Agent Workflow Files
 
-The GitHub workflows are the [github-agent-workflow](../skills/github-agent-workflow/README.md) package. [AGENTS.md](../../AGENTS.md#github-workflow) lists its steps and skills, and `/pipeline-guide` maps them. Prompts for scheduled runs are in [AUTOMATIONS.md](./AUTOMATIONS.md).
+The GitHub workflows are the [github-agent-workflow](https://github.com/glennfaison/github-agent-workflow) package, installed into `.agents/skills/` with `npx skills` ([ADR 0012](./adr/0012-agent-skills-via-npx-skills.md)). [AGENTS.md](../../AGENTS.md#github-workflow) lists its steps and skills, and `/pipeline-guide` maps them. Prompts for scheduled runs are in [AUTOMATIONS.md](./AUTOMATIONS.md).
 
 ### LivePage's settings
 
@@ -21,7 +21,7 @@ git_hooks_path=scripts/git-hooks
 repo_guidance=AGENTS.md .agents/docs/AGENT-WORKFLOW.md .agents/docs/CONVENTIONS.md .agents/docs/BRANCH-NAMES.md
 ```
 
-Add the ones a step uses to its prompt, one per line. Exploring reads `app_url`, which is the deployed LivePage ending in `/try` and is set per prompt in [AUTOMATIONS.md](./AUTOMATIONS.md). Everything a prompt omits keeps the skill's default, listed in the package's [Inputs and defaults](../skills/github-agent-workflow/README.md#inputs-and-defaults).
+Add the ones a step uses to its prompt, one per line. Exploring reads `app_url`, which is the deployed LivePage ending in `/try` and is set per prompt in [AUTOMATIONS.md](./AUTOMATIONS.md). Everything a prompt omits keeps the skill's default, listed in the package's [Inputs and defaults](https://github.com/glennfaison/github-agent-workflow#inputs-and-defaults).
 
 ## Scope
 
@@ -53,7 +53,7 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 - For anything beyond a focused fix, follow the [agent orchestration skill](../skills/agent-orchestration/SKILL.md): a design sub-agent, then coder sub-agents, then reviewer sub-agents, passing work along with the `/handoff` skill and iterating until the goal is met.
 - Whenever you write non-trivial code, have a fresh review sub-agent review it (trivial edits such as typos and one-line fixes only need your own check). The reviewer fixes the issues it finds rather than only reporting them, so the main agent's context stays small. It must not edit tests or allowlists to get green; you read its diff before accepting.
-- End the task by suggesting which parts of the process could be automated deterministically to reduce token use. In an unattended workflow run, nobody is there to read it: put the suggestions in the run log instead, as [log.md](../../.agents/skills/github-agent-workflow/skills/pipeline/agent-workflow-protocol/references/log.md) describes.
+- End the task by suggesting which parts of the process could be automated deterministically to reduce token use. In an unattended workflow run, nobody is there to read it: put the suggestions in the run log instead, as [log.md](../skills/agent-workflow-protocol/references/log.md) describes.
 
 ## Sub-agents
 
