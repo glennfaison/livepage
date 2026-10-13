@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useReducer, useRef, useCallback } from "react"
-import { appReducer, initialState, createInitialState } from "@/client/features/app-state/commands/reducer"
-import type { AppState } from "@/client/features/types"
+import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
+import type { AppState, PersistedSession } from "@/client/features/types"
 
 const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
 const PAGE_STORAGE_KEY = "livepage-page-storage"
@@ -48,32 +48,37 @@ function savePersistedState(state: AppState) {
 }
 
 /**
+ * Reads the browser-persisted session. localStorage is unavailable during
+ * server rendering, so this is dispatched in a mount effect and not read while
+ * rendering: reading it during the first client render would diverge from the
+ * server HTML and fail hydration. Fields that were never stored hydrate as
+ * `null` and keep the reducer's default.
+ */
+function readPersistedSession(): PersistedSession {
+  const storedPage = loadPersistedState()
+  let storedPromptAssist: string | null = null
+  try {
+    storedPromptAssist = window.localStorage.getItem(PROMPT_ASSIST_ENABLED_KEY)
+  } catch {
+    // Storage can be unavailable (private mode, quota); the defaults then apply.
+  }
+  return {
+    componentTree: storedPage?.componentTree ?? null,
+    activePage: storedPage?.activePage ?? null,
+    pageBuilderMode: storedPage?.pageBuilderMode ?? null,
+    toolbarMinimized: storedPage?.toolbarMinimized ?? null,
+    promptAssistEnabled: storedPromptAssist === null ? null : storedPromptAssist === "true",
+  }
+}
+
+/**
  * Hook that provides the global app state and dispatch function.
- * Initializes history with the first page if history is empty.
- * Persists promptAssistEnabled setting and page state to localStorage.
+ * Seeds the initial history entry from the starting page, adopts the
+ * browser-persisted session after mount, and persists the page state and the
+ * promptAssistEnabled setting to localStorage.
  */
 export function useAppState() {
-  const [state, baseDispatch] = useReducer(appReducer, initialState, (initial) => {
-    if (typeof window !== "undefined") {
-      const storedPromptAssist = window.localStorage.getItem(PROMPT_ASSIST_ENABLED_KEY)
-      const storedPage = loadPersistedState()
-      let merged = initial
-      if (storedPromptAssist !== null) {
-        merged = { ...merged, promptAssistEnabled: storedPromptAssist === "true" }
-      }
-      if (storedPage) {
-        merged = {
-          ...merged,
-          componentTree: storedPage.componentTree,
-          activePage: storedPage.activePage,
-          pageBuilderMode: storedPage.pageBuilderMode,
-          toolbarMinimized: storedPage.toolbarMinimized,
-        }
-      }
-      return merged
-    }
-    return initial
-  })
+  const [state, baseDispatch] = useReducer(appReducer, initialState)
 
   const dispatchRef = useRef(baseDispatch)
   dispatchRef.current = baseDispatch
@@ -98,17 +103,14 @@ export function useAppState() {
     }
   }).current
 
+  // Adopt the browser-persisted session after mount so the first render stays
+  // identical to the server HTML. The reducer seeds the initial history entry
+  // from the adopted tree, so undo and discard start from the restored session.
   useEffect(() => {
-    if (state.componentTree.length > 0 && state.history.length === 0) {
-      dispatch({
-        type: "ADD_TO_HISTORY",
-        payload: {
-          action: "Page created",
-          pageState: state.componentTree,
-        },
-      })
-      dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: 0 })
-    }
+    dispatch({ type: "HYDRATE_FROM_STORAGE", payload: readPersistedSession() })
+  }, [dispatch])
+
+  useEffect(() => {
     debouncedSave(state)
   }, [state.componentTree, state.history, state.activePage, state.pageBuilderMode, state.toolbarMinimized, dispatch, debouncedSave])
 
@@ -120,15 +122,6 @@ export function useAppState() {
       }
     }
   }, [])
-
-  // Persist promptAssistEnabled to localStorage (also handled in dispatch above for immediate sync)
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(PROMPT_ASSIST_ENABLED_KEY, String(state.promptAssistEnabled))
-    } catch {
-      // Ignore localStorage errors (e.g., private browsing, quota exceeded)
-    }
-  }, [state.promptAssistEnabled])
 
   return { state, dispatch }
 }

@@ -13,18 +13,12 @@ import {
   findComponentById,
 } from "./helpers"
 
-const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
-
-function getInitialPromptAssistEnabled(): boolean {
-  if (typeof window === "undefined") return false
-  try {
-    const value = window.localStorage.getItem(PROMPT_ASSIST_ENABLED_KEY)
-    return value === "true"
-  } catch {
-    return false
-  }
-}
-
+/**
+ * The reducer's starting state. It must stay browser-free: the server and the
+ * client's first render both use it, so any `window` or `localStorage` read
+ * here makes those renders diverge and hydration fails. Browser-persisted
+ * state is adopted after mount via `HYDRATE_FROM_STORAGE`.
+ */
 export function createInitialState(): AppState {
   return {
     componentTree: [
@@ -43,7 +37,7 @@ export function createInitialState(): AppState {
     pageBuilderMode: "edit",
     toolbarMinimized: false,
     showToolbar: true,
-    promptAssistEnabled: getInitialPromptAssistEnabled(),
+    promptAssistEnabled: false,
     history: [],
     currentHistoryIndex: -1,
     historyPreviewIndex: null,
@@ -302,6 +296,27 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         promptAssistEnabled: action.payload,
       }
+
+    case "HYDRATE_FROM_STORAGE": {
+      // Adopts the browser-persisted session after mount. Fields that were
+      // never stored keep the current value, and the initial history entry is
+      // seeded from the adopted tree so undo and discard act on the restored
+      // session rather than the defaults.
+      const persisted = action.payload
+      const adopted: AppState = {
+        ...state,
+        componentTree: persisted.componentTree ?? state.componentTree,
+        activePage: persisted.activePage ?? state.activePage,
+        pageBuilderMode: persisted.pageBuilderMode ?? state.pageBuilderMode,
+        toolbarMinimized: persisted.toolbarMinimized ?? state.toolbarMinimized,
+        promptAssistEnabled: persisted.promptAssistEnabled ?? state.promptAssistEnabled,
+      }
+      if (adopted.history.length > 0 || adopted.componentTree.length === 0) return adopted
+      return {
+        ...adopted,
+        ...appendHistoryEntry(adopted, adopted.componentTree, "Page created"),
+      }
+    }
 
     case "DUPLICATE_PAGE": {
       const activePage = state.componentTree.find(

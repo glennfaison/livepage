@@ -33,6 +33,18 @@ export type AppState = Readonly<{
   originalHistoryState: ReadonlyArray<AppNode> | null
 }>
 
+/**
+ * The slice of app state persisted in browser storage. A `null` field means
+ * "not stored", so hydration keeps the reducer's default for it.
+ */
+export type PersistedSession = Readonly<{
+  componentTree: ReadonlyArray<AppNode> | null
+  activePage: string | null
+  pageBuilderMode: PageBuilderMode | null
+  toolbarMinimized: boolean | null
+  promptAssistEnabled: boolean | null
+}>
+
 export type AppAction =
   | Readonly<{ type: "SET_PAGES"; payload: ReadonlyArray<AppNode> }>
   | Readonly<{ type: "ADD_PAGE"; payload: AppNode }>
@@ -53,6 +65,7 @@ export type AppAction =
   | Readonly<{ type: "SET_TOOLBAR_MINIMIZED"; payload: boolean }>
   | Readonly<{ type: "SET_SHOW_TOOLBAR"; payload: boolean }>
   | Readonly<{ type: "SET_PROMPT_ASSIST_ENABLED"; payload: boolean }>
+  | Readonly<{ type: "HYDRATE_FROM_STORAGE"; payload: PersistedSession }>
   | Readonly<{ type: "ADD_TO_HISTORY"; payload: Readonly<{ action: string; pageState: ReadonlyArray<AppNode> }> }>
   | Readonly<{ type: "SET_CURRENT_HISTORY_INDEX"; payload: number }>
   | Readonly<{ type: "SET_HISTORY_PREVIEW_INDEX"; payload: number | null }>
