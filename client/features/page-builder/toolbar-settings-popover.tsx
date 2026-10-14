@@ -8,7 +8,7 @@ import type React from "react"
 import { useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
-import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft
+import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
 import { toast } from "@/client/components/ui/use-toast"
 
 type ToolbarSettingsPopoverProps = Readonly<{
@@ -41,7 +41,6 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   dispatch,
   promptAssistEnabled,
 }) => {
-<<<<<<< HEAD
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
@@ -146,8 +145,8 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { description: e.target.value } } } })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter page description for SEO"
-                  rows={3}
                 />
+                rows={3}
               </div>
               <div className="space-y-2">
                 <label htmlFor="page-favicon" className="text-sm font-medium">
@@ -254,30 +253,30 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   </Button>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Shortcuts</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Keyboard className="h-3 w-3 shrink-0" />
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘K</kbd>
-                  <span>Command Palette</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Keyboard className="h-3 w-3 shrink-0" />
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘S</kbd>
-                  <span>Save Page</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Keyboard className="h-3 w-3 shrink-0" />
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘Z</kbd>
-                  <span>Undo</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Keyboard className="h-3 w-3 shrink-0" />
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘⇧Z</kbd>
-                  <span>Redo</span>
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Shortcuts</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Keyboard className="h-3 w-3 shrink-0" />
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘K</kbd>
+                    <span>Command Palette</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Keyboard className="h-3 w-3 shrink-0" />
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘S</kbd>
+                    <span>Save Page</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Keyboard className="h-3 w-3 shrink-0" />
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘Z</kbd>
+                    <span>Undo</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Keyboard className="h-3 w-3 shrink-0" />
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">⌘⇧Z</kbd>
+                    <span>Redo</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,20 +330,20 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
               </div>
             </div>
           </div>
-        </div>
-      </PopoverContent>
+        </PopoverContent>
 
-      <ValidationDialog
-        validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
-        onProceed={handleValidationProceed}
-        onCancel={() => {
-          setValidationDialogOpen(false)
-          setPendingExportAction(null)
-          setValidationResult(null)
-        }}
-        isOpen={validationDialogOpen}
-        onOpenChange={setValidationDialogOpen}
-      />
+        <ValidationDialog
+          validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+          onProceed={handleValidationProceed}
+          onCancel={() => {
+            setValidationDialogOpen(false)
+            setPendingExportAction(null)
+            setValidationResult(null)
+          }}
+          isOpen={validationDialogOpen}
+          onOpenChange={setValidationDialogOpen}
+        />
+      </Popover>
     </Popover>
   )
 }

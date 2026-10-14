@@ -1,19 +1,11 @@
 import React from "react"
 import { render, screen } from "@testing-library/react"
-<<<<<<< HEAD
 import userEvent from "@testing-library/user-event"
 import { RootErrorBoundary } from "@/client/components/error-boundary"
 
 function ThrowError({ shouldThrow, errorMessage }: { shouldThrow: boolean; errorMessage?: string }) {
   if (shouldThrow) {
     throw new Error(errorMessage ?? "Test error")
-=======
-import { RootErrorBoundary } from "@/client/components/error-boundary"
-
-function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
-  if (shouldThrow) {
-    throw new Error("Test error")
->>>>>>> main
   }
   return <div>Child content</div>
 }
@@ -29,16 +21,11 @@ describe("RootErrorBoundary", () => {
     expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument()
   })
 
-<<<<<<< HEAD
   it("renders fallback when error thrown", async () => {
-=======
-  it("renders fallback when error thrown", () => {
->>>>>>> main
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
 
     render(
       <RootErrorBoundary>
-<<<<<<< HEAD
         <ThrowError shouldThrow={true} errorMessage="Test error" />
       </RootErrorBoundary>,
     )
@@ -73,16 +60,6 @@ describe("RootErrorBoundary", () => {
     expect(screen.getByText("Network Error")).toBeInTheDocument()
     expect(screen.getByText("Unable to connect to the server. Please check your internet connection and try again.")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument()
-=======
-        <ThrowError shouldThrow={true} />
-      </RootErrorBoundary>,
-    )
-
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument()
-    // In development mode, error details are in a details/pre element
-    expect(screen.getByText("Test error")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /reload application/i })).toBeInTheDocument()
->>>>>>> main
     expect(consoleErrorSpy).toHaveBeenCalled()
 
     consoleErrorSpy.mockRestore()
@@ -93,20 +70,12 @@ describe("RootErrorBoundary", () => {
 
     render(
       <RootErrorBoundary fallback={<div>Custom fallback</div>}>
-<<<<<<< HEAD
         <ThrowError shouldThrow={true} errorMessage="Test error" />
-=======
-        <ThrowError shouldThrow={true} />
->>>>>>> main
       </RootErrorBoundary>,
     )
 
     expect(screen.getByText("Custom fallback")).toBeInTheDocument()
-<<<<<<< HEAD
     expect(screen.queryByText("Unknown Error")).not.toBeInTheDocument()
-=======
-    expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument()
->>>>>>> main
 
     consoleErrorSpy.mockRestore()
   })

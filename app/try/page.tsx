@@ -212,11 +212,12 @@ export default function BuilderPage() {
           type: "ADD_TO_HISTORY",
           payload: {
             action: "Loaded page",
-            pageState: loadedComponentTree,
-          },
+            pageState: loadedComponentTree
+          }
         })
-      },
-    })
+      }
+    }
+    );
 
     // Reset the file input
     if (event.target.type === "file") {
@@ -319,7 +320,7 @@ export default function BuilderPage() {
                 size="sm"
                 className="gap-2 px-2 sm:px-3"
                 aria-label={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
-                title={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
+                title={pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}
                 onClick={() => {
                   const nextMode = pageBuilderMode === "edit" ? "preview" : "edit"
                   dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: nextMode })
@@ -402,11 +403,8 @@ export default function BuilderPage() {
           onDuplicatePage={handleDuplicatePage}
           dispatch={dispatch}
           promptAssistEnabled={state.promptAssistEnabled}
-<<<<<<< HEAD
           canUndo={canUndo}
           canRedo={canRedo}
-=======
->>>>>>> main
         />
 
         <CommandPalette

@@ -4,7 +4,6 @@ Before changing code, read the [project context](./.agents/docs/CONTEXT.md),
 [conventions](./.agents/docs/CONVENTIONS.md),
 [agent workflow](./.agents/docs/AGENT-WORKFLOW.md),
 [glossary](./.agents/docs/GLOSSARY.md), and relevant [ADRs](./.agents/docs/adr/).
-<<<<<<< HEAD
 
 Treat every task, including agent-documentation changes, as a fresh start unless
 the user explicitly requests backward compatibility. For changes involving
@@ -44,7 +43,7 @@ Two review skills exist. `/code-review` (Matt Pocock's) is the general standards
 The issue-to-merge pipeline is the [github-agent-workflow](https://github.com/glennfaison/github-agent-workflow) package, installed into `.agents/skills/`. `/pipeline-guide` is the map. Each step has a **group skill** that selects work and an **item skill** that does the work on one issue or PR, so both can be run directly: `/triage-github-issues` for the backlog, `/triage-github-issue 123` for one issue.
 
 | Step | Group skill | Item skill |
-| --- | --- | --- |
+|---|---|---|
 | Explore the app and codebase; file unlabelled issues | `/explore-github-repo` | `/file-github-issues` |
 | Triage; mark issues ready-for-agent or ready-for-human | `/triage-github-issues` | `/triage-github-issue` |
 | Implement a ready-for-agent issue and open a PR | `/implement-github-issues` | `/implement-github-issue` |
@@ -83,7 +82,9 @@ Create branches only with a gitflow name: `feature/<topic>`, `bugfix/<topic>`,
 `main`. Topics are lowercase kebab-case. Do not invent prefixes such as `cursor/`,
 `fix/`, or `templates/`. Open pull requests against `develop`; `main` only
 accepts PRs from `develop`. Full patterns and the four layers of enforcement are
-in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).## Git hooks (required)
+in [.agents/docs/BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+
+## Git hooks (required)
 
 Local git hooks enforce branch-name compliance at commit and push time.
 Enable them at **session start**:
@@ -118,7 +119,6 @@ When opening a PR that resolves multiple issues, use separate `Closes` statement
 ```
 Closes #122, #123, #124, #125
 ```
->>>>>>> main
 
 ## PR descriptions and closing issues
 

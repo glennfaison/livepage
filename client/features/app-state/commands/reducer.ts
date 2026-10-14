@@ -13,7 +13,6 @@ import {
   findComponentById,
 } from "./helpers"
 
-<<<<<<< HEAD
 /**
  * The reducer's starting state. It must stay browser-free: the server and the
  * client's first render both use it, so any `window` or `localStorage` read
@@ -46,46 +45,6 @@ export function createInitialState(): AppState {
   }
 }
 
-=======
-const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
-
-function getInitialPromptAssistEnabled(): boolean {
-  if (typeof window === "undefined") return false
-  try {
-    const value = window.localStorage.getItem(PROMPT_ASSIST_ENABLED_KEY)
-    return value === "true"
-  } catch {
-    return false
-  }
-}
-
-export function createInitialState(): AppState {
-  return {
-    componentTree: [
-      {
-        tag: "page",
-        attributes: {
-          id: "page-1",
-          title: "Home Page",
-        },
-        children: [],
-      },
-    ],
-    activePage: "page-1",
-    selectedComponentId: "",
-    selectedComponentAncestors: [],
-    pageBuilderMode: "edit",
-    toolbarMinimized: false,
-    showToolbar: true,
-    promptAssistEnabled: getInitialPromptAssistEnabled(),
-    history: [],
-    currentHistoryIndex: -1,
-    historyPreviewIndex: null,
-    originalHistoryState: null,
-  }
-}
-
->>>>>>> main
 export const initialState = createInitialState()
 
 /**
@@ -127,7 +86,7 @@ function withHistory(
 ): AppState {
   return {
     ...state,
-    componentTree,
+    componentTree: componentTree,
     ...appendHistoryEntry(state, componentTree, historyAction),
   }
 }
@@ -169,13 +128,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       }
       return withHistory(
         {
-        ...state,
-        componentTree: newComponentTree,
-        },
-        newComponentTree,
-        `Updated ${componentId}`,
-      )
-    }
+          ...state,
+          componentTree: newComponentTree,
+          },
+          newComponentTree,
+          `Updated ${componentId}`,
+        )
+      }
 
     case "REMOVE_COMPONENT": {
       const { componentId } = action.payload
@@ -185,14 +144,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const newComponentTree = removeComponent({ components: state.componentTree, componentId })
       return withHistory(
         {
-        ...state,
-        componentTree: newComponentTree,
-        selectedComponentId: state.selectedComponentId === componentId ? "" : state.selectedComponentId,
-        },
-        newComponentTree,
-        `Removed ${componentId}`,
-      )
-    }
+          ...state,
+          componentTree: newComponentTree,
+          selectedComponentId: state.selectedComponentId === componentId ? "" : state.selectedComponentId,
+          },
+          newComponentTree,
+          `Removed ${componentId}`,
+        )
+      }
 
     case "DUPLICATE_COMPONENT": {
       const { componentId } = action.payload
@@ -202,13 +161,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const newTree = duplicateComponent({ components: state.componentTree, componentId })
       return withHistory(
         {
-        ...state,
-        componentTree: newTree,
-        },
-        newTree,
-        `Duplicated ${componentId}`,
-      )
-    }
+          ...state,
+          ...state,
+          componentTree: newTree,
+          },
+          newTree,
+          `Duplicated ${componentId}`,
+        )
+      }
 
     case "REPLACE_COMPONENT": {
       const { oldComponentId, newComponent: providedComponent, newComponentTag } = action.payload
@@ -226,13 +186,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return withHistory(
         {
           ...state,
+          ...state,
           componentTree: newComponentTree,
           selectedComponentId: newComponent.attributes.id,
-        },
-        newComponentTree,
-        `Replaced ${oldComponentId} with ${tag}`,
-      )
-    }
+          },
+          newComponentTree,
+          `Replaced ${oldComponentId} with ${tag}`,
+        )
+      }
 
     case "MOVE_COMPONENT": {
       const { componentId, newParentId, index } = action.payload
@@ -256,13 +217,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return withHistory(
         {
           ...state,
+          ...state,
           componentTree: newComponentTree,
           selectedComponentId: componentId,
-        },
-        newComponentTree,
-        `Moved ${componentId}`,
-      )
-    }
+          },
+          newComponentTree,
+          `Moved ${componentId}`,
+        )
+      }
 
     case "SET_PAGES":
       return {
@@ -273,12 +235,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "ADD_PAGE":
       return withHistory(
         {
-        ...state,
-        componentTree: [...state.componentTree, action.payload],
-        },
-        [...state.componentTree, action.payload],
-        `Added page ${action.payload.attributes.id}`,
-      )
+          ...state,
+          ...state,
+          componentTree: [...state.componentTree, action.payload],
+          },
+          [...state.componentTree, action.payload],
+          `Added page ${action.payload.attributes.id}`,
+        )
 
     case "UPDATE_PAGE":
       return withHistory(
@@ -338,7 +301,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         promptAssistEnabled: action.payload,
       }
 
-<<<<<<< HEAD
     case "HYDRATE_FROM_STORAGE": {
       // Adopts the browser-persisted session after mount. Fields that were
       // never stored keep the current value, and the initial history entry is
@@ -360,8 +322,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       }
     }
 
-=======
->>>>>>> main
     case "DUPLICATE_PAGE": {
       const activePage = state.componentTree.find(
         (p) => p.tag === "page" && p.attributes.id === state.activePage

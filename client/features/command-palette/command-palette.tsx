@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import {
   Command as CommandIcon,
   CornerDownLeft,
@@ -31,7 +32,7 @@ import {
   User,
   Building2,
 } from "lucide-react"
-import type React from "react"
+import * as React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
 import { Input } from "@/client/components/ui/input"
@@ -133,8 +134,7 @@ export const CommandPalette: React.FC<
     onDiscardChanges: () => void
     onOpenAIAssistant: () => void
     onDuplicatePage: () => void
-  }>
-> = ({
+  } >> = ({
   open,
   onOpenChange,
   state,
@@ -193,7 +193,6 @@ export const CommandPalette: React.FC<
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
 
-<<<<<<< HEAD
   // Discard confirmation, shared with the toolbar so both surfaces behave alike.
   const {
     showConfirmation: showDiscardConfirmation,
@@ -569,7 +568,7 @@ export const CommandPalette: React.FC<
                         ) : null}
                       </span>
                       {isActive ? <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
-                    </button>
+                    )
                   )
                 })}
               </div>
@@ -595,27 +594,26 @@ export const CommandPalette: React.FC<
         }}
       />
 
-       <ValidationDialog
-         validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
-         onProceed={handleValidationProceed}
-         onCancel={() => {
-           setValidationDialogOpen(false)
-           setPendingExportAction(null)
-           setValidationResult(null)
-         }}
-         isOpen={validationDialogOpen}
-         onOpenChange={setValidationDialogOpen}
-       />
+      <ValidationDialog
+        validation={validationResult ?? { issues: [], hasErrors: false, hasWarnings: false }}
+        onProceed={handleValidationProceed}
+        onCancel={() => {
+          setValidationDialogOpen(false)
+          setPendingExportAction(null)
+          setValidationResult(null)
+        }}
+        isOpen={validationDialogOpen}
+        onOpenChange={setValidationDialogOpen}
+      />
 
-       {/* Discard Confirmation Dialog */}
-       <DiscardConfirmationDialog
-         open={showDiscardConfirmation}
-         askBeforeDiscard={askBeforeDiscard}
-         onCancel={handleDiscardCancel}
-         onConfirm={handleDiscardConfirm}
-         onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
-       />
-     </Dialog>
-   )
- }
-
+      {/* Discard Confirmation Dialog */}
+      <DiscardConfirmationDialog
+        open={showDiscardConfirmation}
+        askBeforeDiscard={askBeforeDiscard}
+        onCancel={handleDiscardCancel}
+        onConfirm={handleDiscardConfirm}
+        onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
+      />
+    </Dialog>
+  )
+}
