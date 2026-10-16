@@ -1,3 +1,0 @@
-interface:
-  display_name: "Shepherd GitHub PRs"
-  short_description: "Get agent PRs through CI"

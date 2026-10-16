@@ -1,3 +1,0 @@
-interface:
-  display_name: "Merge Safety"
-  short_description: "Assess whether a PR is safe to merge"
