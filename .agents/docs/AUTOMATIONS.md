@@ -16,7 +16,7 @@ The skills read no config file. Everything a prompt below leaves out keeps the s
 | Step | Kilo Code Cloud Agent | Grok with a GitHub connector (no shell) | Grok Build (shell) |
 | --- | --- | --- | --- |
 | Exploring | Yes | Yes, if it can browse the app | Yes |
-| Grooming | Yes | Yes | Yes |
+| Triaging | Yes | Yes | Yes |
 | Implementing | Yes | No: it cannot run tests or the build | Yes |
 | Shepherding | Yes | No: it cannot read check logs | Yes |
 | Reviewing | Yes | Only if the connector can merge pinned to a commit | Yes |
@@ -49,7 +49,7 @@ No human is present: do not ask questions. Runner: kilo.
 If /explore-github-repo is not recognised, call the Skill tool with explore-github-repo, or read .agents/skills/explore-github-repo/SKILL.md and follow it.
 ```
 
-Grooming:
+Triaging:
 
 ```text
 Run /triage-github-issues on github.com/glennfaison/livepage.
@@ -115,7 +115,7 @@ Offset the minutes so runs do not start together.
 | Step | Every | Why |
 | --- | --- | --- |
 | Exploring | Week | Files at most 5 issues per run |
-| Grooming | 2 hours | Takes at most 5 issues per run |
+| Triaging | 2 hours | Takes at most 5 issues per run |
 | Implementing | 3 hours | One issue per run; the lease lasts 3 hours |
 | Shepherding | 1 hour | Skips PRs whose checks are still running |
 | Reviewing | 1 hour | Merges into `develop` |
@@ -124,6 +124,6 @@ Offset the minutes so runs do not start together.
 
 1. Run `/setup-github-agent-workflow` once, by hand.
 2. Run each step by hand. Read the comment it leaves on the monthly `Agent log` issue, under **Problems**.
-3. Schedule Exploring and Grooming first, then Implementing and Shepherding, and Reviewing last.
+3. Schedule Exploring and Triaging first, then Implementing and Shepherding, and Reviewing last.
 
 To stop one item, label it `agent:stuck`. To stop a step, pause its automation.

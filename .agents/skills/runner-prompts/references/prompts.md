@@ -1,4 +1,4 @@
-<!-- Generated from each skill's `## Inputs` table and checked in CI. Do not edit by hand. -->
+<!-- Source of truth for this local skill in this repository. Regenerate from each skill's `## Inputs` table when those change, then commit. Do not edit by hand for ad-hoc wording. -->
 
 # Runner prompts
 

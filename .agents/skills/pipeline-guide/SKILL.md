@@ -20,7 +20,7 @@ Read-only map of the issue-to-merge pipeline. Use this to decide which skill to 
 | Step | Group skill (selects work) | Item skill (one item) |
 |---|---|---|
 | Exploring | `explore-github-repo` | `file-github-issues` |
-| Grooming | `triage-github-issues` | `triage-github-issue` |
+| Triaging | `triage-github-issues` | `triage-github-issue` |
 | Implementing | `implement-github-issues` | `implement-github-issue` |
 | Shepherding | `shepherd-github-prs` | `shepherd-github-pr` |
 | Reviewing | `review-github-prs` | `review-github-pr` |
