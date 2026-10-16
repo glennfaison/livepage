@@ -32,3 +32,11 @@ layout) and is hand-maintained. It must not be used to store agent instructions.
   reference to `.agents/` as the sanctioned convention rather than a leak.
 - Adding agent-facing documentation means adding it under `.agents/`, and adding
   an ADR when the decision is not obvious from the file itself.
+- `README.md` is user-facing and hand-maintained: features, setup, development
+  commands, layout, exports, templates, security. It is not a place for
+  agent-written process or guidance content. Agents must not add new sections,
+  footnotes, or links to `README.md` unless the change is a genuine user-facing
+  feature, setup step, or development command. Agent guidance that would sit in
+  `README.md` belongs in `AGENTS.md` or `.agents/docs/` instead. If a section
+  was added to `README.md` by an agent and is out of scope, remove it rather
+  than keep it "for completeness".

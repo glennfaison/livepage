@@ -15,6 +15,8 @@ Every branch in this repository must use a gitflow name. The rule is the same fo
 
 Topic segments are lowercase kebab-case: letters, digits, and hyphens only. Version segments are numeric (`1`, `1.4`, `1.4.0`). Support lines may end in `x` (`support/1.x`). Dependabot branch names are lowercase and may contain dots, dashes, underscores, and slashes after the `dependabot/` prefix.
 
+Do not invent prefixes. Only the types in the table above are allowed, so do not create branches such as `cursor/`, `fix/`, `templates/`, `chore/`, `docs/`, or `agent/`. If a topic needs a word that is not a gitflow type, use the closest one (`feature/`, `bugfix/`, or `hotfix/`).
+
 ## Enforcement
 
 1. **CI (required backstop, runs first).** `.github/workflows/ci.yml` runs `node scripts/check-branch-name.mjs` on every push and pull request. On a pull request it validates `GITHUB_HEAD_REF`. A failing name prints the allowed patterns and examples. The same workflow also runs `pr-source-branch-check` on every pull request to enforce merge policy: `main` only accepts PRs from `develop`, and `develop` only accepts PRs from gitflow branches. This runs for every actor that opens a pull request. The check runs as the first job in CI, before any tests or other validation.
