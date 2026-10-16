@@ -232,13 +232,12 @@ const EditModeComponent = (props: EditModeProps) => {
 		<div
 			{...attributes}
 			className={cn(
-				"min-h-[50px] flex flex-row justify-start items-stretch",
-				"p-0 gap-0",
-				containerClassName,
-				"border border-dashed border-gray-300",
-				customClasses,
-				childClassName,
-			)}
+			"min-h-[50px] flex flex-row justify-start items-stretch",
+			"p-0 gap-0",
+			containerClassName,
+			customClasses,
+			childClassName,
+		)}
 			onMouseMove={onMouseMove}
 			onMouseLeave={onMouseLeave}
 			style={{

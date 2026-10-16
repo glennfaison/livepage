@@ -109,7 +109,16 @@ export const Divider = ({
         // Opacity only — never visibility:hidden — so the hit target stays active
         // while the pointer moves from a child onto the bar.
         shown ? "opacity-100" : "opacity-0",
-        orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
+        // Zero main-axis space when hidden so invisible dividers don't shift
+        // siblings (preview mode has no dividers at all). When shown (pointer near
+        // an edge) they occupy their normal 2 px strip as an overlay.
+        shown
+          ? orientation === "horizontal"
+            ? "flex-row h-2 w-full"
+            : "flex-col w-2 self-stretch"
+          : orientation === "horizontal"
+            ? "flex-row h-0 w-full"
+            : "flex-col w-0",
         isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
       )}
     >

@@ -193,12 +193,11 @@ const EditModeComponent = (props: EditModeProps) => {
 	return (
 		<div
 			className={cn(
-				"min-h-[50px] flex flex-col justify-start",
-				"p-0 gap-0",
-				"border border-dashed border-gray-300",
-				customClasses,
-				childClassName,
-			)}
+			"min-h-[50px] flex flex-col justify-start",
+			"p-0 gap-0",
+			customClasses,
+			childClassName,
+		)}
 			onMouseMove={onMouseMove}
 			onMouseLeave={onMouseLeave}
 			{...attributes}
