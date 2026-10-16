@@ -1,6 +1,6 @@
 ---
 name: triage-github-issue
-description: Triage one specific GitHub issue by number. Claims it, checks for duplicates, decides it with the unattended-triage skill, leaves the outcome comment, and sets exactly one state label (ready-for-agent, ready-for-human or needs-info). Use when given an issue number to groom, or when triage-github-issues dispatches an issue to you.
+description: Triage one specific GitHub issue by number. Claims it, checks for duplicates, decides it with the unattended-triage skill, leaves the outcome comment, and sets exactly one state label (ready-for-agent, ready-for-human or needs-info). Use when given an issue number to triage, or when triage-github-issues dispatches an issue to you.
 ---
 
 # Triage GitHub issue
@@ -20,7 +20,7 @@ Make one issue ready for an agent to implement, or route it to a human.
 | Input | Default | What it does |
 |---|---|---|
 | `issue` | *(required)* | The issue, as a URL or a number. `N` is the last path segment of a URL |
-| `lease_ttl_triage` | `1 hour` | How long the Grooming lease stays valid without a renewal |
+| `lease_ttl_triage` | `1 hour` | How long the Triaging lease stays valid without a renewal |
 | `max_item_failures` | `3` | Failed runs of one step on one item before it is escalated |
 | `dedupe_closed_days` | `30` | The "recently closed" window the duplicate search runs over |
 
@@ -44,10 +44,10 @@ Make one issue ready for an agent to implement, or route it to a human.
 
 ## Process
 
-1. **Claim.** `claim N issue agent:triage Grooming "$lease_ttl_triage"`. If `failures N Grooming` is at least `$max_item_failures`, follow `references/escalate.md` and stop. Release on every exit path from here on (see step 9).
-2. **Dedupe.** Follow `references/dedupe.md`, using the **Grooming** column. If your issue is a duplicate and is now closed, skip to step 9.
+1. **Claim.** `claim N issue agent:triage Triaging "$lease_ttl_triage"`. If `failures N Triaging` is at least `$max_item_failures`, follow `references/escalate.md` and stop. Release on every exit path from here on (see step 9).
+2. **Dedupe.** Follow `references/dedupe.md`, using the **Triaging** column. If your issue is a duplicate and is now closed, skip to step 9.
 3. **Link related issues** in a comment, or in the description if that reads better.
-4. **Check the format.** Decide the category, then compare the description with `references/issue-format.md` (its **Grooming's check** section). Fill in what the evidence supports. Note what is missing and cannot be inferred. Those become questions in step 5.
+4. **Check the format.** Decide the category, then compare the description with `references/issue-format.md` (its **Triaging check** section). Fill in what the evidence supports. Note what is missing and cannot be inferred. Those become questions in step 5.
 5. **Decide.** Call the Skill tool with `unattended-triage` for this issue. Give it the duplicate and related findings from steps 2 and 3, and the gaps from step 4 (each missing required section becomes a question). It checks for an existing implementation and for prior rejections, tries to reproduce a bug, asks its open questions through `grill-via-github-comments`, and returns the category (`bug` or `enhancement`), the state, the outcome comment, and any proposed repository changes. **For a feature, the use case is always a question if it is not already clear.**
 6. **Update the description** as the discussion warrants. Minimize comments whose questions are now answered, with the classifier "Resolved".
 7. **Post the outcome comment** that `unattended-triage` returned, as the **last comment** of this pass, disclaimer first. It is the handoff for an issue (see `references/handoff.md`). Put any proposed `GLOSSARY.md`, ADR or `.out-of-scope/` changes in it as text. Do not make them.
@@ -58,7 +58,7 @@ Make one issue ready for an agent to implement, or route it to a human.
 9. **Release.** `release N issue agent:triage`.
 
 
-If any step fails, leave the state labels as they were, run `fail_item N issue Grooming "<reason>"` and `release N issue agent:triage`, and return `#N failed: <reason>`.
+If any step fails, leave the state labels as they were, run `fail_item N issue Triaging "<reason>"` and `release N issue agent:triage`, and return `#N failed: <reason>`.
 
 ## Result
 

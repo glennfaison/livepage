@@ -25,7 +25,7 @@ AGENT_ROOT="$(git rev-parse --show-toplevel)"
 : "${lease_ttl_triage:=1 hour}"
 : "${lease_ttl_implement:=3 hours}"
 : "${lease_ttl_pr:=1 hour}"
-: "${groom_batch:=5}"
+: "${triage_batch:=5}"
 : "${implement_batch:=1}"
 : "${shepherd_batch:=3}"
 : "${review_batch:=3}"
@@ -52,7 +52,7 @@ repo_guidance:REPO_GUIDANCE
 lease_ttl_triage:LEASE_TTL_TRIAGE
 lease_ttl_implement:LEASE_TTL_IMPLEMENT
 lease_ttl_pr:LEASE_TTL_PR
-groom_batch:GROOM_BATCH
+triage_batch:TRIAGE_BATCH
 implement_batch:IMPLEMENT_BATCH
 shepherd_batch:SHEPHERD_BATCH
 review_batch:REVIEW_BATCH
@@ -68,45 +68,23 @@ $_config_pairs
 CONFIG_PAIRS
 unset _config_pairs _lower _upper
 
-# Portable date helpers via Node.js (no Python dependency).
+# Portable date helpers via Node.js (no Python dependency). The single
+# implementation lives in `helpers.mjs` next to this file; the shell and that
+# file cannot disagree about dates, run ids or comment shapes.
+
+# Path to the shared Node implementation. lib.sh runs its CLI so the shell and
+# helpers.mjs stay in sync.
+HELPERS="$AGENT_LIB_DIR/helpers.mjs"
 
 utc_epoch() {
-  node -e '
-const s = process.argv[1].trim();
-if (!s) process.exit(1);
-const d = new Date(/Z$|[+-]\d{2}:\d{2}$/.test(s) ? s : s + "Z");
-if (Number.isNaN(d.getTime())) process.exit(1);
-process.stdout.write(String(Math.floor(d.getTime() / 1000)));
-' -- "$1"
+  node "$HELPERS" utc-epoch "$1"
 }
 
 utc_plus() {
-  node -e '
-const raw = process.argv[1].trim();
-if (!raw) process.exit(1);
-let sign = 1;
-let expr = raw;
-if (expr.startsWith("+")) expr = expr.slice(1).trim();
-else if (expr.startsWith("-")) { sign = -1; expr = expr.slice(1).trim(); }
-const m = expr.match(/^(\d+)\s*(second|minute|hour|day|week|month|year)s?$/i);
-if (!m) { console.error("unsupported duration: " + raw); process.exit(1); }
-const value = parseInt(m[1], 10) * sign;
-const unit = m[2].toLowerCase();
-const out = new Date();
-switch (unit) {
-  case "second": out.setUTCSeconds(out.getUTCSeconds() + value); break;
-  case "minute": out.setUTCMinutes(out.getUTCMinutes() + value); break;
-  case "hour": out.setUTCHours(out.getUTCHours() + value); break;
-  case "day": out.setUTCDate(out.getUTCDate() + value); break;
-  case "week": out.setUTCDate(out.getUTCDate() + value * 7); break;
-  case "month": out.setUTCMonth(out.getUTCMonth() + value); break;
-  case "year": out.setUTCFullYear(out.getUTCFullYear() + value); break;
-}
-process.stdout.write(out.toISOString().replace(/\.\d{3}Z$/, "Z"));
-' -- "$1"
+  node "$HELPERS" utc-plus "$1"
 }
 
-RUN_ID="${RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
+RUN_ID="${RUN_ID:-$(node "$HELPERS" run-id "${RUNNER:-$$}")}"
 export RUN_ID
 
 has_label() { gh "$2" view "$1" --json labels --jq '.labels[].name' | grep -qx -- "$3"; }
@@ -124,15 +102,13 @@ claim() {
   local n=$1 kind=$2 label=$3 step=$4 ttl=$5 exp
   exp=$(utc_plus "+$ttl")
   gh "$kind" edit "$n" --add-label "$label" >/dev/null
-  gh "$kind" comment "$n" --body "Claimed by $step run $RUN_ID until $exp.
-<!-- agent:lease step=$step run=$RUN_ID expires=$exp -->" >/dev/null
+  gh "$kind" comment "$n" --body "$(node "$HELPERS" lease-body "$step" "$RUN_ID" "$exp")" >/dev/null
 }
 
 renew() {
   local n=$1 kind=$2 step=$3 ttl=$4 exp
   exp=$(utc_plus "+$ttl")
-  gh "$kind" comment "$n" --body "Lease renewed by $step run $RUN_ID until $exp.
-<!-- agent:lease step=$step run=$RUN_ID expires=$exp -->" >/dev/null
+  gh "$kind" comment "$n" --body "$(node "$HELPERS" lease-body "$step" "$RUN_ID" "$exp" renew)" >/dev/null
 }
 
 release() { gh "$2" edit "$1" --remove-label "$3" >/dev/null; }
@@ -150,12 +126,22 @@ shepherd_attempts() {
 
 fail_item() {
   local n=$1 kind=$2 step=$3 reason=$4
-  gh "$kind" comment "$n" --body "$step run $RUN_ID failed: $reason
-<!-- agent:failure step=$step run=$RUN_ID -->" >/dev/null
+  gh "$kind" comment "$n" --body "$(node "$HELPERS" failure-body "$step" "$RUN_ID" "$reason")" >/dev/null
 }
 
+# Count failure markers for a step since the last escalate. When the step is
+# Triaging, also count legacy "Grooming" markers (see helpers.mjs LEGACY_STEP_NAMES).
 failures() {
-  markers "$1" | awk -v s="$2" '/agent:escalate/{c=0} index($0,"agent:failure step=" s " "){c++} END{print c+0}'
+  markers "$1" | awk -v s="$2" '
+    BEGIN {
+      if (s == "Triaging") legacy = "Grooming"
+      else legacy = ""
+    }
+    /agent:escalate/ { c = 0 }
+    index($0, "agent:failure step=" s " ") { c++ }
+    legacy != "" && index($0, "agent:failure step=" legacy " ") { c++ }
+    END { print c+0 }
+  '
 }
 
 open_findings() {

@@ -21,9 +21,16 @@ repositories are installed with the skills CLI and committed in
 ([ADR 0012](./.agents/docs/adr/0012-agent-skills-via-npx-skills.md)). Nothing
 needs installing at session start.
 
+Some skills here are this repository's own, not installed: they live in
+`.agents/skills/` as tracked files and are never overwritten by a skill refresh
+(the refresh only touches the folders it installs, and `skills-lock.json`
+records which those are). `agent-workflow-protocol` and `runner-prompts` are
+examples. A change to one of those is a change to this repository.
+
 To install or refresh them, run the commands below and commit the changed
-folders and `skills-lock.json`. Do not edit installed skills here; fix them in
-their source repository. Do not commit `.grok/`.
+folders and `skills-lock.json`. We simply NEVER edit installed skills: a change
+to one goes in its source repository, and a refresh re-installs it here. Do not
+commit `.grok/`.
 
 ```bash
 npx skills@latest add glennfaison/github-agent-workflow --skill '*' -y --copy
