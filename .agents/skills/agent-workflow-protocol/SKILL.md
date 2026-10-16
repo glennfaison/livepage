@@ -36,7 +36,7 @@ Item skills lean on three **utility skills**: `unattended-triage`, `grill-via-gi
 | `lease_ttl_triage` | `1 hour` | `triage-github-issue` |
 | `lease_ttl_implement` | `3 hours` | `implement-github-issue` |
 | `lease_ttl_pr` | `1 hour` | `shepherd-github-pr`, `review-github-pr` |
-| `groom_batch` | `5` | `triage-github-issues` |
+| `triage_batch` | `5` | `triage-github-issues` |
 | `implement_batch` | `1` | `implement-github-issues` |
 | `shepherd_batch` | `3` | `shepherd-github-prs` |
 | `review_batch` | `3` | `review-github-prs` |

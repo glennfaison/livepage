@@ -25,7 +25,7 @@ AGENT_ROOT="$(git rev-parse --show-toplevel)"
 : "${lease_ttl_triage:=1 hour}"
 : "${lease_ttl_implement:=3 hours}"
 : "${lease_ttl_pr:=1 hour}"
-: "${groom_batch:=5}"
+: "${triage_batch:=5}"
 : "${implement_batch:=1}"
 : "${shepherd_batch:=3}"
 : "${review_batch:=3}"
@@ -52,7 +52,7 @@ repo_guidance:REPO_GUIDANCE
 lease_ttl_triage:LEASE_TTL_TRIAGE
 lease_ttl_implement:LEASE_TTL_IMPLEMENT
 lease_ttl_pr:LEASE_TTL_PR
-groom_batch:GROOM_BATCH
+triage_batch:TRIAGE_BATCH
 implement_batch:IMPLEMENT_BATCH
 shepherd_batch:SHEPHERD_BATCH
 review_batch:REVIEW_BATCH
@@ -129,8 +129,19 @@ fail_item() {
   gh "$kind" comment "$n" --body "$(node "$HELPERS" failure-body "$step" "$RUN_ID" "$reason")" >/dev/null
 }
 
+# Count failure markers for a step since the last escalate. When the step is
+# Triaging, also count legacy "Grooming" markers (see helpers.mjs LEGACY_STEP_NAMES).
 failures() {
-  markers "$1" | awk -v s="$2" '/agent:escalate/{c=0} index($0,"agent:failure step=" s " "){c++} END{print c+0}'
+  markers "$1" | awk -v s="$2" '
+    BEGIN {
+      if (s == "Triaging") legacy = "Grooming"
+      else legacy = ""
+    }
+    /agent:escalate/ { c = 0 }
+    index($0, "agent:failure step=" s " ") { c++ }
+    legacy != "" && index($0, "agent:failure step=" legacy " ") { c++ }
+    END { print c+0 }
+  '
 }
 
 open_findings() {
