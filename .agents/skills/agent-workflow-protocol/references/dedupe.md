@@ -1,6 +1,6 @@
 # Dedupe
 
-Used by `file-github-issues` (Exploring column) and `triage-github-issue` (Grooming column).
+Used by `file-github-issues` (Exploring column) and `triage-github-issue` (Triaging column).
 
 ## Search
 
@@ -8,7 +8,7 @@ Search open issues, issues closed in the last `dedupe_closed_days` days, and `.o
 
 ## Decide
 
-| Finding | Exploring | Grooming |
+| Finding | Exploring | Triaging |
 |---|---|---|
 | Same problem, open issue | Comment new evidence; do not file | Canonical rule (lowest number wins) |
 | Same problem, closed as completed | File as possible regression | Keep; note regression |

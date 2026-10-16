@@ -30,6 +30,9 @@ Print the copy-paste prompts a scheduler, webhook or person gives to a runner. E
 
 ## Never
 
-- Invent an input, or leave one out. `references/prompts.md` is generated from the skills' Inputs sections (`npm run sync`) and checked in CI.
+- Invent an input, or leave one out. `references/prompts.md` is generated from
+  the skills' own **Inputs** sections and checked in CI, so it stays in sync
+  with them. If a skill's Inputs table changes, regenerate this file before
+  opening a PR.
 - Edit `references/prompts.md` by hand.
 - Run any pipeline skill.

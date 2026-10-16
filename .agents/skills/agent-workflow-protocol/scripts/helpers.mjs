@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * The one implementation of the workflow's date math, run ids, comment shapes and marker
- * parsing. Three kinds of caller use it:
+ * parsing. Two kinds of caller use it:
  *
  *   - lib.sh runs the CLI below (`node helpers.mjs <command> ...`) for dates, run ids and the
  *     lease and failure comments, so the shell and this file cannot disagree about them.

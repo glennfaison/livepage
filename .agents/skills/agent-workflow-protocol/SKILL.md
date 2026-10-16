@@ -12,7 +12,7 @@ Shared by every skill in this package. Each of them points here first. Read this
 | Step | Group skill (selects and dispatches) | Item skill (works on one item) |
 |---|---|---|
 | Exploring | `explore-github-repo` | `file-github-issues` |
-| Grooming | `triage-github-issues` | `triage-github-issue` |
+| Triaging | `triage-github-issues` | `triage-github-issue` |
 | Implementing | `implement-github-issues` | `implement-github-issue` |
 | Shepherding | `shepherd-github-prs` | `shepherd-github-pr` |
 | Reviewing | `review-github-prs` | `review-github-pr` |
