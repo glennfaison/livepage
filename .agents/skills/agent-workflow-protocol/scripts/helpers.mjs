@@ -7,7 +7,7 @@
  *     lease and failure comments, so the shell and this file cannot disagree about them.
  *   - A runner with no shell does not execute this file. It reads it as the reference for the same
  *     operations and does them with GitHub tools (search_issues, issue_read, add_issue_comment).
- *   - tests/ runs the parsing functions and lib.sh against the same fixtures.
+ *   - helpers.test.mjs runs the parsing functions with node:test against the same fixtures.
  *
  * CLI:
  *   run-id [RUNNER]                       20261015T134700Z-grok
@@ -15,6 +15,9 @@
  *   utc-epoch TIMESTAMP                   Unix seconds
  *   lease-body STEP RUN EXPIRES [renew]   the lease comment
  *   failure-body STEP RUN REASON          the failure comment
+ *
+ * Tests:
+ *   node --test .agents/skills/agent-workflow-protocol/scripts/helpers.test.mjs
  */
 import { fileURLToPath } from 'node:url';
 
