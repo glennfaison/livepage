@@ -66,3 +66,7 @@ Rules:
 ## Reading
 
 `read_logs DAYS` prints every entry from the last DAYS days across the most recent log issues, except idle ones. Prefer filtering on the YAML header (`step:`, `runner:`, `run:`) when present; fall back to the prose `**Step:**` line for older comments.
+- [undefined] 2026-10-17T01:23:12Z runner=kilo step=triage-github-issues batch=5
+  - selected: #353 #358 #360 #363
+  - dispatched: triage-github-issue #353, #358, #360, #363
+  - result: dispatched 4 issues (none had agent:pr-open housekeeping changes)
