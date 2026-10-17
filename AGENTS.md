@@ -33,9 +33,23 @@ to one goes in its source repository, and a refresh re-installs it here. Do not
 commit `.grok/`.
 
 ```bash
+npx skills@latest add glennfaison/github-agent-workflow --skill '*' -y --copy
 npx skills@latest add fallow-rs/fallow-skills --skill '*' -y --copy
 npx skills@latest add mattpocock/skills --skill ask-matt --skill code-review --skill codebase-design --skill diagnosing-bugs --skill domain-modeling --skill grill-with-docs --skill implement --skill implement-spec --skill improve-codebase-architecture --skill pr --skill prototype --skill research --skill retro --skill setup-matt-pocock-skills --skill tdd --skill to-spec --skill to-tickets --skill triage --skill wayfinder --skill wizard -y --copy
 ```
+
+## GitHub workflow
+
+The `glennfaison/github-agent-workflow` skills drive issues and PRs through a
+five-step pipeline. Start with `/pipeline-guide`, which lists every skill and
+when to use it. Each step has a group skill (picks the work) and an item skill
+(does the work on one issue or PR):
+
+1. Exploring: `explore-github-repo` (group), `file-github-issues` (item)
+2. Triaging: `triage-github-issues` (group), `triage-github-issue` (item)
+3. Implementing: `implement-github-issues` (group), `implement-github-issue` (item)
+4. Shepherding: `shepherd-github-prs` (group), `shepherd-github-pr` (item)
+5. Reviewing: `review-github-prs` (group), `review-github-pr` (item)
 
 ## Repository guidance
 
