@@ -97,14 +97,23 @@ export RUN_ID
 # accounts, the account this agent runs as, or a login in $trusted_authors (comma-separated).
 
 _agent_self() {
-  [ -n "${_AGENT_SELF+x}" ] || _AGENT_SELF="$(gh api user --jq .login 2>/dev/null || true)"
+  [ -n "${_AGENT_SELF+x}" ] || {
+    _AGENT_SELF="$(gh api user --jq .login 2>/dev/null)" || _AGENT_SELF=""
+    if [ -z "$_AGENT_SELF" ]; then
+      _AGENT_SELF="$(gh auth status --json hosts 2>/dev/null | jq -r '.hosts["github.com"][0].login // empty')"
+    fi
+  }
   printf '%s' "$_AGENT_SELF"
 }
 
 # The trusted logins as the inside of a jq array literal: "a","b". Never empty, so IN() stays valid.
 _trusted_logins() {
-  local list
-  list="$(printf '%s,%s' "$(_agent_self)" "$trusted_authors" \
+  local list self
+  self="$(_agent_self)"
+  if [[ "$self" == *'[bot]' ]]; then
+    self="$self,app/${self%\[bot\]}"
+  fi
+  list="$(printf '%s,%s' "$self" "$trusted_authors" \
     | jq -Rr 'split(",") | map(gsub("^\\s+|\\s+$"; "") | select(length>0) | @json) | join(",")')"
   printf '%s' "${list:-\"@@none@@\"}"
 }
@@ -114,9 +123,10 @@ trusted_jq() {
   printf '((.author_association | IN("OWNER","MEMBER","COLLABORATOR")) or (.user.login | IN(%s)))' "$(_trusted_logins)"
 }
 
-# Same predicate over one `gh ... --json author,authorAssociation` object.
+# Same predicate over one `gh ... --json author` object. `authorAssociation` is not available
+# from `gh pr list/view --json`, so PR trust is by login only.
 _trusted_json_jq() {
-  printf '((.authorAssociation | IN("OWNER","MEMBER","COLLABORATOR")) or (.author.login | IN(%s)))' "$(_trusted_logins)"
+  printf '(.author.login | IN(%s))' "$(_trusted_logins)"
 }
 
 # ---- Leases ----------------------------------------------------------------------
@@ -192,7 +202,7 @@ ready_sha() {
 # The branch-name and Closes/Fixes/Resolves matches are the same signals GitHub itself uses.
 
 prs_for_issue() {
-  gh pr list --state all --limit 200 --json number,state,body,headRefName,author,authorAssociation \
+  gh pr list --state all --limit 200 --json number,state,body,headRefName,author \
   | jq -r --arg n "$1" "
       .[] | $(_trusted_json_jq) as \$ok
       | select( ((\$ok) and ((.body // \"\") | contains(\"<!-- agent:implements issue=\" + \$n + \" -->\")))
@@ -202,7 +212,7 @@ prs_for_issue() {
 }
 
 issue_for_pr() {
-  gh pr view "$1" --json body,closingIssuesReferences,author,authorAssociation --jq "
+  gh pr view "$1" --json body,closingIssuesReferences,author --jq "
     $(_trusted_json_jq) as \$ok
     | ([ (.body // \"\") | scan(\"agent:implements issue=([0-9]+)\") | .[0] | select(\$ok) ]
        + [ (.body // \"\") | scan(\"(?i)(?:closes|fixes|resolves)\\\\s+#([0-9]+)\") | .[0] ]
@@ -213,11 +223,16 @@ issue_for_pr() {
 
 log_issue() {
   local title n cutoff
-  cutoff=$(utc_plus "-14 days")
-  n=$(gh issue list --label agent:log --state open --limit 5 --json number,createdAt \
-        --jq --arg c "$cutoff" '[.[] | select(.createdAt >= $c)] | sort_by(.number) | .[0].number // empty')
+  title="Agent log $(date -u +%Y-%m-%d)"
+  # Reuse an open log issue with today's title first, so two runs on the same day share one issue.
+  n=$(gh issue list --label agent:log --state open --limit 200 --json number,title \
+      | jq -r --arg t "$title" '.[] | select(.title==$t) | .number' | head -1)
   if [ -z "$n" ]; then
-    title="Agent log $(date -u +%Y-%m-%d)"
+    cutoff=$(utc_plus "-14 days")
+    n=$(gh issue list --label agent:log --state open --limit 50 --json number,createdAt \
+        | jq -r --arg c "$cutoff" '[.[] | select(.createdAt >= $c)] | sort_by(.createdAt) | last | .number // empty')
+  fi
+  if [ -z "$n" ]; then
     n=$(gh issue create --title "$title" --label agent:log \
           --body "Append-only run log: one comment per run. Covers roughly two weeks. Excluded from every workflow step." \
         | grep -o '[0-9]*$')
@@ -244,8 +259,7 @@ log_run() {
 difficulty_issue() {
   local step=$1 title n
   title="Agent difficulties: $step"
-  n=$(gh issue list --label agent:difficulty --state open --search "\"$title\" in:title" \
-        --json number,title --jq --arg t "$title" '.[] | select(.title==$t) | .number' | head -1)
+  n=$(gh issue list --state open --limit 200 --json number,title | jq -r --arg t "$title" '.[] | select(.title==$t) | .number' | head -1)
   if [ -z "$n" ]; then
     n=$(gh issue create --title "$title" --label agent:difficulty \
           --body "Difficulties encountered by the $step step. One comment per run that reported **Problems**. Rotate on a ~2 week cadence like the run log." \
