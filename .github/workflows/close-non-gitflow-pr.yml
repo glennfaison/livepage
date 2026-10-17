@@ -1,0 +1,55 @@
+name: Close non-gitflow PR heads
+
+# Agents and bots sometimes open PRs from non-gitflow branches (copilot/, kilo/, …).
+# CI already fails those PRs; this workflow closes them immediately with instructions
+# so the failure is not left open for a human to clean up.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  close-if-non-gitflow:
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !startsWith(github.head_ref, 'dependabot/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check head branch name
+        id: check
+        continue-on-error: true
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: node scripts/check-branch-name.mjs --branch "$HEAD_REF"
+      - name: Comment and close non-compliant PR
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "$(cat <<'BODY'
+          This pull request was opened from a branch that is not a gitflow name.
+
+          **Agents and humans must read `.agents/docs/BRANCH-NAMES.md` before creating any branch or PR.**
+
+          Allowed work-branch patterns: `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, `support/<version-line>` (lowercase kebab-case topics).
+
+          Do not use `copilot/`, `kilo/`, `cursor/`, `agent/`, or other invented prefixes.
+
+          **Fix:** create or rename to a compliant branch, push it, and open a new PR into `develop`.
+
+          ```bash
+          git branch -m feature/<topic>
+          git push -u origin HEAD:feature/<topic>
+          ```
+
+          This PR is being closed automatically.
+          BODY
+          )"
+          gh pr close "$PR_NUMBER" --comment "Closed: head branch is not gitflow-compliant. See BRANCH-NAMES.md."
