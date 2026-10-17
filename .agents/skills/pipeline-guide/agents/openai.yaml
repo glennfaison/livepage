@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pipeline Guide"
+  short_description: "Table of contents for the GitHub agent workflow"
+  default_prompt: "Show me the pipeline guide for the GitHub agent workflow."
