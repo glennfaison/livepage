@@ -26,8 +26,11 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 ## Finish
 
+- [ ] **Read [branch names](./BRANCH-NAMES.md) before creating a branch or opening a PR.** Do not skip this step.
 - [ ] Ship every change, Template changes included, in a pull request into `develop`. Do not push straight to `main` or `develop`.
-- [ ] Open that pull request from a **gitflow branch**. Allowed names are `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, `support/<version-line>`, `develop`, and `main`. See [branch names](./BRANCH-NAMES.md). A non-matching push is rejected by GitHub and fails CI.
+- [ ] Open that pull request from a **gitflow branch** you created yourself (`feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, or `support/<version-line>`). See [branch names](./BRANCH-NAMES.md). A non-matching head fails CI and must not be opened.
+- [ ] **Do not** open a PR via any path that forces a non-gitflow head (for example GitHub Copilot coding agent's `copilot/…` branches, or other runners that invent `kilo/`, `cursor/`, `agent/` prefixes). Create the branch, push commits, then open the PR with that head.
+- [ ] Before calling the create-PR API, confirm the head name with `node scripts/check-branch-name.mjs --branch <name>`. Rename first if it fails.
 - [ ] Check whether the change introduces or renames entities, relationships, or domain terms. If it does, update [the glossary](./GLOSSARY.md) before finishing.
 
 ## Orchestration

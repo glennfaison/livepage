@@ -5,13 +5,15 @@ documentation, which lives under [`.agents/`](./.agents/).
 
 ## Session start (required)
 
+**Before creating any branch or pull request, read [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) in full.** Every agent, bot, and human must use a gitflow name. Do not open a PR until the head branch matches an allowed pattern.
+
 Run before any commit or push:
 
 ```bash
 git config core.hooksPath scripts/git-hooks   # branch-name checks at commit and push
 ```
 
-The hooks validate branch names against [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
+The hooks validate branch names against that same document.
 
 ## Skills
 
@@ -33,9 +35,23 @@ to one goes in its source repository, and a refresh re-installs it here. Do not
 commit `.grok/`.
 
 ```bash
+npx skills@latest add glennfaison/github-agent-workflow --skill '*' -y --copy
 npx skills@latest add fallow-rs/fallow-skills --skill '*' -y --copy
 npx skills@latest add mattpocock/skills --skill ask-matt --skill code-review --skill codebase-design --skill diagnosing-bugs --skill domain-modeling --skill grill-with-docs --skill implement --skill implement-spec --skill improve-codebase-architecture --skill pr --skill prototype --skill research --skill retro --skill setup-matt-pocock-skills --skill tdd --skill to-spec --skill to-tickets --skill triage --skill wayfinder --skill wizard -y --copy
 ```
+
+## GitHub workflow
+
+The `glennfaison/github-agent-workflow` skills drive issues and PRs through a
+five-step pipeline. Start with `/pipeline-guide`, which lists every skill and
+when to use it. Each step has a group skill (picks the work) and an item skill
+(does the work on one issue or PR):
+
+1. Exploring: `explore-github-repo` (group), `file-github-issues` (item)
+2. Triaging: `triage-github-issues` (group), `triage-github-issue` (item)
+3. Implementing: `implement-github-issues` (group), `implement-github-issue` (item)
+4. Shepherding: `shepherd-github-prs` (group), `shepherd-github-pr` (item)
+5. Reviewing: `review-github-prs` (group), `review-github-pr` (item)
 
 ## Repository guidance
 
@@ -46,8 +62,7 @@ task, the branch-name rules, the PR format, and the code conventions.
   verify, and finish a task
 - [`.agents/docs/CONVENTIONS.md`](./.agents/docs/CONVENTIONS.md) — how the code
   should look
-- [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) — allowed
-  branch names and how they are enforced
+- [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) — **required reading before any branch or PR**; allowed names and enforcement
 - [`.agents/docs/PR-FORMAT.md`](./.agents/docs/PR-FORMAT.md) — how to close
   issues and target a branch in a PR body
 
