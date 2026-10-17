@@ -5,13 +5,15 @@ documentation, which lives under [`.agents/`](./.agents/).
 
 ## Session start (required)
 
+**Before creating any branch or pull request, read [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) in full.** Every agent, bot, and human must use a gitflow name. Do not open a PR until the head branch matches an allowed pattern.
+
 Run before any commit or push:
 
 ```bash
 git config core.hooksPath scripts/git-hooks   # branch-name checks at commit and push
 ```
 
-The hooks validate branch names against [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
+The hooks validate branch names against that same document.
 
 ## Skills
 
@@ -60,8 +62,7 @@ task, the branch-name rules, the PR format, and the code conventions.
   verify, and finish a task
 - [`.agents/docs/CONVENTIONS.md`](./.agents/docs/CONVENTIONS.md) — how the code
   should look
-- [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) — allowed
-  branch names and how they are enforced
+- [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) — **required reading before any branch or PR**; allowed names and enforcement
 - [`.agents/docs/PR-FORMAT.md`](./.agents/docs/PR-FORMAT.md) — how to close
   issues and target a branch in a PR body
 
