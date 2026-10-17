@@ -1,3 +1,0 @@
-interface:
-  display_name: "Shepherd GitHub PR"
-  short_description: "Get one PR through CI and hand it off"

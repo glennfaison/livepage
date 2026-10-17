@@ -2,9 +2,8 @@
 
 **Status:** Accepted. Supersedes [ADR 0011](./0011-agent-skills-as-submodules.md).
 
-Three skill sets are not written in this repository: the GitHub workflow
-(`glennfaison/github-agent-workflow`), Matt Pocock's skills (`mattpocock/skills`),
-and Fallow's (`fallow-rs/fallow-skills`). Submodules left skill folders empty
+Two skill sets are not written in this repository: Matt Pocock's skills
+(`mattpocock/skills`) and Fallow's (`fallow-rs/fallow-skills`). Submodules left skill folders empty
 until initialised, needed hand-made symlinks, and hid the skills from runners
 that read the repository through a connector.
 
