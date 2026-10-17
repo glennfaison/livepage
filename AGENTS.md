@@ -33,9 +33,24 @@ to one goes in its source repository, and a refresh re-installs it here. Do not
 commit `.grok/`.
 
 ```bash
+npx skills@latest add glennfaison/github-agent-workflow --skill '*' -y --copy
 npx skills@latest add fallow-rs/fallow-skills --skill '*' -y --copy
 npx skills@latest add mattpocock/skills --skill ask-matt --skill code-review --skill codebase-design --skill diagnosing-bugs --skill domain-modeling --skill grill-with-docs --skill implement --skill implement-spec --skill improve-codebase-architecture --skill pr --skill prototype --skill research --skill retro --skill setup-matt-pocock-skills --skill tdd --skill to-spec --skill to-tickets --skill triage --skill wayfinder --skill wizard -y --copy
 ```
+
+## GitHub workflow
+
+The issue-to-merge pipeline is the [github-agent-workflow](https://github.com/glennfaison/github-agent-workflow) package, installed into `.agents/skills/`. `/pipeline-guide` is the map. Each step has a **group skill** that selects work and an **item skill** that does the work on one issue or PR:
+
+| Step | Group skill | Item skill |
+| --- | --- | --- |
+| Explore the app and codebase; file unlabelled issues | `/explore-github-repo` | `/file-github-issues` |
+| Triage; mark issues ready-for-agent or ready-for-human | `/triage-github-issues` | `/triage-github-issue` |
+| Implement a ready-for-agent issue and open a PR | `/implement-github-issues` | `/implement-github-issue` |
+| Get a PR through checks and post the review handoff | `/shepherd-github-prs` | `/shepherd-github-pr` |
+| Review a ready PR and merge when safe | `/review-github-prs` | `/review-github-pr` |
+
+Two review skills exist. `/code-review` (Matt Pocock's) is the general standards-and-spec review. `/livepage-code-review` is this repository's own, for LivePage architecture and convention checks.
 
 ## Repository guidance
 
