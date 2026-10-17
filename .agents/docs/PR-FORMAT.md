@@ -32,6 +32,11 @@ Closes #122, #123, #124, #125
 
 ## Merge target
 
+**Read [branch names](./BRANCH-NAMES.md) before creating the branch or opening the PR.**
+
 Ship every change, Template changes included, in a pull request into `develop`
 from a gitflow branch. Never push straight to `main` or `develop`. See [branch
-names](./BRANCH-NAMES.md) for the allowed names and enforcement.
+names](./BRANCH-NAMES.md) for the allowed names, agent hard rules, and enforcement.
+
+Do not open a PR from a non-gitflow head (including `copilot/`, `kilo/`, `cursor/`,
+or other invented prefixes). Rename the branch to a gitflow name first.
