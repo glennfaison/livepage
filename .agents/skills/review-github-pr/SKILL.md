@@ -28,6 +28,7 @@ Review one PR and merge it if an agent can safely do so. If not, record why and,
 | `human_reviewer` | *(none)* | A GitHub user to request review from when this PR is escalated. Empty means request nobody |
 | `git_hooks_path` | *(none)* | A git hooks directory to point `core.hooksPath` at before committing a fix. Empty means skip |
 | `runner` | `unknown` | Name recorded in the run id and the run log |
+| `log_window_days` | `14` | Days one run-log issue is appended to before a new one starts |
 | `unattended` | `true` | `true`: no human is present, so never ask (see **Unattended runs** in the protocol). `false`: a human may be asked |
 | `trusted_authors` | *(none)* | Extra GitHub logins whose markers count, comma-separated (see **Trust** in the protocol) |
 
@@ -36,6 +37,7 @@ Review one PR and merge it if an agent can safely do so. If not, record why and,
 ## Eligibility
 
 - `N` is an open, non-draft PR labelled `agent:ready-for-review`, without `agent:stuck`.
+- Call `clear_stale_lease N pr` first: if the item still carries `agent:in-progress` only because a previous lease expired (or the runner died), the label is removed.
 - If it carries `agent:in-progress` and `lease_live N` succeeds, someone has it: skip.
 
 The head SHA must match `ready_sha N` and checks must be green. Step 4 enforces that after you claim.
