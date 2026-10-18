@@ -96,7 +96,7 @@ export default function BuilderPage() {
   const previewExport = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
     if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
+      handleValidationProceedForAction("preview")
       return
     }
     setValidationResult(validation)
@@ -105,8 +105,20 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
-  const handleValidationProceed = () => {
-    if (pendingExportAction === "preview") {
+  const copyHtmlToClipboard = () => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceedForAction("copy")
+      return
+    }
+    setValidationResult(validation)
+    setPendingExportAction("copy")
+    setValidationDialogOpen(true)
+    setSaveDropdownOpen(false)
+  }
+
+  const handleValidationProceedForAction = (action: "preview" | "copy") => {
+    if (action === "preview") {
       const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
       const blob = new Blob([html], { type: "text/html" })
       const url = URL.createObjectURL(blob)
@@ -119,7 +131,7 @@ export default function BuilderPage() {
         })
         URL.revokeObjectURL(url)
       }
-    } else if (pendingExportAction === "copy") {
+    } else if (action === "copy") {
       const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
       navigator.clipboard.writeText(html).then(
         () => {
@@ -137,21 +149,15 @@ export default function BuilderPage() {
         },
       )
     }
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction) {
+      handleValidationProceedForAction(pendingExportAction)
+    }
     setValidationDialogOpen(false)
     setPendingExportAction(null)
     setValidationResult(null)
-  }
-
-  const copyHtmlToClipboard = () => {
-    const validation = validateHtmlExport(state.componentTree, window.location.origin)
-    if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
-      return
-    }
-    setValidationResult(validation)
-    setPendingExportAction("copy")
-    setValidationDialogOpen(true)
-    setSaveDropdownOpen(false)
   }
 
   const canUndo = state.currentHistoryIndex > 0
