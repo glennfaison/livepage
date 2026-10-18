@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { selectCurrentPage } from "@/client/features/app-state"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
+import { deepClone } from "@/client/lib/deep-clone"
 import {
   CanvasRenderer,
   ComponentOperationsContext,
@@ -167,7 +168,7 @@ export default function BuilderPage() {
     if (canUndo) {
       dispatch({
         type: "SET_PAGES",
-        payload: JSON.parse(JSON.stringify(state.history[state.currentHistoryIndex - 1].pageState)),
+        payload: deepClone(state.history[state.currentHistoryIndex - 1].pageState),
       })
       dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: state.currentHistoryIndex - 1 })
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
@@ -179,7 +180,7 @@ export default function BuilderPage() {
     if (canRedo) {
       dispatch({
         type: "SET_PAGES",
-        payload: JSON.parse(JSON.stringify(state.history[state.currentHistoryIndex + 1].pageState)),
+        payload: deepClone(state.history[state.currentHistoryIndex + 1].pageState),
       })
       dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: state.currentHistoryIndex + 1 })
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
