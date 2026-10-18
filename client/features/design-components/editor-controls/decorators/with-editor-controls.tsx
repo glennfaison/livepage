@@ -107,7 +107,7 @@ function EditorControls(props: EditModeProps) {
   }, [component.attributes.id])
 
   return (
-    <div className="absolute -top-8 right-0 z-30 flex flex-col items-end">
+    <div className="absolute top-0 right-0 z-30 flex flex-col items-end">
       <AncestorTags {...props} />
       <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls">
         <span className="flex items-center px-2 text-xs font-medium text-popover-foreground">{label}</span>

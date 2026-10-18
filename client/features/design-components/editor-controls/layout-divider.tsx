@@ -106,10 +106,14 @@ export const Divider = ({
       onDrop={handleDrop}
       className={cn(
         "relative flex items-center justify-center transition-opacity duration-150 group cursor-pointer",
+        // Layout-neutral when hidden: zero size, no pointer events, no flex space.
+        shown ? "" : "size-0 pointer-events-none overflow-hidden",
         // Opacity only — never visibility:hidden — so the hit target stays active
         // while the pointer moves from a child onto the bar.
         shown ? "opacity-100" : "opacity-0",
-        orientation === "horizontal" ? "flex-row h-2 w-full" : "flex-col w-2 self-stretch",
+        orientation === "horizontal"
+          ? shown ? "flex-row h-2 w-full" : ""
+          : shown ? "flex-col w-2 self-stretch" : "",
         isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
       )}
     >
