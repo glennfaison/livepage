@@ -148,8 +148,8 @@ export function usePageOperations(state: AppState) {
 
   const savePageAsHtmlMutation = useMutation({
     mutationFn: async (input: ReadonlyArray<AppNode> | { componentTree: ReadonlyArray<AppNode>, selfContained?: boolean }) => {
-      const componentTree = Array.isArray(input) ? input : input.componentTree
-      const selfContained = !Array.isArray(input) && Boolean(input.selfContained)
+      const componentTree = Array.isArray(input) ? input : (input as { componentTree: ReadonlyArray<AppNode>; selfContained?: boolean }).componentTree
+      const selfContained = !Array.isArray(input) && Boolean((input as { selfContained?: boolean }).selfContained)
       const htmlTemplate = selfContained
         ? await serializeAppStateAsSelfContainedHtml(componentTree, {
             assetBaseUrl: window.location.origin,
@@ -177,7 +177,7 @@ export function usePageOperations(state: AppState) {
       return page
     },
     onSuccess: (_page, input) => {
-      const selfContained = !Array.isArray(input) && Boolean(input.selfContained)
+      const selfContained = !Array.isArray(input) && Boolean((input as { selfContained?: boolean }).selfContained)
       toast({
         title: selfContained ? "Self-contained page exported" : "Page exported",
         description: selfContained
