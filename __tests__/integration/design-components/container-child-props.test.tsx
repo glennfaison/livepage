@@ -271,4 +271,57 @@ describe("container child props", () => {
 		const pageSurface = container.querySelector("section > div")
 		expect(pageSurface).toHaveClass("slot-class")
 	})
+
+	it.each(["row", "column"] as const)("keeps the content box identical between edit and preview (%s)", (tag) => {
+		const component: AppNode = {
+			tag,
+			attributes: { id: `${tag}-1` },
+			children: [{ tag: "header1", attributes: { id: "header-1" }, children: ["Child"] }],
+		}
+
+		const Preview = getComponentInfo(tag).PreviewModeComponent
+		const Edit = getComponentInfo(tag).EditModeComponent
+
+		const { container: previewContainer } = renderWithQueryClient(
+			<Preview
+				pageBuilderMode="preview"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+		const previewContent = previewContainer.firstElementChild as HTMLElement
+
+		const { container: editContainer } = renderWithDragDrop(
+			<Edit
+				pageBuilderMode="edit"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+		// Edit mode wraps the content in an editor-controls decorator; unwrap to the content box.
+		const editWrapper = editContainer.firstElementChild as HTMLElement
+		const editContent = editWrapper.firstElementChild as HTMLElement
+
+		const classes = (el: HTMLElement) => new Set(el.className.split(/\s+/).filter(Boolean))
+		const previewClasses = classes(previewContent)
+		const editClasses = classes(editContent)
+
+		// Neither mode uses a layout-affecting border on the content container.
+		expect([...previewClasses].filter((c) => c.startsWith("border"))).toEqual([])
+		expect([...editClasses].filter((c) => c.startsWith("border"))).toEqual([])
+
+		// Edit adds only non-layout outline chrome; no layout class is added or removed.
+		const addedInEdit = new Set([...editClasses].filter((c) => !previewClasses.has(c)))
+		const removedInEdit = new Set([...previewClasses].filter((c) => !editClasses.has(c)))
+		expect(addedInEdit).toEqual(new Set(["outline", "outline-dashed", "outline-gray-300"]))
+		expect(removedInEdit).toEqual(new Set())
+
+		// The shared content-box classes are present in both modes.
+		for (const cls of ["min-h-[50px]", "flex", "p-0", "gap-0"]) {
+			expect(previewClasses.has(cls)).toBe(true)
+			expect(editClasses.has(cls)).toBe(true)
+		}
+	})
 })
