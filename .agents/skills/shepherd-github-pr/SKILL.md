@@ -27,6 +27,7 @@ Take one PR from "opened" to "reviewable": get checks green, address open review
 | `repo_guidance` | `AGENTS.md` | Space-separated files holding the repository's contributor rules |
 | `git_hooks_path` | *(none)* | A git hooks directory to point `core.hooksPath` at before committing a fix. Empty means skip |
 | `runner` | `unknown` | Name recorded in the run id and the run log |
+| `log_window_days` | `14` | Days one run-log issue is appended to before a new one starts |
 | `unattended` | `true` | `true`: no human is present, so never ask (see **Unattended runs** in the protocol). `false`: a human may be asked |
 | `trusted_authors` | *(none)* | Extra GitHub logins whose markers count, comma-separated (see **Trust** in the protocol) |
 
@@ -35,6 +36,7 @@ Take one PR from "opened" to "reviewable": get checks green, address open review
 ## Eligibility
 
 - `N` is an open PR labelled `agent:needs-work`, without `agent:stuck`.
+- Call `clear_stale_lease N pr` first: if the item still carries `agent:in-progress` only because a previous lease expired (or the runner died), the label is removed.
 - If it carries `agent:in-progress` and `lease_live N` succeeds, someone has it: skip.
 - Check state is `failing` or `green`. Read it like this (ignore the command's exit code, which is non-zero while checks run):
 
