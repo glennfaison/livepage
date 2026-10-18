@@ -137,6 +137,7 @@ export const Toolbar: React.FC<Readonly<{
   const dragOffsetRef = useRef(dragOffset)
   const positionRef = useRef(position)
   const layoutRef = useRef(toolbarLayout)
+  const hydratedRef = useRef(false)
 
   positionRef.current = position
   layoutRef.current = toolbarLayout
@@ -230,12 +231,20 @@ export const Toolbar: React.FC<Readonly<{
   // changes are infrequent (popover, toggle, compact breakpoint), so writing
   // on every change is cheap and keeps the persisted state in sync.
   useEffect(() => {
+    if (pageBuilderMode === "preview") return
+    if (!hydratedRef.current) return
     writeToolbarState({
       version: STORAGE_VERSION,
       position: positionRef.current,
       layout: toolbarLayout,
     })
   }, [toolbarLayout])
+
+  // Mark hydration complete after the first paint so the persistence effect
+  // above does not overwrite stored state with the initial defaults.
+  useEffect(() => {
+    hydratedRef.current = true
+  }, [])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const gripElement = e.currentTarget as HTMLElement
