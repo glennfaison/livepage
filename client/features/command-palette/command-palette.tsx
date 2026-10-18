@@ -35,14 +35,14 @@ import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
 import { Input } from "@/client/components/ui/input"
-import { Label } from "@/client/components/ui/label"
-import { Switch } from "@/client/components/ui/switch"
-import { Button } from "@/client/components/ui/button"
 import { toast } from "@/client/components/ui/use-toast"
 import type { AppAction, AppNode, AppState, Operations } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
+import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
+import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
+import type { ComponentCategory } from "@/client/features/types"
 import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
@@ -55,6 +55,7 @@ type PaletteCommand = Readonly<{
   keywords?: ReadonlyArray<string>
   icon?: React.ReactNode
   onSelect: () => void
+  category?: ComponentCategory
 }>
 
 function getCategoryIcon(category: string): React.ReactNode {
@@ -153,6 +154,7 @@ export const CommandPalette: React.FC<
   onDuplicatePage,
 }) => {
   const [search, setSearch] = useState("")
+  const [insertComponentSearch, setInsertComponentSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -160,6 +162,7 @@ export const CommandPalette: React.FC<
   useEffect(() => {
     if (!open) return
     setSearch("")
+    setInsertComponentSearch("")
     setActiveIndex(0)
     const id = window.setTimeout(() => inputRef.current?.focus(), 0)
     return () => window.clearTimeout(id)
@@ -190,76 +193,15 @@ export const CommandPalette: React.FC<
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
 
-  // Discard confirmation
-  const DISCARD_CONFIRMATION_KEY = "livepage-discard-confirmation"
-  const getDiscardConfirmationPreference = (): boolean => {
-    if (typeof window === "undefined") return true
-    try {
-      const value = window.localStorage.getItem(DISCARD_CONFIRMATION_KEY)
-      return value !== "false"
-    } catch {
-      return true
-    }
-  }
-  const setDiscardConfirmationPreference = (show: boolean) => {
-    if (typeof window === "undefined") return
-    try {
-      window.localStorage.setItem(DISCARD_CONFIRMATION_KEY, String(show))
-    } catch {
-    }
-  }
-
-  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false)
-  const [dontAskAgain, setDontAskAgain] = useState(getDiscardConfirmationPreference())
-  const [pendingDiscard, setPendingDiscard] = useState(false)
-
-  const hasChanges = state.history.length > 1
-
-  const handleDiscardWithConfirmation = useCallback(() => {
-    if (!hasChanges) {
-      dispatch({ type: "DISCARD_CHANGES" })
-      toast({
-        title: "Nothing to discard",
-        description: "No changes have been made yet.",
-      })
-      return
-    }
-
-    if (dontAskAgain) {
-      executeDiscard()
-      return
-    }
-
-    setPendingDiscard(true)
-    setShowDiscardConfirmation(true)
-  }, [dispatch, hasChanges, dontAskAgain])
-
-  const executeDiscard = useCallback(() => {
-    dispatch({ type: "DISCARD_CHANGES" })
-    toast({
-      title: "Changes discarded",
-      description: "Your page has been reset to its initial state.",
-    })
-    setPendingDiscard(false)
-  }, [dispatch])
-
-  const handleDiscardConfirm = useCallback(() => {
-    if (pendingDiscard) {
-      executeDiscard()
-    }
-    setShowDiscardConfirmation(false)
-    setPendingDiscard(false)
-  }, [executeDiscard, pendingDiscard])
-
-  const handleDiscardCancel = useCallback(() => {
-    setShowDiscardConfirmation(false)
-    setPendingDiscard(false)
-  }, [])
-
-  const handleDontAskAgainChange = useCallback((checked: boolean) => {
-    setDontAskAgain(checked)
-    setDiscardConfirmationPreference(checked)
-  }, [])
+  // Discard confirmation, shared with the toolbar so both surfaces behave alike.
+  const {
+    showConfirmation: showDiscardConfirmation,
+    askBeforeDiscard,
+    handleDiscardWithConfirmation,
+    handleConfirm: handleDiscardConfirm,
+    handleCancel: handleDiscardCancel,
+    handleAskBeforeDiscardChange,
+  } = useDiscardConfirmation(dispatch, state)
 
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
@@ -412,7 +354,7 @@ export const CommandPalette: React.FC<
       ? componentOperations.findComponentById(state.componentTree, state.selectedComponentId)
       : currentPage
     const insertParentId = insertParent?.attributes.id
-    const insertCommands: PaletteCommand[] = (insertParent ? getComponentsAllowedIn(insertParent.tag) : []).map(({ tag }) => {
+    const insertCommands: PaletteCommand[] = (insertParent ? getComponentsAllowedIn(insertParent.tag) : []).map(({ tag, category }) => {
       const info = getComponentInfo(tag)
       return {
         id: `insert-${tag}`,
@@ -421,6 +363,7 @@ export const CommandPalette: React.FC<
         description: state.selectedComponentId ? "Inside the selected component" : "Onto the current page",
         keywords: [tag, ...info.keywords],
         icon: info.Icon,
+        category,
         onSelect: () => componentOperations.addComponent({ tag, parentId: insertParentId }),
       }
     })
@@ -480,14 +423,26 @@ export const CommandPalette: React.FC<
 
   const filteredCommands = useMemo(() => {
     const term = search.trim().toLowerCase()
-    if (!term) return commands
+    const insertTerm = insertComponentSearch.trim().toLowerCase()
+    if (!term && !insertTerm) return commands
     return commands.filter((command) => {
-      const haystack = [command.label, command.description ?? "", ...(command.keywords ?? [])]
-        .join(" ")
-        .toLowerCase()
-      return haystack.includes(term)
+      // For insert component commands, also check the insert component search term
+      if (command.group === "Insert component" && insertTerm) {
+        const insertHaystack = [command.label, command.description ?? "", ...(command.keywords ?? []), command.category ?? ""]
+          .join(" ")
+          .toLowerCase()
+        if (!insertHaystack.includes(insertTerm)) return false
+      }
+      // Global search term
+      if (term) {
+        const haystack = [command.label, command.description ?? "", ...(command.keywords ?? [])]
+          .join(" ")
+          .toLowerCase()
+        if (!haystack.includes(term)) return false
+      }
+      return true
     })
-  }, [commands, search])
+  }, [commands, search, insertComponentSearch])
 
   // Precompute id -> index once per filter pass instead of calling
   // filteredCommands.indexOf(command) inside the render loop (O(n) per row,
@@ -501,16 +456,24 @@ export const CommandPalette: React.FC<
   const groupedCommands = useMemo(() => {
     const groups = new Map<string, PaletteCommand[]>()
     for (const command of filteredCommands) {
-      const list = groups.get(command.group) ?? []
-      list.push(command)
-      groups.set(command.group, list)
+      // For "Insert component" group, create subgroups by category
+      if (command.group === "Insert component" && command.category) {
+        const subGroup = `Insert component: ${command.category}`
+        const list = groups.get(subGroup) ?? []
+        list.push(command)
+        groups.set(subGroup, list)
+      } else {
+        const list = groups.get(command.group) ?? []
+        list.push(command)
+        groups.set(command.group, list)
+      }
     }
     return Array.from(groups.entries())
   }, [filteredCommands])
 
   useEffect(() => {
     setActiveIndex(0)
-  }, [search])
+  }, [search, insertComponentSearch])
 
   const runCommand = useCallback(
     (command: PaletteCommand | undefined) => {
@@ -576,6 +539,17 @@ export const CommandPalette: React.FC<
                 <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group}
                 </p>
+                {group.startsWith("Insert component:") && (
+                  <div className="px-2 pb-2">
+                    <Input
+                      value={insertComponentSearch}
+                      onChange={(event) => setInsertComponentSearch(event.target.value)}
+                      placeholder={`Filter ${group.replace("Insert component: ", "")} components…`}
+                      className="h-8 text-sm"
+                      aria-label={`Filter ${group} components`}
+                    />
+                  </div>
+                )}
                 {groupCommands.map((command) => {
                   const index = commandIndexById.get(command.id) ?? 0
                   const isActive = index === activeIndex
@@ -639,37 +613,13 @@ export const CommandPalette: React.FC<
       />
 
       {/* Discard Confirmation Dialog */}
-      <Dialog open={showDiscardConfirmation} onOpenChange={handleDiscardCancel}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <RotateCcw className="h-5 w-5 text-destructive" />
-              Discard all changes?
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              This will reset the page to its initial state. This action cannot be undone.
-            </p>
-          </DialogHeader>
-          <div className="flex items-center gap-2 py-2">
-            <Switch
-              id="dont-ask-again-palette"
-              checked={dontAskAgain}
-              onCheckedChange={handleDontAskAgainChange}
-            />
-            <Label htmlFor="dont-ask-again-palette" className="text-sm font-normal">
-              Don't ask again
-            </Label>
-          </div>
-          <div className="flex justify-end gap-2 border-t px-4 py-3">
-            <Button variant="ghost" onClick={handleDiscardCancel}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDiscardConfirm}>
-              Discard
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DiscardConfirmationDialog
+        open={showDiscardConfirmation}
+        askBeforeDiscard={askBeforeDiscard}
+        onCancel={handleDiscardCancel}
+        onConfirm={handleDiscardConfirm}
+        onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
+      />
     </Dialog>
   )
 }

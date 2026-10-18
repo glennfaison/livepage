@@ -1,6 +1,6 @@
 import { createDesignComponentInstance } from "@/client/features/design-components"
 import { appReducer, initialState } from "@/client/features/app-state"
-import type { AppState, AppAction } from "@/client/features/app-state"
+import type { AppState, AppAction, PersistedSession } from "@/client/features/app-state"
 import { generateId } from "@/client/lib/utils"
 
 describe("App Reducer", () => {
@@ -209,6 +209,63 @@ describe("App Reducer", () => {
       expect(afterSecondEdit.history).toHaveLength(2)
       expect(afterSecondEdit.currentHistoryIndex).toBe(1)
       expect(afterSecondEdit.history[0].id).toBe(afterFirstEdit.history[0].id)
+    })
+  })
+
+  describe("HYDRATE_FROM_STORAGE", () => {
+    const restoredSession: PersistedSession = {
+      componentTree: [{ tag: "page", attributes: { id: "page-9", title: "Restored" }, children: [] }],
+      activePage: "page-9",
+      pageBuilderMode: "preview",
+      toolbarMinimized: true,
+      promptAssistEnabled: true,
+    }
+
+    it("adopts every stored field of the persisted session", () => {
+      const result = appReducer(state, { type: "HYDRATE_FROM_STORAGE", payload: restoredSession })
+
+      expect(result.componentTree).toEqual(restoredSession.componentTree)
+      expect(result.activePage).toBe("page-9")
+      expect(result.pageBuilderMode).toBe("preview")
+      expect(result.toolbarMinimized).toBe(true)
+      expect(result.promptAssistEnabled).toBe(true)
+    })
+
+    it("seeds the initial history entry from the adopted tree", () => {
+      const result = appReducer(state, { type: "HYDRATE_FROM_STORAGE", payload: restoredSession })
+
+      expect(result.history).toHaveLength(1)
+      expect(result.history[0].action).toBe("Page created")
+      expect(result.history[0].pageState).toEqual(restoredSession.componentTree)
+      expect(result.currentHistoryIndex).toBe(0)
+    })
+
+    it("keeps the current value for fields that were never stored", () => {
+      const result = appReducer(state, {
+        type: "HYDRATE_FROM_STORAGE",
+        payload: { componentTree: null, activePage: null, pageBuilderMode: null, toolbarMinimized: null, promptAssistEnabled: null },
+      })
+
+      expect(result.componentTree).toEqual(state.componentTree)
+      expect(result.activePage).toBe(state.activePage)
+      expect(result.pageBuilderMode).toBe(state.pageBuilderMode)
+      expect(result.toolbarMinimized).toBe(state.toolbarMinimized)
+      expect(result.promptAssistEnabled).toBe(state.promptAssistEnabled)
+      expect(result.history).toHaveLength(1)
+      expect(result.history[0].action).toBe("Page created")
+    })
+
+    it("does not re-seed history when a session already has entries", () => {
+      const withHistory = appReducer(state, {
+        type: "INSERT_COMPONENT",
+        payload: { newComponentTag: "header1", parentId: "page-1", index: 0 },
+      })
+
+      const result = appReducer(withHistory, { type: "HYDRATE_FROM_STORAGE", payload: restoredSession })
+
+      expect(result.history).toEqual(withHistory.history)
+      expect(result.currentHistoryIndex).toBe(withHistory.currentHistoryIndex)
+      expect(result.componentTree).toEqual(restoredSession.componentTree)
     })
   })
 })

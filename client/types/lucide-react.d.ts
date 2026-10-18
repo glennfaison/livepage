@@ -26,6 +26,7 @@ declare module 'lucide-react' {
   export const Bot: LucideIcon
   export const Braces: LucideIcon
   export const Briefcase: LucideIcon
+  export const Bug: LucideIcon
   export const Building2: LucideIcon
   export const Calendar: LucideIcon
   export const Check: LucideIcon
@@ -70,6 +71,7 @@ declare module 'lucide-react' {
   export const List: LucideIcon
   export const Loader2: LucideIcon
   export const LoaderIcon: LucideIcon
+  export const Lock: LucideIcon
   export const Mail: LucideIcon
   export const Maximize: LucideIcon
   export const Megaphone: LucideIcon
@@ -102,6 +104,7 @@ declare module 'lucide-react' {
   export const Send: LucideIcon
   export const Settings: LucideIcon
   export const SettingsIcon: LucideIcon
+  export const ShieldAlert: LucideIcon
   export const Sparkles: LucideIcon
   export const Star: LucideIcon
   export const Sun: LucideIcon

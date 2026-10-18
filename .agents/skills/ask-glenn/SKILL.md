@@ -11,12 +11,14 @@ points you to the right instructions.
 
 - [`/ask-glenn`](SKILL.md): choose a skill from this list.
 - [`/agent-orchestration`](../agent-orchestration/SKILL.md): plan and build non-trivial features or tasks through design, implementation, and review.
-- [`/code-review`](../code-review/SKILL.md): review current changes, a branch, or a pull request.
+- [`/code-review`](../code-review/SKILL.md): Matt Pocock's general standards-and-spec review of current changes, a branch, or a pull request.
+- [`/livepage-code-review`](../livepage-code-review/SKILL.md): LivePage-specific architecture and convention review of current changes.
 - [`/merge-safety`](../merge-safety/SKILL.md): decide whether a PR is safe for an agent to merge.
+- [`/pipeline-guide`](../pipeline-guide/SKILL.md): the issue-to-merge GitHub pipeline (explore, triage, implement, shepherd, review, setup, protocol). It lists the group and item skills and when to use each. Run `/setup-github-agent-workflow` once per repository.
+- [`/tdd`](../tdd/SKILL.md): build a feature or fix a bug test-first.
 - [`/template-authoring`](../template-authoring/SKILL.md): add, redesign, or fix a LivePage Template.
 - [`/template-design-review`](../template-design-review/SKILL.md): evaluate and improve a Template's preview-mode design in the browser.
 - [`/typesafe-ai`](../typesafe-ai/SKILL.md): build AI features using TypeSafe judgments and probabilities.
 - [`/zip-branch-import`](../zip-branch-import/SKILL.md): import a patch and related assets from a zip archive.
 
-Read `.agents/skills/fallow-skills/` to find additional skills related to Fallow analysis and review.
-Read `.agents/skills/matt-pocock-skills/` to find additional skills related to Matt Pocock's work.
+Skills installed with `npx skills` are committed in `.agents/skills/` ([ADR 0012](../../docs/adr/0012-agent-skills-via-npx-skills.md)). The Fallow skills (`fallow`, `fallow-review`, `fallow-setup`, `fallow-codex-onboarding`) cover Fallow analysis and review; Matt Pocock's skills (`/ask-matt` lists them) cover specs, tickets, diagnosis and architecture.

@@ -9,6 +9,16 @@ const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger
 
+/**
+ * Caps a popover panel so a tall panel stays inside the viewport: Radix
+ * publishes the space it measured between the trigger and the nearest viewport
+ * edge as `--radix-popper-available-height` (collision padding already
+ * deducted), so the panel flips onto the side with more room and never outgrows
+ * it. The 600px ceiling keeps a panel from filling a roomy viewport, and the
+ * `90vh` fallback covers the frame before Radix first reports a measurement.
+ */
+const POPOVER_PANEL_MAX_HEIGHT_CLASS = "max-h-[min(600px,var(--radix-popper-available-height,90vh))]"
+
 const PopoverContent = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
@@ -28,4 +38,4 @@ const PopoverContent = React.forwardRef<
 ))
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
-export { Popover, PopoverTrigger, PopoverContent }
+export { Popover, PopoverTrigger, PopoverContent, POPOVER_PANEL_MAX_HEIGHT_CLASS }

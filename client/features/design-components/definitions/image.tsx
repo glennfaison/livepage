@@ -4,7 +4,7 @@ import React from "react"
 import { withDataSource } from "@/client/features/data-sources"
 import { ImageIcon } from "lucide-react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
-import type { Props, SettingsField, Metadata } from "@/client/features/types"
+import type { Props, SettingsField, Metadata, ComponentCategory } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
 import { createColorAttribute, createCustomClassesAttribute, createGroupAttribute, createIdAttribute, createSelectAttribute, readCustomClasses, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 
@@ -202,6 +202,7 @@ export const componentMetadata = {
 	tag,
 	htmlTag: "img",
 	label,
+	category: "Media" as ComponentCategory,
 	keywords,
 	defaultChildren: [],
 	attributes,

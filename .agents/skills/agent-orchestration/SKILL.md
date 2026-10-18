@@ -14,7 +14,7 @@ Skip the design phase for focused fixes (a single obvious change). Never skip re
 1. **Design.** Spawn a system-design sub-agent with the problem, constraints and links to [CONTEXT](../../../.agents/docs/CONTEXT.md), [CONVENTIONS](../../../.agents/docs/CONVENTIONS.md) and relevant ADRs. It explores the code and decides the approach: boundaries, data flow, new abstractions, risks, test plan. It writes no code. It ends by calling `handoff`.
 2. **Hand off to the main agent.** Read the design handoff, resolve open questions (ask the user only for real product decisions), and split the work into independent slices.
 3. **Code.** Hand each slice to a coder sub-agent via `handoff`. Coders implement, add tests, and run the narrowest relevant checks. Independent slices run in parallel on separate branches or worktrees.
-4. **Review.** For every coder result, spawn a fresh reviewer sub-agent (see [code-review](../code-review/SKILL.md) for the checklist). The reviewer **applies fixes for the issues it finds** instead of only reporting them, re-runs the checks, and returns a short verdict listing what it changed. It never edits tests, snapshots or allowlists (such as `knownLeftovers`) to get green; it flags those instead. It does not commit or open a PR. The main agent reads the reviewer's diff before accepting it. Domain reviewers, such as [template-design-review](../template-design-review/SKILL.md), replace the generic checklist where they exist.
+4. **Review.** For every coder result, spawn a fresh reviewer sub-agent (use [/code-review](../code-review/SKILL.md) for standards and spec, and [/livepage-code-review](../livepage-code-review/SKILL.md) for LivePage architecture and conventions). The reviewer **applies fixes for the issues it finds** instead of only reporting them, re-runs the checks, and returns a short verdict listing what it changed. It never edits tests, snapshots or allowlists (such as `knownLeftovers`) to get green; it flags those instead. It does not commit or open a PR. The main agent reads the reviewer's diff before accepting it. Domain reviewers, such as [template-design-review](../template-design-review/SKILL.md), replace the generic checklist where they exist.
 5. **Iterate.** If the verdict shows an unmet goal or a design flaw, return to the earliest phase that is wrong (design for structural problems, code for implementation gaps) with a new handoff. Stop when the goal is met and checks pass, or after three full iterations, then report what remains.
 6. **Ship.** Follow [AGENT-WORKFLOW](../../../.agents/docs/AGENT-WORKFLOW.md) for validation and the pull request.
 
@@ -22,6 +22,7 @@ Skip the design phase for focused fixes (a single obvious change). Never skip re
 
 - Use the lowest-cost model that meets each phase's needs.
 - Handoffs reference artifacts (files, diffs, issues) rather than copying them.
+- In an unattended run, `/handoff` cannot be called (it is user-invoked). Hand off with a plain message that links the artifacts and says what to return.
 - Sub-agents get a bounded objective and a stop condition.
 
 ## Finish: automation suggestions

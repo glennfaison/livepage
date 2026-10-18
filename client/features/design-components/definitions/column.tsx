@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
 import { AlignVerticalSpaceBetween, Plus } from "lucide-react"
-import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps } from "@/client/features/types"
+import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps, ComponentCategory } from "@/client/features/types"
 import { ComponentSelectorPopover } from "../editor-controls/component-selector-popover"
 import { Divider, useDividerVisibility } from "../editor-controls/layout-divider"
 import { useComponentOperationsContext } from "../editor-controls/component-operations-context"
@@ -220,6 +220,7 @@ export const componentMetadata = {
 	htmlTag: "div",
 	htmlClassName: "column",
 	label,
+	category: "Layout" as ComponentCategory,
 	keywords,
 	defaultChildren: [],
 	attributes,

@@ -1,7 +1,7 @@
 import { Clock3 } from "lucide-react"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { withTextEditing } from "../editor-controls/decorators/with-text-editing"
-import type { Metadata, Props, SettingsField } from "@/client/features/types"
+import type { Metadata, Props, SettingsField, ComponentCategory } from "@/client/features/types"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createTextAttribute, readCustomClasses, readTextChildren, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { cn } from "@/client/lib/utils"
 
@@ -71,13 +71,14 @@ const Component = (props: Props) => {
 }
 
 export const componentMetadata = {
-  tag,
-  label,
-  keywords,
-  defaultChildren: ["Updated"],
-  attributes,
-  Icon: <Clock3 className="size-4" />,
-  htmlTag: "time",
-  PreviewModeComponent: Component,
-  EditModeComponent: withEditorControls(withTextEditing(Component)),
+	tag,
+	label,
+	category: "Other" as ComponentCategory,
+	keywords,
+	defaultChildren: ["Updated"],
+	attributes,
+	Icon: <Clock3 className="size-4" />,
+	htmlTag: "time",
+	PreviewModeComponent: Component,
+	EditModeComponent: withEditorControls(withTextEditing(Component)),
 } as const satisfies Metadata
