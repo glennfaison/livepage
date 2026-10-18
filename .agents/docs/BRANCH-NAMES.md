@@ -15,6 +15,22 @@ Every branch in this repository must use a gitflow name. The rule is the same fo
 
 Topic segments are lowercase kebab-case: letters, digits, and hyphens only. Version segments are numeric (`1`, `1.4`, `1.4.0`). Support lines may end in `x` (`support/1.x`). Dependabot branch names are lowercase and may contain dots, dashes, underscores, and slashes after the `dependabot/` prefix.
 
+Do not invent prefixes. Only the types in the table above are allowed, so do not create branches such as `cursor/`, `fix/`, `templates/`, `chore/`, `docs/`, or `agent/`. If a topic needs a word that is not a gitflow type, use the closest one (`feature/`, `bugfix/`, or `hotfix/`).
+
+
+## Agent requirements (hard rules)
+
+**Every agent must read this file before creating a branch or opening a pull request.**
+
+1. **Read this document first.** Do not invent a branch name from memory or from another repository's conventions.
+2. **Create only a gitflow name.** Allowed prefixes for work branches: `feature/`, `bugfix/`, `hotfix/`, `release/`, `support/`. Topic segments are lowercase kebab-case.
+3. **Never use banned prefixes**, including (not only): `copilot/`, `kilo/`, `cursor/`, `agent/`, `chore/`, `docs/`, `fix/`, `templates/`.
+4. **Do not use tools or runners that own the branch name** (for example GitHub Copilot coding agent's `copilot/…` branches). Create the gitflow branch yourself, put commits on it, then open the PR with that head into `develop`.
+5. **Validate before opening the PR.** Run `node scripts/check-branch-name.mjs --branch <name>` (or rely on `core.hooksPath` hooks). If the name fails, rename with `git branch -m feature/<topic>` and push the corrected ref — do not open the PR and "fix later".
+6. **Target `develop`.** Never open a feature PR into `main`.
+
+These rules apply even when a scheduler, plugin, or coding agent would prefer its own branch naming scheme.
+
 ## Enforcement
 
 1. **CI (required backstop, runs first).** `.github/workflows/ci.yml` runs `node scripts/check-branch-name.mjs` on every push and pull request. On a pull request it validates `GITHUB_HEAD_REF`. A failing name prints the allowed patterns and examples. The same workflow also runs `pr-source-branch-check` on every pull request to enforce merge policy: `main` only accepts PRs from `develop`, and `develop` only accepts PRs from gitflow branches. This runs for every actor that opens a pull request. The check runs as the first job in CI, before any tests or other validation.

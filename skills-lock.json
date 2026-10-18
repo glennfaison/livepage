@@ -5,7 +5,7 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/meta/agent-workflow-protocol/SKILL.md",
-      "computedHash": "bd1ae89959e298ddc0eebb3564f21d0217ec929ee9df7dfd3a8c7213c69497d6"
+      "computedHash": "7d1a4700025ebcbbd7d72165de382024f58aeb9705551e23ad7218d4974ce63c"
     },
     "ask-matt": {
       "source": "mattpocock/skills",
@@ -41,13 +41,13 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/explore-github-repo/SKILL.md",
-      "computedHash": "d8758f9314e287f4826bdbbf710297d2dabe7cc175dc526a00985cd23823cce9"
+      "computedHash": "c1173b18e3c579a3f8fa350326168473530189d9a2e9ee214c98ab1af683b65c"
     },
     "fallow": {
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow/SKILL.md",
-      "computedHash": "41a1d0206d97f43a306cb8899b317db775c4790a9a79c145085685b6ec92e4b0"
+      "computedHash": "ca0c756741459dc98c11b10475ced17d4ee4c357d0f7c747c73f7a6fee3ba1ab"
     },
     "fallow-codex-onboarding": {
       "source": "fallow-rs/fallow-skills",
@@ -59,19 +59,19 @@
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow-review/SKILL.md",
-      "computedHash": "e810da0733a890351c0e59f398123217679410d1aec0250ade0e92957561903e"
+      "computedHash": "738d0db6764123300ac05cc73572dcad0f6836f039b26f3a1913d4b8b80d7bbb"
     },
     "fallow-setup": {
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow-setup/SKILL.md",
-      "computedHash": "48259e9df538bd30dbb1ef83fb68ad2386de0e6fcbf548b9975c9b9c91cddfdc"
+      "computedHash": "861d8c555c2e4e0d3b453dca79b10ec5cc474a6f94fc7c9fd6af5aca13a259a6"
     },
     "file-github-issues": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/file-github-issues/SKILL.md",
-      "computedHash": "8d6dc853a65310500272b6c4cfe2bdba5ea09d7eb141907410c37c1cec5f9a6a"
+      "computedHash": "82ce4e6ab219c744553ed3393a70799ad05d62e31d7571de5a35409645aeece1"
     },
     "grill-via-github-comments": {
       "source": "glennfaison/github-agent-workflow",
@@ -95,13 +95,13 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/implement-github-issue/SKILL.md",
-      "computedHash": "492320f6bb6a1500e1423e0e0d547fa016954d223545e5eb306489990440b3b0"
+      "computedHash": "af3612f571a3ac85f7efbe7986d07e9c12a693ad4c9cfec71e5d79781dedf9cf"
     },
     "implement-github-issues": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/implement-github-issues/SKILL.md",
-      "computedHash": "29c51f5f9d616aa1aba9b4c7cc8f06e2efd60e752bfd56829afbc7380da1c517"
+      "computedHash": "9402e18c0dcfbb469910273b542d3923c73ae6951d72c1c7f9c6dad0a85fad32"
     },
     "implement-spec": {
       "source": "mattpocock/skills",
@@ -125,7 +125,7 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/meta/pipeline-guide/SKILL.md",
-      "computedHash": "2fd546bf8083d98c4aa723d99aff34ee24ba62cb36ea69382d36e10f0687e4d3"
+      "computedHash": "1589a12dfb7d37fef7c44d220421890330fb7decd089ec18a78d6773cd4f82cc"
     },
     "pr": {
       "source": "mattpocock/skills",
@@ -155,19 +155,25 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/review-github-pr/SKILL.md",
-      "computedHash": "704143e808e2eb807dcf0d93f6c820f817ed0f0fb75d93f8b86246904df0f57d"
+      "computedHash": "47a4b2439eca4c4c691f4342189744a319df37e3ff874521b56c706b25d21d34"
     },
     "review-github-prs": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/review-github-prs/SKILL.md",
-      "computedHash": "b868fbbd651b500734216a2197fce7e14098ca79960ac6e5d9d543d3e5d3c6b2"
+      "computedHash": "72d12d867f2d95cfb573e4dd58de2005b53e2157f76da534f6c0d25eb5260e3b"
+    },
+    "runner-prompts": {
+      "source": "glennfaison/github-agent-workflow",
+      "sourceType": "github",
+      "skillPath": "skills/meta/runner-prompts/SKILL.md",
+      "computedHash": "f7bc78d38547d935ce5b147edd4f5dcc60c953eb8f36af8f98e70af585a0d3af"
     },
     "setup-github-agent-workflow": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/meta/setup-github-agent-workflow/SKILL.md",
-      "computedHash": "5acfaeacf264bef8da036c1768b51a5c6459b558316500b39995559fec443d19"
+      "computedHash": "b388434aba849b3235fe9d16393f1d4af7e785ea2a8ec3f288ef986f359cbb7f"
     },
     "setup-matt-pocock-skills": {
       "source": "mattpocock/skills",
@@ -179,13 +185,13 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/shepherd-github-pr/SKILL.md",
-      "computedHash": "dd2b24096b8bba2529fde022f80682a6ceebdb163b1e1324182f06f46b31ce63"
+      "computedHash": "fd2da173db30ade79eec25ba8f8a73d9c5be5a43a57436074bdc0eb944222093"
     },
     "shepherd-github-prs": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/shepherd-github-prs/SKILL.md",
-      "computedHash": "6b18f2f9e1774e29466691e47afdfa14315f83b00c5b0bbde67db59b3624f549"
+      "computedHash": "e6826d0312b5d71cd4773a1c2fbda8afa4201cebe66f96aa0d5f9757c9e70506"
     },
     "tdd": {
       "source": "mattpocock/skills",
@@ -215,19 +221,19 @@
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/triage-github-issue/SKILL.md",
-      "computedHash": "7da672ce9af4386024b54b7ac1cb8090f7887502e3339da358c7caaec74e804d"
+      "computedHash": "6189d2b7cec21dee32faa3d89f0f9b4a0e4c39af4836461615406e1a2a3f7b75"
     },
     "triage-github-issues": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/pipeline/triage-github-issues/SKILL.md",
-      "computedHash": "7ac0d70f79ef95dcf7875ccfc9785b297190b2ec33badc547303666848dac7f5"
+      "computedHash": "d9b34c7ef8a5687b13eb98bfb56cfcea0d21338a9b268c59d483699372215188"
     },
     "unattended-triage": {
       "source": "glennfaison/github-agent-workflow",
       "sourceType": "github",
       "skillPath": "skills/utility/unattended-triage/SKILL.md",
-      "computedHash": "51d1de40181a909ad6de4036ac1e172223c8967c10fee2f3507904b5600298c5"
+      "computedHash": "182f68e0dc935f8691fd1264e19852fcdda9884548cd34cf96d2f6d86ad789a7"
     },
     "wayfinder": {
       "source": "mattpocock/skills",

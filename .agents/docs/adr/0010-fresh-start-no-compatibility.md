@@ -22,7 +22,7 @@ compatibility is the opt-in; when given, agents follow it and say what they
 preserved.
 
 This does not mean deleting unrelated current behavior. Agents change what the
-task touches and leave the rest alone. Reviews, including `merge-safety`, do not
+task touches and leave the rest alone. Reviews do not
 require a migration plan by default; they check explicitly requested
 compatibility.
 
