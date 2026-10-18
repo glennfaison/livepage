@@ -1,6 +1,7 @@
 import type { AppAction, AppNode, AppState, HistoryEntry } from "@/client/features/types"
 import { generateId } from "@/client/lib/utils"
 import { logger } from "@/client/lib/logger"
+import { deepClone } from "@/client/lib/deep-clone"
 import {
   insertComponent,
   updateComponent,
@@ -68,7 +69,7 @@ function appendHistoryEntry(
     id: generateId(),
     action: historyAction,
     timestamp: new Date(),
-    pageState: JSON.parse(JSON.stringify(pageState)),
+    pageState: deepClone(pageState),
   }
 
   const historyUpToCurrent = state.history.slice(0, state.currentHistoryIndex + 1)
@@ -377,9 +378,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
       return {
         ...state,
-        componentTree: JSON.parse(JSON.stringify(selectedEntry.pageState)),
+        componentTree: deepClone(selectedEntry.pageState),
         historyPreviewIndex: historyIndex,
-        originalHistoryState: state.originalHistoryState || JSON.parse(JSON.stringify(state.componentTree)),
+        originalHistoryState: state.originalHistoryState || deepClone(state.componentTree),
       }
     }
 
@@ -388,7 +389,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         const firstEntry = state.history[0]
         return {
           ...state,
-          componentTree: JSON.parse(JSON.stringify(firstEntry.pageState)),
+          componentTree: deepClone(firstEntry.pageState),
           currentHistoryIndex: 0,
         }
       }

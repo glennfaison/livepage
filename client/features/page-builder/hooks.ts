@@ -8,6 +8,7 @@ import type { AppState, AppAction, AppNode } from "@/client/features/app-state"
 import { selectCurrentPage } from "@/client/features/app-state"
 import { createDesignComponentInstance } from "@/client/features/design-components"
 import { generateId } from "@/client/lib/utils"
+import { deepClone } from "@/client/lib/deep-clone"
 import { toast } from "@/client/components/ui/use-toast"
 import {
   deserializeAppStateFromJson,
@@ -402,7 +403,7 @@ export function useHistoryOperations(dispatch: React.Dispatch<AppAction>, state:
   // Handle history discard
   const handleHistoryDiscard = useCallback(() => {
     if (state.originalHistoryState) {
-      dispatch({ type: "SET_PAGES", payload: JSON.parse(JSON.stringify(state.originalHistoryState)) })
+      dispatch({ type: "SET_PAGES", payload: deepClone(state.originalHistoryState) })
       dispatch({ type: "SET_ORIGINAL_HISTORY_STATE", payload: null })
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
     }
