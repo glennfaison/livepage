@@ -112,8 +112,8 @@ export const Divider = ({
         // while the pointer moves from a child onto the bar.
         shown ? "opacity-100" : "opacity-0",
         orientation === "horizontal"
-          ? shown ? "flex-row h-2 w-full" : ""
-          : shown ? "flex-col w-2 self-stretch" : "",
+          ? shown ? "flex-row h-[2px] w-full" : ""
+          : shown ? "flex-col w-[2px] self-stretch" : "",
         isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
       )}
     >

@@ -23,4 +23,26 @@ describe("Divider", () => {
     expect(button.style.color).toBe("rgb(24, 24, 27)")
     expect(bar.className).not.toMatch(/bg-gray-400|bg-primary/)
   })
+
+  it("renders with fixed 2px thickness", () => {
+    const { container } = render(
+      <DragDropProvider moveComponent={() => {}}>
+        <div style={{ backgroundColor: "rgb(11, 16, 23)" }}>
+          <Divider orientation="horizontal" parentTag={"row" as never} onAddComponent={jest.fn()} index={0} isVisible parentId="test" dividerIndex={0} />
+        </div>
+      </DragDropProvider>,
+    )
+    const bar = container.querySelector("div > div > div") as HTMLElement
+    expect(bar.className).toMatch(/h-\[2px\]/)
+
+    const { container: vContainer } = render(
+      <DragDropProvider moveComponent={() => {}}>
+        <div style={{ backgroundColor: "rgb(11, 16, 23)" }}>
+          <Divider orientation="vertical" parentTag={"row" as never} onAddComponent={jest.fn()} index={0} isVisible parentId="test" dividerIndex={0} />
+        </div>
+      </DragDropProvider>,
+    )
+    const vBar = vContainer.querySelector("div > div > div") as HTMLElement
+    expect(vBar.className).toMatch(/w-\[2px\]/)
+  })
 })
