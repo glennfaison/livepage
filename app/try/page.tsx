@@ -97,7 +97,7 @@ export default function BuilderPage() {
   const previewExport = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
     if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
+      handleValidationProceed("preview")
       return
     }
     setValidationResult(validation)
@@ -106,8 +106,9 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
-  const handleValidationProceed = () => {
-    if (pendingExportAction === "preview") {
+  const handleValidationProceed = (action?: "preview" | "copy") => {
+    const resolvedAction = action ?? pendingExportAction
+    if (resolvedAction === "preview") {
       const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
       const blob = new Blob([html], { type: "text/html" })
       const url = URL.createObjectURL(blob)
@@ -120,7 +121,7 @@ export default function BuilderPage() {
         })
         URL.revokeObjectURL(url)
       }
-    } else if (pendingExportAction === "copy") {
+    } else if (resolvedAction === "copy") {
       const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
       navigator.clipboard.writeText(html).then(
         () => {
@@ -146,7 +147,7 @@ export default function BuilderPage() {
   const copyHtmlToClipboard = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
     if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
+      handleValidationProceed("copy")
       return
     }
     setValidationResult(validation)
