@@ -5,7 +5,7 @@ import React from "react"
 import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
-import { useDragDrop, type DropTargetType } from "./drag-drop-context"
+import { useDragDrop } from "./drag-drop-context"
 
 const MAX_ANCESTOR_DEPTH = 12
 /** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
@@ -37,6 +37,10 @@ export const getDividerThicknessStyle = (orientation: "horizontal" | "vertical")
     : { height: px, minHeight: px, maxHeight: px, flex: `0 0 ${px}` }
 }
 
+export const getDividerHiddenStyle = (): React.CSSProperties => ({
+  flex: "0 0 0px",
+})
+
 export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>) => {
   const [color, setColor] = React.useState(CONTRAST_DARK)
   React.useEffect(() => {
@@ -56,6 +60,7 @@ export const Divider = ({
   isVisible,
   parentId,
   dividerIndex,
+  gap,
 }: Readonly<{
   orientation: "horizontal" | "vertical"
   parentTag: AppNodeTag
@@ -64,6 +69,7 @@ export const Divider = ({
   isVisible: boolean
   parentId: string
   dividerIndex: number
+  gap?: string | number
 }>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   const [hovered, setHovered] = React.useState(false)
@@ -71,11 +77,46 @@ export const Divider = ({
   // Stay visible while the pointer is on the bar/+ so it does not fade mid-click.
   const shown = isVisible || popoverOpen || hovered
 
+  const gapCss = gap == null || gap === "" ? "0px" : (typeof gap === "number" ? `${gap}px` : gap)
+
   const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex
 
   const barRef = React.useRef<HTMLDivElement>(null)
   const color = useDividerContrastColor(barRef)
   const iconColor = color === CONTRAST_LIGHT ? CONTRAST_DARK : CONTRAST_LIGHT
+
+  React.useEffect(() => {
+    const el = barRef.current
+    if (!el) return
+    const thickness = shown ? DIVIDER_THICKNESS_PX : 0
+    const sizing = shown ? getDividerThicknessStyle(orientation) : getDividerHiddenStyle()
+    // Drop thickness pins left over from a previous shown state so a hidden bar
+    // does not keep an inline 2px width/height (which would override size-0).
+    if (!shown) {
+      if (orientation === "vertical") {
+        el.style.removeProperty("width")
+        el.style.removeProperty("min-width")
+        el.style.removeProperty("max-width")
+      } else {
+        el.style.removeProperty("height")
+        el.style.removeProperty("min-height")
+        el.style.removeProperty("max-height")
+      }
+    }
+    Object.entries(sizing).forEach(([key, value]) => {
+      const cssProperty = key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
+      el.style.setProperty(cssProperty, String(value), "important")
+    })
+    const gapValue = gapCss
+    const half = `calc((${gapValue} + ${thickness}px) / -2)`
+    if (orientation === "vertical") {
+      el.style.setProperty("margin-left", half, "important")
+      el.style.setProperty("margin-right", half, "important")
+    } else {
+      el.style.setProperty("margin-top", half, "important")
+      el.style.setProperty("margin-bottom", half, "important")
+    }
+   }, [shown, orientation, gap, gapCss])
 
   const handleAddComponent = (type: AppNodeTag) => {
     onAddComponent(type, index)
@@ -113,7 +154,12 @@ export const Divider = ({
   return (
     <div
       ref={barRef}
-      style={{ backgroundColor: color, ...(shown ? getDividerThicknessStyle(orientation) : null) }}
+      style={{
+        backgroundColor: color,
+        ...(shown ? getDividerThicknessStyle(orientation) : getDividerHiddenStyle()),
+        [orientation === "vertical" ? "marginLeft" : "marginTop"]: `calc((${gapCss} + ${shown ? DIVIDER_THICKNESS_PX : 0}px) / -2)`,
+        [orientation === "vertical" ? "marginRight" : "marginBottom"]: `calc((${gapCss} + ${shown ? DIVIDER_THICKNESS_PX : 0}px) / -2)`,
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onDragOver={handleDragOver}
