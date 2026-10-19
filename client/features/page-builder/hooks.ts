@@ -14,6 +14,7 @@ import {
   deserializeAppStateFromJson,
   deserializeAppStateFromShortcode,
   serializeAppStateAsHtml,
+  serializeAppStateAsSelfContainedHtml,
   serializeAppStateAsJson,
   serializeAppStateAsShortcode,
 } from "@/client/features/serializers"
@@ -146,10 +147,16 @@ export function usePageOperations(state: AppState) {
   })
 
   const savePageAsHtmlMutation = useMutation({
-    mutationFn: async (componentTree: ReadonlyArray<AppNode>) => {
-      const htmlTemplate = serializeAppStateAsHtml(componentTree, {
-        assetBaseUrl: window.location.origin,
-      })
+    mutationFn: async (input: ReadonlyArray<AppNode> | { componentTree: ReadonlyArray<AppNode>, selfContained?: boolean }) => {
+      const componentTree = Array.isArray(input) ? input : (input as { componentTree: ReadonlyArray<AppNode>; selfContained?: boolean }).componentTree
+      const selfContained = !Array.isArray(input) && Boolean((input as { selfContained?: boolean }).selfContained)
+      const htmlTemplate = selfContained
+        ? await serializeAppStateAsSelfContainedHtml(componentTree, {
+            assetBaseUrl: window.location.origin,
+          })
+        : serializeAppStateAsHtml(componentTree, {
+            assetBaseUrl: window.location.origin,
+          })
 
       // Create and download the HTML file
       const blob = new Blob([htmlTemplate], { type: "text/html" })
@@ -160,7 +167,8 @@ export function usePageOperations(state: AppState) {
         componentTree,
         activePage: state.activePage,
       }) as AppNode | undefined
-      a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}.html`
+      const suffix = selfContained ? "-self-contained.html" : ".html"
+      a.download = `${page?.attributes.title.toLowerCase().replace(/\s+/g, "-") || "page"}${suffix}`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -168,10 +176,13 @@ export function usePageOperations(state: AppState) {
 
       return page
     },
-    onSuccess: () => {
+    onSuccess: (_page, input) => {
+      const selfContained = !Array.isArray(input) && Boolean((input as { selfContained?: boolean }).selfContained)
       toast({
-        title: "Page exported",
-        description: "Your page has been exported as an HTML file.",
+        title: selfContained ? "Self-contained page exported" : "Page exported",
+        description: selfContained
+          ? "HTML was exported with inlined CSS, embedded images, and a local React runtime."
+          : "Your page has been exported as an HTML file.",
       })
     },
     onError: () => {

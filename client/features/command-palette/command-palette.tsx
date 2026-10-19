@@ -126,6 +126,7 @@ export const CommandPalette: React.FC<
     onSaveAsJson: () => void
     onSaveAsShortcode: () => void
     onSaveAsHtml: () => void
+    onSaveAsSelfContainedHtml?: () => void
     onPreviewExport: () => void
     onCopyHtml: () => void
     onImportJson: () => void
@@ -145,6 +146,7 @@ export const CommandPalette: React.FC<
   onSaveAsJson,
   onSaveAsShortcode,
   onSaveAsHtml,
+  onSaveAsSelfContainedHtml,
   onPreviewExport,
   onCopyHtml,
   onImportJson,
@@ -301,6 +303,15 @@ export const CommandPalette: React.FC<
         onSelect: onSaveAsHtml,
       },
       {
+        id: "action-save-html-self-contained",
+        group: "Actions",
+        label: "Export self-contained HTML",
+        description: "Inline CSS, embed images, and bundle React locally",
+        keywords: ["export", "html", "download", "self-contained", "offline", "base64"],
+        icon: <Download className="h-4 w-4" />,
+        onSelect: onSaveAsSelfContainedHtml ?? onSaveAsHtml,
+      },
+      {
         id: "action-preview-export",
         group: "Actions",
         label: "Preview export",
@@ -414,6 +425,7 @@ export const CommandPalette: React.FC<
     onApplyTemplate,
     onDiscardChanges,
     onSaveAsHtml,
+    onSaveAsSelfContainedHtml,
     onSaveAsJson,
     onSaveAsShortcode,
     onImportJson,
