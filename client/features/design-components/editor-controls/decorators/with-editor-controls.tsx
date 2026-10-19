@@ -46,7 +46,7 @@ function AncestorTags(props: EditModeProps) {
       {ancestors.map((component, idx) => {
         return (
           <div key={component.attributes.id}
-            className={cn(
+            className={cn(props.pageBuilderMode === "edit" ? "contents" : ""
               "relative flex cursor-pointer justify-end p-1 px-2 text-right text-xs",
               editorChromeSurfaceClassName,
               "text-muted-foreground",
@@ -109,13 +109,13 @@ function EditorControls(props: EditModeProps) {
   return (
     <div className="absolute top-0 right-0 z-30 flex flex-col items-end">
       <AncestorTags {...props} />
-      <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls">
+      <div className={cn(props.pageBuilderMode === "edit" ? "contents" : """flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls">
         <span className="flex items-center px-2 text-xs font-medium text-popover-foreground">{label}</span>
         <SettingsPopover component={component} open={settingsOpen} onOpenChange={setSettingsOpen}>
           <Button
             variant="ghost"
             size="icon"
-            className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
+            className={cn(props.pageBuilderMode === "edit" ? "contents" : """h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
             aria-label="Settings"
             title="Settings"
             data-testid="component-settings-trigger"
@@ -129,7 +129,7 @@ function EditorControls(props: EditModeProps) {
           <Button
             variant="ghost"
             size="icon"
-            className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
+            className={cn(props.pageBuilderMode === "edit" ? "contents" : """h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
             aria-label="Replace"
             title="Replace"
             onClick={(e) => e.stopPropagation()}
@@ -140,7 +140,7 @@ function EditorControls(props: EditModeProps) {
         <Button
           variant="ghost"
           size="icon"
-          className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
+          className={cn(props.pageBuilderMode === "edit" ? "contents" : """h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
           aria-label="Duplicate"
           title="Duplicate"
           onClick={(e) => {
@@ -153,7 +153,7 @@ function EditorControls(props: EditModeProps) {
         <Button
           variant="ghost"
           size="icon"
-          className={cn("h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
+          className={cn(props.pageBuilderMode === "edit" ? "contents" : """h-6 w-6 cursor-pointer", editorChromeButtonClassName)}
           aria-label="Delete"
           title="Delete"
           onClick={(e) => {
@@ -166,7 +166,7 @@ function EditorControls(props: EditModeProps) {
         <Button
           variant="ghost"
           size="icon"
-          className={cn("h-6 w-6 cursor-grab", editorChromeButtonClassName)}
+          className={cn(props.pageBuilderMode === "edit" ? "contents" : """h-6 w-6 cursor-grab", editorChromeButtonClassName)}
           aria-label="Move"
           title="Move"
           draggable
@@ -203,7 +203,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
         onClick={selectComponent}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
-        className={cn(
+        className={cn(props.pageBuilderMode === "edit" ? "contents" : ""
           "relative block",
           // Outline (not border) so selection chrome does not change content layout.
           editMode && "outline outline-1 outline-offset-2 outline-transparent transition-shadow hover:outline-muted-foreground/50",
