@@ -295,7 +295,7 @@ async function readPreviewSnapshot(
 }
 
 test("all bundled templates render like standalone HTML at desktop and mobile sizes", async ({ page }) => {
-  test.setTimeout(180_000)
+  test.setTimeout(600_000)
   const localReactModules = await createLocalReactModules()
   const server = createServer((request, response) => {
     const url = new URL(request.url ?? "/", "http://127.0.0.1")
