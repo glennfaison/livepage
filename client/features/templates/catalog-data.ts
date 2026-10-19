@@ -11,6 +11,7 @@ import { farmLogisticsLandingPageTemplate } from "./definitions/farm-logistics-l
 import { patientHealthDashboardTemplate } from "./definitions/patient-health-dashboard"
 import { podcastShowPageTemplate } from "./definitions/podcast-show-page"
 import { neighborhoodCafePageTemplate } from "./definitions/neighborhood-cafe-page"
+import { realEstatePropertyTemplate } from "./definitions/real-estate-property"
 
 const rawPageTemplateRegistry = [
   cvResumePersonalTemplate,
@@ -27,6 +28,7 @@ const rawPageTemplateRegistry = [
   patientHealthDashboardTemplate,
   podcastShowPageTemplate,
   neighborhoodCafePageTemplate,
+  realEstatePropertyTemplate,
 ] as const
 
 export type TemplateDisplaySummary = Readonly<{
