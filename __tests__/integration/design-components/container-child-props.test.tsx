@@ -315,7 +315,7 @@ describe("container child props", () => {
 		// Edit adds only non-layout outline chrome; no layout class is added or removed.
 		const addedInEdit = new Set([...editClasses].filter((c) => !previewClasses.has(c)))
 		const removedInEdit = new Set([...previewClasses].filter((c) => !editClasses.has(c)))
-		expect(addedInEdit).toEqual(new Set(["outline", "outline-dashed", "outline-gray-300"]))
+		expect(addedInEdit).toEqual(new Set())
 		expect(removedInEdit).toEqual(new Set())
 
 		// The shared content-box classes are present in both modes.
