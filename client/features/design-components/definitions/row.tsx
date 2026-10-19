@@ -235,6 +235,7 @@ const EditModeComponent = (props: EditModeProps) => {
 				"min-h-[50px] flex flex-row justify-start items-stretch",
 				"p-0 gap-0",
 				containerClassName,
+				"outline outline-dashed outline-gray-300",
 				customClasses,
 				childClassName,
 			)}

@@ -195,6 +195,7 @@ const EditModeComponent = (props: EditModeProps) => {
 			className={cn(
 				"min-h-[50px] flex flex-col justify-start",
 				"p-0 gap-0",
+				"outline outline-dashed outline-gray-300",
 				customClasses,
 				childClassName,
 			)}
