@@ -7,6 +7,8 @@ documentation, which lives under [`.agents/`](./.agents/).
 
 **Before creating any branch or pull request, read [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) in full.** Every agent, bot, and human must use a gitflow name. Do not open a PR until the head branch matches an allowed pattern.
 
+**Before making any commit, read the [evergreen rule](./.agents/docs/AGENT-WORKFLOW.md#Finish): never close an issue labeled `evergreen`.** That label marks an issue that must stay open across releases; raise the conflict to a human instead of closing it.
+
 Run before any commit or push:
 
 ```bash
