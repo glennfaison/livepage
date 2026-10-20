@@ -71,6 +71,18 @@ describe("app-state selectors and serializers", () => {
     expect(html).not.toContain("<script>alert(1)</script>")
   })
 
+  it("includes a Content Security Policy meta tag that restricts external resources", () => {
+    const html = serializeAppStateAsHtml(appState.componentTree as any)
+    expect(html).toContain('<meta http-equiv="Content-Security-Policy"')
+    const csp = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/)?.[1]
+    expect(csp).toBeDefined()
+    expect(csp).toContain("'unsafe-inline'")
+    expect(csp).toContain("https://fonts.googleapis.com")
+    expect(csp).toContain("https://fonts.gstatic.com")
+    expect(csp).toContain("https://esm.sh")
+    expect(csp).not.toContain("*")
+  })
+
   it("renders nested component trees through the shared preview runtime", () => {
     const html = serializeAppStateAsHtml([
       {
