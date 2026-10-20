@@ -206,7 +206,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
         className={cn(
           "relative block",
           // Outline (not border) so selection chrome does not change content layout.
-          editMode && "outline outline-1 outline-offset-2 outline-transparent transition-shadow hover:outline-muted-foreground/50",
+          editMode && "outline-1 outline-offset-2 outline-transparent transition-shadow hover:outline-muted-foreground/50",
           showControls && "outline-2 outline-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.18)] hover:outline-primary",
           childClassName,
         )}
