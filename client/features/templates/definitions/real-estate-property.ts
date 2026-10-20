@@ -136,6 +136,7 @@ export const realEstatePropertyTemplate = {
             wrap: "wrap",
             "padding-top": "0", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "1rem",
+            "margin-left": "auto", "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             node("column", "property-stat-col-1", { "custom-classes": "min-w-0 flex-1" }, [
@@ -155,6 +156,7 @@ export const realEstatePropertyTemplate = {
             id: "details",
             "padding-top": "3rem", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
             "gap": "2rem",
+            "margin-left": "auto", "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             node("column", "property-details-heading-group", { "gap": "0.75rem", "align-items": "center", "custom-classes": "text-center" }, [
@@ -163,16 +165,15 @@ export const realEstatePropertyTemplate = {
             ]),
             node("row", "property-features-list", {
               wrap: "wrap", "gap": "1.25rem",
-              "custom-classes": "flex-wrap",
             }, []),
             node("row", "property-amenities-list", {
               wrap: "wrap", "gap": "1rem",
-              "custom-classes": "flex-wrap",
             }, []),
           ]),
           node("row", "property-gallery-row", {
             wrap: "wrap", "gap": "1rem",
             "padding-top": "0", "padding-right": "2.5rem", "padding-bottom": "3rem", "padding-left": "2.5rem",
+            "margin-left": "auto", "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             node("image", "property-gallery-1", { src: "", fallbackSrc: "/template-art/real-estate-property-kitchen.svg", alt: "Renovated kitchen", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
@@ -184,6 +185,7 @@ export const realEstatePropertyTemplate = {
             id: "agent",
             "padding-top": "0", "padding-right": "2.5rem", "padding-bottom": "3.5rem", "padding-left": "2.5rem",
             "gap": "1.5rem",
+            "margin-left": "auto", "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
             node("column", "property-agent-heading-group", { "gap": "0.75rem", "align-items": "center", "custom-classes": "text-center" }, [
