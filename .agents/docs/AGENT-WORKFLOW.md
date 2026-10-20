@@ -26,6 +26,7 @@ Work through these in order. Skip items that clearly do not apply to the change.
 
 ## Finish
 
+- [ ] **Never close an issue labeled `evergreen`.** That label marks an issue that must stay open across releases. If you are asked to "close" it, do not — raise the conflict instead and let a human decide.
 - [ ] **Read [branch names](./BRANCH-NAMES.md) before creating a branch or opening a PR.** Do not skip this step.
 - [ ] Ship every change, Template changes included, in a pull request into `develop`. Do not push straight to `main` or `develop`.
 - [ ] Open that pull request from a **gitflow branch** you created yourself (`feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>`, `release/<version>`, or `support/<version-line>`). See [branch names](./BRANCH-NAMES.md). A non-matching head fails CI and must not be opened.
