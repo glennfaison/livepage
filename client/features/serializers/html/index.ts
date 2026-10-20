@@ -89,7 +89,7 @@ export function serializeAppStateAsHtml(
   const escapedDescription = escapeHtml(description)
   const data = JSON.stringify(tree).replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("&", "\\u0026")
 
-  const csp = `default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;`
+  const csp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;`
   const metaTags = []
   if (mode === "linked") metaTags.push(`  <meta http-equiv="Content-Security-Policy" content="${csp}">`)
   if (description) metaTags.push(`  <meta name="description" content="${escapedDescription}">`)
