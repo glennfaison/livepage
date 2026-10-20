@@ -8,6 +8,8 @@ import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop, type DropTargetType } from "./drag-drop-context"
 
 const MAX_ANCESTOR_DEPTH = 12
+/** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
+export const DIVIDER_THICKNESS_PX = 2
 /** Time the pointer has to reach the divider after leaving a child before it hides. */
 const HIDE_DELAY_MS = 250
 
@@ -20,6 +22,19 @@ export const measureBackgroundUnder = (el: HTMLElement | null): string | null =>
     node = node.parentElement
   }
   return null
+}
+
+/**
+ * Inline styles pin the divider's cross-axis thickness. Inline, because a utility class
+ * loses to `min-width: auto` (which a flex item resolves to its content size) and to
+ * parent-level `[&>*]` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
+ * on the thickness axis keeps it from growing or shrinking in a row, column, or grid.
+ */
+export const getDividerThicknessStyle = (orientation: "horizontal" | "vertical"): React.CSSProperties => {
+  const px = `${DIVIDER_THICKNESS_PX}px`
+  return orientation === "vertical"
+    ? { width: px, minWidth: px, maxWidth: px, flex: `0 0 ${px}` }
+    : { height: px, minHeight: px, maxHeight: px, flex: `0 0 ${px}` }
 }
 
 export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>) => {
@@ -98,7 +113,7 @@ export const Divider = ({
   return (
     <div
       ref={barRef}
-      style={{ backgroundColor: color }}
+      style={{ backgroundColor: color, ...(shown ? getDividerThicknessStyle(orientation) : null) }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onDragOver={handleDragOver}
@@ -112,8 +127,8 @@ export const Divider = ({
         // while the pointer moves from a child onto the bar.
         shown ? "opacity-100" : "opacity-0",
         orientation === "horizontal"
-          ? shown ? "flex-row h-[2px] w-full" : ""
-          : shown ? "flex-col w-[2px] self-stretch" : "",
+          ? shown ? "flex-row w-full" : ""
+          : shown ? "flex-col self-stretch" : "",
         isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
       )}
     >
@@ -122,7 +137,7 @@ export const Divider = ({
           variant="ghost"
           size="icon"
           style={{ backgroundColor: color, color: iconColor }}
-          className="relative z-20 size-7 rounded-full transition-transform hover:scale-110 hover:bg-inherit"
+          className="absolute left-1/2 top-1/2 z-20 size-7 -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform hover:scale-110 hover:bg-inherit"
           onClick={(e) => {
             e.stopPropagation()
             setPopoverOpen(true)
