@@ -263,4 +263,75 @@ describe("CommandPalette", () => {
       "Export self-contained HTML, Inline CSS, embed images, and bundle React locally",
     )
   })
+
+  it("disables export commands while an export is in flight", async () => {
+    const dispatch = jest.fn()
+    render(
+      <CommandPalette
+        open
+        onOpenChange={jest.fn()}
+        state={buildState()}
+        dispatch={dispatch}
+        componentOperations={buildComponentOperations()}
+        templates={[]}
+        onApplyTemplate={jest.fn()}
+        onSaveAsJson={jest.fn()}
+        onSaveAsShortcode={jest.fn()}
+        onSaveAsHtml={jest.fn()}
+        onPreviewExport={jest.fn()}
+        onCopyHtml={jest.fn()}
+        onImportJson={jest.fn()}
+        onImportShortcode={jest.fn()}
+        onDiscardChanges={jest.fn()}
+        onOpenAIAssistant={jest.fn()}
+        onDuplicatePage={jest.fn()}
+        isSavingJson={true}
+        isSavingShortcode={true}
+        isSavingHtml={true}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Save page as JSON")).toBeInTheDocument()
+    })
+
+    expect(screen.getByText("Save page as JSON").closest("button")).toBeDisabled()
+    expect(screen.getByText("Save page as Shortcode").closest("button")).toBeDisabled()
+    expect(screen.getByText("Export page as HTML").closest("button")).toBeDisabled()
+    expect(screen.getByText("Export self-contained HTML").closest("button")).toBeDisabled()
+  })
+
+  it("disables import commands while an import is in flight", async () => {
+    const dispatch = jest.fn()
+    render(
+      <CommandPalette
+        open
+        onOpenChange={jest.fn()}
+        state={buildState()}
+        dispatch={dispatch}
+        componentOperations={buildComponentOperations()}
+        templates={[]}
+        onApplyTemplate={jest.fn()}
+        onSaveAsJson={jest.fn()}
+        onSaveAsShortcode={jest.fn()}
+        onSaveAsHtml={jest.fn()}
+        onPreviewExport={jest.fn()}
+        onCopyHtml={jest.fn()}
+        onImportJson={jest.fn()}
+        onImportShortcode={jest.fn()}
+        onDiscardChanges={jest.fn()}
+        onOpenAIAssistant={jest.fn()}
+        onDuplicatePage={jest.fn()}
+        isLoadingJson={true}
+        isLoadingShortcode={true}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Import page from JSON")).toBeInTheDocument()
+    })
+
+    expect(screen.getByText("Import page from JSON").closest("button")).toBeDisabled()
+    expect(screen.getByText("Import page from Shortcode").closest("button")).toBeDisabled()
+  })
 })

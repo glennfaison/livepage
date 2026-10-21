@@ -226,6 +226,42 @@ describe("BuilderPage Integration", () => {
     })
   })
 
+  it("disables the Export trigger while an export is pending", async () => {
+    const { usePageOperations } = jest.requireMock("@/client/features/page-builder/hooks")
+      ; (usePageOperations as jest.Mock).mockReturnValue({
+        savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsJsonMutation: { mutate: jest.fn(), isPending: true },
+        loadPageFromJsonMutation: { mutate: jest.fn(), isPending: false },
+        loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
+      })
+
+    render(<BuilderPage />)
+
+    const exportButton = screen.getByRole("button", { name: /export/i })
+    expect(exportButton).toBeDisabled()
+  })
+
+  it("disables import file inputs while an import is pending", async () => {
+    const { usePageOperations } = jest.requireMock("@/client/features/page-builder/hooks")
+      ; (usePageOperations as jest.Mock).mockReturnValue({
+        savePageAsShortcodeMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsJsonMutation: { mutate: jest.fn(), isPending: false },
+        loadPageFromJsonMutation: { mutate: jest.fn(), isPending: true },
+        loadPageFromShortcodeMutation: { mutate: jest.fn(), isPending: false },
+        savePageAsHtmlMutation: { mutate: jest.fn(), isPending: false },
+      })
+
+    render(<BuilderPage />)
+
+    const jsonInput = document.querySelector('input[type="file"][accept=".json"]') as HTMLInputElement | null
+    const shortcodeInput = document.querySelector('input[type="file"][accept=".txt"]') as HTMLInputElement | null
+    expect(jsonInput).not.toBeNull()
+    expect(shortcodeInput).not.toBeNull()
+    expect(jsonInput!.disabled).toBe(true)
+    expect(shortcodeInput!.disabled).toBe(true)
+  })
+
   it("triggers save as JSON when Download as JSON is clicked", async () => {
     const { usePageOperations } = jest.requireMock("@/client/features/page-builder/hooks")
     const mockSavePageAsJsonMutation = { mutate: jest.fn(), isPending: false }
