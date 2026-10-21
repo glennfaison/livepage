@@ -6,6 +6,7 @@ import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop } from "./drag-drop-context"
+import { getLayoutRect } from "./shared/use-element-box"
 
 const MAX_ANCESTOR_DEPTH = 12
 /** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
@@ -290,7 +291,8 @@ export const useDividerVisibility = () => {
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
-    const rect = e.currentTarget.getBoundingClientRect()
+    // The editor-controls wrapper is `display: contents`, so measure the component inside it.
+    const rect = getLayoutRect(e.currentTarget)
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
