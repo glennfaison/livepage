@@ -6,7 +6,7 @@ on:
 
 jobs:
   gitflow-branch-name:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Reject non-gitflow branch names
@@ -14,7 +14,7 @@ jobs:
 
   pr-source-branch-check:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate PR source branch policy
@@ -22,7 +22,7 @@ jobs:
 
   test:
     needs: [gitflow-branch-name, pr-source-branch-check]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
