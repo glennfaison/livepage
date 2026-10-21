@@ -26,7 +26,7 @@ import {
   writeToolbarState,
 } from "./toolbar-persistence"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut, useToolbarToggleShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useDiscardConfirmation, useHistoryOperations } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
@@ -168,6 +168,7 @@ export const Toolbar: React.FC<Readonly<{
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
   useDuplicatePageShortcut(() => onDuplicatePage?.())
+  useToolbarToggleShortcut(() => setToolbarMinimized(!toolbarMinimized))
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -262,6 +263,39 @@ export const Toolbar: React.FC<Readonly<{
     isDraggingRef.current = true
   }
 
+  const handleGripKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        setIsDragging(true)
+        isDraggingRef.current = true
+        return
+      }
+      if (!isDraggingRef.current) return
+      if (e.key === "Escape") {
+        e.preventDefault()
+        setIsDragging(false)
+        isDraggingRef.current = false
+        return
+      }
+      let dx = 0
+      let dy = 0
+      if (e.key === "ArrowRight") dx = 10
+      else if (e.key === "ArrowLeft") dx = -10
+      else if (e.key === "ArrowDown") dy = 10
+      else if (e.key === "ArrowUp") dy = -10
+      else return
+      e.preventDefault()
+      setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }))
+      writeToolbarState({
+        version: STORAGE_VERSION,
+        position: { x: positionRef.current.x + dx, y: positionRef.current.y + dy },
+        layout: layoutRef.current,
+      })
+    },
+    [],
+  )
+
   useEffect(() => {
     if (pageBuilderMode === "preview") return
 
@@ -334,8 +368,12 @@ export const Toolbar: React.FC<Readonly<{
       {!toolbarMinimized ? (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -378,7 +416,7 @@ export const Toolbar: React.FC<Readonly<{
             <Redo className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title={`Minimize / toggle toolbar (${formatShortcut("\`")})`} className="shrink-0">
             <Minimize className="h-4 w-4" />
           </Button>
 
@@ -420,8 +458,12 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
 
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -429,8 +471,12 @@ export const Toolbar: React.FC<Readonly<{
       ) : (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -446,8 +492,12 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
 
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>

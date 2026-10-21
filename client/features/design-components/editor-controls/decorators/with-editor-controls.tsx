@@ -107,9 +107,13 @@ function EditorControls(props: EditModeProps) {
   }, [component.attributes.id])
 
   return (
-    <div className="absolute top-0 right-0 z-30 flex flex-col items-end">
+    // Sit above the component's top edge so the controls never cover its content.
+    // The selection outline extends 4px (2px offset + 2px width) past the component, so
+    // `-right-1` lines the toolbar up with the outline's right edge and `mb-2` clears it.
+    <div className="absolute -right-1 bottom-full z-30 mb-2 flex flex-col items-end">
       <AncestorTags {...props} />
-      <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls">
+      {/* Empty title: stop the wrapper's long component tooltip showing while over the toolbar. */}
+      <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls" title="">
         <span className="flex items-center px-2 text-xs font-medium text-popover-foreground">{label}</span>
         <SettingsPopover component={component} open={settingsOpen} onOpenChange={setSettingsOpen}>
           <Button
@@ -206,7 +210,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
         className={cn(
           "relative block",
           // Outline (not border) so selection chrome does not change content layout.
-          editMode && "outline outline-1 outline-offset-2 outline-transparent transition-shadow hover:outline-muted-foreground/50",
+          editMode && "outline-1 outline-offset-2 outline-transparent transition-shadow hover:outline-muted-foreground/50",
           showControls && "outline-2 outline-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.18)] hover:outline-primary",
           childClassName,
         )}

@@ -441,6 +441,7 @@ export default function BuilderPage() {
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
           onDuplicatePage={handleDuplicatePage}
+          onToggleToolbar={() => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: !state.toolbarMinimized })}
         />
 
         <ValidationDialog

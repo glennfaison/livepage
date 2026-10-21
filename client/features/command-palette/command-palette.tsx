@@ -30,6 +30,7 @@ import {
   HeartPulse,
   User,
   Building2,
+  Maximize,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -134,6 +135,7 @@ export const CommandPalette: React.FC<
     onDiscardChanges: () => void
     onOpenAIAssistant: () => void
     onDuplicatePage: () => void
+    onToggleToolbar?: () => void
   }>
 > = ({
   open,
@@ -154,6 +156,7 @@ export const CommandPalette: React.FC<
   onDiscardChanges,
   onOpenAIAssistant,
   onDuplicatePage,
+  onToggleToolbar,
 }) => {
   const [search, setSearch] = useState("")
   const [insertComponentSearch, setInsertComponentSearch] = useState("")
@@ -359,6 +362,19 @@ export const CommandPalette: React.FC<
         icon: <Copy className="h-4 w-4" />,
         onSelect: onDuplicatePage,
       },
+      ...(onToggleToolbar
+        ? [
+            {
+              id: "action-toggle-toolbar",
+              group: "Actions",
+              label: "Toggle toolbar",
+              description: "Show or hide the floating toolbar",
+              keywords: ["toolbar", "minimize", "maximize", "hide", "show"],
+              icon: <Maximize className="h-4 w-4" />,
+              onSelect: onToggleToolbar,
+            },
+          ]
+        : []),
     ]
 
     const insertParent = state.selectedComponentId
@@ -431,6 +447,7 @@ export const CommandPalette: React.FC<
     onImportJson,
     onImportShortcode,
     onDuplicatePage,
+    onToggleToolbar,
   ])
 
   const filteredCommands = useMemo(() => {
@@ -569,6 +586,7 @@ export const CommandPalette: React.FC<
                     <button
                       key={command.id}
                       type="button"
+                      aria-label={`${command.label}${command.description ? `, ${command.description}` : ""}`}
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => runCommand(command)}
                       className={cn(
