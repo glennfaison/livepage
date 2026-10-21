@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useReducer, useRef, useCallback } from "react"
+import { useToast } from "@/client/components/ui/use-toast"
 import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
 import type { AppState, PersistedSession } from "@/client/features/types"
 
@@ -15,6 +16,8 @@ interface PersistedPageState {
   pageBuilderMode: AppState["pageBuilderMode"]
   toolbarMinimized: boolean
 }
+
+type PersistResult = { ok: true } | { ok: false; error: Error }
 
 function loadPersistedState(): PersistedPageState | null {
   if (typeof window === "undefined") return null
@@ -31,8 +34,8 @@ function loadPersistedState(): PersistedPageState | null {
   }
 }
 
-function savePersistedState(state: AppState) {
-  if (typeof window === "undefined") return
+function savePersistedState(state: AppState): PersistResult {
+  if (typeof window === "undefined") return { ok: true }
   try {
     const toPersist: PersistedPageState = {
       version: PAGE_STORAGE_VERSION,
@@ -42,8 +45,12 @@ function savePersistedState(state: AppState) {
       toolbarMinimized: state.toolbarMinimized,
     }
     window.localStorage.setItem(PAGE_STORAGE_KEY, JSON.stringify(toPersist))
-  } catch {
-    // Ignore quota exceeded or other storage errors
+    return { ok: true }
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error : new Error(String(error)),
+    }
   }
 }
 
@@ -83,16 +90,36 @@ export function useAppState() {
   const dispatchRef = useRef(baseDispatch)
   dispatchRef.current = baseDispatch
 
+  const { toast } = useToast()
+
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastSaveErrorRef = useRef<Error | null>(null)
 
   const debouncedSave = useCallback((newState: AppState) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
     saveTimeoutRef.current = setTimeout(() => {
-      savePersistedState(newState)
+      const result = savePersistedState(newState)
+      if (result.ok) {
+        lastSaveErrorRef.current = null
+        return
+      }
+      const error = result.error
+      if (lastSaveErrorRef.current?.message === error.message) {
+        return
+      }
+      lastSaveErrorRef.current = error
+      toast({
+        title: "Could not save page",
+        description:
+          error.name === "QuotaExceededError"
+            ? "Browser storage is full. Free up space or reduce the page size to keep saving."
+            : "Page state could not be saved to browser storage.",
+        variant: "destructive",
+      })
     }, 500)
-  }, [])
+  }, [toast])
 
   const dispatch = useRef((action: Parameters<typeof baseDispatch>[0]) => {
     baseDispatch(action)
