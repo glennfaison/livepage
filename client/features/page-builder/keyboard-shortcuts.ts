@@ -80,6 +80,21 @@ export function useDuplicatePageShortcut(onDuplicate: () => void) {
   }, [onDuplicate])
 }
 
+export function useToolbarToggleShortcut(onToggle: () => void) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      if (isModifierPressed && event.key.toLowerCase() === "`") {
+        event.preventDefault()
+        onToggle()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onToggle])
+}
+
 export function formatShortcut(key: string): string {
   if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
     return `⌘${key.toUpperCase()}`
