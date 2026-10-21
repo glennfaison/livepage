@@ -1,6 +1,6 @@
 # Divider thickness is pinned inline and the + button is out of flow
 
-**Status:** Accepted. Supersedes [ADR 0013](./0013-fixed-divider-thickness.md).
+**Status:** Accepted, amended by [ADR 0015](./0015-dividers-are-layout-neutral.md) (hidden state). Supersedes [ADR 0013](./0013-fixed-divider-thickness.md).
 
 Issue #403: a vertical insertion divider rendered far wider than intended inside rows of the
 `farm-logistics-landing-page` template, pushing the layout apart. [ADR 0013](./0013-fixed-divider-thickness.md)
@@ -22,7 +22,7 @@ never the binding constraint.
 - The "+" button is `absolute`, centred on the bar, so it does not contribute to the bar's
   content size. The bar does not clip, so the button stays fully visible and clickable.
 - The 2px value lives in one constant, `DIVIDER_THICKNESS_PX`.
-- While hidden, the bar keeps its existing `size-0` layout-neutral classes and gets no inline thickness.
+- While hidden, the bar keeps its `size-0` classes, gets no inline thickness, and is taken out of flow (see ADR 0015).
 
 ## Consequences
 
