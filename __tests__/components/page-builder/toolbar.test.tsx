@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, fireEvent } from "@testing-library/react"
 import { Toolbar } from "@/client/features/page-builder/toolbar"
 import type { AppNode, PageBuilderMode } from "@/client/features/types"
 
@@ -28,7 +28,12 @@ const baseProps = {
 }
 
 const renderedTitles = () =>
-  screen.getAllByRole("button").map((button) => button.getAttribute("title") ?? "")
+  screen
+    .getAllByRole("button")
+    .map((button) => button.getAttribute("title") ?? "")
+    // Drag handles (role="button", aria-label="Drag toolbar") are not action
+    // buttons and carry no title; per ADR 0005 they never count here.
+    .filter(Boolean)
 
 describe("Toolbar button layout", () => {
   it("renders no duplicate buttons when expanded", () => {
@@ -70,5 +75,46 @@ describe("Toolbar button layout", () => {
     const right = titles.length - pivotIndex - 1
 
     expect([-1, 0, 1]).toContain(left - right)
+  })
+})
+
+describe("Toolbar grip accessibility", () => {
+  const gripLeft = (grip: HTMLElement) => {
+    const toolbar = grip.closest("div[style]")
+    const match = toolbar?.getAttribute("style")?.match(/left:\s*(\d+)px/)
+    return match ? Number(match[1]) : null
+  }
+
+  it("exposes each grip handle as a keyboard-focusable button with an accessible name", () => {
+    render(<Toolbar {...baseProps} />)
+
+    const grips = screen.getAllByRole("button", { name: "Drag toolbar" })
+    expect(grips.length).toBeGreaterThan(0)
+    for (const grip of grips) {
+      expect(grip.getAttribute("tabindex")).toBe("0")
+      expect(grip.getAttribute("role")).toBe("button")
+    }
+  })
+
+  it("picks up a grip on Enter, moves it with arrow keys, and drops it on Escape", () => {
+    render(<Toolbar {...baseProps} />)
+
+    const grips = screen.getAllByRole("button", { name: "Drag toolbar" })
+    const grip = grips[0]
+
+    const before = gripLeft(grip)
+    expect(before).not.toBeNull()
+
+    fireEvent.keyDown(grip, { key: "Enter" })
+    fireEvent.keyDown(grip, { key: "ArrowRight" })
+
+    const afterMove = gripLeft(grip)
+    expect(afterMove).toBe(before! + 10)
+
+    fireEvent.keyDown(grip, { key: "Escape" })
+    fireEvent.keyDown(grip, { key: "ArrowRight" })
+
+    const afterDrop = gripLeft(grip)
+    expect(afterDrop).toBe(afterMove)
   })
 })
