@@ -245,4 +245,22 @@ describe("CommandPalette", () => {
     expect(screen.getByText("Insert Header 1")).toBeInTheDocument()
     expect(screen.queryByText("Undo last change")).not.toBeInTheDocument()
   })
+
+  it("gives command buttons an accessible name from their label and description", async () => {
+    renderPalette()
+
+    await waitFor(() => {
+      expect(screen.getByText("Undo last change")).toBeInTheDocument()
+    })
+
+    const button = screen.getByText("Undo last change").closest("button")
+    expect(button).toBeInTheDocument()
+    expect(button?.getAttribute("aria-label")).toBe("Undo last change")
+
+    const selfContained = await screen.findByText("Export self-contained HTML")
+    const selfContainedButton = selfContained.closest("button")
+    expect(selfContainedButton?.getAttribute("aria-label")).toBe(
+      "Export self-contained HTML, Inline CSS, embed images, and bundle React locally",
+    )
+  })
 })

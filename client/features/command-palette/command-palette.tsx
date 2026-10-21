@@ -586,6 +586,7 @@ export const CommandPalette: React.FC<
                     <button
                       key={command.id}
                       type="button"
+                      aria-label={`${command.label}${command.description ? `, ${command.description}` : ""}`}
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => runCommand(command)}
                       className={cn(
