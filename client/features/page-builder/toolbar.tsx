@@ -26,7 +26,7 @@ import {
   writeToolbarState,
 } from "./toolbar-persistence"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut, useToolbarToggleShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useDiscardConfirmation, useHistoryOperations } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
@@ -168,6 +168,7 @@ export const Toolbar: React.FC<Readonly<{
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
   useDuplicatePageShortcut(() => onDuplicatePage?.())
+  useToolbarToggleShortcut(() => setToolbarMinimized(!toolbarMinimized))
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -415,7 +416,7 @@ export const Toolbar: React.FC<Readonly<{
             <Redo className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title={`Minimize / toggle toolbar (${formatShortcut("\`")})`} className="shrink-0">
             <Minimize className="h-4 w-4" />
           </Button>
 

@@ -40,12 +40,16 @@ function Probe() {
 
 const Wrapped = withEditorControls(Probe)
 
-function renderWrapped(selectedComponentId: string, mode: "edit" | "preview" = "edit") {
+function renderWrapped(
+  selectedComponentId: string,
+  mode: "edit" | "preview" = "edit",
+  selectedComponentAncestors: EditModeProps["selectedComponentAncestors"] = [],
+) {
   const props = {
     component,
     pageBuilderMode: mode,
     selectedComponentId,
-    selectedComponentAncestors: [],
+    selectedComponentAncestors,
     parentTag: "column",
   } as EditModeProps
   return render(
@@ -80,5 +84,40 @@ describe("selection indicator", () => {
       window.dispatchEvent(new CustomEvent(OPEN_COMPONENT_SETTINGS_EVENT, { detail: "paragraph-1" }))
     })
     expect(screen.getByTestId("settings-popover")).toHaveAttribute("data-open", "true")
+  })
+
+  describe("editor controls placement", () => {
+    it("anchors the toolbar above the selected component, flush with its outline's right edge", () => {
+      renderWrapped("paragraph-1")
+      const anchor = screen.getByTestId("editor-controls").parentElement
+      const classes = anchor?.className.split(/\s+/) ?? []
+      expect(classes).toEqual(expect.arrayContaining(["absolute", "bottom-full", "-right-1"]))
+      // Anchoring to the top edge would draw the toolbar over the component's content.
+      expect(classes).not.toContain("top-0")
+      // The outline extends 4px (0.25rem) past the component; -right-1 is that same 4px.
+      expect(classes).not.toContain("right-0")
+    })
+
+    it("leaves a gap so the toolbar clears the selection outline", () => {
+      renderWrapped("paragraph-1")
+      const anchor = screen.getByTestId("editor-controls").parentElement
+      expect(anchor?.className.split(/\s+/)).toContain("mb-2")
+    })
+
+    it("stacks ancestor labels above the toolbar rather than over the component", () => {
+      const ancestor = { tag: "column", attributes: { id: "column-1" }, children: [] }
+      renderWrapped("paragraph-1", "edit", [ancestor] as never)
+      const toolbar = screen.getByTestId("editor-controls")
+      const labels = toolbar.previousElementSibling as HTMLElement
+      expect(labels.className.split(/\s+/)).toContain("bottom-[100%]")
+      expect(labels).toHaveTextContent("Paragraph")
+    })
+
+    it("suppresses the component's native tooltip while hovering the toolbar", () => {
+      renderWrapped("paragraph-1")
+      // The selected wrapper carries a long `title`; an empty title on the toolbar
+      // stops that tooltip from appearing over the content beneath the controls.
+      expect(screen.getByTestId("editor-controls")).toHaveAttribute("title", "")
+    })
   })
 })

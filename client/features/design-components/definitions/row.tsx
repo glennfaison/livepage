@@ -9,7 +9,7 @@ import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { withDataSource } from "@/client/features/data-sources"
-import { useDragDrop, type DropTargetType } from "../editor-controls/drag-drop-context"
+import { useDragDrop } from "../editor-controls/drag-drop-context"
 
 const tag = "row" as const
 
@@ -222,7 +222,8 @@ const EditModeComponent = (props: EditModeProps) => {
 				index={index}
 				isVisible={visibleVerticalDividers.has(index)}
 				parentId={attributes.id}
-				dividerIndex={index} />
+				dividerIndex={index}
+				gap={layoutStyles.gap} />
 		) : (
 			<React.Fragment key={index}>{item}</React.Fragment>
 		)
