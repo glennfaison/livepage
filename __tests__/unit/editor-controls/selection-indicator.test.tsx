@@ -87,13 +87,15 @@ describe("selection indicator", () => {
   })
 
   describe("editor controls placement", () => {
-    it("anchors the toolbar above the top-right corner of the selected component", () => {
+    it("anchors the toolbar above the selected component, flush with its outline's right edge", () => {
       renderWrapped("paragraph-1")
       const anchor = screen.getByTestId("editor-controls").parentElement
       const classes = anchor?.className.split(/\s+/) ?? []
-      expect(classes).toEqual(expect.arrayContaining(["absolute", "bottom-full", "right-0"]))
+      expect(classes).toEqual(expect.arrayContaining(["absolute", "bottom-full", "-right-1"]))
       // Anchoring to the top edge would draw the toolbar over the component's content.
       expect(classes).not.toContain("top-0")
+      // The outline extends 4px (0.25rem) past the component; -right-1 is that same 4px.
+      expect(classes).not.toContain("right-0")
     })
 
     it("leaves a gap so the toolbar clears the selection outline", () => {

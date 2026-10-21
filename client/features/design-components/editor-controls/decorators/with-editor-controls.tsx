@@ -107,9 +107,10 @@ function EditorControls(props: EditModeProps) {
   }, [component.attributes.id])
 
   return (
-    // Sit above the component's top edge, right-aligned, so the controls never cover its content.
-    // `mb-2` clears the selection outline (2px offset + 2px width) and its glow.
-    <div className="absolute right-0 bottom-full z-30 mb-2 flex flex-col items-end">
+    // Sit above the component's top edge so the controls never cover its content.
+    // The selection outline extends 4px (2px offset + 2px width) past the component, so
+    // `-right-1` lines the toolbar up with the outline's right edge and `mb-2` clears it.
+    <div className="absolute -right-1 bottom-full z-30 mb-2 flex flex-col items-end">
       <AncestorTags {...props} />
       {/* Empty title: stop the wrapper's long component tooltip showing while over the toolbar. */}
       <div className={cn("flex gap-1 p-1", editorChromeSurfaceClassName)} data-testid="editor-controls" title="">
