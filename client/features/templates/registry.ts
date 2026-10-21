@@ -11,6 +11,7 @@ import { farmLogisticsLandingPageTemplate } from "@/client/features/templates/de
 import { patientHealthDashboardTemplate } from "@/client/features/templates/definitions/patient-health-dashboard"
 import { podcastShowPageTemplate } from "@/client/features/templates/definitions/podcast-show-page"
 import { neighborhoodCafePageTemplate } from "@/client/features/templates/definitions/neighborhood-cafe-page"
+import { realEstatePropertyTemplate } from "@/client/features/templates/definitions/real-estate-property"
 import { validateAndMigrateTemplate, type PageTemplateDefinition } from "@/client/features/templates/schema"
 
 export const pageTemplateRegistry = [
@@ -28,6 +29,7 @@ export const pageTemplateRegistry = [
   validateAndMigrateTemplate(patientHealthDashboardTemplate),
   validateAndMigrateTemplate(podcastShowPageTemplate),
   validateAndMigrateTemplate(neighborhoodCafePageTemplate),
+  validateAndMigrateTemplate(realEstatePropertyTemplate),
 ] as const
 
 /**
