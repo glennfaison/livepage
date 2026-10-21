@@ -31,6 +31,12 @@ anchored to.
 - Handlers that need the component's rectangle (insertion divider visibility) receive it from the
   component's element, because `getBoundingClientRect()` of a `display: contents` element is empty.
 - `data-component-id`, `data-selected` and `aria-selected` stay on the wrapper element.
+- Direct-child utilities use a `kids:` variant (`@custom-variant kids (& > *, & > [data-component-id] > *)`
+  in `app/globals.css`) instead of `[&>*]:`. A child combinator would otherwise match the wrapper,
+  which has no box, and skip the component inside it. Measured on mobile: `farm-hero` used
+  `[&>*]:!flex-none`, so in edit mode its columns kept `flex: 1 1 0` and collapsed to 50px (page
+  7,216px tall in edit vs 10,211px in preview). In preview and exported HTML there is no wrapper,
+  so the second selector is inert. A unit test keeps templates on the variant.
 
 ## Consequences
 
@@ -38,5 +44,8 @@ anchored to.
   intentional edit-only content (for example the "Add Row" drop zone).
 - The overlay position is synchronised with the element on every animation frame while a component
   is hovered or selected, so it follows layout changes that no scroll or resize event reports.
+- Selectors that depend on sibling or child position other than `> *` (for example `[&>p:first-child]`
+  or `:last-child`) still cannot see through the wrapper. Only a wrapper-free DOM would remove that
+  limit; it needs every component root to receive the editor handlers, which is a larger change.
 - Components must render a single root element that carries the `id` from their attributes; the
   overlay measures that element.

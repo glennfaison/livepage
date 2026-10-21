@@ -87,7 +87,7 @@ export const contactAboutPageTemplate = {
             "custom-classes": "min-w-0 flex-1",
           }, [
             node("row", "contact-hero", {
-              "child-sizing": "natural", "align-items": "center", "gap": "1.25rem", "custom-classes": "[&>*]:!self-center",
+              "child-sizing": "natural", "align-items": "center", "gap": "1.25rem", "custom-classes": "kids:!self-center",
             }, [
               node("image", "contact-hero-photo", {
                 alt: "Riley Ortiz portrait",

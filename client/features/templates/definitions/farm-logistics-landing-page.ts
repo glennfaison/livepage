@@ -41,8 +41,8 @@ const BUTTON_OUTLINE = "inline-flex items-center rounded-lg border-2 border-[#1b
 const SHELL = "mx-auto w-full max-w-6xl"
 // Rows give children `flex-1 basis-0`, which collapses them to zero height once the row stacks. Reset that while
 // stacked and restore equal columns from the breakpoint up.
-const STACK_MD = "min-h-0 flex-col md:flex-row [&>*]:!flex-none md:[&>*]:!flex-1"
-const STACK_LG = "min-h-0 flex-col lg:flex-row [&>*]:!flex-none lg:[&>*]:!flex-1"
+const STACK_MD = "min-h-0 flex-col md:flex-row kids:!flex-none md:kids:!flex-1"
+const STACK_LG = "min-h-0 flex-col lg:flex-row kids:!flex-none lg:kids:!flex-1"
 
 const services = [
   { key: "bulk", number: "01", title: "Large bulk orders", body: "Pool harvests from nearby farms to fill pallet, container and truckload orders from wholesalers and food processors." },
@@ -180,9 +180,9 @@ export const farmLogisticsLandingPageTemplate = {
           node("row", "farm-nav", {
             ...padding("1.25rem", "1.5rem"), ...centered,
             "child-sizing": "natural", "align-items": "center", "justify-content": "between", gap: "1rem",
-            "custom-classes": `${SHELL} relative [&>*]:!self-center`,
+            "custom-classes": `${SHELL} relative kids:!self-center`,
           }, [
-            node("row", "farm-nav-brandmark", { "child-sizing": "natural", "align-items": "center", gap: "0.6rem", "custom-classes": "min-h-0 [&>*]:!self-center" }, [
+            node("row", "farm-nav-brandmark", { "child-sizing": "natural", "align-items": "center", gap: "0.6rem", "custom-classes": "min-h-0 kids:!self-center" }, [
               node("image", "farm-nav-logo", {
                 alt: "Fieldrun logo", src: "", fallbackSrc: "/template-art/farm-logistics-logo.svg",
                 width: "36px", height: "36px", objectFit: "contain", loading: "lazy", decoding: "async",
@@ -192,14 +192,14 @@ export const farmLogisticsLandingPageTemplate = {
             ]),
             node("row", "farm-nav-links", {
               "child-sizing": "natural", "align-items": "center", gap: "1.75rem",
-              "custom-classes": "invisible absolute left-0 top-0 min-h-0 md:visible md:static md:flex [&>*]:!self-center",
+              "custom-classes": "invisible absolute left-0 top-0 min-h-0 md:visible md:static md:flex kids:!self-center",
             }, [
               navLink("farm-nav-link-services", "Services", "#farm-services"),
               navLink("farm-nav-link-how", "How it works", "#farm-how"),
               navLink("farm-nav-link-pricing", "Pricing", "#farm-pricing"),
               navLink("farm-nav-link-stories", "Stories", "#farm-stories"),
             ]),
-            node("row", "farm-nav-actions", { "child-sizing": "natural", "align-items": "center", gap: "1rem", "custom-classes": "relative min-h-0 [&>*]:!self-center" }, [
+            node("row", "farm-nav-actions", { "child-sizing": "natural", "align-items": "center", gap: "1rem", "custom-classes": "relative min-h-0 kids:!self-center" }, [
               node("link", "farm-nav-signin", { href: "https://example.com/sign-in", "custom-classes": "invisible absolute left-0 top-0 text-sm font-semibold text-[#1b1b18] no-underline hover:underline sm:visible sm:static sm:inline" }, ["Sign in"]),
               node("button", "farm-nav-cta", { variant: "default", size: "sm", "custom-classes": "rounded-lg border-2 border-[#1b1b18] bg-[#f5b82e] px-4 font-bold text-[#1b1b18] shadow-[2px_2px_0_0_#1b1b18] hover:bg-[#f7c653]" }, ["Get started"]),
             ]),
@@ -217,7 +217,7 @@ export const farmLogisticsLandingPageTemplate = {
                 "custom-classes": "py-0 text-[2.5rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#1b1b18] md:text-[3.75rem]",
               }),
               text("paragraph", "farm-hero-copy", "Fieldrun connects farmers with buyers, then handles the trucks, cold chain and paperwork in between. List your produce in minutes, we collect and deliver, and you are paid when it lands.", { "custom-classes": `${LEAD} max-w-xl` }),
-              node("row", "farm-hero-actions", { "child-sizing": "natural", "align-items": "center", gap: "0.75rem", "custom-classes": "min-h-0 flex-wrap [&>*]:!self-center" }, [
+              node("row", "farm-hero-actions", { "child-sizing": "natural", "align-items": "center", gap: "0.75rem", "custom-classes": "min-h-0 flex-wrap kids:!self-center" }, [
                 node("button", "farm-hero-cta-primary", { variant: "default", size: "lg", "custom-classes": BUTTON_PRIMARY }, ["Get started free"]),
                 node("link", "farm-hero-cta-secondary", { href: "#farm-pricing", "custom-classes": BUTTON_OUTLINE }, ["See pricing"]),
               ]),
@@ -242,7 +242,7 @@ export const farmLogisticsLandingPageTemplate = {
               text("paragraph", "farm-proof-label", "Trusted by 3,200 farms, 140 co-ops and the markets they sell to", { "custom-classes": "py-0 text-center text-sm font-semibold text-[#6b6b60]" }),
               node("row", "farm-proof-logos", {
                 "child-sizing": "natural", "align-items": "center", "justify-content": "center", gap: "0.75rem 1rem",
-                "custom-classes": "min-h-0 flex-wrap [&>*]:!self-center",
+                "custom-classes": "min-h-0 flex-wrap kids:!self-center",
               }, [
                 text("inline-text", "farm-proof-1", "GREENMARKET CO-OP", { "custom-classes": "text-sm font-black tracking-[0.12em] text-[#1b1b18]" }),
                 text("inline-text", "farm-proof-2", "Hilltop Fresh Markets", { "custom-classes": "text-base font-extrabold italic tracking-[-0.02em] text-[#2e7d32]" }),
@@ -346,7 +346,7 @@ export const farmLogisticsLandingPageTemplate = {
                 "custom-classes": CARD,
               }, [
                 text("paragraph", `farm-story-${story.key}-quote`, story.quote, { "custom-classes": "py-0 text-base leading-7 text-[#1b1b18]" }),
-                node("row", `farm-story-${story.key}-person`, { "child-sizing": "natural", "align-items": "center", gap: "0.85rem", "custom-classes": "min-h-0 [&>*]:!self-center" }, [
+                node("row", `farm-story-${story.key}-person`, { "child-sizing": "natural", "align-items": "center", gap: "0.85rem", "custom-classes": "min-h-0 kids:!self-center" }, [
                   node("image", `farm-story-${story.key}-avatar`, {
                     alt: `${story.name} portrait`, src: "", fallbackSrc: story.avatar,
                     width: "48px", height: "48px", objectFit: "cover", borderRadius: "9999px", loading: "lazy", decoding: "async",
@@ -442,7 +442,7 @@ export const farmLogisticsLandingPageTemplate = {
             }, [
               text("header2", "farm-cta-heading", "Your next harvest has somewhere to be.", { "custom-classes": `${HEADING} text-center` }),
               text("paragraph", "farm-cta-copy", "Create a free account, list what is ready, and have a quote in your inbox before the end of the day.", { "custom-classes": "max-w-xl py-0 text-center text-base leading-7 text-[#3a3418] md:text-lg" }),
-              node("row", "farm-cta-actions", { "child-sizing": "natural", "align-items": "center", "justify-content": "center", gap: "0.75rem", "custom-classes": "min-h-0 flex-wrap [&>*]:!self-center" }, [
+              node("row", "farm-cta-actions", { "child-sizing": "natural", "align-items": "center", "justify-content": "center", gap: "0.75rem", "custom-classes": "min-h-0 flex-wrap kids:!self-center" }, [
                 node("button", "farm-cta-primary", { variant: "default", size: "lg", "custom-classes": "rounded-lg border-2 border-[#1b1b18] bg-[#1b1b18] px-6 font-bold text-[#f4f1e8] shadow-[3px_3px_0_0_#fffdf6] hover:bg-[#33332e]" }, ["Get started free"]),
                 node("link", "farm-cta-secondary", { href: "#farm-services", "custom-classes": BUTTON_OUTLINE }, ["Explore services"]),
               ]),

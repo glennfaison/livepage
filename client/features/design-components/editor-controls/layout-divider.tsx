@@ -28,7 +28,7 @@ export const measureBackgroundUnder = (el: HTMLElement | null): string | null =>
 /**
  * Inline styles pin the divider's cross-axis thickness. Inline, because a utility class
  * loses to `min-width: auto` (which a flex item resolves to its content size) and to
- * parent-level `[&>*]` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
+ * parent-level `kids:` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
  * on the thickness axis keeps it from growing or shrinking in a row, column, or grid.
  */
 export const getDividerThicknessStyle = (orientation: "horizontal" | "vertical"): React.CSSProperties => {

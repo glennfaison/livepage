@@ -2,6 +2,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Direct-child variant that also reaches through the editor-controls wrapper.
+ * In Edit Mode each component sits inside a `display: contents` wrapper (ADR 0016), so `[&>*]:` or
+ * `*:` would match that wrapper, which has no box, instead of the component that is the flex or
+ * grid item. In preview and in exported HTML there is no wrapper, so the second selector is inert.
+ * Use `kids:` instead of `[&>*]:` to style the components inside a row or column.
+ */
+@custom-variant kids (& > *, & > [data-component-id] > *);
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
