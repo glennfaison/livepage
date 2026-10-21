@@ -49,7 +49,7 @@ describe("Toolbar button layout", () => {
     render(<Toolbar {...baseProps} />)
 
     const titles = renderedTitles()
-    const pivotIndex = titles.indexOf("Minimize")
+    const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
 
     expect(pivotIndex).toBeGreaterThanOrEqual(0)
     const left = pivotIndex
@@ -68,7 +68,7 @@ describe("Toolbar button layout", () => {
     render(<Toolbar {...baseProps} promptAssistEnabled={false} />)
 
     const titles = renderedTitles()
-    const pivotIndex = titles.indexOf("Minimize")
+    const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
 
     expect(pivotIndex).toBeGreaterThanOrEqual(0)
     const left = pivotIndex
