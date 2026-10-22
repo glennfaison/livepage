@@ -102,7 +102,7 @@ export const blogArticlePageTemplate = {
             "child-sizing": "natural",
             "align-items": "center",
             "gap": "0.75rem",
-            "custom-classes": "[&>*]:!self-center",
+            "custom-classes": "kids:!self-center",
           }, [
             node("image", "blog-byline-photo", {
               alt: "Priya Nathan portrait",

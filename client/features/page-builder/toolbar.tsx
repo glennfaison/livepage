@@ -18,8 +18,15 @@ import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry, AppState } from "@/client/features/types"
 import type { AppAction, AppNode } from "@/client/features/types"
+import {
+  DEFAULT_TOOLBAR_LAYOUT,
+  DEFAULT_TOOLBAR_POSITION,
+  readToolbarState,
+  STORAGE_VERSION,
+  writeToolbarState,
+} from "./toolbar-persistence"
 import { selectCurrentPage } from "@/client/features/app-state"
-import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
+import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut, useToolbarToggleShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useDiscardConfirmation, useHistoryOperations } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
@@ -119,15 +126,21 @@ export const Toolbar: React.FC<Readonly<{
   canUndo: canUndoProp,
   canRedo: canRedoProp,
 }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [position, setPosition] = useState(DEFAULT_TOOLBAR_POSITION)
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false)
   const [settingsPopoverOpen, setSettingsPopoverOpen] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
-  const [toolbarLayout, setToolbarLayout] = useState<"horizontal" | "vertical">("vertical")
+  const [toolbarLayout, setToolbarLayout] = useState(DEFAULT_TOOLBAR_LAYOUT)
   const isDraggingRef = useRef(isDragging)
   const dragOffsetRef = useRef(dragOffset)
+  const positionRef = useRef(position)
+  const layoutRef = useRef(toolbarLayout)
+  const hydratedRef = useRef(false)
+
+  positionRef.current = position
+  layoutRef.current = toolbarLayout
 
   const pageTitle = pageComponent?.attributes?.title ?? ""
   const currentPage = pageComponent ?? componentTree[0]
@@ -155,6 +168,7 @@ export const Toolbar: React.FC<Readonly<{
   useUndoShortcut(() => onUndo?.(), canUndo)
   useRedoShortcut(() => onRedo?.(), canRedo)
   useDuplicatePageShortcut(() => onDuplicatePage?.())
+  useToolbarToggleShortcut(() => setToolbarMinimized(!toolbarMinimized))
 
   const dockPosition = useCallback((preferred?: { x: number; y: number }) => {
     if (typeof window === "undefined") return
@@ -175,17 +189,37 @@ export const Toolbar: React.FC<Readonly<{
     ))
   }, [])
 
-  // Keep the floating toolbar inside the viewport. Narrow screens start compact
-  // so the expanded control strip cannot run off the right or bottom edge.
-  // Skip in preview mode: the toolbar renders null but the effect would still run
-  // and trigger state updates on resize, causing "Maximum update depth exceeded".
+  // Hydrate the toolbar's position and layout from localStorage after mount so
+  // the first render matches the server HTML. Falls back to docking the
+  // toolbar at the default right-center position when nothing is stored.
   useEffect(() => {
     if (pageBuilderMode === "preview") return
-    if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) {
+
+    const rect = toolbarRef.current?.getBoundingClientRect()
+    const width = rect?.width ?? 48
+    const height = rect?.height ?? 48
+
+    const stored = readToolbarState()
+    if (stored) {
+      setPosition(
+        clampToolbarCenter(
+          stored.position.x,
+          stored.position.y,
+          width,
+          height,
+          window.innerWidth,
+          window.innerHeight,
+        ),
+      )
+      setToolbarLayout(stored.layout)
+    } else if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) {
       setToolbarMinimized(true)
       setToolbarLayout("vertical")
+      dockPosition()
+    } else {
+      dockPosition()
     }
-    dockPosition()
+
     const handleResize = () => {
       if (window.innerWidth < COMPACT_TOOLBAR_BREAKPOINT) setToolbarLayout("vertical")
       dockPosition()
@@ -193,6 +227,25 @@ export const Toolbar: React.FC<Readonly<{
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [dockPosition, setToolbarMinimized, pageBuilderMode])
+
+  // Persist layout changes (and the latest position) to localStorage. Layout
+  // changes are infrequent (popover, toggle, compact breakpoint), so writing
+  // on every change is cheap and keeps the persisted state in sync.
+  useEffect(() => {
+    if (pageBuilderMode === "preview") return
+    if (!hydratedRef.current) return
+    writeToolbarState({
+      version: STORAGE_VERSION,
+      position: positionRef.current,
+      layout: toolbarLayout,
+    })
+  }, [toolbarLayout])
+
+  // Mark hydration complete after the first paint so the persistence effect
+  // above does not overwrite stored state with the initial defaults.
+  useEffect(() => {
+    hydratedRef.current = true
+  }, [])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const gripElement = e.currentTarget as HTMLElement
@@ -209,6 +262,39 @@ export const Toolbar: React.FC<Readonly<{
     setIsDragging(true)
     isDraggingRef.current = true
   }
+
+  const handleGripKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        setIsDragging(true)
+        isDraggingRef.current = true
+        return
+      }
+      if (!isDraggingRef.current) return
+      if (e.key === "Escape") {
+        e.preventDefault()
+        setIsDragging(false)
+        isDraggingRef.current = false
+        return
+      }
+      let dx = 0
+      let dy = 0
+      if (e.key === "ArrowRight") dx = 10
+      else if (e.key === "ArrowLeft") dx = -10
+      else if (e.key === "ArrowDown") dy = 10
+      else if (e.key === "ArrowUp") dy = -10
+      else return
+      e.preventDefault()
+      setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }))
+      writeToolbarState({
+        version: STORAGE_VERSION,
+        position: { x: positionRef.current.x + dx, y: positionRef.current.y + dy },
+        layout: layoutRef.current,
+      })
+    },
+    [],
+  )
 
   useEffect(() => {
     if (pageBuilderMode === "preview") return
@@ -231,6 +317,11 @@ export const Toolbar: React.FC<Readonly<{
     const handleUp = () => {
       isDraggingRef.current = false
       setIsDragging(false)
+      writeToolbarState({
+        version: STORAGE_VERSION,
+        position: positionRef.current,
+        layout: layoutRef.current,
+      })
     }
 
     document.addEventListener("mousemove", handleMove)
@@ -277,8 +368,12 @@ export const Toolbar: React.FC<Readonly<{
       {!toolbarMinimized ? (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -321,7 +416,7 @@ export const Toolbar: React.FC<Readonly<{
             <Redo className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title="Minimize" className="shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title={`Minimize / toggle toolbar (${formatShortcut("\`")})`} className="shrink-0">
             <Minimize className="h-4 w-4" />
           </Button>
 
@@ -363,8 +458,12 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
 
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -372,8 +471,12 @@ export const Toolbar: React.FC<Readonly<{
       ) : (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -389,8 +492,12 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
 
           <div
+            tabIndex={0}
+            role="button"
+            aria-label="Drag toolbar"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
+            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>

@@ -130,7 +130,7 @@ describe("container child props", () => {
 		expect(screen.getByText("Natural")).not.toHaveClass("basis-auto", "basis-0", "flex-1")
 	})
 
-	it("applies the child slot class to edit-mode wrappers", () => {
+	it("applies the child slot class to the edit-mode component itself", () => {
 		const component: AppNode = {
 			tag: "row",
 			attributes: { id: "row-1" },
@@ -153,11 +153,13 @@ describe("container child props", () => {
 			/>
 		)
 
-		expect(screen.getByText("Child Header").closest("div")).toHaveClass("flex-1", "basis-0", "min-w-0")
+		// The component itself is the flex item (the editor wrapper has no box), so it carries the slot class.
+		const header = container.querySelector("[data-component-id='header-1']")?.firstElementChild
+		expect(header).toHaveClass("flex-1", "basis-0", "min-w-0")
 		expect(container.querySelector("span")).toBeNull()
 	})
 
-	it("keeps edit-mode component wrappers in block flow", () => {
+	it("keeps edit-mode component wrappers out of layout", () => {
 		const component: AppNode = {
 			tag: "row",
 			attributes: { id: "row-1" },
@@ -173,7 +175,10 @@ describe("container child props", () => {
 			/>
 		)
 
-		expect(container.firstElementChild).toHaveClass("block")
+		// `display: contents` means the wrapper never becomes the flex or grid item of its parent (ADR 0016).
+		const wrapper = container.firstElementChild as HTMLElement
+		expect(wrapper).toHaveStyle({ display: "contents" })
+		expect(wrapper).not.toHaveClass("block", "relative")
 	})
 
 	it("lets a paragraph determine the row height through a column", () => {
@@ -270,5 +275,58 @@ describe("container child props", () => {
 
 		const pageSurface = container.querySelector("section > div")
 		expect(pageSurface).toHaveClass("slot-class")
+	})
+
+	it.each(["row", "column"] as const)("keeps the content box identical between edit and preview (%s)", (tag) => {
+		const component: AppNode = {
+			tag,
+			attributes: { id: `${tag}-1` },
+			children: [{ tag: "header1", attributes: { id: "header-1" }, children: ["Child"] }],
+		}
+
+		const Preview = getComponentInfo(tag).PreviewModeComponent
+		const Edit = getComponentInfo(tag).EditModeComponent
+
+		const { container: previewContainer } = renderWithQueryClient(
+			<Preview
+				pageBuilderMode="preview"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+		const previewContent = previewContainer.firstElementChild as HTMLElement
+
+		const { container: editContainer } = renderWithDragDrop(
+			<Edit
+				pageBuilderMode="edit"
+				component={component}
+				selectedComponentId=""
+				selectedComponentAncestors={[]}
+			/>
+		)
+		// Edit mode wraps the content in an editor-controls decorator; unwrap to the content box.
+		const editWrapper = editContainer.firstElementChild as HTMLElement
+		const editContent = editWrapper.firstElementChild as HTMLElement
+
+		const classes = (el: HTMLElement) => new Set(el.className.split(/\s+/).filter(Boolean))
+		const previewClasses = classes(previewContent)
+		const editClasses = classes(editContent)
+
+		// Neither mode uses a layout-affecting border on the content container.
+		expect([...previewClasses].filter((c) => c.startsWith("border"))).toEqual([])
+		expect([...editClasses].filter((c) => c.startsWith("border"))).toEqual([])
+
+		// Edit adds only non-layout outline chrome; no layout class is added or removed.
+		const addedInEdit = new Set([...editClasses].filter((c) => !previewClasses.has(c)))
+		const removedInEdit = new Set([...previewClasses].filter((c) => !editClasses.has(c)))
+		expect(addedInEdit).toEqual(new Set(["outline", "outline-dashed", "outline-gray-300"]))
+		expect(removedInEdit).toEqual(new Set())
+
+		// The shared content-box classes are present in both modes.
+		for (const cls of ["min-h-[50px]", "flex", "p-0", "gap-0"]) {
+			expect(previewClasses.has(cls)).toBe(true)
+			expect(editClasses.has(cls)).toBe(true)
+		}
 	})
 })

@@ -30,6 +30,7 @@ import {
   HeartPulse,
   User,
   Building2,
+  Maximize,
 } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -56,6 +57,8 @@ type PaletteCommand = Readonly<{
   icon?: React.ReactNode
   onSelect: () => void
   category?: ComponentCategory
+  /** When true, the command cannot be triggered (an export/import is in flight). */
+  disabled?: boolean
 }>
 
 function getCategoryIcon(category: string): React.ReactNode {
@@ -126,6 +129,7 @@ export const CommandPalette: React.FC<
     onSaveAsJson: () => void
     onSaveAsShortcode: () => void
     onSaveAsHtml: () => void
+    onSaveAsSelfContainedHtml?: () => void
     onPreviewExport: () => void
     onCopyHtml: () => void
     onImportJson: () => void
@@ -133,6 +137,13 @@ export const CommandPalette: React.FC<
     onDiscardChanges: () => void
     onOpenAIAssistant: () => void
     onDuplicatePage: () => void
+    onToggleToolbar?: () => void
+    /** Whether the matching export/import mutation is currently in flight. */
+    isSavingJson?: boolean
+    isSavingShortcode?: boolean
+    isSavingHtml?: boolean
+    isLoadingJson?: boolean
+    isLoadingShortcode?: boolean
   }>
 > = ({
   open,
@@ -145,6 +156,7 @@ export const CommandPalette: React.FC<
   onSaveAsJson,
   onSaveAsShortcode,
   onSaveAsHtml,
+  onSaveAsSelfContainedHtml,
   onPreviewExport,
   onCopyHtml,
   onImportJson,
@@ -152,6 +164,12 @@ export const CommandPalette: React.FC<
   onDiscardChanges,
   onOpenAIAssistant,
   onDuplicatePage,
+  onToggleToolbar,
+  isSavingJson = false,
+  isSavingShortcode = false,
+  isSavingHtml = false,
+  isLoadingJson = false,
+  isLoadingShortcode = false,
 }) => {
   const [search, setSearch] = useState("")
   const [insertComponentSearch, setInsertComponentSearch] = useState("")
@@ -206,7 +224,7 @@ export const CommandPalette: React.FC<
   const runValidation = (action: "preview" | "copy") => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
     if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
+      handleValidationProceedForAction(action)
       return
     }
     setValidationResult(validation)
@@ -215,11 +233,17 @@ export const CommandPalette: React.FC<
     onOpenChange(false)
   }
 
-  const handleValidationProceed = () => {
-    if (pendingExportAction === "preview") {
+  const handleValidationProceedForAction = (action: "preview" | "copy") => {
+    if (action === "preview") {
       onPreviewExport()
-    } else if (pendingExportAction === "copy") {
+    } else if (action === "copy") {
       onCopyHtml()
+    }
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction) {
+      handleValidationProceedForAction(pendingExportAction)
     }
     setValidationDialogOpen(false)
     setPendingExportAction(null)
@@ -277,6 +301,7 @@ export const CommandPalette: React.FC<
         keywords: ["save", "export", "json", "download"],
         icon: <FileJson className="h-4 w-4" />,
         onSelect: onSaveAsJson,
+        disabled: isSavingJson,
       },
       {
         id: "action-save-shortcode",
@@ -285,6 +310,7 @@ export const CommandPalette: React.FC<
         keywords: ["save", "export", "shortcode", "download"],
         icon: <FileText className="h-4 w-4" />,
         onSelect: onSaveAsShortcode,
+        disabled: isSavingShortcode,
       },
       {
         id: "action-save-html",
@@ -293,6 +319,17 @@ export const CommandPalette: React.FC<
         keywords: ["export", "html", "download"],
         icon: <Download className="h-4 w-4" />,
         onSelect: onSaveAsHtml,
+        disabled: isSavingHtml,
+      },
+      {
+        id: "action-save-html-self-contained",
+        group: "Actions",
+        label: "Export self-contained HTML",
+        description: "Inline CSS, embed images, and bundle React locally",
+        keywords: ["export", "html", "download", "self-contained", "offline", "base64"],
+        icon: <Download className="h-4 w-4" />,
+        onSelect: onSaveAsSelfContainedHtml ?? onSaveAsHtml,
+        disabled: isSavingHtml,
       },
       {
         id: "action-preview-export",
@@ -317,6 +354,7 @@ export const CommandPalette: React.FC<
         keywords: ["import", "load", "json", "upload"],
         icon: <Upload className="h-4 w-4" />,
         onSelect: onImportJson,
+        disabled: isLoadingJson,
       },
       {
         id: "action-import-shortcode",
@@ -325,6 +363,7 @@ export const CommandPalette: React.FC<
         keywords: ["import", "load", "shortcode", "upload"],
         icon: <Upload className="h-4 w-4" />,
         onSelect: onImportShortcode,
+        disabled: isLoadingShortcode,
       },
       {
         id: "action-open-ai-assistant",
@@ -342,6 +381,19 @@ export const CommandPalette: React.FC<
         icon: <Copy className="h-4 w-4" />,
         onSelect: onDuplicatePage,
       },
+      ...(onToggleToolbar
+        ? [
+            {
+              id: "action-toggle-toolbar",
+              group: "Actions",
+              label: "Toggle toolbar",
+              description: "Show or hide the floating toolbar",
+              keywords: ["toolbar", "minimize", "maximize", "hide", "show"],
+              icon: <Maximize className="h-4 w-4" />,
+              onSelect: onToggleToolbar,
+            },
+          ]
+        : []),
     ]
 
     const insertParent = state.selectedComponentId
@@ -408,11 +460,18 @@ export const CommandPalette: React.FC<
     onApplyTemplate,
     onDiscardChanges,
     onSaveAsHtml,
+    onSaveAsSelfContainedHtml,
     onSaveAsJson,
     onSaveAsShortcode,
     onImportJson,
     onImportShortcode,
     onDuplicatePage,
+    onToggleToolbar,
+    isSavingJson,
+    isSavingShortcode,
+    isSavingHtml,
+    isLoadingJson,
+    isLoadingShortcode,
   ])
 
   const filteredCommands = useMemo(() => {
@@ -471,7 +530,7 @@ export const CommandPalette: React.FC<
 
   const runCommand = useCallback(
     (command: PaletteCommand | undefined) => {
-      if (!command) return
+      if (!command || command.disabled) return
       command.onSelect()
       onOpenChange(false)
     },
@@ -551,11 +610,15 @@ export const CommandPalette: React.FC<
                     <button
                       key={command.id}
                       type="button"
+                      disabled={command.disabled}
+                      aria-disabled={command.disabled || undefined}
+                      aria-label={`${command.label}${command.description ? `, ${command.description}` : ""}`}
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => runCommand(command)}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm",
                         isActive ? "bg-muted text-foreground" : "text-foreground/90 hover:bg-muted/60",
+                        command.disabled && "opacity-50 cursor-not-allowed disabled:opacity-50 disabled:cursor-not-allowed",
                       )}
                     >
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground">

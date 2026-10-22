@@ -37,6 +37,23 @@ const require = (specifier) => {
 };
 ${bundledRuntime}`
 
+const standaloneResult = await build({
+  entryPoints: [resolve(root, "client/features/serializers/html/browser-runtime.tsx")],
+  bundle: true,
+  format: "esm",
+  platform: "browser",
+  target: "es2022",
+  jsx: "automatic",
+  jsxImportSource: "react",
+  minify: true,
+  write: false,
+  legalComments: "none",
+})
+
+const standaloneRuntime = standaloneResult.outputFiles[0].text
+if (/from\s*["']https?:/.test(standaloneRuntime) || /from\s*["']react/.test(standaloneRuntime)) {
+  throw new Error("Self-contained HTML runtime still has external imports")
+}
 const globalsPath = resolve(root, "app/globals.css")
 const globals = await readFile(globalsPath, "utf8")
 const compiledStyles = await postcss([tailwindcss()]).process(globals, {
@@ -48,6 +65,10 @@ await mkdir(generatedPath, { recursive: true })
 await writeFile(
   resolve(generatedPath, "browser-runtime.js"),
   `export default ${JSON.stringify(runtime)}\n`,
+)
+await writeFile(
+  resolve(generatedPath, "browser-runtime-self-contained.js"),
+  `export default ${JSON.stringify(standaloneRuntime)}\n`,
 )
 await writeFile(
   resolve(generatedPath, "browser-styles.js"),

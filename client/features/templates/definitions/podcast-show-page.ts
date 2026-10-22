@@ -29,7 +29,7 @@ function episodeRow(id: string, episodeTitle: string, description: string, durat
     gap: "1rem",
     "padding-top": "1rem",
     "padding-bottom": "1rem",
-    "custom-classes": "[&>*]:!self-center border-b border-amber-100 last:border-b-0 flex-wrap",
+    "custom-classes": "kids:!self-center border-b border-amber-100 last:border-b-0 flex-wrap",
   }, [
     node("image", `${id}-cover`, {
       src: "",
@@ -128,7 +128,7 @@ export const podcastShowPageTemplate = {
             gap: "1rem",
             "margin-left": "auto",
             "margin-right": "auto",
-            "custom-classes": "[&>*]:!self-center mx-auto w-full max-w-4xl border-b border-amber-200 flex-wrap",
+            "custom-classes": "kids:!self-center mx-auto w-full max-w-4xl border-b border-amber-200 flex-wrap",
           }, [
             text("inline-text", "podcast-nav-brand", "The Longform Hour", {
               "custom-classes": "text-sm font-semibold uppercase tracking-[0.16em] text-amber-900",
@@ -137,7 +137,7 @@ export const podcastShowPageTemplate = {
               "child-sizing": "natural",
               "align-items": "center",
               gap: "0.75rem",
-              "custom-classes": "[&>*]:!self-center ml-auto",
+              "custom-classes": "kids:!self-center ml-auto",
             }, [
               node("link", "podcast-nav-episodes", { href: "#episodes", "custom-classes": "text-sm font-medium text-amber-800 hover:text-amber-950" }, ["Episodes"]),
               node("button", "podcast-nav-cta", {
@@ -173,7 +173,7 @@ export const podcastShowPageTemplate = {
               "align-items": "center",
               "justify-content": "center",
               gap: "0.75rem",
-              "custom-classes": "[&>*]:!self-center flex-wrap",
+              "custom-classes": "kids:!self-center flex-wrap",
             }, [
               node("button", "podcast-hero-play", {
                 variant: "default",
@@ -234,7 +234,7 @@ export const podcastShowPageTemplate = {
               "child-sizing": "natural",
               "align-items": "center",
               gap: "1.5rem",
-              "custom-classes": "[&>*]:!self-center",
+              "custom-classes": "kids:!self-center",
             }, [
               node("image", "podcast-host-photo", {
                 src: "",
@@ -307,7 +307,7 @@ export const podcastShowPageTemplate = {
               "align-items": "center",
               "justify-content": "center",
               gap: "0.75rem",
-              "custom-classes": "[&>*]:!self-center flex-wrap",
+              "custom-classes": "kids:!self-center flex-wrap",
             }, [
               node("button", "podcast-subscribe-primary", {
                 variant: "default",

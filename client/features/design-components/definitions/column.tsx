@@ -9,7 +9,7 @@ import { Button } from "@/client/components/ui/button"
 import { cn, intersperseAndAppend } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { withDataSource } from "@/client/features/data-sources"
-import { useDragDrop, type DropTargetType } from "../editor-controls/drag-drop-context"
+import { useDragDrop } from "../editor-controls/drag-drop-context"
 
 const tag = "column" as const
 
@@ -110,7 +110,7 @@ const EmptyColumnContent = ({
 	return (
 		<div
 			className={cn(
-				"flex items-center justify-center h-full w-full text-muted-foreground min-h-24",
+				"flex min-h-24 w-full flex-col items-center justify-center gap-2 rounded-sm bg-muted/30 px-4 text-muted-foreground",
 				isDropTarget && "bg-primary/20 ring-2 ring-primary ring-offset-2"
 			)}
 			onDragOver={handleDragOver}
@@ -184,7 +184,8 @@ const EditModeComponent = (props: EditModeProps) => {
 				index={index}
 				isVisible={visibleHorizontalDividers.has(index)}
 				parentId={attributes.id}
-				dividerIndex={index} />
+				dividerIndex={index}
+				gap={layoutStyles.gap} />
 		) : (
 			<React.Fragment key={index}>{item}</React.Fragment>
 		)
@@ -195,7 +196,7 @@ const EditModeComponent = (props: EditModeProps) => {
 			className={cn(
 				"min-h-[50px] flex flex-col justify-start",
 				"p-0 gap-0",
-				"border border-dashed border-gray-300",
+				"outline outline-dashed outline-gray-300",
 				customClasses,
 				childClassName,
 			)}

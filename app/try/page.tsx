@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { selectCurrentPage } from "@/client/features/app-state"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
+import { deepClone } from "@/client/lib/deep-clone"
 import {
   CanvasRenderer,
   ComponentOperationsContext,
@@ -18,7 +19,7 @@ import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/com
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Copy, Download, Eye, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useCallback, useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
@@ -93,10 +94,15 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
+  const saveAsSelfContainedHTML = () => {
+    savePageAsHtmlMutation.mutate({ componentTree: state.componentTree, selfContained: true })
+    setSaveDropdownOpen(false)
+  }
+
   const previewExport = () => {
     const validation = validateHtmlExport(state.componentTree, window.location.origin)
     if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
+      handleValidationProceedForAction("preview")
       return
     }
     setValidationResult(validation)
@@ -105,8 +111,20 @@ export default function BuilderPage() {
     setSaveDropdownOpen(false)
   }
 
-  const handleValidationProceed = () => {
-    if (pendingExportAction === "preview") {
+  const copyHtmlToClipboard = () => {
+    const validation = validateHtmlExport(state.componentTree, window.location.origin)
+    if (!validation.hasErrors && !validation.hasWarnings) {
+      handleValidationProceedForAction("copy")
+      return
+    }
+    setValidationResult(validation)
+    setPendingExportAction("copy")
+    setValidationDialogOpen(true)
+    setSaveDropdownOpen(false)
+  }
+
+  const handleValidationProceedForAction = (action: "preview" | "copy") => {
+    if (action === "preview") {
       const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
       const blob = new Blob([html], { type: "text/html" })
       const url = URL.createObjectURL(blob)
@@ -119,7 +137,7 @@ export default function BuilderPage() {
         })
         URL.revokeObjectURL(url)
       }
-    } else if (pendingExportAction === "copy") {
+    } else if (action === "copy") {
       const html = serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: window.location.origin })
       navigator.clipboard.writeText(html).then(
         () => {
@@ -137,31 +155,32 @@ export default function BuilderPage() {
         },
       )
     }
+  }
+
+  const handleValidationProceed = () => {
+    if (pendingExportAction) {
+      handleValidationProceedForAction(pendingExportAction)
+    }
     setValidationDialogOpen(false)
     setPendingExportAction(null)
     setValidationResult(null)
   }
 
-  const copyHtmlToClipboard = () => {
-    const validation = validateHtmlExport(state.componentTree, window.location.origin)
-    if (!validation.hasErrors && !validation.hasWarnings) {
-      handleValidationProceed()
-      return
-    }
-    setValidationResult(validation)
-    setPendingExportAction("copy")
-    setValidationDialogOpen(true)
-    setSaveDropdownOpen(false)
-  }
-
   const canUndo = state.currentHistoryIndex > 0
   const canRedo = state.currentHistoryIndex < state.history.length - 1
+
+  const anyExportPending =
+    savePageAsJsonMutation.isPending ||
+    savePageAsShortcodeMutation.isPending ||
+    savePageAsHtmlMutation.isPending
+  const anyImportPending =
+    loadPageFromJsonMutation.isPending || loadPageFromShortcodeMutation.isPending
 
   const handleUndo = () => {
     if (canUndo) {
       dispatch({
         type: "SET_PAGES",
-        payload: JSON.parse(JSON.stringify(state.history[state.currentHistoryIndex - 1].pageState)),
+        payload: deepClone(state.history[state.currentHistoryIndex - 1].pageState),
       })
       dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: state.currentHistoryIndex - 1 })
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
@@ -173,7 +192,7 @@ export default function BuilderPage() {
     if (canRedo) {
       dispatch({
         type: "SET_PAGES",
-        payload: JSON.parse(JSON.stringify(state.history[state.currentHistoryIndex + 1].pageState)),
+        payload: deepClone(state.history[state.currentHistoryIndex + 1].pageState),
       })
       dispatch({ type: "SET_CURRENT_HISTORY_INDEX", payload: state.currentHistoryIndex + 1 })
       dispatch({ type: "SET_HISTORY_PREVIEW_INDEX", payload: null })
@@ -272,6 +291,7 @@ export default function BuilderPage() {
                 ref={jsonFileInputRef}
                 onChange={(e) => loadPage(e, "json")}
                 accept=".json"
+                disabled={anyImportPending}
                 className="hidden"
               />
               <input
@@ -279,14 +299,25 @@ export default function BuilderPage() {
                 ref={shortcodeFileInputRef}
                 onChange={(e) => loadPage(e, "shortcode")}
                 accept=".txt"
+                disabled={anyImportPending}
                 className="hidden"
               />
 
               <DropdownMenu open={saveDropdownOpen} onOpenChange={setSaveDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Export page">
-                    <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">Export</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 px-2 sm:px-3"
+                    disabled={anyExportPending}
+                    aria-label="Export page"
+                  >
+                    {anyExportPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">{anyExportPending ? "Exporting..." : "Export"}</span>
                     <ChevronDown className="hidden h-3 w-3 sm:block" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -302,6 +333,10 @@ export default function BuilderPage() {
                   <DropdownMenuItem onClick={saveAsHTML} disabled={savePageAsHtmlMutation.isPending}>
                     <Download className="h-4 w-4 mr-2" />
                     {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download as HTML"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={saveAsSelfContainedHTML} disabled={savePageAsHtmlMutation.isPending}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {savePageAsHtmlMutation.isPending ? "Exporting..." : "Download self-contained HTML"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={previewExport}>
@@ -417,13 +452,20 @@ export default function BuilderPage() {
           onSaveAsJson={saveAsJSON}
           onSaveAsShortcode={saveAsShortcode}
           onSaveAsHtml={saveAsHTML}
+          onSaveAsSelfContainedHtml={saveAsSelfContainedHTML}
           onPreviewExport={previewExport}
           onCopyHtml={copyHtmlToClipboard}
           onImportJson={() => jsonFileInputRef.current?.click()}
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
+          isSavingJson={savePageAsJsonMutation.isPending}
+          isSavingShortcode={savePageAsShortcodeMutation.isPending}
+          isSavingHtml={savePageAsHtmlMutation.isPending}
+          isLoadingJson={loadPageFromJsonMutation.isPending}
+          isLoadingShortcode={loadPageFromShortcodeMutation.isPending}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
           onDuplicatePage={handleDuplicatePage}
+          onToggleToolbar={() => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: !state.toolbarMinimized })}
         />
 
         <ValidationDialog

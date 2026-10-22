@@ -94,7 +94,7 @@ export const neighborhoodCafePageTemplate = {
             "padding-right": "2.5rem",
             "padding-bottom": "1.25rem",
             "padding-left": "2.5rem",
-            "custom-classes": "[&>*]:!self-center flex-wrap border-b border-[#eadfce] bg-[#faf7f0]",
+            "custom-classes": "kids:!self-center flex-wrap border-b border-[#eadfce] bg-[#faf7f0]",
           }, [
             text("inline-text", "cafe-brand", "JUNIPER & GRAIN", {
               "custom-classes": "text-sm font-bold tracking-[0.16em] text-[#67442f]",
@@ -103,7 +103,7 @@ export const neighborhoodCafePageTemplate = {
               "child-sizing": "natural",
               "align-items": "center",
               gap: "1.25rem",
-              "custom-classes": "[&>*]:!self-center ml-auto",
+              "custom-classes": "kids:!self-center ml-auto",
             }, [
               node("link", "cafe-nav-menu", { href: "#cafe-menu", "custom-classes": "text-sm font-medium text-[#67442f] hover:text-[#9a572f]" }, ["Menu"]),
               node("link", "cafe-nav-visit", { href: "#cafe-visit", "custom-classes": "text-sm font-medium text-[#67442f] hover:text-[#9a572f]" }, ["Visit"]),
@@ -142,7 +142,7 @@ export const neighborhoodCafePageTemplate = {
                 "child-sizing": "natural",
                 "align-items": "center",
                 gap: "0.75rem",
-                "custom-classes": "[&>*]:!self-end flex-wrap",
+                "custom-classes": "kids:!self-end flex-wrap",
               }, [
                 node("link", "cafe-hero-menu-link", {
                   href: "#cafe-menu",
@@ -182,7 +182,7 @@ export const neighborhoodCafePageTemplate = {
               "align-items": "end",
               "justify-content": "between",
               gap: "1.5rem",
-              "custom-classes": "[&>*]:!self-center flex-wrap",
+              "custom-classes": "kids:!self-center flex-wrap",
             }, [
               node("column", "cafe-menu-heading-group", { gap: "0.5rem", "custom-classes": "min-w-0" }, [
                 text("inline-text", "cafe-menu-eyebrow", "MADE HERE, WITH CARE", {
@@ -288,7 +288,7 @@ export const neighborhoodCafePageTemplate = {
             "padding-right": "2.5rem",
             "padding-bottom": "1.25rem",
             "padding-left": "2.5rem",
-            "custom-classes": "[&>*]:!self-center flex-wrap border-t border-[#eadfce] text-xs text-[#815c37]",
+            "custom-classes": "kids:!self-center flex-wrap border-t border-[#eadfce] text-xs text-[#815c37]",
           }, [
             text("inline-text", "cafe-footer-brand", "JUNIPER & GRAIN · GOOD THINGS, CLOSE TO HOME", {
               "custom-classes": "font-semibold tracking-[0.08em]",
