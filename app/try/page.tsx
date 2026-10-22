@@ -427,7 +427,6 @@ export default function BuilderPage() {
           onAcceptHistory={handleHistoryAccept}
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
-          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
           pageComponent={currentPage}
           componentTree={state.componentTree}
