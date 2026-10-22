@@ -31,14 +31,19 @@ export function DiscardConfirmationDialog({
   return (
     <Dialog open={open} onOpenChange={onCancel}>
       <DialogContent className="h-auto max-h-[90vh] w-[min(90vw,28rem)] max-w-md p-0">
-        <DialogHeader className="space-y-2 border-b-0 px-6 pt-6 pb-2">
-          <DialogTitle className="flex items-center gap-2.5 text-base font-semibold">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Discard all changes?
-          </DialogTitle>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            This will reset the page to its initial state. This action cannot be undone.
-          </p>
+        <DialogHeader className="border-b-0 px-6 py-0">
+          <div className="space-y-2 pt-6 pb-2">
+            <DialogTitle className="flex items-center gap-2.5 text-base font-semibold">
+              <AlertTriangle
+                aria-hidden="true"
+                className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
+              />
+              Discard all changes?
+            </DialogTitle>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              This will reset the page to its initial state. This action cannot be undone.
+            </p>
+          </div>
         </DialogHeader>
 
         <div className="px-6 py-4">
