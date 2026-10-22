@@ -47,5 +47,10 @@ anchored to.
 - Selectors that depend on sibling or child position other than `> *` (for example `[&>p:first-child]`
   or `:last-child`) still cannot see through the wrapper. Only a wrapper-free DOM would remove that
   limit; it needs every component root to receive the editor handlers, which is a larger change.
-- Components must render a single root element that carries the `id` from their attributes; the
-  overlay measures that element.
+- The overlay measures the wrapper's first element child (`wrapper.firstElementChild`), so a
+  component must render a single root element. That root does not need to carry the component's
+  `id`; some roots do not (for example the link component's), which is why the wrapper's
+  `data-component-id` is the reliable way to find a component in the DOM.
+- A component whose root has no box (`display: none`, or `display: contents`) is not measurable, so
+  it gets no outline or toolbar even while selected. This is intentional: there is nothing to draw
+  around.
