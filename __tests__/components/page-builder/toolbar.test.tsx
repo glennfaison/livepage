@@ -18,7 +18,6 @@ const baseProps = {
   onAcceptHistory: jest.fn(),
   onDiscardHistory: jest.fn(),
   historyPreviewIndex: null,
-  onOpenCommandPalette: jest.fn(),
   onOpenAIAssistant: jest.fn(),
   onUndo: jest.fn(),
   onRedo: jest.fn(),
@@ -116,5 +115,37 @@ describe("Toolbar grip accessibility", () => {
 
     const afterDrop = gripLeft(grip)
     expect(afterDrop).toBe(afterMove)
+  })
+})
+
+describe("Toolbar without the command palette and duplicate page buttons", () => {
+  it("does not render a command palette or a duplicate page button", () => {
+    render(<Toolbar {...baseProps} />)
+
+    expect(screen.queryByTitle("Command palette")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Duplicate page")).not.toBeInTheDocument()
+    expect(renderedTitles().some((title) => title.startsWith("Duplicate page"))).toBe(false)
+  })
+
+  it("still duplicates the page with the keyboard shortcut", () => {
+    const onDuplicatePage = jest.fn()
+    render(<Toolbar {...baseProps} onDuplicatePage={onDuplicatePage} />)
+
+    fireEvent.keyDown(window, { key: "d", ctrlKey: true, shiftKey: true })
+
+    expect(onDuplicatePage).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    [true, 4, 4],
+    [false, 3, 4],
+  ])("has the documented button counts when the page assistant is %s (left %i, right %i)", (promptAssistEnabled, left, right) => {
+    render(<Toolbar {...baseProps} promptAssistEnabled={promptAssistEnabled} />)
+
+    const titles = renderedTitles()
+    const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
+
+    expect(pivotIndex).toBe(left)
+    expect(titles.length - pivotIndex - 1).toBe(right)
   })
 })

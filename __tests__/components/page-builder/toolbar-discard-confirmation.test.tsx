@@ -24,7 +24,6 @@ const baseProps = {
   onAcceptHistory: jest.fn(),
   onDiscardHistory: jest.fn(),
   historyPreviewIndex: null,
-  onOpenCommandPalette: jest.fn(),
   onOpenAIAssistant: jest.fn(),
   onUndo: jest.fn(),
   onRedo: jest.fn(),
