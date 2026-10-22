@@ -13,7 +13,7 @@ import {
 } from "@/client/components/ui/dialog"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
+import { Bot, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry, AppState } from "@/client/features/types"
@@ -79,7 +79,6 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory: (index: number) => void
   onDiscardHistory: () => void
   historyPreviewIndex: number | null
-  onOpenCommandPalette?: () => void
   /** Optional: renders an AI Assistant trigger button when provided and prompt assist is enabled. */
   onOpenAIAssistant?: () => void
   /** Page component for settings popover */
@@ -113,7 +112,6 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory,
   onDiscardHistory,
   historyPreviewIndex,
-  onOpenCommandPalette,
   onOpenAIAssistant,
   pageComponent,
   componentTree,
@@ -341,10 +339,9 @@ export const Toolbar: React.FC<Readonly<{
       assertToolbarButtonBalance(0, 0)
     } else {
       const leftButtonCount =
-        (onOpenCommandPalette ? 1 : 0) +
         (onOpenAIAssistant && promptAssistEnabled ? 1 : 0) +
         3 // history, undo, redo
-      const rightButtonCount = 5 // save, discard, duplicate page, settings, layout toggle
+      const rightButtonCount = 4 // save, discard, settings, layout toggle
       assertToolbarButtonBalance(leftButtonCount, rightButtonCount)
     }
   }
@@ -378,11 +375,6 @@ export const Toolbar: React.FC<Readonly<{
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
 
-          {onOpenCommandPalette ? (
-            <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette" className="shrink-0">
-              <Command className="h-4 w-4" />
-            </Button>
-          ) : null}
           {onOpenAIAssistant && promptAssistEnabled ? (
             <Button
               variant="outline"
@@ -425,9 +417,6 @@ export const Toolbar: React.FC<Readonly<{
           </Button>
           <Button variant="outline" size="sm" onClick={handleDiscardWithConfirmation} title="Discard" className="shrink-0">
             <X className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
-            <Copy className="h-4 w-4" />
           </Button>
 
           <ToolbarSettingsPopover
