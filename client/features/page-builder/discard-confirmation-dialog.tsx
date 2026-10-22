@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { X } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 import { Button } from "@/client/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
 import { Label } from "@/client/components/ui/label"
@@ -30,31 +30,41 @@ export function DiscardConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <X className="h-5 w-5 text-destructive" />
+      <DialogContent className="h-auto max-h-[90vh] w-[min(90vw,28rem)] max-w-md p-0">
+        <DialogHeader className="space-y-2 border-b-0 px-6 pt-6 pb-2">
+          <DialogTitle className="flex items-center gap-2.5 text-base font-semibold">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
             Discard all changes?
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             This will reset the page to its initial state. This action cannot be undone.
           </p>
         </DialogHeader>
-        <div className="flex items-center gap-2 py-2">
-          <Switch
-            id={switchId}
-            checked={askBeforeDiscard}
-            onCheckedChange={onAskBeforeDiscardChange}
-          />
-          <Label htmlFor={switchId} className="text-sm font-normal">
-            Ask before discarding
-          </Label>
+
+        <div className="px-6 py-4">
+          <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-3">
+            <Switch
+              id={switchId}
+              checked={askBeforeDiscard}
+              onCheckedChange={onAskBeforeDiscardChange}
+              className="mt-0.5"
+            />
+            <div className="space-y-0.5">
+              <Label htmlFor={switchId} className="text-sm font-medium leading-none">
+                Ask before discarding
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                You can change this preference anytime.
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex justify-end gap-2 border-t px-4 py-3">
-          <Button variant="ghost" onClick={onCancel}>
+
+        <div className="flex justify-end gap-2 border-t bg-muted/20 px-6 py-4">
+          <Button variant="ghost" onClick={onCancel} size="sm">
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
+          <Button variant="destructive" onClick={onConfirm} size="sm">
             Discard
           </Button>
         </div>
