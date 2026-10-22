@@ -5,7 +5,7 @@ const TEMPLATE_DIR = path.join(process.cwd(), "client/features/templates/definit
 const GLOBALS_CSS = path.join(process.cwd(), "app/globals.css")
 
 describe("direct-child utilities in templates (ADR 0016)", () => {
-  const files = fs.readdirSync(TEMPLATE_DIR).filter((name) => name.endsWith(".ts"))
+  const files = fs.readdirSync(TEMPLATE_DIR).filter((name) => name.endsWith(".ts") && !name.endsWith(".test.ts"))
 
   it.each(files)("%s uses the `kids:` variant, not a bare child combinator", (file) => {
     const source = fs.readFileSync(path.join(TEMPLATE_DIR, file), "utf8")
