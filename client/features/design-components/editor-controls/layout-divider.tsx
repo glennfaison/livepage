@@ -6,6 +6,7 @@ import { Button } from "@/client/components/ui/button"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop } from "./drag-drop-context"
+import { getLayoutRect } from "./shared/use-element-box"
 
 const MAX_ANCESTOR_DEPTH = 12
 /** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
@@ -27,7 +28,7 @@ export const measureBackgroundUnder = (el: HTMLElement | null): string | null =>
 /**
  * Inline styles pin the divider's cross-axis thickness. Inline, because a utility class
  * loses to `min-width: auto` (which a flex item resolves to its content size) and to
- * parent-level `[&>*]` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
+ * parent-level `kids:` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
  * on the thickness axis keeps it from growing or shrinking in a row, column, or grid.
  */
 export const getDividerThicknessStyle = (orientation: "horizontal" | "vertical"): React.CSSProperties => {
@@ -290,7 +291,8 @@ export const useDividerVisibility = () => {
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
-    const rect = e.currentTarget.getBoundingClientRect()
+    // The editor-controls wrapper is `display: contents`, so measure the component inside it.
+    const rect = getLayoutRect(e.currentTarget)
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 

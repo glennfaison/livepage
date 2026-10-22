@@ -130,7 +130,7 @@ describe("container child props", () => {
 		expect(screen.getByText("Natural")).not.toHaveClass("basis-auto", "basis-0", "flex-1")
 	})
 
-	it("applies the child slot class to edit-mode wrappers", () => {
+	it("applies the child slot class to the edit-mode component itself", () => {
 		const component: AppNode = {
 			tag: "row",
 			attributes: { id: "row-1" },
@@ -153,11 +153,13 @@ describe("container child props", () => {
 			/>
 		)
 
-		expect(screen.getByText("Child Header").closest("div")).toHaveClass("flex-1", "basis-0", "min-w-0")
+		// The component itself is the flex item (the editor wrapper has no box), so it carries the slot class.
+		const header = container.querySelector("[data-component-id='header-1']")?.firstElementChild
+		expect(header).toHaveClass("flex-1", "basis-0", "min-w-0")
 		expect(container.querySelector("span")).toBeNull()
 	})
 
-	it("keeps edit-mode component wrappers in block flow", () => {
+	it("keeps edit-mode component wrappers out of layout", () => {
 		const component: AppNode = {
 			tag: "row",
 			attributes: { id: "row-1" },
@@ -173,7 +175,10 @@ describe("container child props", () => {
 			/>
 		)
 
-		expect(container.firstElementChild).toHaveClass("block")
+		// `display: contents` means the wrapper never becomes the flex or grid item of its parent (ADR 0016).
+		const wrapper = container.firstElementChild as HTMLElement
+		expect(wrapper).toHaveStyle({ display: "contents" })
+		expect(wrapper).not.toHaveClass("block", "relative")
 	})
 
 	it("lets a paragraph determine the row height through a column", () => {

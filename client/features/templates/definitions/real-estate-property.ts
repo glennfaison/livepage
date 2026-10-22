@@ -215,7 +215,7 @@ export const realEstatePropertyTemplate = {
           node("row", "property-footer", {
             "child-sizing": "natural", "align-items": "center", "justify-content": "between", "gap": "1rem",
             "padding-top": "1.25rem", "padding-right": "2.5rem", "padding-bottom": "1.25rem", "padding-left": "2.5rem",
-            "custom-classes": "[&>*]:!self-center flex-wrap border-t border-[#e2e8f0] text-xs text-slate-500",
+            "custom-classes": "kids:!self-center flex-wrap border-t border-[#e2e8f0] text-xs text-slate-500",
           }, [
             text("inline-text", "property-footer-brand", "WILLOW & VINE REALTY · LISTING DETAILS", { "custom-classes": "font-semibold tracking-[0.08em]" }),
             node("divider", "property-footer-divider", { color: "#e2e8f0", style: "solid" }),
