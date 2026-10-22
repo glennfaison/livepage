@@ -1,6 +1,6 @@
 # Editor chrome is an overlay, not a wrapper box
 
-**Status:** Proposed (in progress). Follows [ADR 0015](./0015-dividers-are-layout-neutral.md).
+**Status:** Accepted. Follows [ADR 0015](./0015-dividers-are-layout-neutral.md).
 
 Issue #431: edit mode and preview lay a page out differently. ADR 0015 removed the drift caused by
 insertion dividers. The remaining drift comes from `withEditorControls`, which wraps every
