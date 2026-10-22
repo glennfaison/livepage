@@ -30,3 +30,11 @@ never the binding constraint.
 - Jest (jsdom) does not compute layout, so unit tests assert the pinned styles and the out-of-flow
   button. Visual verification is the `farm-logistics-landing-page` template in Edit Mode, hovering
   a vertical divider.
+
+## Visual verification
+
+Hover state of a vertical divider in the `farm-logistics-landing-page` template (Edit Mode):
+
+![Vertical divider hover](./images/403-vertical-divider-hover.png)
+
+The bar is 2px wide; the + button is centered and out of flow.

@@ -19,7 +19,7 @@ import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/com
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Copy, Download, Eye, Layers, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import React, { useCallback, useRef, useState } from "react"
 import { Input } from "@/client/components/ui/input"
@@ -169,6 +169,13 @@ export default function BuilderPage() {
   const canUndo = state.currentHistoryIndex > 0
   const canRedo = state.currentHistoryIndex < state.history.length - 1
 
+  const anyExportPending =
+    savePageAsJsonMutation.isPending ||
+    savePageAsShortcodeMutation.isPending ||
+    savePageAsHtmlMutation.isPending
+  const anyImportPending =
+    loadPageFromJsonMutation.isPending || loadPageFromShortcodeMutation.isPending
+
   const handleUndo = () => {
     if (canUndo) {
       dispatch({
@@ -284,6 +291,7 @@ export default function BuilderPage() {
                 ref={jsonFileInputRef}
                 onChange={(e) => loadPage(e, "json")}
                 accept=".json"
+                disabled={anyImportPending}
                 className="hidden"
               />
               <input
@@ -291,14 +299,25 @@ export default function BuilderPage() {
                 ref={shortcodeFileInputRef}
                 onChange={(e) => loadPage(e, "shortcode")}
                 accept=".txt"
+                disabled={anyImportPending}
                 className="hidden"
               />
 
               <DropdownMenu open={saveDropdownOpen} onOpenChange={setSaveDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Export page">
-                    <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">Export</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 px-2 sm:px-3"
+                    disabled={anyExportPending}
+                    aria-label="Export page"
+                  >
+                    {anyExportPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">{anyExportPending ? "Exporting..." : "Export"}</span>
                     <ChevronDown className="hidden h-3 w-3 sm:block" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -438,6 +457,11 @@ export default function BuilderPage() {
           onCopyHtml={copyHtmlToClipboard}
           onImportJson={() => jsonFileInputRef.current?.click()}
           onImportShortcode={() => shortcodeFileInputRef.current?.click()}
+          isSavingJson={savePageAsJsonMutation.isPending}
+          isSavingShortcode={savePageAsShortcodeMutation.isPending}
+          isSavingHtml={savePageAsHtmlMutation.isPending}
+          isLoadingJson={loadPageFromJsonMutation.isPending}
+          isLoadingShortcode={loadPageFromShortcodeMutation.isPending}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
           onDuplicatePage={handleDuplicatePage}
