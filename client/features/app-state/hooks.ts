@@ -73,6 +73,10 @@ function getSnapshot(): AppState {
   return currentState
 }
 
+function getServerSnapshot(): AppState {
+  return initialState
+}
+
 function loadPersistedState(): PersistedPageState | null {
   if (typeof window === "undefined") return null
   try {
@@ -165,7 +169,7 @@ export function useAppState() {
   const { toast } = useToast()
   setToastRef = toast
 
-  const state = useSyncExternalStore(subscribe, getSnapshot)
+  const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   // Adopt the browser-persisted session once per tab, after mount, so the
   // first render stays identical to the server HTML.
