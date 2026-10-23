@@ -107,3 +107,29 @@ export function validateUrlForSsrf(url: string): { valid: boolean; error?: strin
 
   return { valid: true }
 }
+
+/**
+ * Wraps an async function with a debounce/cooldown so rapid successive calls
+ * within `delayMs` are rejected. The first call proceeds immediately; later
+ * calls inside the window are rate-limited.
+ *
+ * @param fn - Async function to debounce
+ * @param delayMs - Minimum milliseconds between allowed calls
+ * @returns Debounced version of `fn`
+ */
+export function debounceAsync<TArgs extends unknown[], TResult extends Promise<unknown>>(
+  fn: (...args: TArgs) => TResult,
+  delayMs: number
+): (...args: TArgs) => TResult {
+  let lastCallTime = 0
+  return ((...args: TArgs) => {
+    const now = Date.now()
+    if (now - lastCallTime < delayMs) {
+      return Promise.reject(
+        new Error(`Rate limited. Please wait ${delayMs - (now - lastCallTime)}ms before trying again.`)
+      ) as TResult
+    }
+    lastCallTime = now
+    return fn(...args)
+  }) as (...args: TArgs) => TResult
+}

@@ -1,6 +1,6 @@
 import { Plug } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { validateUrlForSsrf } from "@/client/lib/utils"
+import { validateUrlForSsrf, debounceAsync } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -49,11 +49,13 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	return parseResultFn ? parseResultFn(unparsedData) : unparsedData
 }
 
+const tryConnectionDebounced = debounceAsync(tryConnection, 500)
+
 export const dataSourceInfo = {
 	id: "rest-api",
 	label: "REST API",
 	keywords: ["rest", "api"],
 	Icon: <Plug className="h-4 w-4" />,
 	settings,
-	tryConnection,
+	tryConnection: tryConnectionDebounced,
 } as const satisfies DataSourceInfo
