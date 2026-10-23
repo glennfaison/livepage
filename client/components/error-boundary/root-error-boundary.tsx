@@ -5,6 +5,7 @@ import { Button } from "@/client/components/ui/button"
 import { RefreshCw, AlertTriangle, Bug, ExternalLink, Copy } from "lucide-react"
 import { cn } from "@/client/lib/utils"
 import { logger } from "@/client/lib/logger"
+import { captureException } from "@/client/lib/observability"
 import { classifyError, isDevelopmentMode, type ClassifiedError, type RecoveryAction } from "./error-classification"
 
 interface RootErrorBoundaryState {
@@ -86,6 +87,7 @@ export class RootErrorBoundary extends React.Component<
       stack: error.stack,
       errorInfo: errorInfo.componentStack,
     })
+    captureException(error, { source: "RootErrorBoundary", componentStack: errorInfo.componentStack })
   }
 
   handleRetry = (): void => {

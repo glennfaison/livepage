@@ -1,3 +1,4 @@
+import { captureEvent } from "@/client/lib/observability"
 "use client"
 
 import React from "react"
@@ -48,6 +49,7 @@ export function useTemplateSettingsEditor({
   const templates = React.useMemo(() => describeTemplateDisplayCatalog(), [])
 
   const handleApplyTemplate = (templateId: string) => {
+    captureEvent("template_applied", { templateId })
     const template = getPageTemplateById(templateId)
     if (!template) return
 

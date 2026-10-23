@@ -1,3 +1,4 @@
+import { captureEvent } from "@/client/lib/observability"
 "use client"
 
 import React from "react"
@@ -244,6 +245,7 @@ function DataSourceSettingsView(props: Readonly<{
   const isLinkedInProfile = selectedDataSource.id === "linkedin-profile"
 
   const testConnection = async (nextFormData: DataSourceSettings) => {
+    captureEvent("data_source_test", { source: nextFormData.type || "unknown" })
     try {
       setTestingConnection(true)
       const result = await selectedDataSource.tryConnection(nextFormData)
