@@ -1,5 +1,6 @@
-import { captureEvent } from "@/client/lib/observability"
 "use client"
+
+import { captureEvent } from "@/client/lib/observability"
 
 import React from "react"
 import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
