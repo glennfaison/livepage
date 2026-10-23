@@ -316,6 +316,10 @@ export function patchComponent(
 
 /**
  * Moves a component to a new parent at the specified index.
+ * The `index` is interpreted as the desired insertion position in the original
+ * (pre-removal) children list of the target parent. When the move is within the
+ * same parent and the component currently sits before that index, the index is
+ * decremented so the post-removal insert lands at the correct relative position.
  * Prevents moving a component into its own descendant.
  * Returns the original tree if the component or new parent is not found,
  * or if the move would create a cycle.
@@ -331,6 +335,22 @@ export function moveComponent({
   newParentId: string
   index?: number
 }>): AppNode[] {
+  // Adjust index for same-parent reorders: the provided index is the desired
+  // position in the original children list (e.g. after divider-index conversion).
+  // After removal, a component that was before the target must have its index reduced by 1.
+  let adjustedIndex = index
+  if (typeof index === "number") {
+    const currentParent = findComponentParent({ components, componentId })
+    if (currentParent && currentParent.attributes.id === newParentId) {
+      const currentIndex = currentParent.children.findIndex(
+        (child) => typeof child !== "string" && child.attributes.id === componentId
+      )
+      if (currentIndex !== -1 && currentIndex < index) {
+        adjustedIndex = index - 1
+      }
+    }
+  }
+
   // First, remove the component from its current location
   const withoutComponent = removeComponent({ components, componentId })
 
@@ -343,6 +363,6 @@ export function moveComponent({
     components: withoutComponent,
     newComponent: componentToMove,
     parentId: newParentId,
-    index,
+    index: adjustedIndex,
   })
 }
