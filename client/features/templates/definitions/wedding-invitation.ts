@@ -62,7 +62,7 @@ export const weddingInvitationTemplate = {
     pages: [
       node("page", "wedding-page", {
         title: "Alex & Jordan — Wedding Invitation",
-        "custom-classes": "border-0 bg-[#faf8f5] text-[#3d2e2a] shadow-none",
+        "custom-classes": "min-h-screen border-0 bg-[#faf8f5] text-[#3d2e2a] shadow-none",
       }, [
         node("column", "wedding-shell", { gap: "0", "custom-classes": "mx-auto w-full max-w-3xl", "margin-left": "auto", "margin-right": "auto" }, [
           node("column", "wedding-hero", {
