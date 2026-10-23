@@ -49,7 +49,16 @@ export function DragDropProvider({
 
   const endDrag = useCallback(() => {
     if (draggedComponentId && dropTarget) {
-      moveComponent(draggedComponentId, dropTarget.parentId, dropTarget.index)
+      // Divider drop targets store the index in the interspersed children+dividers array
+      // (0, 2, 4, ...). insertComponent / moveComponent expect a child index, so convert.
+      // The + button path already does Math.floor(dividerIndex / 2); this matches it.
+      // Same-parent reordering adjustment (subtract 1 when the moved item was before the
+      // target) is handled inside moveComponent so the index here is the pre-removal desired position.
+      const insertIndex =
+        dropTarget.type === "divider" && typeof dropTarget.index === "number"
+          ? Math.floor(dropTarget.index / 2)
+          : dropTarget.index
+      moveComponent(draggedComponentId, dropTarget.parentId, insertIndex)
     }
     setDraggedComponentId(null)
     setDraggedComponentTag(null)
