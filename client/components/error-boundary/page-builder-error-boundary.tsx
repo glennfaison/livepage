@@ -5,6 +5,7 @@ import { Button } from "@/client/components/ui/button"
 import { RefreshCw, AlertTriangle, RotateCcw, Bug, ExternalLink } from "lucide-react"
 import { cn } from "@/client/lib/utils"
 import { logger } from "@/client/lib/logger"
+import { captureException } from "@/client/lib/observability"
 import { classifyError, isDevelopmentMode, type ClassifiedError, type RecoveryAction } from "./error-classification"
 
 interface PageBuilderErrorBoundaryState {
@@ -92,6 +93,7 @@ export class PageBuilderErrorBoundary extends React.Component<
       stack: error.stack,
       errorInfo,
     })
+    captureException(error, { source: "PageBuilderErrorBoundary", componentStack: errorInfo.componentStack })
   }
 
   handleRetry = (): void => {
