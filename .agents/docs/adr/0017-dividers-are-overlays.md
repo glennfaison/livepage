@@ -7,10 +7,12 @@ Issue #466: shown insertion dividers are real flex items interleaved between row
 ## Decision
 
 - **Rows and columns render no divider elements inside the flex container.** The `intersperseAndAppend` divider interleaving is removed from `row.tsx` and `column.tsx`, so the children are the only DOM children (plus existing empty-state content). Edit-mode layout is identical to preview for any `gap` and any `justify-content`.
-- **The active divider is drawn as an overlay portalled to `document.body`** (like `EditorOverlay`, ADR 0016) and placed from the hovered child's own box via `useElementBox`. A 2px bar with a centered "+", anchored to the hovered child's own edge (start or end along the main axis), so wrapped rows have no ambiguity at line breaks and an overlay cannot cause a row to wrap.
-- **`useDividerVisibility` is unchanged** (30% / 70% edge logic and the 250 ms hide delay). Only the rendering moves from interleaved flex items to a portal overlay.
-- **The whole bar is a real `<button>`** with `aria-label="Add component here"` that opens the component selector popover. The "+" is the visual cue. The button's hit area is wider than the 2px bar (8px), which costs no layout because the overlay is out of flow.
-- **Removed:** `resolveMainAxisGap`, `getDividerLayoutStyle`, `getDividerThicknessStyle`, the old interleaved `Divider` component, the free-text `gap` parsing, and the pinned-thickness inline styles, along with their unit tests. The `DIVIDER_THICKNESS_PX` constant (2px) and `useDividerContrastColor` are retained for the overlay bar.
+- **The active divider is drawn as an overlay portalled to `document.body`** (like `EditorOverlay`, ADR 0016) and placed from the hovered child's own box via `useElementBox`. A 4px bar with a centered "+", anchored to the hovered child's own edge (start or end along the main axis), so wrapped rows have no ambiguity at line breaks and an overlay cannot cause a row to wrap.
+- **`useDividerVisibility` keeps the 30% / 70% edge logic.** Dividers are keyed by insertion index (the index a component would get). A mounted overlay is always drawn: the hook mounts it only while its divider is visible, and the overlay does not hide itself.
+- **A divider lingers for `DIVIDER_HIDE_DELAY_MS` (1000 ms) after the pointer stops being near its edge.** A pending hide keeps its original deadline, so moving around inside the child does not push it back.
+- **An overlay holds its divider while the pointer is on it or its popover is open** (`holdDivider`, called from the overlay), so the hide timer cannot unmount the bar or popover from under the cursor. The hold is released on leave, on close, and on unmount.
+- **The whole bar is a real `<button>`** with `aria-label="Add component here"` that opens the component selector popover. The "+" is the visual cue. The button's hit area is wider than the 4px bar (12px: the bar plus 4px each side), which costs no layout because the overlay is out of flow.
+- **Removed:** `resolveMainAxisGap`, `getDividerLayoutStyle`, `getDividerThicknessStyle`, the old interleaved `Divider` component, the free-text `gap` parsing, and the pinned-thickness inline styles, along with their unit tests. The `DIVIDER_THICKNESS_PX` constant (now 4px) and `useDividerContrastColor` are retained for the overlay bar.
 
 ## Consequences
 
@@ -21,4 +23,4 @@ Issue #466: shown insertion dividers are real flex items interleaved between row
 
 ## Visual verification
 
-Hover a child's edge in Edit Mode on any bundled template (including `farm-logistics-landing-page` with `justify-content: space-between` rows and a wrapping row): a 2px divider bar appears at the child's edge, does not move surrounding elements, and clicking anywhere on it opens the component selector.
+Hover a child's edge in Edit Mode on any bundled template (including `farm-logistics-landing-page` with `justify-content: space-between` rows and a wrapping row): a 4px divider bar appears at the child's edge, does not move surrounding elements, and clicking anywhere on it opens the component selector.

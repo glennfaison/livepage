@@ -141,6 +141,7 @@ const EditModeComponent = (props: EditModeProps) => {
 	const { addComponent } = useComponentOperationsContext()
 	const {
 		visibleHorizontalDividers,
+		holdDivider,
 		handleChildMouseMove: onChildMouseMove,
 		handleChildMouseLeave: onChildMouseLeave,
 	} = useDividerVisibility()
@@ -201,7 +202,7 @@ const EditModeComponent = (props: EditModeProps) => {
 		if (typeof child === "string") return
 		const box = childBoxes.get(childIndex)
 		if (!box) return
-		if (visibleHorizontalDividers.has(childIndex * 2)) {
+		if (visibleHorizontalDividers.has(childIndex)) {
 			dividers.push(
 				<DividerOverlay
 					key={`column-divider-start-${childIndex}`}
@@ -209,13 +210,14 @@ const EditModeComponent = (props: EditModeProps) => {
 					edge="start"
 					box={box}
 					onAddComponent={handleAddAtIndex}
+					onHold={holdDivider}
 					parentTag={component.tag}
 					parentId={attributes.id}
 					insertIndex={childIndex}
 				/>
 			)
 		}
-		if (visibleHorizontalDividers.has((childIndex + 1) * 2)) {
+		if (visibleHorizontalDividers.has(childIndex + 1)) {
 			dividers.push(
 				<DividerOverlay
 					key={`column-divider-end-${childIndex}`}
@@ -223,6 +225,7 @@ const EditModeComponent = (props: EditModeProps) => {
 					edge="end"
 					box={box}
 					onAddComponent={handleAddAtIndex}
+					onHold={holdDivider}
 					parentTag={component.tag}
 					parentId={attributes.id}
 					insertIndex={childIndex + 1}
