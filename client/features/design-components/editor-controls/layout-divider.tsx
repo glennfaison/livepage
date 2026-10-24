@@ -2,17 +2,19 @@ import { cn } from "@/client/lib/utils"
 import { CONTRAST_DARK, CONTRAST_LIGHT, getContrastColorForBackground, parseCssColor } from "./shared/contrast-color"
 import { Plus } from "lucide-react"
 import React from "react"
-import { Button } from "@/client/components/ui/button"
+import { createPortal } from "react-dom"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop } from "./drag-drop-context"
-import { getLayoutRect } from "./shared/use-element-box"
+import type { ElementBox } from "./shared/use-element-box"
 
 const MAX_ANCESTOR_DEPTH = 12
 /** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
 export const DIVIDER_THICKNESS_PX = 2
 /** Time the pointer has to reach the divider after leaving a child before it hides. */
 const HIDE_DELAY_MS = 250
+/** Wider invisible hit area around the 2px bar, so it is easy to click. Costs no layout. */
+const HIT_AREA_PX = 8
 
 export const measureBackgroundUnder = (el: HTMLElement | null): string | null => {
   if (typeof window === "undefined" || !el) return null
@@ -23,80 +25,6 @@ export const measureBackgroundUnder = (el: HTMLElement | null): string | null =>
     node = node.parentElement
   }
   return null
-}
-
-/**
- * Inline styles pin the divider's cross-axis thickness. Inline, because a utility class
- * loses to `min-width: auto` (which a flex item resolves to its content size) and to
- * parent-level `kids:` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
- * on the thickness axis keeps it from growing or shrinking in a row, column, or grid.
- */
-export const getDividerThicknessStyle = (orientation: "horizontal" | "vertical"): React.CSSProperties => {
-  const px = `${DIVIDER_THICKNESS_PX}px`
-  return orientation === "vertical"
-    ? { width: px, minWidth: px, maxWidth: px, flex: `0 0 ${px}` }
-    : { height: px, minHeight: px, maxHeight: px, flex: `0 0 ${px}` }
-}
-
-const CSS_WIDE_KEYWORDS = /^(normal|inherit|initial|unset|revert|revert-layer)$/i
-const UNITLESS_NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)$/
-
-/** Splits on whitespace that is not inside parentheses, so `calc(1rem + 2px)` stays one token. */
-const splitTopLevel = (value: string): string[] => {
-  const tokens: string[] = []
-  let depth = 0
-  let current = ""
-  for (const char of value.trim()) {
-    if (char === "(") depth++
-    else if (char === ")") depth = Math.max(0, depth - 1)
-    if (/\s/.test(char) && depth === 0) {
-      if (current) tokens.push(current)
-      current = ""
-      continue
-    }
-    current += char
-  }
-  if (current) tokens.push(current)
-  return tokens
-}
-
-/**
- * The flex gap a divider sits in, along the parent's main axis, as a value that is safe to
- * place inside `calc()`. The Gap setting is free text, so it can be `0`, `normal`, or the
- * two-value `<row-gap> <column-gap>` form; none of those can be added to a length as written.
- * A vertical divider lives in a row (main axis = columns, so `column-gap`, the last value);
- * a horizontal divider lives in a column (`row-gap`, the first value). Anything that browsers
- * would not apply as a gap resolves to `0px`.
- */
-export const resolveMainAxisGap = (gap: string | number | undefined, orientation: "horizontal" | "vertical"): string => {
-  if (gap == null) return "0px"
-  if (typeof gap === "number") return Number.isFinite(gap) && gap > 0 ? `${gap}px` : "0px"
-  const tokens = splitTopLevel(gap)
-  if (tokens.length === 0 || tokens.length > 2) return "0px"
-  const token = orientation === "vertical" ? tokens[tokens.length - 1] : tokens[0]
-  return CSS_WIDE_KEYWORDS.test(token) || UNITLESS_NUMBER.test(token) ? "0px" : token
-}
-
-/**
- * Layout for an insertion divider, so editor chrome does not move the page (issue #431).
- *
- * - Hidden: taken out of flow with `position: absolute`. It is then not a flex item, so it
- *   adds no flex gap and no `justify-content` slot, and edit-mode layout is identical to
- *   preview whatever the gap or justification is.
- * - Shown: in flow, because it has to sit between its siblings, with the thickness from
- *   ADR 0014. Each side gets a negative margin of half of (gap + thickness), so the two flex
- *   gaps around the bar and its own thickness cancel out and the siblings do not move.
- */
-export const getDividerLayoutStyle = (
-  orientation: "horizontal" | "vertical",
-  shown: boolean,
-  gap?: string | number,
-): React.CSSProperties => {
-  if (!shown) return { position: "absolute" }
-  const half = `calc((${resolveMainAxisGap(gap, orientation)} + ${DIVIDER_THICKNESS_PX}px) / -2)`
-  return orientation === "vertical"
-    ? { ...getDividerThicknessStyle(orientation), marginLeft: half, marginRight: half }
-    : { ...getDividerThicknessStyle(orientation), marginTop: half, marginBottom: half }
 }
 
 export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>) => {
@@ -110,43 +38,48 @@ export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>
   return color
 }
 
-export const Divider = ({
+type DividerEdge = "start" | "end"
+
+/**
+ * Insertion divider drawn as an overlay portalled to `document.body`, placed from the hovered
+ * child's own box. It is never a flex item, so it can never shift surrounding elements.
+ *
+ * The whole bar is a clickable `<button>` with an accessible name and a hit area wider than the
+ * 2px bar. Clicking it opens the component selector popover; the "+" is the visual cue.
+ */
+export const DividerOverlay = ({
   orientation,
-  parentTag,
+  edge,
+  box,
   onAddComponent,
-  index,
-  isVisible,
+  parentTag,
   parentId,
-  dividerIndex,
-  gap,
+  insertIndex,
 }: Readonly<{
-  orientation: "horizontal" | "vertical"
-  parentTag: AppNodeTag
+  orientation: "vertical" | "horizontal"
+  edge: DividerEdge
+  box: ElementBox
   onAddComponent: (type: AppNodeTag, index: number) => void
-  index: number
-  isVisible: boolean
+  parentTag: AppNodeTag
   parentId: string
-  dividerIndex: number
-  gap?: string | number
+  insertIndex: number
 }>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   const [hovered, setHovered] = React.useState(false)
   const { state, setDropTarget, endDrag } = useDragDrop()
-  // Stay visible while the pointer is on the bar/+ so it does not fade mid-click.
-  const shown = isVisible || popoverOpen || hovered
+  const shown = popoverOpen || hovered
+  const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId
 
-  const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex
-
-  const barRef = React.useRef<HTMLDivElement>(null)
+  const barRef = React.useRef<HTMLButtonElement>(null)
   const color = useDividerContrastColor(barRef)
   const iconColor = color === CONTRAST_LIGHT ? CONTRAST_DARK : CONTRAST_LIGHT
 
   const handleAddComponent = (type: AppNodeTag) => {
-    onAddComponent(type, index)
+    onAddComponent(type, insertIndex)
     setPopoverOpen(false)
   }
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
     if (state.draggedComponentId) {
@@ -154,67 +87,77 @@ export const Divider = ({
         type: "divider",
         parentId,
         parentTag,
-        index,
-        dividerIndex,
+        index: insertIndex,
       })
     }
   }
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    // Only clear if we're actually leaving the element (not entering a child)
+  const handleDragLeave = (e: React.DragEvent<HTMLButtonElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-      if (state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex) {
+      if (state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId) {
         setDropTarget(null)
       }
     }
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     endDrag()
   }
 
-  return (
-    <div
-      ref={barRef}
-      style={{ backgroundColor: color, ...getDividerLayoutStyle(orientation, shown, gap) }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      className={cn(
-        "flex items-center justify-center transition-opacity duration-150 group cursor-pointer",
-        // Layout-neutral when hidden: out of flow (inline `position: absolute`), zero size, no
-        // pointer events. `relative` is only for the in-flow bar; it would lose to inline anyway.
-        shown ? "relative" : "size-0 pointer-events-none overflow-hidden",
-        // Opacity only — never visibility:hidden — so the hit target stays active
-        // while the pointer moves from a child onto the bar.
-        shown ? "opacity-100" : "opacity-0",
-        orientation === "horizontal"
-          ? shown ? "flex-row w-full" : ""
-          : shown ? "flex-col self-stretch" : "",
-        isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
-      )}
+  const isVertical = orientation === "vertical"
+  const atEnd = edge === "end"
+  const main = isVertical ? box.width : box.height
+  const cross = isVertical ? box.height : box.width
+  const halfHit = HIT_AREA_PX / 2
+  const edgeOffset = atEnd ? main : 0
+
+  const hitStyle: React.CSSProperties = {
+    position: "absolute",
+    zIndex: 30,
+    ...(isVertical
+      ? { left: box.left + edgeOffset - halfHit, top: box.top, width: HIT_AREA_PX, height: cross }
+      : { left: box.left, top: box.top + edgeOffset - halfHit, width: cross, height: HIT_AREA_PX }),
+  }
+
+  const barStyle: React.CSSProperties = {
+    position: "absolute",
+    backgroundColor: color,
+    ...(isVertical
+      ? { left: "50%", top: 0, width: DIVIDER_THICKNESS_PX, height: "100%", transform: "translateX(-50%)" }
+      : { left: 0, top: "50%", width: "100%", height: DIVIDER_THICKNESS_PX, transform: "translateY(-50%)" }),
+  }
+
+  return createPortal(
+    <ComponentSelectorPopover
+      open={popoverOpen}
+      onOpenChange={setPopoverOpen}
+      onSelect={handleAddComponent}
+      parentTag={parentTag}
     >
-      <ComponentSelectorPopover onSelect={handleAddComponent} parentTag={parentTag}>
-        <Button
-          variant="ghost"
-          size="icon"
-          style={{ backgroundColor: color, color: iconColor }}
-          className="absolute left-1/2 top-1/2 z-20 size-7 -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform hover:scale-110 hover:bg-inherit"
-          onClick={(e) => {
-            e.stopPropagation()
-            setPopoverOpen(true)
-          }}
-        >
-          <Plus className="h-3 w-3" />
-        </Button>
-      </ComponentSelectorPopover>
-    </div>
+      <button
+        ref={barRef}
+        type="button"
+        aria-label="Add component here"
+        style={hitStyle}
+        className={cn(
+          "flex items-center justify-center cursor-pointer transition-opacity duration-150 group",
+          shown ? "opacity-100" : "opacity-0",
+          isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
+        )}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div style={barStyle} aria-hidden="true" />
+        <Plus className="absolute left-1/2 top-1/2 z-20 size-6 -translate-x-1/2 -translate-y-1/2" style={{ color: iconColor }} />
+      </button>
+    </ComponentSelectorPopover>,
+    document.body,
   )
 }
-
 
 type DividerAxis = "v" | "h"
 
@@ -315,4 +258,16 @@ export const useDividerVisibility = () => {
     handleChildMouseMove,
     handleChildMouseLeave,
   }
+}
+
+/**
+ * Rectangle of the element that actually has a box. The editor-controls wrapper is
+ * `display: contents`, so its own rectangle is empty; its first element child is the component.
+ */
+function getLayoutRect(element: Element): DOMRect {
+  if (!(element instanceof Element)) return (element as Element).getBoundingClientRect()
+  const target = getComputedStyle(element).display === "contents" && element.firstElementChild
+    ? element.firstElementChild
+    : element
+  return target.getBoundingClientRect()
 }
