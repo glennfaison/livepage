@@ -58,6 +58,7 @@ export const componentMetadata = {
 	htmlTag: "span",
 	label,
 	category: "Typography" as ComponentCategory,
+	description: "A short run of inline text within a flow.",
 	keywords,
 	defaultChildren,
 	attributes,

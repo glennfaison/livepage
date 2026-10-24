@@ -87,6 +87,7 @@ export const componentMetadata = {
 	htmlTag: "section",
 	label,
 	category: "Data" as ComponentCategory,
+	description: "A card showing a single metric value with an optional trend.",
 	keywords,
 	defaultChildren: [],
 	attributes,

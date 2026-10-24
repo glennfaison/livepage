@@ -85,6 +85,7 @@ export const componentMetadata = {
 	htmlTag: "section",
 	label,
 	category: "Data" as ComponentCategory,
+	description: "A table of rows and columns for structured data.",
 	keywords,
 	defaultChildren: [],
 	attributes,

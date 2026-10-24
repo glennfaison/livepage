@@ -63,6 +63,7 @@ export const componentMetadata = {
 	htmlTag: "p",
 	label,
 	category: "Typography" as ComponentCategory,
+	description: "A block of body text.",
 	keywords,
 	defaultChildren,
 	attributes,
