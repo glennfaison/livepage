@@ -16,6 +16,20 @@ const HIDE_DELAY_MS = 250
 /** Wider invisible hit area around the 2px bar, so it is easy to click. Costs no layout. */
 const HIT_AREA_PX = 8
 
+/** Portal root shared by every divider overlay. Portalling into a dedicated element instead of
+ * `document.body` directly keeps React's unmount from throwing `NotFoundError` when something
+ * (e.g. a test teardown) wipes `document.body.innerHTML`: the overlay node stays a child of the
+ * detached container, so `container.removeChild(node)` still succeeds. */
+let portalRoot: HTMLDivElement | null = null
+function getPortalRoot(): HTMLDivElement {
+  if (!portalRoot || !document.body.contains(portalRoot)) {
+    portalRoot?.remove()
+    portalRoot = document.createElement("div")
+    document.body.appendChild(portalRoot)
+  }
+  return portalRoot
+}
+
 export const measureBackgroundUnder = (el: HTMLElement | null): string | null => {
   if (typeof window === "undefined" || !el) return null
   let node: HTMLElement | null = el.parentElement
@@ -155,7 +169,7 @@ export const DividerOverlay = ({
         <Plus className="absolute left-1/2 top-1/2 z-20 size-6 -translate-x-1/2 -translate-y-1/2" style={{ color: iconColor }} />
       </button>
     </ComponentSelectorPopover>,
-    document.body,
+    getPortalRoot(),
   )
 }
 
