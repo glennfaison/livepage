@@ -6,6 +6,7 @@ import { createPortal } from "react-dom"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop } from "./drag-drop-context"
+import { getLayoutElement } from "./shared/use-element-box"
 import type { ElementBox } from "./shared/use-element-box"
 
 /** Marks editor chrome portalled over the page, so sampling the page's colors can look through it. */
@@ -104,11 +105,13 @@ export const DividerOverlay = ({
   const [hovered, setHovered] = React.useState(false)
   const { state, setDropTarget, endDrag } = useDragDrop()
   const isVertical = orientation === "vertical"
-  const held = hovered || popoverOpen
+  // Only the divider being dragged over is the drop target, not every divider in this layout.
+  const isDropTarget =
+    state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.index === insertIndex
+  const held = hovered || popoverOpen || isDropTarget
   // Registers with the parent's visibility store (an external system) while held. The cleanup
   // also runs on unmount, so a hold can never outlive its overlay.
   React.useEffect(() => (held ? onHold(insertIndex) : undefined), [held, onHold, insertIndex])
-  const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId
 
   // Sample 1px inside the hovered child: the bar straddles its edge, and the child is what the
   // user is looking at.
@@ -126,7 +129,7 @@ export const DividerOverlay = ({
   const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
-    if (state.draggedComponentId) {
+    if (state.draggedComponentId && !isDropTarget) {
       setDropTarget({
         type: "divider",
         parentId,
@@ -138,9 +141,7 @@ export const DividerOverlay = ({
 
   const handleDragLeave = (e: React.DragEvent<HTMLButtonElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-      if (state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId) {
-        setDropTarget(null)
-      }
+      if (isDropTarget) setDropTarget(null)
     }
   }
 
@@ -337,14 +338,7 @@ export const useDividerVisibility = (orientation: DividerOrientation) => {
   }
 }
 
-/**
- * Rectangle of the element that actually has a box. The editor-controls wrapper is
- * `display: contents`, so its own rectangle is empty; its first element child is the component.
- */
 function getLayoutRect(element: Element): DOMRect {
   if (!(element instanceof Element)) return (element as Element).getBoundingClientRect()
-  const target = getComputedStyle(element).display === "contents" && element.firstElementChild
-    ? element.firstElementChild
-    : element
-  return target.getBoundingClientRect()
+  return getLayoutElement(element).getBoundingClientRect()
 }

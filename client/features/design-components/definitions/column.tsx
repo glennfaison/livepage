@@ -137,7 +137,7 @@ const EditModeComponent = (props: EditModeProps) => {
 	const layoutStyles = readLayoutStyles(component.attributes)
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
-	const { handleChildMouseMove, handleChildMouseLeave, dividers } = useLayoutDividers({
+	const { handleChildMouseMove, handleChildMouseLeave, handleChildDragOver, handleChildDragLeave, dividers } = useLayoutDividers({
 		orientation: "horizontal",
 		parentTag: component.tag,
 		parentId: attributes.id,
@@ -167,6 +167,8 @@ const EditModeComponent = (props: EditModeProps) => {
 				childClassName={slotClassName}
 				onMouseMove={(e) => handleChildMouseMove(e, childIndex)}
 				onMouseLeave={() => handleChildMouseLeave(childIndex)}
+				onDragOver={(e) => handleChildDragOver(e, childIndex)}
+				onDragLeave={() => handleChildDragLeave(childIndex)}
 			/>
 		)
 	})

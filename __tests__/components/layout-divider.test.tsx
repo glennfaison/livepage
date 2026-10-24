@@ -6,7 +6,7 @@ import {
   DividerOverlay,
   measureBackgroundAt,
 } from "@/client/features/design-components/editor-controls/layout-divider"
-import { DragDropProvider } from "@/client/features/design-components/editor-controls"
+import { DragDropProvider, useDragDrop } from "@/client/features/design-components/editor-controls"
 import type { ElementBox } from "@/client/features/design-components/editor-controls/shared/use-element-box"
 
 jest.mock("@/client/features/design-components/editor-controls/component-selector-popover", () => ({
@@ -272,5 +272,84 @@ describe("divider color follows the page under the bar", () => {
     stubStack([section("rgb(255, 255, 255)")])
     renderOverlay()
     expect(innerBar().style.backgroundColor).toBe("rgb(24, 24, 27)")
+  })
+})
+
+describe("DividerOverlay as a drop target", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const StartDrag = () => {
+    const { startDrag } = useDragDrop()
+    return <button type="button" data-testid="start-drag" onClick={() => startDrag("dragged", "row")} />
+  }
+
+  const renderTwoDividers = () => {
+    const release = jest.fn()
+    const onHold = jest.fn(() => release)
+    const base = { orientation: "vertical", edge: "start", box, onAddComponent: jest.fn(), onHold, parentTag: "row", parentId: "row-1" } as const
+    const utils = render(
+      <DragDropProvider moveComponent={() => {}}>
+        <StartDrag />
+        <DividerOverlay {...base} insertIndex={1} />
+        <DividerOverlay {...base} insertIndex={2} />
+      </DragDropProvider>,
+    )
+    fireEvent.click(document.body.querySelector("[data-testid='start-drag']") as HTMLElement)
+    const [first, second] = Array.from(document.body.querySelectorAll("button[aria-label='Add component here']")) as HTMLElement[]
+    return { ...utils, first, second, onHold, release }
+  }
+
+  const over = (el: HTMLElement) => fireEvent.dragOver(el, { dataTransfer: { dropEffect: "" } })
+
+  it("highlights only the divider being dragged over, not every divider in the layout", () => {
+    const { first, second } = renderTwoDividers()
+
+    over(second)
+
+    expect(second.className).toContain("ring-primary")
+    expect(first.className).not.toContain("ring-primary")
+  })
+
+  it("holds its divider while it is the drop target, with the pointer resting on it", () => {
+    const { second, onHold } = renderTwoDividers()
+    expect(onHold).not.toHaveBeenCalled()
+
+    over(second)
+
+    expect(onHold).toHaveBeenCalledWith(2)
+  })
+
+  it("stops being the drop target, and releases its hold, when the drag leaves", () => {
+    const { first, second, release } = renderTwoDividers()
+    over(second)
+
+    fireEvent.dragLeave(second, { relatedTarget: document.body })
+
+    expect(second.className).not.toContain("ring-primary")
+    expect(release).toHaveBeenCalledTimes(1)
+    expect(first.className).not.toContain("ring-primary")
+  })
+
+  it("does not become the drop target when nothing is being dragged", () => {
+    const release = jest.fn()
+    render(
+      <DragDropProvider moveComponent={() => {}}>
+        <DividerOverlay
+          orientation="vertical"
+          edge="start"
+          box={box}
+          onAddComponent={jest.fn()}
+          onHold={jest.fn(() => release)}
+          parentTag="row"
+          parentId="row-1"
+          insertIndex={1}
+        />
+      </DragDropProvider>,
+    )
+    const button = dividerButton()
+    over(button)
+    expect(button.className).not.toContain("ring-primary")
   })
 })
