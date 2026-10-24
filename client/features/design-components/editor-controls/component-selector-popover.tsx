@@ -12,14 +12,28 @@ export const ComponentSelectorPopover = ({
 	children,
 	parentTag,
 	excludeTag,
+	open,
+	onOpenChange,
 }: Readonly<{
 	onSelect: (type: AppNodeTag) => void
 	children: React.ReactNode
 	parentTag?: AppNodeTag
 	excludeTag?: AppNodeTag
+	open?: boolean
+	onOpenChange?: (open: boolean) => void
 }>) => {
 	const [searchTerm, setSearchTerm] = React.useState("")
-  const [open, setOpen] = React.useState(false)
+  const [internalOpen, setInternalOpen] = React.useState(false)
+
+	const isControlled = open !== undefined
+	const popoverOpen = isControlled ? open : internalOpen
+
+	const handleOpenChange = (next: boolean) => {
+		if (!isControlled) {
+			setInternalOpen(next)
+		}
+		onOpenChange?.(next)
+	}
 
 	const filteredComponents = React.useMemo(() => {
 		const components = getComponentsAllowedIn(parentTag).filter(({ tag }) => tag !== excludeTag)
@@ -40,12 +54,15 @@ export const ComponentSelectorPopover = ({
 		}
 	}
 
-  const closePopover = () => {
-    setOpen(false)
-  }
+	const closePopover = () => {
+		if (!isControlled) {
+			setInternalOpen(false)
+		}
+		onOpenChange?.(false)
+	}
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
+	return (
+		<Popover open={popoverOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-auto p-0">
 				<div className="bg-background border rounded-lg shadow-lg -m-1">
