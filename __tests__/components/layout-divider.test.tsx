@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react"
 import React from "react"
-import { DIVIDER_THICKNESS_PX, DividerOverlay } from "@/client/features/design-components/editor-controls/layout-divider"
+import { DIVIDER_BADGE_PX, DIVIDER_THICKNESS_PX, DividerOverlay } from "@/client/features/design-components/editor-controls/layout-divider"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 import type { ElementBox } from "@/client/features/design-components/editor-controls/shared/use-element-box"
 
@@ -110,6 +110,44 @@ describe("DividerOverlay position math", () => {
   it("gives the bar an accessible name", () => {
     renderOverlay()
     expect(dividerButton().getAttribute("aria-label")).toBe("Add component here")
+  })
+})
+
+describe("DividerOverlay add badge", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  const badge = () => document.body.querySelector("[data-testid='divider-add-badge']") as HTMLElement
+
+  it("draws the + on a solid round badge inside the clickable button", () => {
+    renderOverlay()
+    expect(badge().parentElement).toBe(dividerButton())
+    expect(badge().className).toContain("rounded-full")
+    expect(badge().style.width).toBe(`${DIVIDER_BADGE_PX}px`)
+    expect(badge().style.height).toBe(`${DIVIDER_BADGE_PX}px`)
+    expect(badge().querySelector("svg")).not.toBeNull()
+  })
+
+  it("fills the badge with the bar color and draws the + in the opposite color", () => {
+    renderOverlay()
+    const barColor = innerBar().style.backgroundColor
+    expect(barColor).not.toBe("")
+    expect(badge().style.backgroundColor).toBe(barColor)
+    expect(badge().style.color).not.toBe("")
+    expect(badge().style.color).not.toBe(barColor)
+  })
+
+  it("keeps the badge out of the accessibility tree so the button's own name is announced", () => {
+    renderOverlay()
+    expect(badge().getAttribute("aria-hidden")).toBe("true")
+  })
+
+  it("lets a click on the badge reach the button", () => {
+    const onHold = jest.fn(() => jest.fn())
+    renderOverlay({ onHold })
+    fireEvent.mouseEnter(badge())
+    expect(onHold).toHaveBeenCalled()
   })
 })
 

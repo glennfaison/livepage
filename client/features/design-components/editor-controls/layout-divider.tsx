@@ -15,6 +15,8 @@ export const DIVIDER_THICKNESS_PX = 4
 export const DIVIDER_HIDE_DELAY_MS = 1000
 /** Wider invisible hit area around the bar, so it is easy to click. Costs no layout. */
 const HIT_AREA_PX = DIVIDER_THICKNESS_PX + 8
+/** Diameter of the round "+" badge centered on the bar. */
+export const DIVIDER_BADGE_PX = 24
 
 /** Portal root shared by every divider overlay. Portalling into a dedicated element instead of
  * `document.body` directly keeps React's unmount from throwing `NotFoundError` when something
@@ -176,7 +178,22 @@ export const DividerOverlay = ({
         onDrop={handleDrop}
       >
         <div style={barStyle} aria-hidden="true" />
-        <Plus className="absolute left-1/2 top-1/2 z-20 size-6 -translate-x-1/2 -translate-y-1/2" style={{ color: iconColor }} />
+        {/* Solid badge in the bar color, so the "+" stays legible on any background. The thin ring
+            in the icon color keeps the badge itself visible where the bar color does not contrast. */}
+        <span
+          data-testid="divider-add-badge"
+          aria-hidden="true"
+          className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-sm"
+          style={{
+            width: DIVIDER_BADGE_PX,
+            height: DIVIDER_BADGE_PX,
+            backgroundColor: color,
+            color: iconColor,
+            boxShadow: `0 0 0 2px ${iconColor}`,
+          }}
+        >
+          <Plus className="size-4" strokeWidth={3} />
+        </span>
       </button>
     </ComponentSelectorPopover>,
     getPortalRoot(),
