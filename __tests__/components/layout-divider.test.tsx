@@ -171,12 +171,12 @@ describe("DividerOverlay visibility and hold", () => {
     expect(onHold).not.toHaveBeenCalled()
   })
 
-  it("holds its divider (by axis and insertion index) while the pointer is on it, and releases on leave", () => {
+  it("holds its divider (by insertion index) while the pointer is on it, and releases on leave", () => {
     const { onHold, release } = renderOverlay({ orientation: "horizontal", edge: "end", parentTag: "column", insertIndex: 3 })
 
     fireEvent.mouseEnter(dividerButton())
     expect(onHold).toHaveBeenCalledTimes(1)
-    expect(onHold).toHaveBeenCalledWith("h", 3)
+    expect(onHold).toHaveBeenCalledWith(3)
     expect(release).not.toHaveBeenCalled()
 
     fireEvent.mouseLeave(dividerButton())
@@ -187,7 +187,7 @@ describe("DividerOverlay visibility and hold", () => {
     const { onHold, release } = renderOverlay({ insertIndex: 2 })
 
     fireEvent.click(document.body.querySelector("[data-testid='toggle-popover']") as HTMLElement)
-    expect(onHold).toHaveBeenCalledWith("v", 2)
+    expect(onHold).toHaveBeenCalledWith(2)
     expect(release).not.toHaveBeenCalled()
   })
 

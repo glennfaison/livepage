@@ -67,7 +67,8 @@ export const useDividerContrastColor = (documentX: number, documentY: number) =>
   return color
 }
 
-type DividerEdge = "start" | "end"
+export type DividerOrientation = "vertical" | "horizontal"
+export type DividerEdge = "start" | "end"
 
 /**
  * Insertion divider drawn as an overlay portalled to `document.body`, placed from the hovered
@@ -90,7 +91,7 @@ export const DividerOverlay = ({
   parentId,
   insertIndex,
 }: Readonly<{
-  orientation: "vertical" | "horizontal"
+  orientation: DividerOrientation
   edge: DividerEdge
   box: ElementBox
   onAddComponent: (type: AppNodeTag, index: number) => void
@@ -104,10 +105,9 @@ export const DividerOverlay = ({
   const { state, setDropTarget, endDrag } = useDragDrop()
   const isVertical = orientation === "vertical"
   const held = hovered || popoverOpen
-  const axis: DividerAxis = isVertical ? "v" : "h"
   // Registers with the parent's visibility store (an external system) while held. The cleanup
   // also runs on unmount, so a hold can never outlive its overlay.
-  React.useEffect(() => (held ? onHold(axis, insertIndex) : undefined), [held, onHold, axis, insertIndex])
+  React.useEffect(() => (held ? onHold(insertIndex) : undefined), [held, onHold, insertIndex])
   const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId
 
   // Sample 1px inside the hovered child: the bar straddles its edge, and the child is what the
@@ -215,84 +215,89 @@ export const DividerOverlay = ({
   )
 }
 
-type DividerAxis = "v" | "h"
+/** The child edge the pointer was last near when a divider was shown; where its overlay is drawn. */
+export type DividerAnchor = Readonly<{ childIndex: number; edge: DividerEdge }>
 
 /** Keeps a divider visible until the returned release function is called. */
-export type DividerHold = (axis: DividerAxis, insertIndex: number) => () => void
-
-const dividerKey = (axis: DividerAxis, insertIndex: number) => `${axis}${insertIndex}`
+export type DividerHold = (insertIndex: number) => () => void
 
 /**
- * Divider visibility, keyed per axis and insertion index (the index a component would get if
- * inserted there). Show and hide each go through a generation so a hide that already queued a
- * state update cannot clobber a later show (the race that left insertion dividers stuck visible
- * or stuck invisible).
+ * Divider visibility along one axis, keyed by insertion index (the index a component would get if
+ * inserted there). Two neighbouring children share an insertion index, so each visible divider
+ * remembers the one edge the pointer was last near: exactly one overlay is drawn per insertion
+ * point, where the pointer is.
+ *
+ * Show and hide each go through a generation so a hide that already queued a state update cannot
+ * clobber a later show (the race that left insertion dividers stuck visible or stuck invisible).
  *
  * Hide is delayed so the pointer can travel from a child edge onto the divider bar and its +
  * button without the control disappearing under the cursor. A pending hide keeps its original
  * deadline: moving around inside the child does not push it back, so the divider lingers for a
- * predictable time. A divider that is held (see `holdDivider`) is not hidden at all.
+ * predictable time. A held divider (see `holdDivider`) is not hidden and keeps its anchor, so it
+ * cannot jump away from under an open popover.
  */
-export const useDividerVisibility = () => {
-  const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(() => new Set())
-  const [visibleHorizontalDividers, setVisibleHorizontalDividers] = React.useState<Set<number>>(() => new Set())
-  const generationRef = React.useRef<Record<string, number>>({})
-  const timeoutRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({})
-  const holdCountRef = React.useRef<Record<string, number>>({})
+export const useDividerVisibility = (orientation: DividerOrientation) => {
+  const [visibleDividers, setVisibleDividers] = React.useState<ReadonlyMap<number, DividerAnchor>>(() => new Map())
+  const generationRef = React.useRef<Record<number, number>>({})
+  const timeoutRef = React.useRef<Record<number, ReturnType<typeof setTimeout>>>({})
+  const holdCountRef = React.useRef<Record<number, number>>({})
 
-  const clearTimer = React.useCallback((key: string) => {
-    const pending = timeoutRef.current[key]
+  const clearTimer = React.useCallback((index: number) => {
+    const pending = timeoutRef.current[index]
     if (pending) {
       clearTimeout(pending)
-      delete timeoutRef.current[key]
+      delete timeoutRef.current[index]
     }
   }, [])
 
-  const bump = React.useCallback((key: string) => {
-    clearTimer(key)
-    const next = (generationRef.current[key] ?? 0) + 1
-    generationRef.current[key] = next
+  const bump = React.useCallback((index: number) => {
+    clearTimer(index)
+    const next = (generationRef.current[index] ?? 0) + 1
+    generationRef.current[index] = next
     return next
   }, [clearTimer])
 
-  const setVisible = React.useCallback((axis: DividerAxis, index: number, visible: boolean, generation: number) => {
-    const key = dividerKey(axis, index)
-    const setter = axis === "v" ? setVisibleVerticalDividers : setVisibleHorizontalDividers
-    setter((prev) => {
-      if (generationRef.current[key] !== generation) return prev
-      if (prev.has(index) === visible) return prev
-      const next = new Set(prev)
-      if (visible) next.add(index)
-      else next.delete(index)
-      return next
+  const setVisible = React.useCallback((index: number, visible: boolean, generation: number, anchor?: DividerAnchor) => {
+    setVisibleDividers((prev) => {
+      if (generationRef.current[index] !== generation) return prev
+      const current = prev.get(index)
+      if (!visible) {
+        if (!current) return prev
+        const next = new Map(prev)
+        next.delete(index)
+        return next
+      }
+      const resolved = anchor ?? current
+      if (!resolved) return prev
+      if (current?.childIndex === resolved.childIndex && current.edge === resolved.edge) return prev
+      return new Map(prev).set(index, resolved)
     })
   }, [])
 
-  const showDivider = React.useCallback((axis: DividerAxis, index: number) => {
-    const generation = bump(dividerKey(axis, index))
-    setVisible(axis, index, true, generation)
+  const showDivider = React.useCallback((index: number, anchor?: DividerAnchor) => {
+    const generation = bump(index)
+    // A held divider stays where its popover is anchored.
+    setVisible(index, true, generation, holdCountRef.current[index] ? undefined : anchor)
   }, [bump, setVisible])
 
-  const hideDividerDelayed = React.useCallback((axis: DividerAxis, index: number) => {
-    const key = dividerKey(axis, index)
-    if (holdCountRef.current[key] || timeoutRef.current[key]) return
-    const generation = (generationRef.current[key] ?? 0) + 1
-    generationRef.current[key] = generation
-    timeoutRef.current[key] = setTimeout(() => {
-      delete timeoutRef.current[key]
-      setVisible(axis, index, false, generation)
+  const hideDividerDelayed = React.useCallback((index: number) => {
+    if (holdCountRef.current[index] || timeoutRef.current[index]) return
+    const generation = (generationRef.current[index] ?? 0) + 1
+    generationRef.current[index] = generation
+    timeoutRef.current[index] = setTimeout(() => {
+      delete timeoutRef.current[index]
+      setVisible(index, false, generation)
     }, DIVIDER_HIDE_DELAY_MS)
   }, [setVisible])
 
-  const holdDivider = React.useCallback<DividerHold>((axis, index) => {
-    const key = dividerKey(axis, index)
-    holdCountRef.current[key] = (holdCountRef.current[key] ?? 0) + 1
-    showDivider(axis, index)
+  const holdDivider = React.useCallback<DividerHold>((index) => {
+    holdCountRef.current[index] = (holdCountRef.current[index] ?? 0) + 1
+    showDivider(index)
     return () => {
-      const remaining = (holdCountRef.current[key] ?? 1) - 1
-      if (remaining > 0) holdCountRef.current[key] = remaining
-      else delete holdCountRef.current[key]
-      hideDividerDelayed(axis, index)
+      const remaining = (holdCountRef.current[index] ?? 1) - 1
+      if (remaining > 0) holdCountRef.current[index] = remaining
+      else delete holdCountRef.current[index]
+      hideDividerDelayed(index)
     }
   }, [showDivider, hideDividerDelayed])
 
@@ -303,33 +308,29 @@ export const useDividerVisibility = () => {
     }
   }, [])
 
-  const syncEdge = (axis: DividerAxis, index: number, near: boolean) => {
-    if (near) showDivider(axis, index)
-    else hideDividerDelayed(axis, index)
+  const syncEdge = (index: number, near: boolean, anchor: DividerAnchor) => {
+    if (near) showDivider(index, anchor)
+    else hideDividerDelayed(index)
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
     // The editor-controls wrapper is `display: contents`, so measure the component inside it.
     const rect = getLayoutRect(e.currentTarget)
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const isVertical = orientation === "vertical"
+    const along = isVertical ? e.clientX - rect.left : e.clientY - rect.top
+    const length = isVertical ? rect.width : rect.height
 
-    syncEdge("v", childIndex, x < rect.width * 0.3)
-    syncEdge("v", childIndex + 1, x > rect.width * 0.7)
-    syncEdge("h", childIndex, y < rect.height * 0.3)
-    syncEdge("h", childIndex + 1, y > rect.height * 0.7)
+    syncEdge(childIndex, along < length * 0.3, { childIndex, edge: "start" })
+    syncEdge(childIndex + 1, along > length * 0.7, { childIndex, edge: "end" })
   }
 
   const handleChildMouseLeave = (childIndex: number) => {
-    hideDividerDelayed("v", childIndex)
-    hideDividerDelayed("v", childIndex + 1)
-    hideDividerDelayed("h", childIndex)
-    hideDividerDelayed("h", childIndex + 1)
+    hideDividerDelayed(childIndex)
+    hideDividerDelayed(childIndex + 1)
   }
 
   return {
-    visibleVerticalDividers,
-    visibleHorizontalDividers,
+    visibleDividers,
     handleChildMouseMove,
     handleChildMouseLeave,
     holdDivider,

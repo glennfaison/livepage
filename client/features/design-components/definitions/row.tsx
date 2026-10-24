@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback } from "react"
 import { AlignHorizontalSpaceBetween, Plus } from "lucide-react"
 import type { SettingsField, Metadata, EditModeProps, Props, ViewModeProps, ComponentCategory } from "@/client/features/types"
 import { ComponentSelectorPopover } from "../editor-controls/component-selector-popover"
-import { DividerOverlay, useDividerVisibility } from "../editor-controls/layout-divider"
+import { useLayoutDividers } from "../editor-controls/use-layout-dividers"
 import { useComponentOperationsContext } from "../editor-controls/component-operations-context"
 import { withEditorControls } from "../editor-controls/decorators/with-editor-controls"
 import { Button } from "@/client/components/ui/button"
@@ -10,8 +10,6 @@ import { cn } from "@/client/lib/utils"
 import { createAttributeMap, createCustomClassesAttribute, createIdAttribute, createLayoutAttributes, createSelectAttribute, createSpacingAttributes, readBoxSpacing, readCustomClasses, readLayoutStyles, getAccessibilityAttributes, getComponentInfo } from "@/client/features/design-components/primitives"
 import { withDataSource } from "@/client/features/data-sources"
 import { useDragDrop } from "../editor-controls/drag-drop-context"
-import type { ElementBox } from "../editor-controls/shared/use-element-box"
-import { readElementBox } from "../editor-controls/shared/use-element-box"
 
 const tag = "row" as const
 
@@ -178,12 +176,11 @@ const EditModeComponent = (props: EditModeProps) => {
 	const layoutStyles = readLayoutStyles(component.attributes)
 	const hasChildren = !!component.children.length
 	const { addComponent } = useComponentOperationsContext()
-	const {
-		visibleVerticalDividers,
-		holdDivider,
-		handleChildMouseMove: onChildMouseMove,
-		handleChildMouseLeave: onChildMouseLeave,
-	} = useDividerVisibility()
+	const { handleChildMouseMove, handleChildMouseLeave, dividers } = useLayoutDividers({
+		orientation: "vertical",
+		parentTag: component.tag,
+		parentId: attributes.id,
+	})
 	const metadata = getComponentInfo(component.tag)
 	const accessibilityAttrs = getAccessibilityAttributes(component, metadata)
 
@@ -192,30 +189,7 @@ const EditModeComponent = (props: EditModeProps) => {
 		[addComponent, attributes.id]
 	)
 
-	const handleAddAtIndex = useCallback((tag: string, index: number) => {
-		addComponent({ tag, parentId: attributes.id, index })
-	}, [addComponent, attributes.id])
 
-	const [childBoxes, setChildBoxes] = useState<Map<number, ElementBox>>(new Map())
-
-	const handleChildMouseMove = useCallback(
-		(e: React.MouseEvent, childIndex: number) => {
-			const box = readElementBox(e.currentTarget as Element)
-			if (box) {
-				setChildBoxes((prev) => {
-					const next = new Map(prev)
-					next.set(childIndex, box)
-					return next
-				})
-			}
-			onChildMouseMove(e, childIndex)
-		},
-		[onChildMouseMove]
-	)
-
-	const handleChildMouseLeave = useCallback((childIndex: number) => {
-		onChildMouseLeave(childIndex)
-	}, [onChildMouseLeave])
 	const { containerClassName, slotClassName } = readRowLayout(component.attributes)
 
 	const children = component.children.map((child, childIndex) => {
@@ -233,43 +207,6 @@ const EditModeComponent = (props: EditModeProps) => {
 				onMouseLeave={() => handleChildMouseLeave(childIndex)}
 			/>
 		)
-	})
-
-	const dividers: React.ReactNode[] = []
-	component.children.forEach((child, childIndex) => {
-		if (typeof child === "string") return
-		const box = childBoxes.get(childIndex)
-		if (!box) return
-		if (visibleVerticalDividers.has(childIndex)) {
-			dividers.push(
-				<DividerOverlay
-					key={`row-divider-start-${childIndex}`}
-					orientation="vertical"
-					edge="start"
-					box={box}
-					onAddComponent={handleAddAtIndex}
-					onHold={holdDivider}
-					parentTag={component.tag}
-					parentId={attributes.id}
-					insertIndex={childIndex}
-				/>
-			)
-		}
-		if (visibleVerticalDividers.has(childIndex + 1)) {
-			dividers.push(
-				<DividerOverlay
-					key={`row-divider-end-${childIndex}`}
-					orientation="vertical"
-					edge="end"
-					box={box}
-					onAddComponent={handleAddAtIndex}
-					onHold={holdDivider}
-					parentTag={component.tag}
-					parentId={attributes.id}
-					insertIndex={childIndex + 1}
-				/>
-			)
-		}
 	})
 
 	return (
