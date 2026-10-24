@@ -3,6 +3,7 @@
 import { Button } from "@/client/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/client/components/ui/dropdown-menu"
 import { selectCurrentPage } from "@/client/features/app-state"
+import { recoverLoadLatest, recoverOverwrite } from "@/client/features/app-state"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
 import { deepClone } from "@/client/lib/deep-clone"
@@ -26,13 +27,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
-import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { serializeAppStateAsHtml, serializeAppStateAsJson, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
 const templateDisplayCatalog = describeTemplateDisplayCatalog()
 
+function StaleLockBanner({
+  onLoadLatest,
+  onExport,
+  onOverwrite,
+}: Readonly<{
+  onLoadLatest: () => void
+  onExport: () => void
+  onOverwrite: () => void
+}>): React.JSX.Element {
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      className="fixed inset-x-0 top-0 z-50 p-4 sm:p-6 sm:rounded-b-lg"
+    >
+      <div className="max-w-2xl mx-auto bg-amber-50 border border-amber-200 rounded-lg p-4 shadow-lg">
+        <h2 className="text-sm font-semibold text-amber-900">Edited in another tab</h2>
+        <p className="mt-1 text-sm text-amber-800">
+          This tab is out of date and has been locked to protect your edits. Your changes are still
+          in memory and have not been saved.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3 sm:gap-4">
+          <Button variant="default" onClick={onLoadLatest} className="flex-1 sm:auto">
+            Load latest here
+          </Button>
+          <Button variant="outline" onClick={onExport} className="flex-1 sm:auto">
+            Export my version
+          </Button>
+          <Button variant="destructive" onClick={onOverwrite} className="flex-1 sm:auto">
+            Overwrite with this tab
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
+  const isStale = state.stale
   const pageBuilderMode = state.pageBuilderMode
   const {
     savePageAsJsonMutation,
@@ -270,6 +310,28 @@ export default function BuilderPage() {
   return (
     <ComponentOperationsContext.Provider value={componentOperations}>
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
+        {isStale && (
+          <StaleLockBanner
+            onLoadLatest={() => {
+              recoverLoadLatest()
+            }}
+            onExport={() => {
+              const data = serializeAppStateAsJson(state.componentTree)
+              const blob = new Blob([data], { type: "application/json" })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement("a")
+              a.href = url
+              a.download = `${(selectCurrentPage(state)?.attributes.title ?? "page").toLowerCase().replace(/\s+/g, "-") || "page"}.json`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            }}
+            onOverwrite={() => {
+              recoverOverwrite()
+            }}
+          />
+        )}
         <header className="border-b px-2">
           <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-2 py-3 sm:py-4">
             <div className="flex min-w-0 items-center gap-2">
@@ -413,7 +475,7 @@ export default function BuilderPage() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden flex flex-col">
+        <main className={cn("flex-1 overflow-hidden flex flex-col", isStale ? "inert opacity-50 pointer-events-none" : "")}>
           <div className="border-b bg-background">
             <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div className="flex min-w-0 flex-1 basis-full items-center gap-3 sm:basis-0">
