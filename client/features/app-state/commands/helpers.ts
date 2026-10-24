@@ -329,20 +329,30 @@ export function moveComponent({
   components: ReadonlyArray<AppNode | string>
   componentId: string
   newParentId: string
+  /** Insertion index among `newParentId`'s children as they are before the move (what a divider stands for). */
   index?: number
 }>): AppNode[] {
-  // First, remove the component from its current location
-  const withoutComponent = removeComponent({ components, componentId })
-
-  // Then insert it at the new location
-  // We need to find the component that was removed to re-insert it
   const componentToMove = findComponentById(components, componentId)
   if (!componentToMove) return components as unknown as AppNode[]
+
+  const withoutComponent = removeComponent({ components, componentId })
+
+  // Moving a component into itself or one of its descendants, or into a parent that does not
+  // exist, would drop it from the tree along with its subtree. Leave the tree alone instead.
+  if (!findComponentById(withoutComponent, newParentId)) return components as unknown as AppNode[]
+
+  // Removing the component shifts every later sibling down by one, so an insertion index that
+  // was counted before the move and lies after the component must shift with them.
+  const oldParent = findComponentParent({ components, componentId })
+  const oldIndex = oldParent?.attributes.id === newParentId
+    ? oldParent.children.findIndex((child) => typeof child !== "string" && child.attributes.id === componentId)
+    : -1
+  const insertionIndex = typeof index === "number" && oldIndex !== -1 && oldIndex < index ? index - 1 : index
 
   return insertComponent({
     components: withoutComponent,
     newComponent: componentToMove,
     parentId: newParentId,
-    index,
+    index: insertionIndex,
   })
 }
