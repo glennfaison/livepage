@@ -1,6 +1,11 @@
 import { fireEvent, render } from "@testing-library/react"
 import React from "react"
-import { DIVIDER_BADGE_PX, DIVIDER_THICKNESS_PX, DividerOverlay } from "@/client/features/design-components/editor-controls/layout-divider"
+import {
+  DIVIDER_BADGE_PX,
+  DIVIDER_THICKNESS_PX,
+  DividerOverlay,
+  measureBackgroundAt,
+} from "@/client/features/design-components/editor-controls/layout-divider"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 import type { ElementBox } from "@/client/features/design-components/editor-controls/shared/use-element-box"
 
@@ -194,5 +199,78 @@ describe("DividerOverlay visibility and hold", () => {
 
     unmount()
     expect(release).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("divider color follows the page under the bar", () => {
+  const original = (document as { elementsFromPoint?: unknown }).elementsFromPoint
+
+  const stubStack = (stack: Element[]) => {
+    ;(document as unknown as { elementsFromPoint: (x: number, y: number) => Element[] }).elementsFromPoint = jest.fn(() => stack)
+  }
+
+  const section = (background: string, parent: HTMLElement = document.body) => {
+    const el = document.createElement("div")
+    el.style.backgroundColor = background
+    parent.appendChild(el)
+    return el
+  }
+
+  afterEach(() => {
+    ;(document as { elementsFromPoint?: unknown }).elementsFromPoint = original
+    document.body.innerHTML = ""
+  })
+
+  it("returns the background of the element under the point", () => {
+    stubStack([section("rgb(27, 27, 24)")])
+    expect(measureBackgroundAt(10, 10)).toBe("rgb(27, 27, 24)")
+  })
+
+  it("walks up from a transparent element to the first ancestor that paints a background", () => {
+    const dark = section("rgb(10, 20, 30)")
+    const transparentChild = section("transparent", dark)
+    stubStack([transparentChild])
+    expect(measureBackgroundAt(10, 10)).toBe("rgb(10, 20, 30)")
+  })
+
+  it("looks through editor chrome drawn on top of the page", () => {
+    const page = section("rgb(1, 2, 3)")
+    const chrome = section("rgb(250, 250, 250)")
+    chrome.setAttribute("data-editor-chrome", "true")
+    const chromeChild = section("rgb(250, 250, 250)", chrome)
+    stubStack([chromeChild, chrome, page])
+    expect(measureBackgroundAt(10, 10)).toBe("rgb(1, 2, 3)")
+  })
+
+  it("returns null when elementsFromPoint is unavailable", () => {
+    ;(document as { elementsFromPoint?: unknown }).elementsFromPoint = undefined
+    expect(measureBackgroundAt(10, 10)).toBeNull()
+  })
+
+  it("samples the page 1px inside the hovered child's start edge", () => {
+    stubStack([section("rgb(255, 255, 255)")])
+    renderOverlay({ orientation: "vertical", edge: "start" })
+    expect(document.elementsFromPoint).toHaveBeenCalledWith(200 + 1, 100 + 60 / 2)
+  })
+
+  it("samples the page 1px inside the hovered child's end edge", () => {
+    stubStack([section("rgb(255, 255, 255)")])
+    renderOverlay({ orientation: "horizontal", edge: "end", parentTag: "column" })
+    expect(document.elementsFromPoint).toHaveBeenCalledWith(200 + 120 / 2, 100 + 60 - 1)
+  })
+
+  it("draws a light bar and a light badge over a dark section", () => {
+    stubStack([section("rgb(27, 27, 24)")])
+    renderOverlay()
+    expect(innerBar().style.backgroundColor).toBe("rgb(250, 250, 250)")
+    expect((document.body.querySelector("[data-testid='divider-add-badge']") as HTMLElement).style.backgroundColor).toBe(
+      "rgb(250, 250, 250)",
+    )
+  })
+
+  it("draws a dark bar over a light section", () => {
+    stubStack([section("rgb(255, 255, 255)")])
+    renderOverlay()
+    expect(innerBar().style.backgroundColor).toBe("rgb(24, 24, 27)")
   })
 })

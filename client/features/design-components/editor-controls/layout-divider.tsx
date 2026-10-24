@@ -8,7 +8,8 @@ import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop } from "./drag-drop-context"
 import type { ElementBox } from "./shared/use-element-box"
 
-const MAX_ANCESTOR_DEPTH = 12
+/** Marks editor chrome portalled over the page, so sampling the page's colors can look through it. */
+export const EDITOR_CHROME_ATTRIBUTE = "data-editor-chrome"
 /** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
 export const DIVIDER_THICKNESS_PX = 4
 /** How long a divider lingers once the pointer is no longer near its edge. */
@@ -27,30 +28,42 @@ function getPortalRoot(): HTMLDivElement {
   if (!portalRoot || !document.body.contains(portalRoot)) {
     portalRoot?.remove()
     portalRoot = document.createElement("div")
+    portalRoot.setAttribute(EDITOR_CHROME_ATTRIBUTE, "true")
     document.body.appendChild(portalRoot)
   }
   return portalRoot
 }
 
-export const measureBackgroundUnder = (el: HTMLElement | null): string | null => {
-  if (typeof window === "undefined" || !el) return null
-  let node: HTMLElement | null = el.parentElement
-  for (let depth = 0; node && depth < MAX_ANCESTOR_DEPTH; depth++) {
+/**
+ * The first opaque background color at a viewport point: the topmost page element there (editor
+ * chrome is skipped) or its nearest ancestor that paints one. Returns null when nothing does, or
+ * where `elementsFromPoint` is unavailable.
+ */
+export const measureBackgroundAt = (x: number, y: number): string | null => {
+  if (typeof document === "undefined" || typeof document.elementsFromPoint !== "function") return null
+  const clampedX = Math.min(Math.max(x, 0), window.innerWidth - 1)
+  const clampedY = Math.min(Math.max(y, 0), window.innerHeight - 1)
+  const target = document.elementsFromPoint(clampedX, clampedY).find((el) => !el.closest(`[${EDITOR_CHROME_ATTRIBUTE}]`))
+  for (let node = target ?? null; node; node = node.parentElement) {
     const bg = window.getComputedStyle(node).backgroundColor
     if (parseCssColor(bg)) return bg
-    node = node.parentElement
   }
   return null
 }
 
-export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>) => {
+/**
+ * Contrast color for a bar drawn over the page at a document-coordinate point. The overlay lives
+ * in a portal, so its own ancestors say nothing about what is under it: sample the page itself.
+ */
+export const useDividerContrastColor = (documentX: number, documentY: number) => {
   const [color, setColor] = React.useState(CONTRAST_DARK)
   React.useEffect(() => {
-    const measure = () => setColor(getContrastColorForBackground(measureBackgroundUnder(ref.current)))
+    const measure = () =>
+      setColor(getContrastColorForBackground(measureBackgroundAt(documentX - window.scrollX, documentY - window.scrollY)))
     measure()
     const frame = requestAnimationFrame(measure)
     return () => cancelAnimationFrame(frame)
-  }, [ref])
+  }, [documentX, documentY])
   return color
 }
 
@@ -97,8 +110,11 @@ export const DividerOverlay = ({
   React.useEffect(() => (held ? onHold(axis, insertIndex) : undefined), [held, onHold, axis, insertIndex])
   const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId
 
-  const barRef = React.useRef<HTMLButtonElement>(null)
-  const color = useDividerContrastColor(barRef)
+  // Sample 1px inside the hovered child: the bar straddles its edge, and the child is what the
+  // user is looking at.
+  const sampleX = isVertical ? (edge === "start" ? box.left + 1 : box.left + box.width - 1) : box.left + box.width / 2
+  const sampleY = isVertical ? box.top + box.height / 2 : edge === "start" ? box.top + 1 : box.top + box.height - 1
+  const color = useDividerContrastColor(sampleX, sampleY)
   const iconColor = color === CONTRAST_LIGHT ? CONTRAST_DARK : CONTRAST_LIGHT
 
   const handleAddComponent = (type: AppNodeTag) => {
@@ -163,7 +179,6 @@ export const DividerOverlay = ({
       parentTag={parentTag}
     >
       <button
-        ref={barRef}
         type="button"
         aria-label="Add component here"
         style={hitStyle}
