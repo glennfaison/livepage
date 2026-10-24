@@ -157,9 +157,9 @@ const EmptyColumnContent = ({
 			onDrop={handleDrop}
 		>
 			<ComponentSelectorPopover onSelect={onAddChildComponent} parentTag="row">
-				<Button variant="outline" size="icon" className="rounded-full h-6 w-6">
+				<Button variant="outline" size="icon" className="rounded-full h-6 w-6" title="Add component">
 					<Plus className="size-3.5" />
-					<span className="text-xs font-medium">Add component</span>
+					<span className="sr-only">Add component</span>
 				</Button>
 			</ComponentSelectorPopover>
 		</div>
