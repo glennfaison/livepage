@@ -261,6 +261,7 @@ export const componentMetadata = {
 	htmlClassName: "row",
 	label,
 	category: "Layout" as ComponentCategory,
+	description: "A horizontal layout row that can contain other components.",
 	keywords,
 	defaultChildren: [],
 	attributes,

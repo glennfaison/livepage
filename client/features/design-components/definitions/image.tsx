@@ -203,6 +203,7 @@ export const componentMetadata = {
 	htmlTag: "img",
 	label,
 	category: "Media" as ComponentCategory,
+	description: "An image with a source, alt text, and sizing options.",
 	keywords,
 	defaultChildren: [],
 	attributes,
