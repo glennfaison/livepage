@@ -396,7 +396,7 @@ export const Toolbar: React.FC<Readonly<{
             onDiscard={onDiscardHistory}
             previewIndex={historyPreviewIndex}
           >
-            <Button variant="outline" size="sm" title="History" className="shrink-0">
+            <Button variant="outline" size="sm" title={`History (${formatShortcut("H")})`} className="shrink-0">
               <History className="h-4 w-4" />
             </Button>
           </HistoryPopover>
@@ -404,7 +404,7 @@ export const Toolbar: React.FC<Readonly<{
           <Button variant="outline" size="sm" onClick={onUndo} disabled={!canUndo} title={`Undo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Undo">
             <Undo className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Redo">
+          <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z", { shift: true })})`} className="shrink-0" aria-label="Redo">
             <Redo className="h-4 w-4" />
           </Button>
 
@@ -412,7 +412,7 @@ export const Toolbar: React.FC<Readonly<{
             <Minimize className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" size="sm" onClick={savePage} title="Save" className="shrink-0">
+          <Button variant="outline" size="sm" onClick={savePage} title={`Save (${formatShortcut("S")})`} className="shrink-0">
             <Save className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={handleDiscardWithConfirmation} title="Discard" className="shrink-0">
