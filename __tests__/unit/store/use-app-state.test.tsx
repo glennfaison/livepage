@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react"
+import { act, renderHook, waitFor } from "@testing-library/react"
 
 import { useAppState } from "@/client/features/app-state"
 import type { AppState } from "@/client/features/app-state"
@@ -79,5 +79,53 @@ describe("useAppState", () => {
     expect(result.current.history[0].action).toBe("Page created")
     expect(result.current.history[0].pageState).toHaveLength(1)
     expect(result.current.currentHistoryIndex).toBe(0)
+  })
+})
+
+describe("useAppState shared store", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("gives every caller the same shared state and dispatch", () => {
+    const first = renderHook(() => useAppState())
+    const second = renderHook(() => useAppState())
+
+    expect(first.result.current.state).toBe(second.result.current.state)
+    expect(first.result.current.dispatch).toBe(second.result.current.dispatch)
+
+    act(() => {
+      first.result.current.dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: true })
+    })
+
+    expect(second.result.current.state.toolbarMinimized).toBe(true)
+  })
+
+  it("is a single writer so a second instance cannot clobber the first", async () => {
+    const originalSetItem = Storage.prototype.setItem
+    const setItemSpy = jest.spyOn(Storage.prototype, "setItem")
+    const writes: string[] = []
+    setItemSpy.mockImplementation(function (this: Storage, key: string, value: string) {
+      if (key === PAGE_STORAGE_KEY) writes.push(value)
+      return originalSetItem.call(this, key, value)
+    })
+
+    const first = renderHook(() => useAppState())
+    const second = renderHook(() => useAppState())
+
+    // Both instances share one debounced save; dispatching from either writes
+    // the same shared state, so no stale second instance can overwrite it.
+    act(() => {
+      first.result.current.dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: true })
+    })
+
+    await waitFor(() => expect(writes).toHaveLength(1), { timeout: 2000 })
+
+    const saved = JSON.parse(writes[0])
+    expect(saved.toolbarMinimized).toBe(true)
+    // The second instance shares the same store, so it reflects the dispatch too.
+    expect(second.result.current.state.toolbarMinimized).toBe(true)
+
+    setItemSpy.mockRestore()
   })
 })
