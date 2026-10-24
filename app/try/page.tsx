@@ -19,9 +19,10 @@ import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/com
 import { AssistChat } from "@/client/features/prompt-assist"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload, Monitor } from "lucide-react"
 import Link from "next/link"
-import React, { useCallback, useRef, useState } from "react"
+import React, { useCallback, useRef, useState, useMemo, useEffect } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/client/components/ui/select"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
@@ -57,6 +58,7 @@ export default function BuilderPage() {
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop")
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
@@ -166,6 +168,28 @@ export default function BuilderPage() {
     setValidationResult(null)
   }
 
+  const previewHtml = useMemo(() => {
+    if (pageBuilderMode !== "preview" || previewDevice === "desktop") return null
+    try {
+      return serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: typeof window !== "undefined" ? window.location.origin : undefined })
+    } catch {
+      return null
+    }
+  }, [pageBuilderMode, previewDevice, state.componentTree])
+
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null)
+  useEffect(() => {
+    if (!previewHtml) {
+      setIframeSrc(null)
+      return
+    }
+    const blob = new Blob([previewHtml], { type: "text/html" })
+    const url = URL.createObjectURL(blob)
+    setIframeSrc(url)
+    return () => URL.revokeObjectURL(url)
+  }, [previewHtml])
+
+  const deviceWidth = previewDevice === "tablet" ? 768 : previewDevice === "mobile" ? 375 : undefined
   const canUndo = state.currentHistoryIndex > 0
   const canRedo = state.currentHistoryIndex < state.history.length - 1
 
@@ -366,6 +390,24 @@ export default function BuilderPage() {
                 {pageBuilderMode === "edit" ? <MonitorPlay className="h-4 w-4 sm:hidden" /> : <Pencil className="h-4 w-4 sm:hidden" />}
                 <span className="hidden sm:inline">{pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}</span>
               </Button>
+              {pageBuilderMode === "preview" && (
+                <Select value={previewDevice} onValueChange={(value) => setPreviewDevice(value as "desktop" | "tablet" | "mobile")}>
+                  <SelectTrigger className="w-[140px] h-9" aria-label="Preview device size">
+                    <SelectValue placeholder="Device" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desktop">
+                      <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Desktop</span>
+                    </SelectItem>
+                    <SelectItem value="tablet">
+                      <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Tablet (768px)</span>
+                    </SelectItem>
+                    <SelectItem value="mobile">
+                      <span className="flex items-center gap-2"><MonitorPlay className="h-4 w-4" /> Mobile (375px)</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
               <ThemeToggle />
             </div>
           </div>
@@ -404,14 +446,33 @@ export default function BuilderPage() {
           </div>
 
           <PageBuilderErrorBoundary>
-            <DragDropProvider moveComponent={componentOperations.moveComponent ?? (() => {})}>
-              <CanvasRenderer
-                component={currentPage}
-                pageBuilderMode={pageBuilderMode}
-                selectedComponentId={state.selectedComponentId}
-                selectedComponentAncestors={state.selectedComponentAncestors}
-              />
-            </DragDropProvider>
+            {pageBuilderMode === "preview" && previewDevice !== "desktop" && iframeSrc ? (
+              <div className="flex-1 flex items-start justify-center overflow-auto bg-muted/30 p-4">
+                <div
+                  className="relative bg-background border shadow-xl rounded-lg overflow-hidden"
+                  style={{ width: deviceWidth, maxWidth: "100%", height: "calc(100dvh - 12rem)" }}
+                >
+                  <iframe
+                    src={iframeSrc}
+                    title={`${previewDevice} preview`}
+                    className="w-full h-full border-0"
+                    sandbox="allow-scripts allow-same-origin"
+                  />
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground bg-background/80 px-2 py-0.5 rounded">
+                    {previewDevice === "tablet" ? "768px" : "375px"}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <DragDropProvider moveComponent={componentOperations.moveComponent ?? (() => {})}>
+                <CanvasRenderer
+                  component={currentPage}
+                  pageBuilderMode={pageBuilderMode}
+                  selectedComponentId={state.selectedComponentId}
+                  selectedComponentAncestors={state.selectedComponentAncestors}
+                />
+              </DragDropProvider>
+            )}
           </PageBuilderErrorBoundary>
         </main>
 
