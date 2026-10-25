@@ -145,6 +145,8 @@ export const Toolbar: React.FC<Readonly<{
   const canUndo = canUndoProp ?? currentHistoryIndex > 0
   const canRedo = canRedoProp ?? currentHistoryIndex < history.length - 1
 
+  const [announcement, setAnnouncement] = useState("")
+
   // Discard confirmation
   const {
     showConfirmation,
@@ -408,7 +410,16 @@ export const Toolbar: React.FC<Readonly<{
             <Redo className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title={`Minimize / toggle toolbar (${formatShortcut("\`")})`} className="shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setToolbarMinimized(true)
+              setAnnouncement("Toolbar minimized")
+            }}
+            title={`Minimize / toggle toolbar (${formatShortcut("\`")})`}
+            className="shrink-0"
+          >
             <Minimize className="h-4 w-4" />
           </Button>
 
@@ -473,7 +484,10 @@ export const Toolbar: React.FC<Readonly<{
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setToolbarMinimized(false)}
+            onClick={() => {
+              setToolbarMinimized(false)
+              setAnnouncement("Toolbar restored")
+            }}
             className="flex items-center gap-2"
             title="Maximize"
           >
@@ -492,6 +506,9 @@ export const Toolbar: React.FC<Readonly<{
           </div>
         </div>
       )}
+        <div role="status" aria-live="polite" className="sr-only">
+          {announcement}
+        </div>
     </div>
 
     <DiscardConfirmationDialog
