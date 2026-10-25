@@ -1,5 +1,7 @@
 "use client"
 
+import { captureEvent } from "@/client/lib/observability"
+
 import React from "react"
 import { ChevronLeftIcon, LoaderIcon, PlugZapIcon, Search } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -244,6 +246,7 @@ function DataSourceSettingsView(props: Readonly<{
   const isLinkedInProfile = selectedDataSource.id === "linkedin-profile"
 
   const testConnection = async (nextFormData: DataSourceSettings) => {
+    captureEvent("data_source_test", { source: nextFormData.type || "unknown" })
     try {
       setTestingConnection(true)
       const result = await selectedDataSource.tryConnection(nextFormData)

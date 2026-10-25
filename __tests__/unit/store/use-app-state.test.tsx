@@ -4,11 +4,11 @@ import { useAppState } from "@/client/features/app-state"
 import type { AppState } from "@/client/features/app-state"
 
 const PAGE_STORAGE_KEY = "livepage-page-storage"
-const PAGE_STORAGE_VERSION = 1
+const PAGE_UI_STATE_KEY = "livepage-page-ui-state"
 const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
 
 type StoredPageOverrides = Partial<{
-  version: number
+  rev: number
   componentTree: AppState["componentTree"]
   activePage: string
   pageBuilderMode: AppState["pageBuilderMode"]
@@ -17,14 +17,18 @@ type StoredPageOverrides = Partial<{
 
 function seedStoredPage(overrides: StoredPageOverrides = {}) {
   const stored = {
-    version: PAGE_STORAGE_VERSION,
+    rev: 0,
     componentTree: [{ tag: "page", attributes: { id: "page-9", title: "Restored" }, children: [] }],
-    activePage: "page-9",
-    pageBuilderMode: "preview",
-    toolbarMinimized: true,
     ...overrides,
   }
   window.localStorage.setItem(PAGE_STORAGE_KEY, JSON.stringify(stored))
+
+  const ui = {
+    activePage: overrides.activePage ?? "page-9",
+    pageBuilderMode: overrides.pageBuilderMode ?? "preview",
+    toolbarMinimized: overrides.toolbarMinimized ?? true,
+  }
+  window.localStorage.setItem(PAGE_UI_STATE_KEY, JSON.stringify(ui))
 }
 
 describe("useAppState", () => {
@@ -113,18 +117,23 @@ describe("useAppState shared store", () => {
     const first = renderHook(() => useAppState())
     const second = renderHook(() => useAppState())
 
-    // Both instances share one debounced save; dispatching from either writes
-    // the same shared state, so no stale second instance can overwrite it.
+    // Both instances share one debounced save; dispatching a document change
+    // from either instance writes the same shared state once, so no stale
+    // second instance can clobber the first instance's write.
     act(() => {
-      first.result.current.dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: true })
+      first.result.current.dispatch({
+        type: "SET_PAGES",
+        payload: [{ tag: "page", attributes: { id: "page-1", title: "Home" }, children: [] }],
+      })
     })
 
     await waitFor(() => expect(writes).toHaveLength(1), { timeout: 2000 })
 
     const saved = JSON.parse(writes[0])
-    expect(saved.toolbarMinimized).toBe(true)
+    expect(saved.rev).toBe(1)
+    expect(saved.componentTree).toHaveLength(1)
     // The second instance shares the same store, so it reflects the dispatch too.
-    expect(second.result.current.state.toolbarMinimized).toBe(true)
+    expect(second.result.current.state.componentTree).toHaveLength(1)
 
     setItemSpy.mockRestore()
   })
