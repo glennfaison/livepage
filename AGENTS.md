@@ -80,3 +80,8 @@ the change is a genuine user-facing feature, setup step, or development command.
 Agent guidance belongs in `AGENTS.md` or `.agents/docs/`. If a section has already
 been added to `README.md` by an agent and is out of scope, remove it rather than
 kept "for completeness".
+
+
+## Observability
+
+See [`.agents/docs/OBSERVABILITY.md`](./.agents/docs/OBSERVABILITY.md) for what is tracked, privacy choices (canvas content masked), and free-tier limits.
