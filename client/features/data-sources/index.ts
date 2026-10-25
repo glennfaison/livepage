@@ -13,6 +13,7 @@ export {
   loadBrowserDataSource,
   type DataSourceSettings,
 } from "./browser-core"
-export { DataSourceLoading, DataSourceError, readableErrorMessage } from "./data-source-states"
+export { DataSourceLoading, DataSourceError, DataSourceCached, readableErrorMessage } from "./data-source-states"
+export { dataSourceCache, dataSourceCacheKey, type CacheEntry } from "./cache"
 
 
