@@ -5,6 +5,8 @@ import { Inter } from "next/font/google"
 import { ClientProviders } from "@/client/components/client-providers"
 import { RootErrorBoundary } from "@/client/components/error-boundary"
 import { FaviconSwitcher } from "@/client/components/favicon-switcher"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -106,6 +108,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const observabilityEnabled = process.env.NEXT_PUBLIC_OBSERVABILITY_ENABLED !== "0"
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -121,6 +125,8 @@ export default function RootLayout({
             {children}
           </RootErrorBoundary>
         </ClientProviders>
+        {observabilityEnabled && <SpeedInsights />}
+        {observabilityEnabled && <Analytics />}
       </body>
     </html>
   )
