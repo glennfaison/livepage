@@ -1,5 +1,7 @@
 "use client"
 
+import { captureEvent } from "@/client/lib/observability"
+
 import {
   Command as CommandIcon,
   CornerDownLeft,
@@ -180,6 +182,7 @@ export const CommandPalette: React.FC<
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    if (open) captureEvent("command_palette_opened")
     if (!open) return
     setSearch("")
     setInsertComponentSearch("")
@@ -237,7 +240,7 @@ export const CommandPalette: React.FC<
 
   const handleValidationProceedForAction = (action: "preview" | "copy") => {
     if (action === "preview") {
-      onPreviewExport()
+      captureEvent("export_initiated", { type: "preview" }); onPreviewExport()
     } else if (action === "copy") {
       onCopyHtml()
     }
@@ -432,7 +435,7 @@ export const CommandPalette: React.FC<
       keywords: [template.category, ...template.tags, "preview"],
       icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
-        onApplyTemplate(template.id)
+        captureEvent("template_applied", { templateId: template.id, source: "command-palette" }); onApplyTemplate(template.id)
         toast({ title: "Template applied", description: template.name })
       },
     }))
