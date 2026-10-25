@@ -215,20 +215,15 @@ describe("App Reducer", () => {
   describe("HYDRATE_FROM_STORAGE", () => {
     const restoredSession: PersistedSession = {
       componentTree: [{ tag: "page", attributes: { id: "page-9", title: "Restored" }, children: [] }],
-      activePage: "page-9",
-      pageBuilderMode: "preview",
-      toolbarMinimized: true,
       promptAssistEnabled: true,
     }
 
-    it("adopts every stored field of the persisted session", () => {
+    it("adopts the stored component tree and prompt assist flag", () => {
       const result = appReducer(state, { type: "HYDRATE_FROM_STORAGE", payload: restoredSession })
 
       expect(result.componentTree).toEqual(restoredSession.componentTree)
-      expect(result.activePage).toBe("page-9")
-      expect(result.pageBuilderMode).toBe("preview")
-      expect(result.toolbarMinimized).toBe(true)
       expect(result.promptAssistEnabled).toBe(true)
+      expect(result.stale).toBe(false)
     })
 
     it("seeds the initial history entry from the adopted tree", () => {
@@ -243,14 +238,12 @@ describe("App Reducer", () => {
     it("keeps the current value for fields that were never stored", () => {
       const result = appReducer(state, {
         type: "HYDRATE_FROM_STORAGE",
-        payload: { componentTree: null, activePage: null, pageBuilderMode: null, toolbarMinimized: null, promptAssistEnabled: null },
+        payload: { componentTree: null, promptAssistEnabled: null },
       })
 
       expect(result.componentTree).toEqual(state.componentTree)
-      expect(result.activePage).toBe(state.activePage)
-      expect(result.pageBuilderMode).toBe(state.pageBuilderMode)
-      expect(result.toolbarMinimized).toBe(state.toolbarMinimized)
       expect(result.promptAssistEnabled).toBe(state.promptAssistEnabled)
+      expect(result.stale).toBe(state.stale)
       expect(result.history).toHaveLength(1)
       expect(result.history[0].action).toBe("Page created")
     })
@@ -290,5 +283,37 @@ describe("insertComponent", () => {
     state.componentTree = newComponents
     expect(state.componentTree[0].children).toHaveLength(1)
     expect(state.componentTree[0].children[0]).toEqual(child)
+  })
+})
+
+describe("App Reducer stale gating", () => {
+  it("rejects document-changing actions while stale", () => {
+    const staleState: AppState = { ...initialState, stale: true }
+
+    const edited = appReducer(staleState, {
+      type: "INSERT_COMPONENT",
+      payload: { newComponentTag: "header1", parentId: "page-1", index: 0 },
+    })
+
+    expect(edited).toBe(staleState)
+    expect(edited.componentTree).toEqual(staleState.componentTree)
+    expect(edited.stale).toBe(true)
+  })
+
+  it("allows UI-only actions while stale", () => {
+    const staleState: AppState = { ...initialState, stale: true }
+
+    const edited = appReducer(staleState, { type: "SET_TOOLBAR_MINIMIZED", payload: true })
+
+    expect(edited.toolbarMinimized).toBe(true)
+    expect(edited.stale).toBe(true)
+  })
+
+  it("allows clearing stale so recovery can proceed", () => {
+    const staleState: AppState = { ...initialState, stale: true }
+
+    const cleared = appReducer(staleState, { type: "SET_STALE", payload: false })
+
+    expect(cleared.stale).toBe(false)
   })
 })
