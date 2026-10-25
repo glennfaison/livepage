@@ -11,6 +11,7 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       LIVEPAGE_NEXT_DIST_DIR: ".next-playwright",
+      NEXT_PUBLIC_OBSERVABILITY_ENABLED: "0",
     },
   },
   use: {
