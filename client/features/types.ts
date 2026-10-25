@@ -31,17 +31,20 @@ export type AppState = Readonly<{
   currentHistoryIndex: number
   historyPreviewIndex: number | null
   originalHistoryState: ReadonlyArray<AppNode> | null
+  stale: boolean
 }>
 
 /**
  * The slice of app state persisted in browser storage. A `null` field means
  * "not stored", so hydration keeps the reducer's default for it.
+ *
+ * The document is persisted as a revisioned envelope `{ rev, componentTree }`
+ * (see hooks.ts). Legacy records without `rev` load as rev 0. UI fields
+ * (`activePage`, `pageBuilderMode`, `toolbarMinimized`) are stored under a
+ * separate last-write-wins key and are not part of this type.
  */
 export type PersistedSession = Readonly<{
   componentTree: ReadonlyArray<AppNode> | null
-  activePage: string | null
-  pageBuilderMode: PageBuilderMode | null
-  toolbarMinimized: boolean | null
   promptAssistEnabled: boolean | null
 }>
 
@@ -66,6 +69,7 @@ export type AppAction =
   | Readonly<{ type: "SET_SHOW_TOOLBAR"; payload: boolean }>
   | Readonly<{ type: "SET_PROMPT_ASSIST_ENABLED"; payload: boolean }>
   | Readonly<{ type: "HYDRATE_FROM_STORAGE"; payload: PersistedSession }>
+  | Readonly<{ type: "SET_STALE"; payload: boolean }>
   | Readonly<{ type: "ADD_TO_HISTORY"; payload: Readonly<{ action: string; pageState: ReadonlyArray<AppNode> }> }>
   | Readonly<{ type: "SET_CURRENT_HISTORY_INDEX"; payload: number }>
   | Readonly<{ type: "SET_HISTORY_PREVIEW_INDEX"; payload: number | null }>
