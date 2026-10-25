@@ -255,7 +255,7 @@ describe("CommandPalette", () => {
 
     const button = screen.getByText("Undo last change").closest("button")
     expect(button).toBeInTheDocument()
-    expect(button?.getAttribute("aria-label")).toBe("Undo last change")
+    expect(button?.getAttribute("aria-label")).toBe("Undo last change, Ctrl+Z")
 
     const selfContained = await screen.findByText("Export self-contained HTML")
     const selfContainedButton = selfContained.closest("button")
