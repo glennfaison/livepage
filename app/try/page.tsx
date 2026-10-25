@@ -7,6 +7,7 @@ import { recoverLoadLatest, recoverOverwrite } from "@/client/features/app-state
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
 import { deepClone } from "@/client/lib/deep-clone"
+import { cn } from "@/client/lib/utils"
 import {
   CanvasRenderer,
   ComponentOperationsContext,
