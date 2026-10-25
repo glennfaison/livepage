@@ -1,9 +1,11 @@
 "use client"
 
+import { useEffect } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { ThemeProvider } from "@/client/components/theme-provider"
 import { Toaster } from "@/client/components/ui/toaster"
+import { initPostHog } from "@/client/lib/observability"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,6 +17,10 @@ const queryClient = new QueryClient({
 })
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    initPostHog()
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>

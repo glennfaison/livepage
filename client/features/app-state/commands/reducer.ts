@@ -43,6 +43,7 @@ export function createInitialState(): AppState {
     currentHistoryIndex: -1,
     historyPreviewIndex: null,
     originalHistoryState: null,
+    stale: false,
   }
 }
 
@@ -92,7 +93,39 @@ function withHistory(
   }
 }
 
+/** Actions that mutate `componentTree`. Rejected by the reducer while the tab is stale. */
+function isDocumentChange(action: AppAction): boolean {
+  switch (action.type) {
+    case "INSERT_COMPONENT":
+    case "UPDATE_COMPONENT":
+    case "REMOVE_COMPONENT":
+    case "DUPLICATE_COMPONENT":
+    case "REPLACE_COMPONENT":
+    case "MOVE_COMPONENT":
+    case "SET_PAGES":
+    case "ADD_PAGE":
+    case "UPDATE_PAGE":
+    case "DUPLICATE_PAGE":
+    case "RESTORE_FROM_HISTORY":
+    case "DISCARD_CHANGES":
+      return true
+    default:
+      return false
+  }
+}
+
 export function appReducer(state: AppState, action: AppAction): AppState {
+  /**
+   * While a tab is stale (another tab has a newer stored revision), reject
+   * every document-changing action so the stale tab can never overwrite
+   * another tab's edits. Gating at the reducer covers keyboard shortcuts and
+   * the command palette, not only the UI. `SET_STALE` and `HYDRATE_FROM_STORAGE`
+   * are not document changes and pass through so recovery and hydration work.
+   */
+  if (state.stale && isDocumentChange(action)) {
+    return state
+  }
+
   switch (action.type) {
     case "INSERT_COMPONENT": {
       const { newComponent: providedComponent, newComponentTag, parentId, index } = action.payload
@@ -298,19 +331,21 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         promptAssistEnabled: action.payload,
       }
 
+    case "SET_STALE":
+      return {
+        ...state,
+        stale: action.payload,
+      }
+
     case "HYDRATE_FROM_STORAGE": {
-      // Adopts the browser-persisted session after mount. Fields that were
-      // never stored keep the current value, and the initial history entry is
-      // seeded from the adopted tree so undo and discard act on the restored
-      // session rather than the defaults.
+      // Adopts the browser-persisted session after mount. Hydration never
+      // writes to storage; UI fields are restored from the separate UI key.
       const persisted = action.payload
       const adopted: AppState = {
         ...state,
         componentTree: persisted.componentTree ?? state.componentTree,
-        activePage: persisted.activePage ?? state.activePage,
-        pageBuilderMode: persisted.pageBuilderMode ?? state.pageBuilderMode,
-        toolbarMinimized: persisted.toolbarMinimized ?? state.toolbarMinimized,
         promptAssistEnabled: persisted.promptAssistEnabled ?? state.promptAssistEnabled,
+        stale: false,
       }
       if (adopted.history.length > 0 || adopted.componentTree.length === 0) return adopted
       return {

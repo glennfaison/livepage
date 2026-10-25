@@ -149,3 +149,21 @@ describe("Toolbar without the command palette and duplicate page buttons", () =>
     expect(titles.length - pivotIndex - 1).toBe(right)
   })
 })
+
+describe("Toolbar screen reader announcements", () => {
+  it("announces 'Toolbar minimized' when the minimize button is clicked", () => {
+    render(<Toolbar {...baseProps} />)
+
+    fireEvent.click(screen.getByTitle(/Minimize/))
+
+    expect(screen.getByRole("status")).toHaveTextContent("Toolbar minimized")
+  })
+
+  it("announces 'Toolbar restored' when the maximize button is clicked", () => {
+    render(<Toolbar {...baseProps} toolbarMinimized />)
+
+    fireEvent.click(screen.getByTitle(/Maximize/))
+
+    expect(screen.getByRole("status")).toHaveTextContent("Toolbar restored")
+  })
+})
