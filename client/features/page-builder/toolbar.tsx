@@ -364,9 +364,6 @@ export const Toolbar: React.FC<Readonly<{
           transform: "translate(-50%, -50%)",
         }}
       >
-        <div role="status" aria-live="polite" className="sr-only">
-          {announcement}
-        </div>
       {!toolbarMinimized ? (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
@@ -509,6 +506,9 @@ export const Toolbar: React.FC<Readonly<{
           </div>
         </div>
       )}
+        <div role="status" aria-live="polite" className="sr-only">
+          {announcement}
+        </div>
     </div>
 
     <DiscardConfirmationDialog
