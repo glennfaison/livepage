@@ -5,7 +5,8 @@ import { DATA_SOURCE_FIELD_NAME } from "./constants"
 import { useQuery } from "@tanstack/react-query"
 import { cn } from "@/client/lib/utils"
 import { replaceDataSourceComponentProperties } from "./browser-core"
-import { DataSourceLoading, DataSourceError, readableErrorMessage } from "./data-source-states"
+import { dataSourceCache, dataSourceCacheKey } from "./cache"
+import { DataSourceLoading, DataSourceError, DataSourceCached, readableErrorMessage } from "./data-source-states"
 import { DataSourceErrorBoundary } from "@/client/components/error-boundary"
 
 const dataSourceFieldName = DATA_SOURCE_FIELD_NAME
@@ -20,13 +21,34 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		}
 
 		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {
+			const bypassCache = cacheBypassRef.current
+			cacheBypassRef.current = false
+
 			const decodedDataSourceSettings = decodeDataSourceSettings(dataSourceSettingsValue)
 			const dataSourceId: DataSourceId = decodedDataSourceSettings.id
+			const key = dataSourceCacheKey(dataSourceId, decodedDataSourceSettings.settings)
+
+			if (!bypassCache) {
+				const cached = dataSourceCache.get(key)
+				if (cached !== null) {
+					cachedRef.current = true
+					return cached
+				}
+			}
+
+			cachedRef.current = false
+
 			const dataSource = getDataSourceInfo(dataSourceId)
 			if (!dataSource) {
 				throw new Error(`Unknown data source: ${dataSourceId}`)
 			}
-			return dataSource.tryConnection(decodedDataSourceSettings.settings)
+			const result = await dataSource.tryConnection(decodedDataSourceSettings.settings)
+
+			if (!bypassCache) {
+				dataSourceCache.set(key, result)
+			}
+
+			return result
 		}, [])
 
 		const queryKey = ["data-source-data", dataSourceSettings]
@@ -45,7 +67,11 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		const retryRef = useRef(refetch)
 		retryRef.current = refetch
 
+		const cacheBypassRef = useRef(false)
+		const cachedRef = useRef(false)
+
 		const handleRetry = useCallback(() => {
+			cacheBypassRef.current = true
 			retryRef.current()
 		}, [])
 
@@ -70,8 +96,11 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			renderDataSourceComponent(dataSourceData)
 		)
 
+		const cached = cachedRef.current
+
 		return (
 			<DataSourceErrorBoundary isPreviewMode={isPreviewMode} onRetry={handleRetry}>
+				{cached && <DataSourceCached childClassName={props.childClassName} />}
 				{renderedContent}
 			</DataSourceErrorBoundary>
 		)
@@ -84,4 +113,5 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 
 withDataSource.LoadingComponent = DataSourceLoading
 withDataSource.ErrorComponent = DataSourceError
+withDataSource.CachedComponent = DataSourceCached
 withDataSource.readableErrorMessage = readableErrorMessage

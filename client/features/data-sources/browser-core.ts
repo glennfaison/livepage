@@ -1,5 +1,6 @@
 import type { AppNode } from "@/client/features/types"
 import { replacePlaceholdersInString } from "@/client/features/placeholders"
+import { dataSourceCache, dataSourceCacheKey } from "./cache"
 
 export type DataSourceSettings = Readonly<{
   id: string
@@ -66,28 +67,50 @@ export function replaceDataSourceComponentProperties<T extends AppNode>(
  * (executes user-provided code) and rest-api (fetches from URL with
  * optional result parsing).
  *
+ * Successful results are cached in memory with a TTL; the cache is
+ * consulted before fetching and bypassed when `options.bypassCache` is
+ * true. Errors are never cached.
+ *
  * @param settings - Data source settings including ID and configuration
  * @param fetcher - Fetch implementation to use (defaults to global fetch)
+ * @param options - `bypassCache` skips the cache and forces a fresh fetch
  * @returns Promise resolving to the data from the source
- * @throws Error if data source ID is unknown
+ * @throws Error if data source ID is unknown or the fetch fails
  */
 export async function loadBrowserDataSource(
   settings: DataSourceSettings,
   fetcher: typeof fetch = fetch,
+  options: { bypassCache?: boolean } = {},
 ): Promise<unknown> {
+  const { bypassCache = false } = options
+  const key = dataSourceCacheKey(settings.id, settings.settings)
+
+  if (!bypassCache) {
+    const cached = dataSourceCache.get(key)
+    if (cached !== null) return cached
+  }
+
+  let result: unknown
+
   if (settings.id === "generated-data") {
     const source = settings.settings.generate
     const code = Array.isArray(source) ? source.join("") : String(source || "")
-    return new Function("return (async () => {" + code + "})()")()
-  }
-  if (settings.id === "rest-api") {
+    result = await new Function("return (async () => {" + code + "})()")()
+  } else if (settings.id === "rest-api") {
     const rawUrl = settings.settings.url
     const response = await fetcher(Array.isArray(rawUrl) ? rawUrl.join("") : String(rawUrl || ""))
     if (!response.ok) throw new Error(`Data source request failed (${response.status})`)
-    const result = await response.json()
+    const unparsed = await response.json()
     const source = settings.settings["parse-result"]
     const code = Array.isArray(source) ? source.join("") : String(source || "")
-    return code.trim() ? new Function("data", code)(result) : result
+    result = code.trim() ? new Function("data", code)(unparsed) : unparsed
+  } else {
+    throw new Error(`Unknown data source: ${settings.id}`)
   }
-  throw new Error(`Unknown data source: ${settings.id}`)
+
+  if (!bypassCache) {
+    dataSourceCache.set(key, result)
+  }
+
+  return result
 }
