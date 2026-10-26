@@ -69,6 +69,20 @@ issues and reports ranked, evidence-backed suggestions for improving the skills
 and the process. It only reads and reports. `/pipeline-guide` lists every
 utility skill.
 
+### Settings
+
+These are the key-value inputs the pipeline skills read. Override one per run
+with a `key=value` pair on a line of its own; leaving it out keeps the default.
+
+- `pr_base_branch`: develop
+- `app_url`: https://livepagecrafter-dev.vercel.app
+- `merge_method`: squash
+- `human_reviewer`: glennfaison
+- `build_cmd`: npm run build
+- `git_hooks_path`: scripts/git-hooks
+- `repo_guidance`: AGENTS.md
+- `trusted_authors`: (none)
+
 ## Repository guidance
 
 These files hold this repository's contributor rules: how to scope and verify a
