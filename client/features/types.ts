@@ -219,6 +219,9 @@ export type EditModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "edit">
   onMouseMove?: React.MouseEventHandler<HTMLElement>
   onMouseLeave?: React.MouseEventHandler<HTMLElement>
+  /** While a component is being dragged: the same pointer tracking as `onMouseMove`, which browsers do not fire during a drag. */
+  onDragOver?: React.DragEventHandler<HTMLElement>
+  onDragLeave?: React.DragEventHandler<HTMLElement>
 }>
 
 export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
