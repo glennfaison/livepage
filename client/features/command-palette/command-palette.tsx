@@ -44,6 +44,7 @@ import { selectCurrentPage } from "@/client/features/app-state"
 import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/design-components"
 import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
+import { formatShortcut, KEYBOARD_SHORTCUTS } from "@/client/features/page-builder/keyboard-shortcuts"
 import type { TemplateDisplaySummary } from "@/client/features/templates"
 import type { ComponentCategory } from "@/client/features/types"
 import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
@@ -176,6 +177,7 @@ export const CommandPalette: React.FC<
   isLoadingShortcode = false,
 }) => {
   const [search, setSearch] = useState("")
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [insertComponentSearch, setInsertComponentSearch] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null)
@@ -273,7 +275,7 @@ export const CommandPalette: React.FC<
         id: "action-undo",
         group: "Actions",
         label: "Undo last change",
-        description: canUndo ? undefined : "Nothing to undo",
+        description: canUndo ? formatShortcut("Z") : "Nothing to undo",
         keywords: ["undo", "back", "history"],
         icon: <Undo2 className="h-4 w-4" />,
         onSelect: () => {
@@ -284,12 +286,20 @@ export const CommandPalette: React.FC<
         id: "action-redo",
         group: "Actions",
         label: "Redo change",
-        description: canRedo ? undefined : "Nothing to redo",
+        description: canRedo ? formatShortcut("Z", { shift: true }) : "Nothing to redo",
         keywords: ["redo", "forward", "history"],
         icon: <Redo2 className="h-4 w-4" />,
         onSelect: () => {
           if (canRedo) jumpToHistory(state.currentHistoryIndex + 1)
         },
+      },
+      {
+        id: "action-keyboard-shortcuts",
+        group: "Actions",
+        label: "Keyboard shortcuts",
+        keywords: ["keyboard", "shortcuts", "help", "cheatsheet", "hotkeys"],
+        icon: <CommandIcon className="h-4 w-4" />,
+        onSelect: () => setShortcutsOpen(true),
       },
       {
         id: "action-discard",
@@ -694,6 +704,25 @@ export const CommandPalette: React.FC<
         onConfirm={handleDiscardConfirm}
         onAskBeforeDiscardChange={handleAskBeforeDiscardChange}
       />
+    
+      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Keyboard shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            {KEYBOARD_SHORTCUTS.map((s) => (
+              <div key={s.label} className="flex items-center justify-between gap-4">
+                <span>{s.label}</span>
+                <kbd className="rounded border bg-muted px-2 py-0.5 font-mono text-xs">
+                  {formatShortcut(s.keys, { shift: "shift" in s && s.shift })}
+                </kbd>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </Dialog>
   )
 }

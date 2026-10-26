@@ -1,4 +1,4 @@
-import { cn, generateId, intersperseAndAppend, validateUrlForSsrf } from "@/client/lib/utils"
+import { cn, generateId, intersperseAndAppend, validateUrlForSsrf, debounceAsync } from "@/client/lib/utils"
 
 describe("Utility Functions", () => {
   describe("cn function", () => {
@@ -127,6 +127,56 @@ describe("Utility Functions", () => {
     it("should allow public hostnames", () => {
       const result = validateUrlForSsrf("https://example.com/api")
       expect(result.valid).toBe(true)
+    })
+  })
+
+  describe("debounceAsync function", () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it("should allow the first call immediately", async () => {
+      const fn = jest.fn().mockResolvedValue("result")
+      const debounced = debounceAsync(fn, 500)
+
+      const promise = debounced("arg")
+      expect(fn).toHaveBeenCalledTimes(1)
+      await expect(promise).resolves.toBe("result")
+    })
+
+    it("should reject calls within the debounce window", async () => {
+      const fn = jest.fn().mockResolvedValue("result")
+      const debounced = debounceAsync(fn, 500)
+
+      await debounced("first")
+
+      const second = debounced("second")
+      await expect(second).rejects.toThrow("Rate limited")
+      expect(fn).toHaveBeenCalledTimes(1)
+    })
+
+    it("should allow calls after the debounce window", async () => {
+      const fn = jest.fn().mockResolvedValue("result")
+      const debounced = debounceAsync(fn, 500)
+
+      await debounced("first")
+
+      jest.advanceTimersByTime(500)
+      await debounced("second")
+
+      expect(fn).toHaveBeenCalledTimes(2)
+    })
+
+    it("should pass arguments through to the wrapped function", async () => {
+      const fn = jest.fn().mockResolvedValue("result")
+      const debounced = debounceAsync(fn, 500)
+
+      await debounced({ key: "value" })
+      expect(fn).toHaveBeenCalledWith({ key: "value" })
     })
   })
 })

@@ -1,7 +1,7 @@
 import React from "react"
 import { cn } from "@/client/lib/utils"
 import { Button } from "@/client/components/ui/button"
-import { RefreshCw, Loader2 } from "lucide-react"
+import { Clock, Loader2, RefreshCw } from "lucide-react"
 
 export function readableErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -63,6 +63,23 @@ export function DataSourceError({ childClassName, retry, errorMessage }: DataSou
           Retry
         </Button>
       )}
+    </div>
+  )
+}
+
+export function DataSourceCached({ childClassName }: DataSourceStateProps) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center gap-2 py-4 text-muted-foreground",
+        childClassName
+      )}
+      role="status"
+      aria-live="polite"
+      aria-label="Serving cached data"
+    >
+      <Clock className="h-4 w-4" aria-hidden="true" />
+      <span className="text-sm">Cached</span>
     </div>
   )
 }

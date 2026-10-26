@@ -37,7 +37,10 @@ const Component = (props: Props) => {
 }
 
 export const componentMetadata = {
-	tag, label, category: "Feedback" as ComponentCategory, keywords, defaultChildren: ["New"], attributes, Icon, htmlTag: "span",
+	tag, label, 	category: "Feedback" as ComponentCategory,
+	description: "A small status label or tag.",
+	keywords,
+	defaultChildren: ["New"], attributes, Icon, htmlTag: "span",
 	PreviewModeComponent: withDataSource(Component),
 	EditModeComponent: withEditorControls(withTextEditing(withDataSource(Component))),
 } as const satisfies Metadata

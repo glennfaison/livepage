@@ -219,6 +219,9 @@ export type EditModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
   pageBuilderMode: Extract<PageBuilderMode, "edit">
   onMouseMove?: React.MouseEventHandler<HTMLElement>
   onMouseLeave?: React.MouseEventHandler<HTMLElement>
+  /** While a component is being dragged: the same pointer tracking as `onMouseMove`, which browsers do not fire during a drag. */
+  onDragOver?: React.DragEventHandler<HTMLElement>
+  onDragLeave?: React.DragEventHandler<HTMLElement>
 }>
 
 export type ViewModeProps = Readonly<Omit<Props, "pageBuilderMode"> & {
@@ -237,8 +240,15 @@ export interface Metadata {
   readonly allowedChildTags?: ReadonlyArray<AppNodeTag>
   readonly label: string
   readonly category: ComponentCategory
+  /** Human-readable summary shown in pickers and catalogs. */
+  readonly description: string
   readonly keywords: string[]
   readonly Icon: ReactNode
+  /**
+   * The children a new instance of this component starts with. Text/content
+   * components provide representative starter text; container and media/data
+   * components start empty (`[]`) and are populated by the user.
+   */
   readonly defaultChildren: ReadonlyArray<AppNode | string>
   readonly defaultAttributes?: Readonly<Record<string, unknown>>
   readonly attributes: ReadonlyArray<SettingsField>

@@ -95,13 +95,26 @@ export function useToolbarToggleShortcut(onToggle: () => void) {
   }, [onToggle])
 }
 
-export function formatShortcut(key: string): string {
-  if (typeof navigator !== "undefined" && navigator.platform.includes("Mac")) {
-    return `⌘${key.toUpperCase()}`
+export function formatShortcut(key: string, options?: { shift?: boolean }): string {
+  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || "")
+  const base = key.toUpperCase()
+  if (isMac) {
+    return options?.shift ? `⌘⇧${base}` : `⌘${base}`
   }
-  return `Ctrl+${key.toUpperCase()}`
+  return options?.shift ? `Ctrl+Shift+${base}` : `Ctrl+${base}`
 }
+
 export const KEYBOARD_SHORTCUTS = [
+  { label: "Undo", keys: "Z" },
+  { label: "Redo", keys: "Z", shift: true },
+  { label: "Save", keys: "S" },
+  { label: "Open history", keys: "H" },
+  { label: "Toggle toolbar", keys: "`" },
+  { label: "Duplicate page", keys: "D", shift: true },
+  { label: "Command palette", keys: "K" },
+] as const
+
+export const CHEATSHEET_SHORTCUTS = [
   { keys: "⌘K / Ctrl+K", description: "Open command palette", category: "Navigation" },
   { keys: "⌘S / Ctrl+S", description: "Save page", category: "Editing" },
   { keys: "⌘Z / Ctrl+Z", description: "Undo", category: "Editing" },

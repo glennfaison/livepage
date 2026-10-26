@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/client/components/ui/dialog"
-import { KEYBOARD_SHORTCUTS } from "./keyboard-shortcuts"
+import { CHEATSHEET_SHORTCUTS } from "./keyboard-shortcuts"
 
 export function KeyboardShortcutsDialog({
   open,
@@ -10,13 +10,13 @@ export function KeyboardShortcutsDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }>) {
-  const grouped = KEYBOARD_SHORTCUTS.reduce(
+  const grouped = CHEATSHEET_SHORTCUTS.reduce(
     (acc, shortcut) => {
       if (!acc[shortcut.category]) acc[shortcut.category] = []
       acc[shortcut.category].push(shortcut)
       return acc
     },
-    {} as Record<string, typeof KEYBOARD_SHORTCUTS[number][]>,
+    {} as Record<string, typeof CHEATSHEET_SHORTCUTS[number][]>,
   )
 
   return (
