@@ -111,5 +111,70 @@ export const KEYBOARD_SHORTCUTS = [
   { label: "Open history", keys: "H" },
   { label: "Toggle toolbar", keys: "`" },
   { label: "Duplicate page", keys: "D", shift: true },
+  { label: "Copy component", keys: "C" },
+  { label: "Paste component", keys: "V" },
+  { label: "Duplicate component", keys: "D" },
   { label: "Command palette", keys: "K" },
 ] as const
+
+export function useCopyComponentShortcut(onCopy: () => void, enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Skip when typing in an input/textarea/contenteditable
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return
+      }
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      if (isModifierPressed && !event.shiftKey && event.key.toLowerCase() === "c") {
+        event.preventDefault()
+        onCopy()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onCopy, enabled])
+}
+
+export function usePasteComponentShortcut(onPaste: () => void, enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return
+      }
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      if (isModifierPressed && !event.shiftKey && event.key.toLowerCase() === "v") {
+        event.preventDefault()
+        onPaste()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onPaste, enabled])
+}
+
+export function useDuplicateComponentShortcut(onDuplicate: () => void, enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return
+      }
+      const isModifierPressed = event.metaKey || event.ctrlKey
+      // Plain ⌘D (page uses ⌘⇧D)
+      if (isModifierPressed && !event.shiftKey && event.key.toLowerCase() === "d") {
+        event.preventDefault()
+        onDuplicate()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onDuplicate, enabled])
+}

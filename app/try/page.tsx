@@ -16,6 +16,11 @@ import {
   useHistoryOperations,
   usePageOperations,
 } from "@/client/features/page-builder"
+import {
+  useCopyComponentShortcut,
+  usePasteComponentShortcut,
+  useDuplicateComponentShortcut,
+} from "@/client/features/page-builder/keyboard-shortcuts"
 import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
 import { AssistChat } from "@/client/features/prompt-assist"
@@ -104,6 +109,21 @@ export default function BuilderPage() {
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
+
+  // Component copy / paste / duplicate (edit mode only, when a component is selected)
+  const hasSelection = Boolean(state.selectedComponentId)
+  useCopyComponentShortcut(
+    () => componentOperations.copyComponentToClipboard?.(state.selectedComponentId),
+    pageBuilderMode === "edit" && hasSelection,
+  )
+  usePasteComponentShortcut(
+    () => componentOperations.pasteComponentFromClipboard?.(state.selectedComponentId),
+    pageBuilderMode === "edit" && hasSelection,
+  )
+  useDuplicateComponentShortcut(
+    () => componentOperations.duplicateComponent?.(state.selectedComponentId),
+    pageBuilderMode === "edit" && hasSelection,
+  )
 
   // Deep link used by template review: /try?template=<id>&mode=preview renders a template deterministically.
   useTemplateDeepLink(dispatch)
