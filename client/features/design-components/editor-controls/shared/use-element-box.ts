@@ -23,6 +23,16 @@ export function getLayoutRect(element: Element): DOMRect {
 }
 
 /** Reads an element's box, or `null` when it has none (not rendered, `display: none`, ...). */
+/**
+ * The element that actually has a box. The editor-controls wrapper is `display: contents`, so its
+ * own rectangle is empty; its first element child is the component.
+ */
+export function getLayoutElement(element: Element): Element {
+  return getComputedStyle(element).display === "contents" && element.firstElementChild
+    ? element.firstElementChild
+    : element
+}
+
 export function readElementBox(element: Element | null | undefined): ElementBox | null {
   if (!element) return null
   const rect = element.getBoundingClientRect()
