@@ -113,6 +113,7 @@ trusted_authors=
 ```
 Run /shepherd-github-pr 124
 lease_ttl_pr=1 hour
+ready_lane_ttl=2 hours
 max_shepherd_attempts=3
 max_item_failures=3
 human_reviewer=
@@ -147,6 +148,7 @@ max_item_failures=3
 merge_method=squash
 pr_base_branch=main
 human_reviewer=
+human_merge_paths=
 git_hooks_path=
 runner=NAME
 log_window_days=14
