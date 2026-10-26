@@ -4,7 +4,6 @@ import { useEffect, useSyncExternalStore } from "react"
 import { useToast, toast } from "@/client/components/ui/use-toast"
 import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
 import type { AppState, AppAction, PersistedSession } from "@/client/features/types"
-import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 
 const PAGE_STORAGE_KEY = "livepage-page-storage"
 const PAGE_UI_STATE_KEY = "livepage-page-ui-state"
@@ -136,6 +135,8 @@ function loadPersistedDocument(): PersistedDocument | null {
     if (!stored) return null
     const parsed = JSON.parse(stored) as PersistedDocument
     if (!parsed || !parsed.componentTree) return null
+    // Lazy require to avoid circular dependency with design-components -> app-state
+    const { appNodeTreeSchema } = require("@/client/features/serializers/schema")
     const validation = appNodeTreeSchema.safeParse(parsed.componentTree)
     if (!validation.success) {
       discardedInvalidPersisted = true
