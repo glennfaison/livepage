@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from "react"
 import { useToast, toast } from "@/client/components/ui/use-toast"
 import { appReducer, initialState } from "@/client/features/app-state/commands/reducer"
 import type { AppState, AppAction, PersistedSession } from "@/client/features/types"
+import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 
 const PAGE_STORAGE_KEY = "livepage-page-storage"
 const PAGE_UI_STATE_KEY = "livepage-page-ui-state"
@@ -56,6 +57,7 @@ let listenerCount = 0
 let baseRev = 0
 let dirty = false
 let persistenceListenersInstalled = false
+let discardedInvalidPersisted = false
 
 function resetStore() {
   currentState = initialState
@@ -134,7 +136,17 @@ function loadPersistedDocument(): PersistedDocument | null {
     if (!stored) return null
     const parsed = JSON.parse(stored) as PersistedDocument
     if (!parsed || !parsed.componentTree) return null
-    return parsed
+    const validation = appNodeTreeSchema.safeParse(parsed.componentTree)
+    if (!validation.success) {
+      discardedInvalidPersisted = true
+      try {
+        window.localStorage.removeItem(PAGE_STORAGE_KEY)
+      } catch {
+        // ignore
+      }
+      return null
+    }
+    return { ...parsed, componentTree: validation.data }
   } catch {
     return null
   }
@@ -398,6 +410,14 @@ export function useAppState() {
     )
     if (currentState.history.length === 0) {
       dispatch({ type: "ADD_TO_HISTORY", payload: { action: "Page created", pageState: componentTree } })
+    }
+    if (discardedInvalidPersisted && setToastRef) {
+      setToastRef({
+        title: "Saved page was incompatible",
+        description: "The previously saved page contained unknown or invalid components and was reset to a blank page.",
+        variant: "destructive",
+      })
+      discardedInvalidPersisted = false
     }
   }, [])
 
