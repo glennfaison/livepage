@@ -55,6 +55,20 @@ when to use it. Each step has a group skill (picks the work) and an item skill
 4. Shepherding: `shepherd-github-prs` (group), `shepherd-github-pr` (item)
 5. Reviewing: `review-github-prs` (group), `review-github-pr` (item)
 
+Reviewing has a third outcome besides merging and sending a PR back: a PR that
+runs out of review rounds, or that changes a path matched by `human_merge_paths`,
+is handed to a person. It gets the `agent:human-merge` label and a comment that
+mentions the PR's CODEOWNERS, read from the base branch. Agents never merge it.
+The label is created by the label setup in the `agent-workflow-protocol` skill's
+`references/labels.md`, so run that setup again after refreshing the skills if
+the label is missing.
+
+Utility skills are called by the steps above and are not run on their own, with
+one exception: `retrospective` is run by hand. It reads the `agent:log` run-log
+issues and reports ranked, evidence-backed suggestions for improving the skills
+and the process. It only reads and reports. `/pipeline-guide` lists every
+utility skill.
+
 ## Repository guidance
 
 These files hold this repository's contributor rules: how to scope and verify a
