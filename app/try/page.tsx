@@ -19,6 +19,7 @@ import {
 import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
 import { AssistChat } from "@/client/features/prompt-assist"
+import { OnboardingWalkthrough } from "@/client/features/page-builder/onboarding-walkthrough"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
 import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload, Monitor } from "lucide-react"
@@ -348,7 +349,7 @@ export default function BuilderPage() {
                 className="gap-2 px-2 sm:px-3"
                 onClick={() => setCommandPaletteOpen(true)}
                 title="Command palette (⌘K)"
-                aria-label="Open command palette"
+                aria-label="Open command palette" data-onboarding="command"
               >
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
@@ -440,7 +441,7 @@ export default function BuilderPage() {
                 variant="outline"
                 size="sm"
                 className="gap-2 px-2 sm:px-3"
-                aria-label={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
+                aria-label={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"} data-onboarding="mode-toggle"
                 title={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
                 onClick={() => {
                   const nextMode = pageBuilderMode === "edit" ? "preview" : "edit"
@@ -476,7 +477,7 @@ export default function BuilderPage() {
           </div>
         </header>
 
-        <main className={cn("flex-1 overflow-hidden flex flex-col", isStale ? "inert opacity-50 pointer-events-none" : "")}>
+        <main data-onboarding="canvas" className={cn("flex-1 overflow-hidden flex flex-col", isStale ? "inert opacity-50 pointer-events-none" : "")}>
           <div className="border-b bg-background">
             <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div className="flex min-w-0 flex-1 basis-full items-center gap-3 sm:basis-0">
@@ -564,6 +565,7 @@ export default function BuilderPage() {
           canRedo={canRedo}
         />
 
+        <OnboardingWalkthrough />
         <CommandPalette
           open={commandPaletteOpen}
           onOpenChange={setCommandPaletteOpen}
