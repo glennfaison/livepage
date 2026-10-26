@@ -24,6 +24,7 @@ export function EditorOverlay({ box, selected, children }: EditorOverlayProps) {
   return createPortal(
     <div
       data-testid="editor-overlay"
+      data-editor-chrome="true"
       className="pointer-events-none absolute z-30"
       style={{ top: box.top, left: box.left, width: box.width, height: box.height }}
     >
