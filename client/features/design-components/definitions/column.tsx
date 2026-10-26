@@ -211,6 +211,7 @@ export const componentMetadata = {
 	htmlClassName: "column",
 	label,
 	category: "Layout" as ComponentCategory,
+	description: "A vertical layout column that can contain other components.",
 	keywords,
 	defaultChildren: [],
 	attributes,

@@ -2,7 +2,7 @@
 
 import { Button } from "@/client/components/ui/button"
 import { useComponentOperationsContext } from "../editor-controls/component-operations-context"
-import { AlignHorizontalSpaceBetweenIcon } from "lucide-react"
+import { AlignHorizontalSpaceBetweenIcon, FileText } from "lucide-react"
 import { useCallback } from "react"
 import type { Metadata, SettingsField, ViewModeProps, EditModeProps, ComponentCategory } from "@/client/features/types"
 import { cn } from "@/client/lib/utils"
@@ -106,7 +106,6 @@ function EditModeComponent(props: EditModeProps) {
 	const metadata = getComponentInfo(currentPage.tag)
 	const accessibilityAttrs = getAccessibilityAttributes(currentPage, metadata)
 	const { state, setDropTarget, endDrag } = useDragDrop()
-	const hasChildren = currentPage.children.length > 0
 	const isDropTarget = state.dropTarget?.type === "empty-layout" && state.dropTarget.parentId === attributes.id
 
 	const appendComponent = useCallback(() => {
@@ -191,10 +190,11 @@ export const componentMetadata = {
 	htmlClassName: "column",
 	label: "Page",
 	category: "Layout" as ComponentCategory,
-	keywords: [],
+	description: "The root page containing all other components.",
+	keywords: ["page", "root", "document"],
 	defaultChildren: [],
 	attributes,
-	Icon: null,
+	Icon: <FileText className="h-4 w-4" />,
 	PreviewModeComponent: PreviewModeComponent,
 	EditModeComponent: EditModeComponent,
 } as const satisfies Metadata

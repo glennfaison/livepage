@@ -51,6 +51,7 @@ export const componentMetadata = {
 	htmlTag: "h2",
 	label,
 	category: "Typography" as ComponentCategory,
+	description: "A section heading (H2).",
 	keywords,
 	defaultChildren,
 	attributes,
