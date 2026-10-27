@@ -1,11 +1,24 @@
 "use client"
 
 import { useEffect } from "react"
-import type { Dispatch, SetStateAction } from "react"
+
+// Returns true when the user is actively editing text in an input, textarea, or
+// contentEditable element, so app-level shortcuts should yield to the browser's
+// native editing behavior instead of firing.
+function isEditingText(): boolean {
+  const active = document.activeElement
+  if (!active) return false
+  const element = active as HTMLElement
+  if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") return true
+  if (element.isContentEditable) return true
+  if (element.closest("[contenteditable=true]")) return true
+  return false
+}
 
 export function useSaveShortcut(onSave: () => void) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditingText()) return
       const isModifierPressed = event.metaKey || event.ctrlKey
       if (isModifierPressed && event.key.toLowerCase() === "s") {
         event.preventDefault()
@@ -21,6 +34,7 @@ export function useSaveShortcut(onSave: () => void) {
 export function useHistoryShortcut(onOpenHistory: () => void) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditingText()) return
       const isModifierPressed = event.metaKey || event.ctrlKey
       if (isModifierPressed && event.key.toLowerCase() === "h") {
         event.preventDefault()
@@ -37,6 +51,7 @@ export function useUndoShortcut(onUndo: () => void, canUndo: boolean) {
   useEffect(() => {
     if (!canUndo) return
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditingText()) return
       const isModifierPressed = event.metaKey || event.ctrlKey
       if (isModifierPressed && event.key.toLowerCase() === "z" && !event.shiftKey) {
         event.preventDefault()
@@ -53,6 +68,7 @@ export function useRedoShortcut(onRedo: () => void, canRedo: boolean) {
   useEffect(() => {
     if (!canRedo) return
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditingText()) return
       const isModifierPressed = event.metaKey || event.ctrlKey
       if (isModifierPressed && event.key.toLowerCase() === "z" && event.shiftKey) {
         event.preventDefault()
@@ -68,6 +84,7 @@ export function useRedoShortcut(onRedo: () => void, canRedo: boolean) {
 export function useDuplicatePageShortcut(onDuplicate: () => void) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditingText()) return
       const isModifierPressed = event.metaKey || event.ctrlKey
       if (isModifierPressed && event.shiftKey && event.key.toLowerCase() === "d") {
         event.preventDefault()
