@@ -18,6 +18,8 @@ import {
 } from "@/client/features/page-builder"
 import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
+import { KeyboardShortcutsDialog } from "@/client/features/page-builder/keyboard-shortcuts-dialog"
+import { useKeyboardShortcutsHelp } from "@/client/features/page-builder/keyboard-shortcuts"
 import { AssistChat } from "@/client/features/prompt-assist"
 import { OnboardingWalkthrough } from "@/client/features/page-builder/onboarding-walkthrough"
 import { ThemeToggle } from "@/client/components/theme-toggle"
@@ -101,9 +103,11 @@ export default function BuilderPage() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop")
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
+  useKeyboardShortcutsHelp(() => setShortcutsOpen(true))
 
   // Deep link used by template review: /try?template=<id>&mode=preview renders a template deterministically.
   useTemplateDeepLink(dispatch)
@@ -565,6 +569,7 @@ export default function BuilderPage() {
           canRedo={canRedo}
         />
 
+        <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
         <OnboardingWalkthrough />
         <CommandPalette
           open={commandPaletteOpen}
@@ -589,6 +594,7 @@ export default function BuilderPage() {
           isLoadingShortcode={loadPageFromShortcodeMutation.isPending}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
+          onOpenKeyboardShortcuts={() => setShortcutsOpen(true)}
           onDuplicatePage={handleDuplicatePage}
           onToggleToolbar={() => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: !state.toolbarMinimized })}
         />
