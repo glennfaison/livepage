@@ -141,6 +141,7 @@ export const CommandPalette: React.FC<
     onOpenAIAssistant: () => void
     onDuplicatePage: () => void
     onToggleToolbar?: () => void
+    onOpenKeyboardShortcuts?: () => void
     /** Whether the matching export/import mutation is currently in flight. */
     isSavingJson?: boolean
     isSavingShortcode?: boolean
@@ -168,6 +169,7 @@ export const CommandPalette: React.FC<
   onOpenAIAssistant,
   onDuplicatePage,
   onToggleToolbar,
+  onOpenKeyboardShortcuts,
   isSavingJson = false,
   isSavingShortcode = false,
   isSavingHtml = false,
@@ -407,6 +409,18 @@ export const CommandPalette: React.FC<
             },
           ]
         : []),
+      {
+        id: "keyboard-shortcuts",
+        group: "Actions",
+        label: "Keyboard shortcuts",
+        description: "Show all keyboard shortcuts",
+        keywords: ["shortcuts", "help", "cheatsheet", "?"],
+        icon: <CommandIcon className="h-4 w-4" />,
+        onSelect: () => {
+          onOpenKeyboardShortcuts?.()
+          onOpenChange(false)
+        },
+      },
     ]
 
     const insertParent = state.selectedComponentId
