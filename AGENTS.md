@@ -93,6 +93,8 @@ task, the branch-name rules, the PR format, and the code conventions.
 - [`.agents/docs/CONVENTIONS.md`](./.agents/docs/CONVENTIONS.md) — how the code
   should look
 - [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) — **required reading before any branch or PR**; allowed names and enforcement
+- [`.agents/docs/TESTING.md`](./.agents/docs/TESTING.md) — test categories, what
+  belongs in smoke, and CI job order
 - [`.agents/docs/PR-FORMAT.md`](./.agents/docs/PR-FORMAT.md) — how to close
   issues and target a branch in a PR body
 
