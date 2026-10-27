@@ -55,6 +55,34 @@ when to use it. Each step has a group skill (picks the work) and an item skill
 4. Shepherding: `shepherd-github-prs` (group), `shepherd-github-pr` (item)
 5. Reviewing: `review-github-prs` (group), `review-github-pr` (item)
 
+Reviewing has a third outcome besides merging and sending a PR back: a PR that
+runs out of review rounds, or that changes a path matched by `human_merge_paths`,
+is handed to a person. It gets the `agent:human-merge` label and a comment that
+mentions the PR's CODEOWNERS, read from the base branch. Agents never merge it.
+The label is created by the label setup in the `agent-workflow-protocol` skill's
+`references/labels.md`, so run that setup again after refreshing the skills if
+the label is missing.
+
+Utility skills are called by the steps above and are not run on their own, with
+one exception: `retrospective` is run by hand. It reads the `agent:log` run-log
+issues and reports ranked, evidence-backed suggestions for improving the skills
+and the process. It only reads and reports. `/pipeline-guide` lists every
+utility skill.
+
+### Settings
+
+These are the key-value inputs the pipeline skills read. Override one per run
+with a `key=value` pair on a line of its own; leaving it out keeps the default.
+
+- `pr_base_branch`: develop
+- `app_url`: https://livepagecrafter-dev.vercel.app
+- `merge_method`: squash
+- `human_reviewer`: glennfaison
+- `build_cmd`: npm run build
+- `git_hooks_path`: scripts/git-hooks
+- `repo_guidance`: AGENTS.md
+- `trusted_authors`: (none)
+
 ## Repository guidance
 
 These files hold this repository's contributor rules: how to scope and verify a
@@ -65,6 +93,8 @@ task, the branch-name rules, the PR format, and the code conventions.
 - [`.agents/docs/CONVENTIONS.md`](./.agents/docs/CONVENTIONS.md) — how the code
   should look
 - [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md) — **required reading before any branch or PR**; allowed names and enforcement
+- [`.agents/docs/TESTING.md`](./.agents/docs/TESTING.md) — test categories, what
+  belongs in smoke, and CI job order
 - [`.agents/docs/PR-FORMAT.md`](./.agents/docs/PR-FORMAT.md) — how to close
   issues and target a branch in a PR body
 
@@ -80,3 +110,8 @@ the change is a genuine user-facing feature, setup step, or development command.
 Agent guidance belongs in `AGENTS.md` or `.agents/docs/`. If a section has already
 been added to `README.md` by an agent and is out of scope, remove it rather than
 kept "for completeness".
+
+
+## Observability
+
+See [`.agents/docs/OBSERVABILITY.md`](./.agents/docs/OBSERVABILITY.md) for what is tracked, privacy choices (canvas content masked), and free-tier limits.

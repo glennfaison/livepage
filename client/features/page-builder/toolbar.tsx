@@ -13,7 +13,7 @@ import {
 } from "@/client/components/ui/dialog"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
-import { Bot, Command, Copy, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
+import { Bot, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
 import type React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { HistoryEntry, AppState } from "@/client/features/types"
@@ -79,7 +79,6 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory: (index: number) => void
   onDiscardHistory: () => void
   historyPreviewIndex: number | null
-  onOpenCommandPalette?: () => void
   /** Optional: renders an AI Assistant trigger button when provided and prompt assist is enabled. */
   onOpenAIAssistant?: () => void
   /** Page component for settings popover */
@@ -113,7 +112,6 @@ export const Toolbar: React.FC<Readonly<{
   onAcceptHistory,
   onDiscardHistory,
   historyPreviewIndex,
-  onOpenCommandPalette,
   onOpenAIAssistant,
   pageComponent,
   componentTree,
@@ -146,6 +144,8 @@ export const Toolbar: React.FC<Readonly<{
   const currentPage = pageComponent ?? componentTree[0]
   const canUndo = canUndoProp ?? currentHistoryIndex > 0
   const canRedo = canRedoProp ?? currentHistoryIndex < history.length - 1
+
+  const [announcement, setAnnouncement] = useState("")
 
   // Discard confirmation
   const {
@@ -341,10 +341,9 @@ export const Toolbar: React.FC<Readonly<{
       assertToolbarButtonBalance(0, 0)
     } else {
       const leftButtonCount =
-        (onOpenCommandPalette ? 1 : 0) +
         (onOpenAIAssistant && promptAssistEnabled ? 1 : 0) +
         3 // history, undo, redo
-      const rightButtonCount = 5 // save, discard, duplicate page, settings, layout toggle
+      const rightButtonCount = 4 // save, discard, settings, layout toggle
       assertToolbarButtonBalance(leftButtonCount, rightButtonCount)
     }
   }
@@ -378,11 +377,6 @@ export const Toolbar: React.FC<Readonly<{
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
 
-          {onOpenCommandPalette ? (
-            <Button variant="outline" size="sm" onClick={onOpenCommandPalette} title="Command palette" className="shrink-0">
-              <Command className="h-4 w-4" />
-            </Button>
-          ) : null}
           {onOpenAIAssistant && promptAssistEnabled ? (
             <Button
               variant="outline"
@@ -404,7 +398,7 @@ export const Toolbar: React.FC<Readonly<{
             onDiscard={onDiscardHistory}
             previewIndex={historyPreviewIndex}
           >
-            <Button variant="outline" size="sm" title="History" className="shrink-0">
+            <Button variant="outline" size="sm" title={`History (${formatShortcut("H")})`} className="shrink-0">
               <History className="h-4 w-4" />
             </Button>
           </HistoryPopover>
@@ -412,22 +406,28 @@ export const Toolbar: React.FC<Readonly<{
           <Button variant="outline" size="sm" onClick={onUndo} disabled={!canUndo} title={`Undo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Undo">
             <Undo className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z")})`} className="shrink-0" aria-label="Redo">
+          <Button variant="outline" size="sm" onClick={onRedo} disabled={!canRedo} title={`Redo (${formatShortcut("Z", { shift: true })})`} className="shrink-0" aria-label="Redo">
             <Redo className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={() => setToolbarMinimized(true)} title={`Minimize / toggle toolbar (${formatShortcut("\`")})`} className="shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setToolbarMinimized(true)
+              setAnnouncement("Toolbar minimized")
+            }}
+            title={`Minimize / toggle toolbar (${formatShortcut("\`")})`}
+            className="shrink-0"
+          >
             <Minimize className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" size="sm" onClick={savePage} title="Save" className="shrink-0">
+          <Button variant="outline" size="sm" onClick={savePage} title={`Save (${formatShortcut("S")})`} className="shrink-0">
             <Save className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={handleDiscardWithConfirmation} title="Discard" className="shrink-0">
             <X className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDuplicatePage} title={`Duplicate page (${formatShortcut("D")})`} className="shrink-0" aria-label="Duplicate page">
-            <Copy className="h-4 w-4" />
           </Button>
 
           <ToolbarSettingsPopover
@@ -484,7 +484,10 @@ export const Toolbar: React.FC<Readonly<{
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setToolbarMinimized(false)}
+            onClick={() => {
+              setToolbarMinimized(false)
+              setAnnouncement("Toolbar restored")
+            }}
             className="flex items-center gap-2"
             title="Maximize"
           >
@@ -503,6 +506,9 @@ export const Toolbar: React.FC<Readonly<{
           </div>
         </div>
       )}
+        <div role="status" aria-live="polite" className="sr-only">
+          {announcement}
+        </div>
     </div>
 
     <DiscardConfirmationDialog

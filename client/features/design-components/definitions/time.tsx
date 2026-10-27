@@ -74,6 +74,7 @@ export const componentMetadata = {
 	tag,
 	label,
 	category: "Other" as ComponentCategory,
+	description: "A localized date and time.",
 	keywords,
 	defaultChildren: ["Updated"],
 	attributes,

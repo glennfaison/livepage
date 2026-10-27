@@ -1,6 +1,6 @@
 import { Rss } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { validateUrlForSsrf } from "@/client/lib/utils"
+import { validateUrlForSsrf, debounceAsync } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -59,11 +59,13 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	}
 }
 
+const tryConnectionDebounced = debounceAsync(tryConnection, 500)
+
 export const dataSourceInfo = {
 	id: "rss-feed",
 	label: "RSS Feed",
 	keywords: ["rss", "feed", "xml", "syndication"],
 	Icon: <Rss className="h-4 w-4" />,
 	settings,
-	tryConnection,
+	tryConnection: tryConnectionDebounced,
 } as const satisfies DataSourceInfo

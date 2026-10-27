@@ -159,6 +159,7 @@ export const componentMetadata = {
 	htmlTag: "section",
 	label,
 	category: "Data" as ComponentCategory,
+	description: "A two-series line chart for trends and values.",
 	keywords,
 	defaultChildren: [],
 	attributes,

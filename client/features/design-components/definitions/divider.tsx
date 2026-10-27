@@ -25,7 +25,9 @@ const Component = (props: Props) => {
 }
 
 export const componentMetadata = {
-	tag, label, category: "Feedback" as ComponentCategory, keywords, defaultChildren: [], attributes, Icon, htmlTag: "hr",
+	tag, label, category: "Feedback" as ComponentCategory,
+	description: "A horizontal line that separates sections.",
+	keywords, defaultChildren: [], attributes, Icon, htmlTag: "hr",
 	PreviewModeComponent: withDataSource(Component),
 	EditModeComponent: withEditorControls(withDataSource(Component)),
 } as const satisfies Metadata

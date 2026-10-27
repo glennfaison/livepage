@@ -1,6 +1,6 @@
 export { ComponentOperationsContext, useComponentOperationsContext } from "./component-operations-context"
 export { ComponentSelectorPopover } from "./component-selector-popover"
-export { Divider, useDividerVisibility } from "./layout-divider"
+export { DividerOverlay, useDividerVisibility } from "./layout-divider"
 export { SettingsPopover } from "./settings-popover"
 export { ReplaceWithPopover } from "./replace-with-popover"
 export { withEditorControls } from "./decorators/with-editor-controls"

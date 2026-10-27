@@ -3,9 +3,11 @@
 import { Button } from "@/client/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/client/components/ui/dropdown-menu"
 import { selectCurrentPage } from "@/client/features/app-state"
+import { recoverLoadLatest, recoverOverwrite } from "@/client/features/app-state"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { useAppState } from "@/client/features/app-state"
 import { deepClone } from "@/client/lib/deep-clone"
+import { cn } from "@/client/lib/utils"
 import {
   CanvasRenderer,
   ComponentOperationsContext,
@@ -14,24 +16,72 @@ import {
   useHistoryOperations,
   usePageOperations,
 } from "@/client/features/page-builder"
+import {
+  useCopyComponentShortcut,
+  usePasteComponentShortcut,
+  useDuplicateComponentShortcut,
+} from "@/client/features/page-builder/keyboard-shortcuts"
 import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
+import { KeyboardShortcutsDialog } from "@/client/features/page-builder/keyboard-shortcuts-dialog"
+import { useKeyboardShortcutsHelp } from "@/client/features/page-builder/keyboard-shortcuts"
 import { AssistChat } from "@/client/features/prompt-assist"
+import { OnboardingWalkthrough } from "@/client/features/page-builder/onboarding-walkthrough"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload, Monitor } from "lucide-react"
 import Link from "next/link"
-import React, { useCallback, useRef, useState } from "react"
+import React, { useCallback, useRef, useState, useMemo, useEffect } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/client/components/ui/select"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
 import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
-import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { serializeAppStateAsHtml, serializeAppStateAsJson, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
 const templateDisplayCatalog = describeTemplateDisplayCatalog()
 
+function StaleLockBanner({
+  onLoadLatest,
+  onExport,
+  onOverwrite,
+}: Readonly<{
+  onLoadLatest: () => void
+  onExport: () => void
+  onOverwrite: () => void
+}>): React.JSX.Element {
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      className="fixed inset-x-0 top-0 z-50 p-4 sm:p-6 sm:rounded-b-lg"
+    >
+      <div className="max-w-2xl mx-auto bg-amber-50 border border-amber-200 rounded-lg p-4 shadow-lg">
+        <h2 className="text-sm font-semibold text-amber-900">Edited in another tab</h2>
+        <p className="mt-1 text-sm text-amber-800">
+          This tab is out of date and has been locked to protect your edits. Your changes are still
+          in memory and have not been saved.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3 sm:gap-4">
+          <Button variant="default" onClick={onLoadLatest} className="flex-1 sm:auto">
+            Load latest here
+          </Button>
+          <Button variant="outline" onClick={onExport} className="flex-1 sm:auto">
+            Export my version
+          </Button>
+          <Button variant="destructive" onClick={onOverwrite} className="flex-1 sm:auto">
+            Overwrite with this tab
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function BuilderPage() {
   const { state, dispatch } = useAppState()
+  const isStale = state.stale
   const pageBuilderMode = state.pageBuilderMode
   const {
     savePageAsJsonMutation,
@@ -57,9 +107,27 @@ export default function BuilderPage() {
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop")
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
+  useKeyboardShortcutsHelp(() => setShortcutsOpen(true))
+
+  // Component copy / paste / duplicate (edit mode only, when a component is selected)
+  const hasSelection = Boolean(state.selectedComponentId)
+  useCopyComponentShortcut(
+    () => componentOperations.copyComponentToClipboard?.(state.selectedComponentId),
+    pageBuilderMode === "edit" && hasSelection,
+  )
+  usePasteComponentShortcut(
+    () => componentOperations.pasteComponentFromClipboard?.(state.selectedComponentId),
+    pageBuilderMode === "edit" && hasSelection,
+  )
+  useDuplicateComponentShortcut(
+    () => componentOperations.duplicateComponent?.(state.selectedComponentId),
+    pageBuilderMode === "edit" && hasSelection,
+  )
 
   // Deep link used by template review: /try?template=<id>&mode=preview renders a template deterministically.
   useTemplateDeepLink(dispatch)
@@ -166,6 +234,28 @@ export default function BuilderPage() {
     setValidationResult(null)
   }
 
+  const previewHtml = useMemo(() => {
+    if (pageBuilderMode !== "preview" || previewDevice === "desktop") return null
+    try {
+      return serializeAppStateAsHtml(state.componentTree, { assetBaseUrl: typeof window !== "undefined" ? window.location.origin : undefined })
+    } catch {
+      return null
+    }
+  }, [pageBuilderMode, previewDevice, state.componentTree])
+
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null)
+  useEffect(() => {
+    if (!previewHtml) {
+      setIframeSrc(null)
+      return
+    }
+    const blob = new Blob([previewHtml], { type: "text/html" })
+    const url = URL.createObjectURL(blob)
+    setIframeSrc(url)
+    return () => URL.revokeObjectURL(url)
+  }, [previewHtml])
+
+  const deviceWidth = previewDevice === "tablet" ? 768 : previewDevice === "mobile" ? 375 : undefined
   const canUndo = state.currentHistoryIndex > 0
   const canRedo = state.currentHistoryIndex < state.history.length - 1
 
@@ -246,6 +336,28 @@ export default function BuilderPage() {
   return (
     <ComponentOperationsContext.Provider value={componentOperations}>
       <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
+        {isStale && (
+          <StaleLockBanner
+            onLoadLatest={() => {
+              recoverLoadLatest()
+            }}
+            onExport={() => {
+              const data = serializeAppStateAsJson(state.componentTree)
+              const blob = new Blob([data], { type: "application/json" })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement("a")
+              a.href = url
+              a.download = `${(selectCurrentPage(state)?.attributes.title ?? "page").toLowerCase().replace(/\s+/g, "-") || "page"}.json`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            }}
+            onOverwrite={() => {
+              recoverOverwrite()
+            }}
+          />
+        )}
         <header className="border-b px-2">
           <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-2 py-3 sm:py-4">
             <div className="flex min-w-0 items-center gap-2">
@@ -261,7 +373,7 @@ export default function BuilderPage() {
                 className="gap-2 px-2 sm:px-3"
                 onClick={() => setCommandPaletteOpen(true)}
                 title="Command palette (⌘K)"
-                aria-label="Open command palette"
+                aria-label="Open command palette" data-onboarding="command"
               >
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
@@ -353,7 +465,7 @@ export default function BuilderPage() {
                 variant="outline"
                 size="sm"
                 className="gap-2 px-2 sm:px-3"
-                aria-label={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
+                aria-label={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"} data-onboarding="mode-toggle"
                 title={pageBuilderMode === "edit" ? "Switch to preview mode" : "Switch to edit mode"}
                 onClick={() => {
                   const nextMode = pageBuilderMode === "edit" ? "preview" : "edit"
@@ -366,12 +478,30 @@ export default function BuilderPage() {
                 {pageBuilderMode === "edit" ? <MonitorPlay className="h-4 w-4 sm:hidden" /> : <Pencil className="h-4 w-4 sm:hidden" />}
                 <span className="hidden sm:inline">{pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}</span>
               </Button>
+              {pageBuilderMode === "preview" && (
+                <Select value={previewDevice} onValueChange={(value) => setPreviewDevice(value as "desktop" | "tablet" | "mobile")}>
+                  <SelectTrigger className="w-[140px] h-9" aria-label="Preview device size">
+                    <SelectValue placeholder="Device" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desktop">
+                      <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Desktop</span>
+                    </SelectItem>
+                    <SelectItem value="tablet">
+                      <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Tablet (768px)</span>
+                    </SelectItem>
+                    <SelectItem value="mobile">
+                      <span className="flex items-center gap-2"><MonitorPlay className="h-4 w-4" /> Mobile (375px)</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
               <ThemeToggle />
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden flex flex-col">
+        <main data-onboarding="canvas" className={cn("flex-1 overflow-hidden flex flex-col", isStale ? "inert opacity-50 pointer-events-none" : "")}>
           <div className="border-b bg-background">
             <div className="container mx-auto flex min-w-0 flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div className="flex min-w-0 flex-1 basis-full items-center gap-3 sm:basis-0">
@@ -404,14 +534,33 @@ export default function BuilderPage() {
           </div>
 
           <PageBuilderErrorBoundary>
-            <DragDropProvider moveComponent={componentOperations.moveComponent ?? (() => {})}>
-              <CanvasRenderer
-                component={currentPage}
-                pageBuilderMode={pageBuilderMode}
-                selectedComponentId={state.selectedComponentId}
-                selectedComponentAncestors={state.selectedComponentAncestors}
-              />
-            </DragDropProvider>
+            {pageBuilderMode === "preview" && previewDevice !== "desktop" && iframeSrc ? (
+              <div className="flex-1 flex items-start justify-center overflow-auto bg-muted/30 p-4">
+                <div
+                  className="relative bg-background border shadow-xl rounded-lg overflow-hidden"
+                  style={{ width: deviceWidth, maxWidth: "100%", height: "calc(100dvh - 12rem)" }}
+                >
+                  <iframe
+                    src={iframeSrc}
+                    title={`${previewDevice} preview`}
+                    className="w-full h-full border-0"
+                    sandbox="allow-scripts allow-same-origin"
+                  />
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground bg-background/80 px-2 py-0.5 rounded">
+                    {previewDevice === "tablet" ? "768px" : "375px"}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <DragDropProvider moveComponent={componentOperations.moveComponent ?? (() => {})}>
+                <CanvasRenderer
+                  component={currentPage}
+                  pageBuilderMode={pageBuilderMode}
+                  selectedComponentId={state.selectedComponentId}
+                  selectedComponentAncestors={state.selectedComponentAncestors}
+                />
+              </DragDropProvider>
+            )}
           </PageBuilderErrorBoundary>
         </main>
 
@@ -427,7 +576,6 @@ export default function BuilderPage() {
           onAcceptHistory={handleHistoryAccept}
           onDiscardHistory={handleHistoryDiscard}
           historyPreviewIndex={state.historyPreviewIndex}
-          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
           pageComponent={currentPage}
           componentTree={state.componentTree}
@@ -441,6 +589,8 @@ export default function BuilderPage() {
           canRedo={canRedo}
         />
 
+        <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+        <OnboardingWalkthrough />
         <CommandPalette
           open={commandPaletteOpen}
           onOpenChange={setCommandPaletteOpen}
@@ -464,6 +614,7 @@ export default function BuilderPage() {
           isLoadingShortcode={loadPageFromShortcodeMutation.isPending}
           onDiscardChanges={handleDiscard}
           onOpenAIAssistant={() => setAiAssistantOpen(true)}
+          onOpenKeyboardShortcuts={() => setShortcutsOpen(true)}
           onDuplicatePage={handleDuplicatePage}
           onToggleToolbar={() => dispatch({ type: "SET_TOOLBAR_MINIMIZED", payload: !state.toolbarMinimized })}
         />

@@ -72,6 +72,7 @@ export const componentMetadata = {
 	htmlTag: "button",
 	label,
 	category: "Navigation" as ComponentCategory,
+	description: "A clickable action button.",
 	keywords,
 	defaultChildren,
 	attributes,

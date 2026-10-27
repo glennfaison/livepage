@@ -192,7 +192,7 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
     const editMode = props.pageBuilderMode === "edit"
     const showControls = editMode && props.selectedComponentId === props.component.attributes.id
     const { setSelectedComponent } = useComponentOperationsContext()
-    const { onMouseMove, onMouseLeave } = props
+    const { onMouseMove, onMouseLeave, onDragOver, onDragLeave } = props
     const [hovered, setHovered] = useState(false)
 
     const metadata = getComponentInfo(props.component.tag)
@@ -221,6 +221,8 @@ export function withEditorControls(WrappedComponent: React.ComponentType<EditMod
           setHovered(false)
           onMouseLeave?.(e)
         }}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
         {...accessibilityAttrs}
         data-component-id={props.component.attributes.id}
         data-selected={showControls ? "true" : "false"}

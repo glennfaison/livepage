@@ -1,6 +1,6 @@
 import { Table2 } from "lucide-react"
 import type { DataSourceInfo, DataSourceSettings } from "@/client/features/types"
-import { validateUrlForSsrf } from "@/client/lib/utils"
+import { validateUrlForSsrf, debounceAsync } from "@/client/lib/utils"
 
 const settings = [
 	{
@@ -48,11 +48,13 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	return { columns, rows: data.map((row) => Object.fromEntries(columns.map((column, index) => [column, row[index] ?? ""]))) }
 }
 
+const tryConnectionDebounced = debounceAsync(tryConnection, 500)
+
 export const dataSourceInfo = {
 	id: "csv",
 	label: "CSV",
 	keywords: ["csv", "table", "spreadsheet", "data"],
 	Icon: <Table2 className="h-4 w-4" />,
 	settings,
-	tryConnection,
+	tryConnection: tryConnectionDebounced,
 } as const satisfies DataSourceInfo

@@ -2,281 +2,305 @@ import { cn } from "@/client/lib/utils"
 import { CONTRAST_DARK, CONTRAST_LIGHT, getContrastColorForBackground, parseCssColor } from "./shared/contrast-color"
 import { Plus } from "lucide-react"
 import React from "react"
-import { Button } from "@/client/components/ui/button"
+import { createPortal } from "react-dom"
 import { ComponentSelectorPopover } from "./component-selector-popover"
 import type { AppNodeTag } from "@/client/features/types"
 import { useDragDrop } from "./drag-drop-context"
-import { getLayoutRect } from "./shared/use-element-box"
+import { getLayoutElement } from "./shared/use-element-box"
+import type { ElementBox } from "./shared/use-element-box"
 
-const MAX_ANCESTOR_DEPTH = 12
+/** Marks editor chrome portalled over the page, so sampling the page's colors can look through it. */
+export const EDITOR_CHROME_ATTRIBUTE = "data-editor-chrome"
 /** Visible thickness of an insertion divider, in pixels. See ADR 0014. */
-export const DIVIDER_THICKNESS_PX = 2
-/** Time the pointer has to reach the divider after leaving a child before it hides. */
-const HIDE_DELAY_MS = 250
+export const DIVIDER_THICKNESS_PX = 4
+/** How long a divider lingers once the pointer is no longer near its edge. */
+export const DIVIDER_HIDE_DELAY_MS = 1000
+/** Wider invisible hit area around the bar, so it is easy to click. Costs no layout. */
+const HIT_AREA_PX = DIVIDER_THICKNESS_PX + 8
+/** Diameter of the round "+" badge centered on the bar. */
+export const DIVIDER_BADGE_PX = 24
 
-export const measureBackgroundUnder = (el: HTMLElement | null): string | null => {
-  if (typeof window === "undefined" || !el) return null
-  let node: HTMLElement | null = el.parentElement
-  for (let depth = 0; node && depth < MAX_ANCESTOR_DEPTH; depth++) {
+/** Portal root shared by every divider overlay. Portalling into a dedicated element instead of
+ * `document.body` directly keeps React's unmount from throwing `NotFoundError` when something
+ * (e.g. a test teardown) wipes `document.body.innerHTML`: the overlay node stays a child of the
+ * detached container, so `container.removeChild(node)` still succeeds. */
+let portalRoot: HTMLDivElement | null = null
+function getPortalRoot(): HTMLDivElement {
+  if (!portalRoot || !document.body.contains(portalRoot)) {
+    portalRoot?.remove()
+    portalRoot = document.createElement("div")
+    portalRoot.setAttribute(EDITOR_CHROME_ATTRIBUTE, "true")
+    document.body.appendChild(portalRoot)
+  }
+  return portalRoot
+}
+
+/**
+ * The first opaque background color at a viewport point: the topmost page element there (editor
+ * chrome is skipped) or its nearest ancestor that paints one. Returns null when nothing does, or
+ * where `elementsFromPoint` is unavailable.
+ */
+export const measureBackgroundAt = (x: number, y: number): string | null => {
+  if (typeof document === "undefined" || typeof document.elementsFromPoint !== "function") return null
+  const clampedX = Math.min(Math.max(x, 0), window.innerWidth - 1)
+  const clampedY = Math.min(Math.max(y, 0), window.innerHeight - 1)
+  const target = document.elementsFromPoint(clampedX, clampedY).find((el) => !el.closest(`[${EDITOR_CHROME_ATTRIBUTE}]`))
+  for (let node = target ?? null; node; node = node.parentElement) {
     const bg = window.getComputedStyle(node).backgroundColor
     if (parseCssColor(bg)) return bg
-    node = node.parentElement
   }
   return null
 }
 
 /**
- * Inline styles pin the divider's cross-axis thickness. Inline, because a utility class
- * loses to `min-width: auto` (which a flex item resolves to its content size) and to
- * parent-level `kids:` / `flex-1` / `self-stretch` rules; `flex: 0 0 Npx` plus min/max
- * on the thickness axis keeps it from growing or shrinking in a row, column, or grid.
+ * Contrast color for a bar drawn over the page at a document-coordinate point. The overlay lives
+ * in a portal, so its own ancestors say nothing about what is under it: sample the page itself.
  */
-export const getDividerThicknessStyle = (orientation: "horizontal" | "vertical"): React.CSSProperties => {
-  const px = `${DIVIDER_THICKNESS_PX}px`
-  return orientation === "vertical"
-    ? { width: px, minWidth: px, maxWidth: px, flex: `0 0 ${px}` }
-    : { height: px, minHeight: px, maxHeight: px, flex: `0 0 ${px}` }
-}
-
-const CSS_WIDE_KEYWORDS = /^(normal|inherit|initial|unset|revert|revert-layer)$/i
-const UNITLESS_NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)$/
-
-/** Splits on whitespace that is not inside parentheses, so `calc(1rem + 2px)` stays one token. */
-const splitTopLevel = (value: string): string[] => {
-  const tokens: string[] = []
-  let depth = 0
-  let current = ""
-  for (const char of value.trim()) {
-    if (char === "(") depth++
-    else if (char === ")") depth = Math.max(0, depth - 1)
-    if (/\s/.test(char) && depth === 0) {
-      if (current) tokens.push(current)
-      current = ""
-      continue
-    }
-    current += char
-  }
-  if (current) tokens.push(current)
-  return tokens
-}
-
-/**
- * The flex gap a divider sits in, along the parent's main axis, as a value that is safe to
- * place inside `calc()`. The Gap setting is free text, so it can be `0`, `normal`, or the
- * two-value `<row-gap> <column-gap>` form; none of those can be added to a length as written.
- * A vertical divider lives in a row (main axis = columns, so `column-gap`, the last value);
- * a horizontal divider lives in a column (`row-gap`, the first value). Anything that browsers
- * would not apply as a gap resolves to `0px`.
- */
-export const resolveMainAxisGap = (gap: string | number | undefined, orientation: "horizontal" | "vertical"): string => {
-  if (gap == null) return "0px"
-  if (typeof gap === "number") return Number.isFinite(gap) && gap > 0 ? `${gap}px` : "0px"
-  const tokens = splitTopLevel(gap)
-  if (tokens.length === 0 || tokens.length > 2) return "0px"
-  const token = orientation === "vertical" ? tokens[tokens.length - 1] : tokens[0]
-  return CSS_WIDE_KEYWORDS.test(token) || UNITLESS_NUMBER.test(token) ? "0px" : token
-}
-
-/**
- * Layout for an insertion divider, so editor chrome does not move the page (issue #431).
- *
- * - Hidden: taken out of flow with `position: absolute`. It is then not a flex item, so it
- *   adds no flex gap and no `justify-content` slot, and edit-mode layout is identical to
- *   preview whatever the gap or justification is.
- * - Shown: in flow, because it has to sit between its siblings, with the thickness from
- *   ADR 0014. Each side gets a negative margin of half of (gap + thickness), so the two flex
- *   gaps around the bar and its own thickness cancel out and the siblings do not move.
- */
-export const getDividerLayoutStyle = (
-  orientation: "horizontal" | "vertical",
-  shown: boolean,
-  gap?: string | number,
-): React.CSSProperties => {
-  if (!shown) return { position: "absolute" }
-  const half = `calc((${resolveMainAxisGap(gap, orientation)} + ${DIVIDER_THICKNESS_PX}px) / -2)`
-  return orientation === "vertical"
-    ? { ...getDividerThicknessStyle(orientation), marginLeft: half, marginRight: half }
-    : { ...getDividerThicknessStyle(orientation), marginTop: half, marginBottom: half }
-}
-
-export const useDividerContrastColor = (ref: React.RefObject<HTMLElement | null>) => {
+export const useDividerContrastColor = (documentX: number, documentY: number) => {
   const [color, setColor] = React.useState(CONTRAST_DARK)
   React.useEffect(() => {
-    const measure = () => setColor(getContrastColorForBackground(measureBackgroundUnder(ref.current)))
+    const measure = () =>
+      setColor(getContrastColorForBackground(measureBackgroundAt(documentX - window.scrollX, documentY - window.scrollY)))
     measure()
     const frame = requestAnimationFrame(measure)
     return () => cancelAnimationFrame(frame)
-  }, [ref])
+  }, [documentX, documentY])
   return color
 }
 
-export const Divider = ({
+export type DividerOrientation = "vertical" | "horizontal"
+export type DividerEdge = "start" | "end"
+
+/**
+ * Insertion divider drawn as an overlay portalled to `document.body`, placed from the hovered
+ * child's own box. It is never a flex item, so it can never shift surrounding elements.
+ *
+ * The whole bar is a clickable `<button>` with an accessible name and a hit area wider than the
+ * bar. Clicking it opens the component selector popover; the "+" is the visual cue.
+ *
+ * The parent mounts the overlay only while its divider is visible, so a mounted overlay is always
+ * drawn. While the pointer is on it or its popover is open, it holds its divider (`onHold`) so the
+ * parent's hide timer cannot unmount it from under the cursor.
+ */
+export const DividerOverlay = ({
   orientation,
-  parentTag,
+  edge,
+  box,
   onAddComponent,
-  index,
-  isVisible,
+  onHold,
+  parentTag,
   parentId,
-  dividerIndex,
-  gap,
+  insertIndex,
 }: Readonly<{
-  orientation: "horizontal" | "vertical"
-  parentTag: AppNodeTag
+  orientation: DividerOrientation
+  edge: DividerEdge
+  box: ElementBox
   onAddComponent: (type: AppNodeTag, index: number) => void
-  index: number
-  isVisible: boolean
+  onHold: DividerHold
+  parentTag: AppNodeTag
   parentId: string
-  dividerIndex: number
-  gap?: string | number
+  insertIndex: number
 }>) => {
   const [popoverOpen, setPopoverOpen] = React.useState(false)
   const [hovered, setHovered] = React.useState(false)
   const { state, setDropTarget, endDrag } = useDragDrop()
-  // Stay visible while the pointer is on the bar/+ so it does not fade mid-click.
-  const shown = isVisible || popoverOpen || hovered
+  const isVertical = orientation === "vertical"
+  // Only the divider being dragged over is the drop target, not every divider in this layout.
+  const isDropTarget =
+    state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.index === insertIndex
+  const held = hovered || popoverOpen || isDropTarget
+  // Registers with the parent's visibility store (an external system) while held. The cleanup
+  // also runs on unmount, so a hold can never outlive its overlay.
+  React.useEffect(() => (held ? onHold(insertIndex) : undefined), [held, onHold, insertIndex])
 
-  const isDropTarget = state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex
-
-  const barRef = React.useRef<HTMLDivElement>(null)
-  const color = useDividerContrastColor(barRef)
+  // Sample 1px inside the hovered child: the bar straddles its edge, and the child is what the
+  // user is looking at.
+  const sampleX = isVertical ? (edge === "start" ? box.left + 1 : box.left + box.width - 1) : box.left + box.width / 2
+  const sampleY = isVertical ? box.top + box.height / 2 : edge === "start" ? box.top + 1 : box.top + box.height - 1
+  const color = useDividerContrastColor(sampleX, sampleY)
   const iconColor = color === CONTRAST_LIGHT ? CONTRAST_DARK : CONTRAST_LIGHT
 
   const handleAddComponent = (type: AppNodeTag) => {
-    onAddComponent(type, index)
+    onAddComponent(type, insertIndex)
     setPopoverOpen(false)
+    setHovered(false)
   }
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
-    if (state.draggedComponentId) {
+    if (state.draggedComponentId && !isDropTarget) {
       setDropTarget({
         type: "divider",
         parentId,
         parentTag,
-        index,
-        dividerIndex,
+        index: insertIndex,
       })
     }
   }
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    // Only clear if we're actually leaving the element (not entering a child)
+  const handleDragLeave = (e: React.DragEvent<HTMLButtonElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-      if (state.dropTarget?.type === "divider" && state.dropTarget.parentId === parentId && state.dropTarget.dividerIndex === dividerIndex) {
-        setDropTarget(null)
-      }
+      if (isDropTarget) setDropTarget(null)
     }
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault()
     endDrag()
   }
 
-  return (
-    <div
-      ref={barRef}
-      style={{ backgroundColor: color, ...getDividerLayoutStyle(orientation, shown, gap) }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      className={cn(
-        "flex items-center justify-center transition-opacity duration-150 group cursor-pointer",
-        // Layout-neutral when hidden: out of flow (inline `position: absolute`), zero size, no
-        // pointer events. `relative` is only for the in-flow bar; it would lose to inline anyway.
-        shown ? "relative" : "size-0 pointer-events-none overflow-hidden",
-        // Opacity only — never visibility:hidden — so the hit target stays active
-        // while the pointer moves from a child onto the bar.
-        shown ? "opacity-100" : "opacity-0",
-        orientation === "horizontal"
-          ? shown ? "flex-row w-full" : ""
-          : shown ? "flex-col self-stretch" : "",
-        isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
-      )}
+  const atEnd = edge === "end"
+  const main = isVertical ? box.width : box.height
+  const cross = isVertical ? box.height : box.width
+  const halfHit = HIT_AREA_PX / 2
+  const edgeOffset = atEnd ? main : 0
+
+  const hitStyle: React.CSSProperties = {
+    position: "absolute",
+    zIndex: 30,
+    ...(isVertical
+      ? { left: box.left + edgeOffset - halfHit, top: box.top, width: HIT_AREA_PX, height: cross }
+      : { left: box.left, top: box.top + edgeOffset - halfHit, width: cross, height: HIT_AREA_PX }),
+  }
+
+  const barStyle: React.CSSProperties = {
+    position: "absolute",
+    backgroundColor: color,
+    ...(isVertical
+      ? { left: "50%", top: 0, width: DIVIDER_THICKNESS_PX, height: "100%", transform: "translateX(-50%)" }
+      : { left: 0, top: "50%", width: "100%", height: DIVIDER_THICKNESS_PX, transform: "translateY(-50%)" }),
+  }
+
+  return createPortal(
+    <ComponentSelectorPopover
+      open={popoverOpen}
+      onOpenChange={setPopoverOpen}
+      onSelect={handleAddComponent}
+      parentTag={parentTag}
     >
-      <ComponentSelectorPopover onSelect={handleAddComponent} parentTag={parentTag}>
-        <Button
-          variant="ghost"
-          size="icon"
-          style={{ backgroundColor: color, color: iconColor }}
-          className="absolute left-1/2 top-1/2 z-20 size-7 -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform hover:scale-110 hover:bg-inherit"
-          onClick={(e) => {
-            e.stopPropagation()
-            setPopoverOpen(true)
+      <button
+        type="button"
+        aria-label="Add component here"
+        style={hitStyle}
+        className={cn(
+          "flex items-center justify-center cursor-pointer animate-in fade-in-0 duration-150",
+          isDropTarget && "bg-primary/50 ring-2 ring-primary ring-offset-2",
+        )}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div style={barStyle} aria-hidden="true" />
+        {/* Solid badge in the bar color, so the "+" stays legible on any background. The thin ring
+            in the icon color keeps the badge itself visible where the bar color does not contrast. */}
+        <span
+          data-testid="divider-add-badge"
+          aria-hidden="true"
+          className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-sm"
+          style={{
+            width: DIVIDER_BADGE_PX,
+            height: DIVIDER_BADGE_PX,
+            backgroundColor: color,
+            color: iconColor,
+            boxShadow: `0 0 0 2px ${iconColor}`,
           }}
         >
-          <Plus className="h-3 w-3" />
-        </Button>
-      </ComponentSelectorPopover>
-    </div>
+          <Plus className="size-4" strokeWidth={3} />
+        </span>
+      </button>
+    </ComponentSelectorPopover>,
+    getPortalRoot(),
   )
 }
 
+/** The child edge the pointer was last near when a divider was shown; where its overlay is drawn. */
+export type DividerAnchor = Readonly<{ childIndex: number; edge: DividerEdge }>
 
-type DividerAxis = "v" | "h"
-
-const dividerKey = (axis: DividerAxis, index: number) => `${axis}${index}`
+/** Keeps a divider visible until the returned release function is called. */
+export type DividerHold = (insertIndex: number) => () => void
 
 /**
- * Divider visibility is keyed per edge. Show and hide each bump a generation so a
- * hide that already queued a state update cannot clobber a later show (the race
- * that left insertion dividers stuck visible or stuck invisible).
+ * Divider visibility along one axis, keyed by insertion index (the index a component would get if
+ * inserted there). Two neighbouring children share an insertion index, so each visible divider
+ * remembers the one edge the pointer was last near: exactly one overlay is drawn per insertion
+ * point, where the pointer is.
  *
- * Hide is delayed so the pointer can travel from a child edge onto the divider
- * bar and its + button without the control disappearing under the cursor.
+ * Show and hide each go through a generation so a hide that already queued a state update cannot
+ * clobber a later show (the race that left insertion dividers stuck visible or stuck invisible).
+ *
+ * Hide is delayed so the pointer can travel from a child edge onto the divider bar and its +
+ * button without the control disappearing under the cursor. A pending hide keeps its original
+ * deadline: moving around inside the child does not push it back, so the divider lingers for a
+ * predictable time. A held divider (see `holdDivider`) is not hidden and keeps its anchor, so it
+ * cannot jump away from under an open popover.
  */
-export const useDividerVisibility = () => {
-  const [visibleVerticalDividers, setVisibleVerticalDividers] = React.useState<Set<number>>(() => new Set())
-  const [visibleHorizontalDividers, setVisibleHorizontalDividers] = React.useState<Set<number>>(() => new Set())
-  const generationRef = React.useRef<Record<string, number>>({})
-  const timeoutRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+export const useDividerVisibility = (orientation: DividerOrientation) => {
+  const [visibleDividers, setVisibleDividers] = React.useState<ReadonlyMap<number, DividerAnchor>>(() => new Map())
+  const generationRef = React.useRef<Record<number, number>>({})
+  const timeoutRef = React.useRef<Record<number, ReturnType<typeof setTimeout>>>({})
+  const holdCountRef = React.useRef<Record<number, number>>({})
 
-  const clearTimer = React.useCallback((key: string) => {
-    const pending = timeoutRef.current[key]
+  const clearTimer = React.useCallback((index: number) => {
+    const pending = timeoutRef.current[index]
     if (pending) {
       clearTimeout(pending)
-      delete timeoutRef.current[key]
+      delete timeoutRef.current[index]
     }
   }, [])
 
-  const bump = React.useCallback((key: string) => {
-    clearTimer(key)
-    const next = (generationRef.current[key] ?? 0) + 1
-    generationRef.current[key] = next
+  const bump = React.useCallback((index: number) => {
+    clearTimer(index)
+    const next = (generationRef.current[index] ?? 0) + 1
+    generationRef.current[index] = next
     return next
   }, [clearTimer])
 
-  const setVisible = React.useCallback((axis: DividerAxis, index: number, visible: boolean, generation: number) => {
-    const key = dividerKey(axis, index)
-    const setter = axis === "v" ? setVisibleVerticalDividers : setVisibleHorizontalDividers
-    setter((prev) => {
-      if (generationRef.current[key] !== generation) return prev
-      if (prev.has(index) === visible) return prev
-      const next = new Set(prev)
-      if (visible) next.add(index)
-      else next.delete(index)
-      return next
+  const setVisible = React.useCallback((index: number, visible: boolean, generation: number, anchor?: DividerAnchor) => {
+    setVisibleDividers((prev) => {
+      if (generationRef.current[index] !== generation) return prev
+      const current = prev.get(index)
+      if (!visible) {
+        if (!current) return prev
+        const next = new Map(prev)
+        next.delete(index)
+        return next
+      }
+      const resolved = anchor ?? current
+      if (!resolved) return prev
+      if (current?.childIndex === resolved.childIndex && current.edge === resolved.edge) return prev
+      return new Map(prev).set(index, resolved)
     })
   }, [])
 
-  const showDivider = React.useCallback((axis: DividerAxis, index: number) => {
-    const generation = bump(dividerKey(axis, index))
-    setVisible(axis, index, true, generation)
+  const showDivider = React.useCallback((index: number, anchor?: DividerAnchor) => {
+    const generation = bump(index)
+    // A held divider stays where its popover is anchored.
+    setVisible(index, true, generation, holdCountRef.current[index] ? undefined : anchor)
   }, [bump, setVisible])
 
-  const hideDividerDelayed = React.useCallback((axis: DividerAxis, index: number) => {
-    const key = dividerKey(axis, index)
-    clearTimer(key)
-    const generation = (generationRef.current[key] ?? 0) + 1
-    generationRef.current[key] = generation
-    timeoutRef.current[key] = setTimeout(() => {
-      delete timeoutRef.current[key]
-      setVisible(axis, index, false, generation)
-    }, HIDE_DELAY_MS)
-  }, [clearTimer, setVisible])
+  const hideDividerDelayed = React.useCallback((index: number) => {
+    if (holdCountRef.current[index] || timeoutRef.current[index]) return
+    const generation = (generationRef.current[index] ?? 0) + 1
+    generationRef.current[index] = generation
+    timeoutRef.current[index] = setTimeout(() => {
+      delete timeoutRef.current[index]
+      setVisible(index, false, generation)
+    }, DIVIDER_HIDE_DELAY_MS)
+  }, [setVisible])
+
+  const holdDivider = React.useCallback<DividerHold>((index) => {
+    holdCountRef.current[index] = (holdCountRef.current[index] ?? 0) + 1
+    showDivider(index)
+    return () => {
+      const remaining = (holdCountRef.current[index] ?? 1) - 1
+      if (remaining > 0) holdCountRef.current[index] = remaining
+      else delete holdCountRef.current[index]
+      hideDividerDelayed(index)
+    }
+  }, [showDivider, hideDividerDelayed])
 
   React.useEffect(() => {
     const timeouts = timeoutRef.current
@@ -285,34 +309,36 @@ export const useDividerVisibility = () => {
     }
   }, [])
 
-  const syncEdge = (axis: DividerAxis, index: number, near: boolean) => {
-    if (near) showDivider(axis, index)
-    else hideDividerDelayed(axis, index)
+  const syncEdge = (index: number, near: boolean, anchor: DividerAnchor) => {
+    if (near) showDivider(index, anchor)
+    else hideDividerDelayed(index)
   }
 
   const handleChildMouseMove = (e: React.MouseEvent, childIndex: number) => {
     // The editor-controls wrapper is `display: contents`, so measure the component inside it.
     const rect = getLayoutRect(e.currentTarget)
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const isVertical = orientation === "vertical"
+    const along = isVertical ? e.clientX - rect.left : e.clientY - rect.top
+    const length = isVertical ? rect.width : rect.height
 
-    syncEdge("v", childIndex * 2, x < rect.width * 0.3)
-    syncEdge("v", (childIndex + 1) * 2, x > rect.width * 0.7)
-    syncEdge("h", childIndex * 2, y < rect.height * 0.3)
-    syncEdge("h", (childIndex + 1) * 2, y > rect.height * 0.7)
+    syncEdge(childIndex, along < length * 0.3, { childIndex, edge: "start" })
+    syncEdge(childIndex + 1, along > length * 0.7, { childIndex, edge: "end" })
   }
 
   const handleChildMouseLeave = (childIndex: number) => {
-    hideDividerDelayed("v", childIndex * 2)
-    hideDividerDelayed("v", (childIndex + 1) * 2)
-    hideDividerDelayed("h", childIndex * 2)
-    hideDividerDelayed("h", (childIndex + 1) * 2)
+    hideDividerDelayed(childIndex)
+    hideDividerDelayed(childIndex + 1)
   }
 
   return {
-    visibleVerticalDividers,
-    visibleHorizontalDividers,
+    visibleDividers,
     handleChildMouseMove,
     handleChildMouseLeave,
+    holdDivider,
   }
+}
+
+function getLayoutRect(element: Element): DOMRect {
+  if (!(element instanceof Element)) return (element as Element).getBoundingClientRect()
+  return getLayoutElement(element).getBoundingClientRect()
 }

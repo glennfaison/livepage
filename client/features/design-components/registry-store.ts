@@ -68,6 +68,16 @@ export const getComponentInfo = function (tag: string): Metadata {
 }
 
 /**
+ * defaultChildren convention (one uniform rule):
+ * - Components whose rendered output is primarily inline or block text content
+ *   provide `defaultChildren` with representative starter text, so inserting the
+ *   component drops in usable content instead of an empty node.
+ * - Container/layout components (`acceptsChildren`) and media/data components
+ *   start with no children (`defaultChildren: []`); children are added by the
+ *   user through the canvas or component picker.
+ */
+
+/**
  * Creates a new design component instance with default attributes and children.
  * Optionally overrides default attributes with provided props.
  * The generated ID follows the pattern `${tag}-${id}`.

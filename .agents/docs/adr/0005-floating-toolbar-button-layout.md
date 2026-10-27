@@ -20,12 +20,16 @@ minimized mode. Drag handles are not counted as buttons.
 
 ## Current arrangement (expanded mode)
 
-- **Left of pivot (5):** command palette, AI assistant, history, undo, redo
+- **Left of pivot (4):** AI assistant, history, undo, redo
 - **Pivot:** minimize
-- **Right of pivot (5):** save, discard, duplicate page, settings, layout toggle
+- **Right of pivot (4):** save, discard, settings, layout toggle
 
 `L - R = 0`, which is valid. With the AI assistant button hidden the row is
-4 vs 5, so `L - R = -1`, also valid.
+3 vs 4, so `L - R = -1`, also valid.
+
+The command palette and duplicate page actions have no toolbar button. The
+command palette opens from the header "Command" button and `⌘K`; duplicate page
+runs from the command palette and the `⌘⇧D` shortcut.
 
 The counts are computed from the buttons the component actually renders and
 passed to `assertToolbarButtonBalance` on every render outside production, so a
@@ -58,6 +62,8 @@ only; undo/redo stay reachable through their keyboard shortcuts.
   rather than a silent visual defect.
 - The layout toggle moved from the left of the pivot to the right to keep the
   row balanced after the copy/paste buttons were removed.
+- The command palette and duplicate page buttons were removed together, one from each
+  side of the pivot, so the row stayed balanced without moving any other button.
 
 ## Supersedes
 
