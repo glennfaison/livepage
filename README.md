@@ -76,13 +76,21 @@ Standalone HTML files cannot use the LinkedIn session cookie.
 | `npm run build` | Create a production build |
 | `npm start` | Serve the production build |
 | `npm run lint` | Run ESLint through `next lint` |
-| `npm test` | Run the Jest suite |
+| `npm test` | Run the whole Jest suite |
+| `npm run test:smoke` | Smoke suites (Jest and Playwright): the fast critical-path gate CI runs first |
+| `npm run test:smoke:unit` / `npm run test:smoke:ui` | Just the Jest or just the Playwright smoke suite |
+| `npm run test:unit` | Unit tests |
+| `npm run test:component` | Component and integration tests |
+| `npm run test:ui` | Full Playwright browser suite (same as `test:html-browser`) |
+| `npm run check:test-categories` | Fail if a Jest test lives outside a category folder |
 | `npm run test:watch` | Run Jest in watch mode |
 | `npm run test:coverage` | Run Jest with coverage |
 | `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
 | `npm run test:html-browser` | Run the standalone HTML artifact regression test in Chromium |
 | `npm run check:branch` | Check that the current branch name follows gitflow |
 | `npm run verify` | Lint + full Jest suite (`--runInBand`) + branch-name check (convenient pre-PR gate) |
+
+Test categories and the CI job order are described in [`.agents/docs/TESTING.md`](./.agents/docs/TESTING.md).
 
 The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
@@ -146,6 +154,7 @@ The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapp
 - [Code conventions](./.agents/docs/CONVENTIONS.md)
 - [Glossary](./.agents/docs/GLOSSARY.md)
 - [Branch names](./.agents/docs/BRANCH-NAMES.md)
+- [Testing](./.agents/docs/TESTING.md): test categories, what belongs in smoke, CI order
 - [AGENTS.md](./AGENTS.md) and the [agent workflow](./.agents/docs/AGENT-WORKFLOW.md) for coding agents
 
 ## Contributing
