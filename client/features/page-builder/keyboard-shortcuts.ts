@@ -178,3 +178,42 @@ export function useDuplicateComponentShortcut(onDuplicate: () => void, enabled: 
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [onDuplicate, enabled])
 }
+
+export const CHEATSHEET_SHORTCUTS = [
+  { keys: "⌘K / Ctrl+K", description: "Open command palette", category: "Navigation" },
+  { keys: "⌘S / Ctrl+S", description: "Save page", category: "Editing" },
+  { keys: "⌘Z / Ctrl+Z", description: "Undo", category: "Editing" },
+  { keys: "⌘⇧Z / Ctrl+Shift+Z", description: "Redo", category: "Editing" },
+  { keys: "⌘H / Ctrl+H", description: "Open history", category: "Editing" },
+  { keys: "⌘⇧D / Ctrl+Shift+D", description: "Duplicate page", category: "Editing" },
+  { keys: "⌘C / Ctrl+C", description: "Copy component", category: "Editing" },
+  { keys: "⌘V / Ctrl+V", description: "Paste component", category: "Editing" },
+  { keys: "⌘D / Ctrl+D", description: "Duplicate component", category: "Editing" },
+  { keys: "⌘` / Ctrl+`", description: "Toggle toolbar", category: "View" },
+  { keys: "?", description: "Show keyboard shortcuts", category: "Help" },
+  { keys: "Escape", description: "Close dialogs and popovers", category: "Navigation" },
+] as const
+
+export function useKeyboardShortcutsHelp(onOpen: () => void) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "?") return
+      // Don't trigger in inputs, textareas, or contenteditable
+      const target = event.target as HTMLElement | null
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest("[contenteditable=true]"))
+      ) {
+        return
+      }
+      event.preventDefault()
+      onOpen()
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onOpen])
+}
