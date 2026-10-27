@@ -14,7 +14,7 @@ export type ValidationResult = Readonly<{
   hasWarnings: boolean
 }>
 
-const DATA_SOURCE_ATTRIBUTE_KEY = "data-source"
+const DATA_SOURCE_ATTRIBUTE_KEY = "__datasource__"
 
 function collectAllNodes(nodes: ReadonlyArray<AppNode>): AppNode[] {
   const result: AppNode[] = []
