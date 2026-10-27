@@ -32,19 +32,31 @@ export function getComponentsAllowedIn(parentTag?: AppNodeTag): ReadonlyArray<Me
   })
 }
 
-function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, unknown>> {
-  const defaults: Record<string, unknown> = {}
+function getDefaultAttributes(metadata: Metadata): Readonly<Record<string, string>> {
+  const defaults: Record<string, string> = {}
   const collectDefaults = (attributes: ReadonlyArray<Metadata["attributes"][number]>) => {
     for (const attribute of attributes) {
       if (attribute.type === "group") {
         collectDefaults(attribute.fields)
       } else if (attribute.type !== "divider" && attribute.id !== "content") {
-        defaults[attribute.id] = attribute.defaultValue
+        defaults[attribute.id] = attributeDefaultToString(attribute.defaultValue)
       }
     }
   }
   collectDefaults(metadata.attributes)
   return defaults
+}
+
+/**
+ * Coerces a setting's default value to a string so every default attribute
+ * written to an `AppNode` satisfies `Record<string, string>`. Booleans become
+ * `"true"`/`"false"`, numbers become their decimal form, and arrays (e.g.
+ * textarea defaults) join with newlines.
+ */
+function attributeDefaultToString(value: unknown): string {
+  if (typeof value === "string") return value
+  if (Array.isArray(value)) return value.join("\n")
+  return String(value)
 }
 
 /**
