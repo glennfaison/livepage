@@ -61,6 +61,7 @@ export type AppAction =
   | Readonly<{ type: "REMOVE_COMPONENT"; payload: Readonly<{ componentId: string }> }>
   | Readonly<{ type: "REPLACE_COMPONENT"; payload: Readonly<{ oldComponentId: string; newComponent?: AppNode; newComponentTag?: AppNodeTag }> }>
   | Readonly<{ type: "DUPLICATE_COMPONENT"; payload: Readonly<{ componentId: string; parentId?: string }> }>
+  | Readonly<{ type: "PASTE_COMPONENT"; payload: Readonly<{ copied: AppNode; selectedId: string }> }>
   | Readonly<{ type: "MOVE_COMPONENT"; payload: Readonly<{ componentId: string; newParentId: string; index?: number }> }>
   | Readonly<{ type: "SET_SELECTED_COMPONENT"; payload: string }>
   | Readonly<{ type: "SET_SELECTED_COMPONENT_ANCESTORS"; payload: string }>
