@@ -24,6 +24,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Reject non-gitflow branch names
         run: node scripts/check-branch-name.mjs --self-test && node scripts/check-branch-name.mjs
 
@@ -33,6 +36,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Validate PR source branch policy
         run: node scripts/check-branch-name.mjs --pr-source-branch --head "${{ github.head_ref }}" --base "${{ github.base_ref }}"
 
