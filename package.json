@@ -22,7 +22,14 @@
     "test:watch": "jest --watch",
     "pretest:coverage": "npm run build:html-runtime",
     "test:coverage": "jest --coverage",
-    "verify": "npm run lint && npm test -- --runInBand && npm run check:branch"
+    "test:smoke": "npm run test:smoke:unit && npm run test:smoke:ui",
+    "test:smoke:unit": "npm run build:html-runtime && jest __tests__/smoke",
+    "test:smoke:ui": "npm run build:html-runtime && playwright test --config=playwright.config.ts __tests__/browser/smoke",
+    "test:unit": "npm run build:html-runtime && jest __tests__/unit client/",
+    "test:component": "npm run build:html-runtime && jest __tests__/components __tests__/integration __tests__/contrast-color.test.ts",
+    "test:ui": "npm run test:html-browser",
+    "verify": "npm run lint && npm test -- --runInBand && npm run check:branch",
+    "check:test-categories": "node scripts/check-test-categories.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
