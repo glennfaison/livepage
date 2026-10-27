@@ -28,7 +28,7 @@ export function findComponentParent({
   return null
 }
 
-function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
+export function cloneNodeWithNewIds(component: AppNode, idSuffix: string): AppNode {
   const newId = `${component.attributes.id}${idSuffix}`
   return {
     ...component,
@@ -355,4 +355,85 @@ export function moveComponent({
     parentId: newParentId,
     index: insertionIndex,
   })
+}
+
+/**
+ * Serializes a component tree node to a plain JSON-safe object for the clipboard.
+ * Strips nothing; AppNode is already plain data.
+ */
+export function copyComponent(node: AppNode): AppNode {
+  return JSON.parse(JSON.stringify(node)) as AppNode
+}
+
+/**
+ * Clones a copied component with fresh IDs and inserts it into the tree.
+ * Prefers inserting as a child of the selected component when the parent accepts the tag;
+ * otherwise inserts as a sibling of the selected component.
+ * Returns the new tree and whether the insert was as child or sibling (for toast messaging).
+ */
+export function pasteComponent({
+  components,
+  copied,
+  selectedId,
+  canAcceptChild,
+}: {
+  components: ReadonlyArray<AppNode | string>
+  copied: AppNode
+  selectedId: string
+  canAcceptChild: (parentTag: string, childTag: string) => boolean
+}): { tree: AppNode[]; insertedAs: "child" | "sibling" | "root" } {
+  const idSuffix = `-paste-${Date.now()}`
+  const newNode = cloneNodeWithNewIds(copied, idSuffix)
+
+  // Find selected and its parent
+  const selected = findComponentById(components, selectedId)
+  if (!selected) {
+    // No selection: insert at root of first page? or as sibling of root? Prefer append to active page if possible, but for simplicity append at top level if no parent.
+    return {
+      tree: insertComponent({ components, newComponent: newNode }) as AppNode[],
+      insertedAs: "root",
+    }
+  }
+
+  const parent = findComponentParent({ components, componentId: selectedId })
+  const parentTag = parent?.tag
+  const selectedTag = selected.tag
+
+  // Prefer child of selected if selected accepts children of this tag
+  if (canAcceptChild(selectedTag, newNode.tag)) {
+    const newTree = insertComponent({
+      components,
+      newComponent: newNode,
+      parentId: selectedId,
+    })
+    return { tree: newTree as AppNode[], insertedAs: "child" }
+  }
+
+  // Else sibling of selected (under same parent)
+  if (parent) {
+    const parentChildren = parent.children
+    const idx = parentChildren.findIndex(
+      (c) => typeof c !== "string" && c.attributes.id === selectedId
+    )
+    const insertIndex = idx === -1 ? parentChildren.length : idx + 1
+    const newTree = insertComponent({
+      components,
+      newComponent: newNode,
+      parentId: parent.attributes.id,
+      index: insertIndex,
+    })
+    return { tree: newTree as AppNode[], insertedAs: "sibling" }
+  }
+
+  // Selected is root-level
+  const rootIdx = (components as AppNode[]).findIndex(
+    (c) => typeof c !== "string" && c.attributes.id === selectedId
+  )
+  const insertIndex = rootIdx === -1 ? components.length : rootIdx + 1
+  const newTree = insertComponent({
+    components,
+    newComponent: newNode,
+    index: insertIndex,
+  })
+  return { tree: newTree as AppNode[], insertedAs: "sibling" }
 }
