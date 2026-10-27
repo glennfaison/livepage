@@ -1,12 +1,27 @@
 name: CI
 
+# Job order, shortest to longest:
+#   gitflow checks -> smoke -> unit -> component -> ui (Playwright)
+# Every job after smoke needs it, so a smoke failure skips the longer jobs.
+# Pull requests, pushes to develop/main, and the nightly schedule all run the
+# full chain. Other branch pushes only run the (fast) branch-name check; their
+# pull request runs the rest.
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   gitflow-branch-name:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Reject non-gitflow branch names
@@ -15,14 +30,65 @@ jobs:
   pr-source-branch-check:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Validate PR source branch policy
         run: node scripts/check-branch-name.mjs --pr-source-branch --head "${{ github.head_ref }}" --base "${{ github.base_ref }}"
 
-  test:
+  smoke:
     needs: [gitflow-branch-name, pr-source-branch-check]
+    # `!cancelled()` lets this run when the PR-only job above was skipped.
+    if: ${{ !cancelled() && !failure() && (github.event_name != 'push' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check:test-categories
+      - run: npm run test:smoke:unit
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:smoke:ui
+
+  unit:
+    needs: smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+
+  component:
+    needs: smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:component
+
+  ui:
+    # Longest job: starts only after the cheaper suites pass.
+    needs: [smoke, unit, component]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,6 +97,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
-      - run: npm test -- --runInBand
-      - run: npm run test:html-browser
+      - run: npm run test:ui
