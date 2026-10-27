@@ -35,7 +35,7 @@ async function tryConnection(componentDataSourceSettings: Readonly<DataSourceSet
 	}
 
 	const parseResult = componentDataSourceSettings["parse-result"]
-	const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult)
+	const parseResultSource = Array.isArray(parseResult) ? parseResult.join("") : String(parseResult ?? "")
 	const parseResultFn = parseResultSource.trim()
 		? new Function("data", parseResultSource) as (data: unknown) => unknown
 		: undefined
