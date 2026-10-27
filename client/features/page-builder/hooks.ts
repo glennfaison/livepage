@@ -338,6 +338,55 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     })
   }, [dispatch])
 
+  // Copy component to system clipboard as JSON
+  const copyComponentToClipboard = useCallback(async (id: string) => {
+    const node = findComponentById(state.componentTree, id)
+    if (!node) {
+      toast({ title: "Copy failed", description: "No component selected.", variant: "destructive" })
+      return
+    }
+    try {
+      const payload = JSON.stringify(node)
+      await navigator.clipboard.writeText(payload)
+      toast({
+        title: "Component copied",
+        description: "Component structure copied to the clipboard.",
+      })
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Clipboard is unavailable in this context.",
+        variant: "destructive",
+      })
+    }
+  }, [state.componentTree])
+
+  // Paste component from system clipboard
+  const pasteComponentFromClipboard = useCallback(async (selectedId: string) => {
+    try {
+      const text = await navigator.clipboard.readText()
+      const copied = JSON.parse(text) as AppNode
+      if (!copied || typeof copied !== "object" || !copied.tag || !copied.attributes) {
+        toast({ title: "Paste failed", description: "Clipboard does not contain a valid component.", variant: "destructive" })
+        return
+      }
+      dispatch({ type: "PASTE_COMPONENT", payload: { copied, selectedId } })
+      toast({
+        title: "Component pasted",
+        description: "The component was pasted successfully.",
+      })
+    } catch (err) {
+      const message = err instanceof SyntaxError
+        ? "Clipboard does not contain a valid component JSON."
+        : "Clipboard is unavailable or could not be read."
+      toast({
+        title: "Paste failed",
+        description: message,
+        variant: "destructive",
+      })
+    }
+  }, [dispatch])
+
   const replaceComponent = useCallback((oldComponentId: string, newComponentTag: string) => {
     const componentId = generateId()
     const newComponent = createDesignComponentInstance(newComponentTag, componentId)
@@ -378,6 +427,8 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
     updateComponent,
     removeComponent,
     duplicateComponent,
+    copyComponentToClipboard,
+    pasteComponentFromClipboard,
     duplicatePage,
     setSelectedComponent,
     replaceComponent,
