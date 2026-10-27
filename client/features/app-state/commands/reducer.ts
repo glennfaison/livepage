@@ -7,6 +7,7 @@ import {
   updateComponent,
   removeComponent,
   duplicateComponent,
+  pasteComponent,
   duplicatePage,
   replaceComponent,
   moveComponent,
@@ -100,6 +101,7 @@ function isDocumentChange(action: AppAction): boolean {
     case "UPDATE_COMPONENT":
     case "REMOVE_COMPONENT":
     case "DUPLICATE_COMPONENT":
+    case "PASTE_COMPONENT":
     case "REPLACE_COMPONENT":
     case "MOVE_COMPONENT":
     case "SET_PAGES":
@@ -200,6 +202,49 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         },
         newTree,
         `Duplicated ${componentId}`,
+      )
+    }
+
+    case "PASTE_COMPONENT": {
+      const { copied, selectedId } = action.payload
+      const canAcceptChild = (parentTag: string, childTag: string) => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          const { componentMetadataByTag } = require("@/client/features/design-components/registry-store")
+          const parentMeta = componentMetadataByTag[parentTag]
+          if (!parentMeta?.acceptsChildren) return false
+          if (parentMeta.allowedChildTags && !parentMeta.allowedChildTags.includes(childTag)) return false
+          const childMeta = componentMetadataByTag[childTag]
+          if (childMeta?.allowedParentTags && !childMeta.allowedParentTags.includes(parentTag)) return false
+          return true
+        } catch {
+          return true
+        }
+      }
+      const { tree: newTree } = pasteComponent({
+        components: state.componentTree,
+        copied,
+        selectedId,
+        canAcceptChild,
+      })
+      // Select the newly pasted root (its id ends with the paste suffix)
+      const pastedId = (function findPasted(nodes: typeof newTree): string | null {
+        for (const n of nodes) {
+          if (typeof n === "string") continue
+          if (String(n.attributes.id).includes("-paste-")) return n.attributes.id
+          const inner = findPasted(n.children as typeof newTree)
+          if (inner) return inner
+        }
+        return null
+      })(newTree)
+      return withHistory(
+        {
+          ...state,
+          componentTree: newTree,
+          selectedComponentId: pastedId ?? selectedId,
+        },
+        newTree,
+        "Pasted component",
       )
     }
 
