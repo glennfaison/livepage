@@ -29,7 +29,7 @@ import { AssistChat } from "@/client/features/prompt-assist"
 import { OnboardingWalkthrough } from "@/client/features/page-builder/onboarding-walkthrough"
 import { ThemeToggle } from "@/client/components/theme-toggle"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
-import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload, Monitor } from "lucide-react"
+import { ChevronDown, Command, Copy, Download, Eye, Layers, Loader2, MonitorPlay, Pencil, Upload, Monitor, RotateCw } from "lucide-react"
 import Link from "next/link"
 import React, { useCallback, useRef, useState, useMemo, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/client/components/ui/select"
@@ -108,6 +108,7 @@ export default function BuilderPage() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop")
+  const [previewOrientation, setPreviewOrientation] = useState<"portrait" | "landscape">("portrait")
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Global shortcut works in both edit and preview mode.
@@ -255,7 +256,10 @@ export default function BuilderPage() {
     return () => URL.revokeObjectURL(url)
   }, [previewHtml])
 
-  const deviceWidth = previewDevice === "tablet" ? 768 : previewDevice === "mobile" ? 375 : undefined
+  const baseDeviceWidth = previewDevice === "tablet" ? 768 : previewDevice === "mobile" ? 375 : undefined
+  const baseDeviceHeight = previewDevice === "tablet" ? 1024 : previewDevice === "mobile" ? 812 : undefined
+  const deviceWidth = previewOrientation === "landscape" ? baseDeviceHeight : baseDeviceWidth
+  const deviceHeight = previewOrientation === "landscape" ? baseDeviceWidth : baseDeviceHeight
   const canUndo = state.currentHistoryIndex > 0
   const canRedo = state.currentHistoryIndex < state.history.length - 1
 
@@ -479,22 +483,37 @@ export default function BuilderPage() {
                 <span className="hidden sm:inline">{pageBuilderMode === "edit" ? "Switch to Preview Mode" : "Switch to Edit Mode"}</span>
               </Button>
               {pageBuilderMode === "preview" && (
-                <Select value={previewDevice} onValueChange={(value) => setPreviewDevice(value as "desktop" | "tablet" | "mobile")}>
-                  <SelectTrigger className="w-[140px] h-9" aria-label="Preview device size">
-                    <SelectValue placeholder="Device" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="desktop">
-                      <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Desktop</span>
-                    </SelectItem>
-                    <SelectItem value="tablet">
-                      <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Tablet (768px)</span>
-                    </SelectItem>
-                    <SelectItem value="mobile">
-                      <span className="flex items-center gap-2"><MonitorPlay className="h-4 w-4" /> Mobile (375px)</span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select value={previewDevice} onValueChange={(value) => setPreviewDevice(value as "desktop" | "tablet" | "mobile")}>
+                    <SelectTrigger className="w-[140px] h-9" aria-label="Preview device size">
+                      <SelectValue placeholder="Device" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desktop">
+                        <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Desktop</span>
+                      </SelectItem>
+                      <SelectItem value="tablet">
+                        <span className="flex items-center gap-2"><Monitor className="h-4 w-4" /> Tablet (768px)</span>
+                      </SelectItem>
+                      <SelectItem value="mobile">
+                        <span className="flex items-center gap-2"><MonitorPlay className="h-4 w-4" /> Mobile (375px)</span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {previewDevice !== "desktop" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      aria-label={`Switch to ${previewOrientation === "portrait" ? "landscape" : "portrait"} orientation`}
+                      title={`Switch to ${previewOrientation === "portrait" ? "landscape" : "portrait"} orientation`}
+                      onClick={() => setPreviewOrientation((current) => current === "portrait" ? "landscape" : "portrait")}
+                    >
+                      <RotateCw className="h-4 w-4" />
+                      <span className="hidden md:inline">{previewOrientation === "portrait" ? "Portrait" : "Landscape"}</span>
+                    </Button>
+                  )}
+                </>
               )}
               <ThemeToggle />
             </div>
@@ -538,7 +557,12 @@ export default function BuilderPage() {
               <div className="flex-1 flex items-start justify-center overflow-auto bg-muted/30 p-4">
                 <div
                   className="relative bg-background border shadow-xl rounded-lg overflow-hidden"
-                  style={{ width: deviceWidth, maxWidth: "100%", height: "calc(100dvh - 12rem)" }}
+                  style={{
+                    width: deviceWidth,
+                    height: deviceHeight ? Math.min(deviceHeight, 720) : "calc(100dvh - 12rem)",
+                    maxWidth: "100%",
+                    aspectRatio: deviceWidth && deviceHeight ? `${deviceWidth} / ${deviceHeight}` : undefined,
+                  }}
                 >
                   <iframe
                     src={iframeSrc}
