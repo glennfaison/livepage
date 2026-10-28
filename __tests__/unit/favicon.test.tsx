@@ -6,6 +6,7 @@ import { metadata } from "@/app/layout"
 
 describe("Favicon assets and metadata", () => {
   const appDir = join(process.cwd(), "app")
+  const publicDir = join(process.cwd(), "public")
 
   it("declares favicon icons in root layout metadata", () => {
     expect(metadata.icons).toBeDefined()
@@ -35,7 +36,7 @@ describe("Favicon assets and metadata", () => {
   })
 
   it("has light favicon SVG asset on disk", () => {
-    const lightPath = join(appDir, "favicon-light.svg")
+    const lightPath = join(publicDir, "favicon-light.svg")
     expect(existsSync(lightPath)).toBe(true)
     const content = readFileSync(lightPath, "utf-8")
     expect(content).toContain("<svg")
@@ -43,7 +44,7 @@ describe("Favicon assets and metadata", () => {
   })
 
   it("has dark favicon SVG asset on disk", () => {
-    const darkPath = join(appDir, "favicon-dark.svg")
+    const darkPath = join(publicDir, "favicon-dark.svg")
     expect(existsSync(darkPath)).toBe(true)
     const content = readFileSync(darkPath, "utf-8")
     expect(content).toContain("<svg")
@@ -58,8 +59,8 @@ describe("Favicon assets and metadata", () => {
   })
 
   it("light and dark SVGs use the same mark (Layers3 paths)", () => {
-    const lightPath = join(appDir, "favicon-light.svg")
-    const darkPath = join(appDir, "favicon-dark.svg")
+    const lightPath = join(publicDir, "favicon-light.svg")
+    const darkPath = join(publicDir, "favicon-dark.svg")
     const lightContent = readFileSync(lightPath, "utf-8")
     const darkContent = readFileSync(darkPath, "utf-8")
 
@@ -72,7 +73,7 @@ describe("Favicon assets and metadata", () => {
   })
 
   it("SVG favicon is legible at 16px (has adequate stroke width)", () => {
-    const lightPath = join(appDir, "favicon-light.svg")
+    const lightPath = join(publicDir, "favicon-light.svg")
     const content = readFileSync(lightPath, "utf-8")
     expect(content).toContain('stroke-width="1.5"')
   })
