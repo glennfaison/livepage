@@ -84,6 +84,41 @@ describe("matchTemplate with Jev", () => {
   })
 })
 
+describe("matchTemplate abstention", () => {
+  it("returns unavailable when Jev abstains and OpenAI is not configured", async () => {
+    mockIsOpenAiConfigured.mockReturnValue(false)
+    mockAskJev.mockResolvedValue(jevChoice("none", { none: 0.8 }))
+    expect(await matchTemplate(request())).toEqual({ kind: "unavailable" })
+  })
+
+  it("returns unavailable when Jev abstains and clarification fails", async () => {
+    mockAskJev.mockResolvedValue(jevChoice("none", { none: 0.8 }))
+    mockCompleteJson.mockRejectedValue(new OpenAiUnavailableError("down"))
+    expect(await matchTemplate(request())).toEqual({ kind: "unavailable" })
+  })
+
+  it("returns unavailable when Jev abstains but OpenAI can ask one", async () => {
+    mockAskJev.mockResolvedValue(jevChoice("none", { none: 0.8 }))
+    mockCompleteJson.mockResolvedValue({ question: "What kind of page?", options: [] })
+    expect((await matchTemplate(request())).kind).toBe("clarify")
+  })
+
+  it("returns unavailable when OpenAI returns no candidates matching the catalog", async () => {
+    mockIsJevConfigured.mockReturnValue(false)
+    mockIsOpenAiConfigured.mockReturnValue(true)
+    mockCompleteJson.mockResolvedValue({ templateId: "unknown-id", confidence: 0.5 })
+    expect(await matchTemplate(request())).toEqual({ kind: "unavailable" })
+  })
+
+  it("does not fall back to catalog[0] when abstaining and candidates are empty", async () => {
+    mockAskJev.mockResolvedValue(jevChoice("none", { none: 0.8 }))
+    mockIsOpenAiConfigured.mockReturnValue(false)
+    const result = await matchTemplate(request())
+    expect(result).toEqual({ kind: "unavailable" })
+    if (result.kind !== "unavailable") throw new Error("expected unavailable")
+  })
+})
+
 describe("matchTemplate fallbacks", () => {
   it("falls back to OpenAI as the judge when Jev is unavailable", async () => {
     mockAskJev.mockRejectedValue(new JevUnavailableError("503"))
