@@ -32,6 +32,7 @@ export const pageTemplateRegistry = [
   validateAndMigrateTemplate(neighborhoodCafePageTemplate),
   validateAndMigrateTemplate(realEstatePropertyTemplate),
   validateAndMigrateTemplate(weddingInvitationTemplate),
+  validateAndMigrateTemplate(restaurantMenuTemplate),
 ] as const
 
 /**
@@ -94,3 +95,4 @@ export function describeTemplateCatalog(): ReadonlyArray<TemplateSummary> {
     tags: metadata.tags,
   }))
 }
+import { restaurantMenuTemplate } from "@/client/features/templates/definitions/restaurant-menu"
