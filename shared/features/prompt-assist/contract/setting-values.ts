@@ -5,7 +5,6 @@ import type { DesignEdit, SettingDescriptor } from "./schema"
 const MAX_TEXT_LENGTH = 300
 const CSS_COLOR = /^(#[0-9a-f]{3,8}|[a-z]{3,30}|(rgb|hsl)a?\([\d\s.,%/-]{3,40}\))$/i
 const EXECUTABLE_SCHEME = /^\s*(javascript|data|vbscript):/i
-// eslint-disable-next-line no-control-regex
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/
 
 /** Coerces `raw` to a value the setting accepts, or returns null when it must be rejected. Pure, so server and client share it. */

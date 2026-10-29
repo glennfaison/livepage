@@ -54,6 +54,7 @@ describe("Favicon assets and metadata", () => {
   it("has ico favicon asset on disk", () => {
     const icoPath = join(appDir, "favicon.ico")
     expect(existsSync(icoPath)).toBe(true)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const stats = require("fs").statSync(icoPath)
     expect(stats.size).toBeGreaterThan(1000)
   })

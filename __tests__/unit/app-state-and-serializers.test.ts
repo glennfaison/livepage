@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectCurrentPage } from "@/client/features/app-state"
 import { decodeDataSourceSettings, encodeDataSourceSettings } from "@/client/features/data-sources"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, serializeAppStateAsSelfContainedHtml, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/client/features/serializers"

@@ -6,7 +6,7 @@ import { useAppState } from "@/client/features/app-state"
 import { toast } from "@/client/components/ui/use-toast"
 
 const PAGE_STORAGE_KEY = "livepage-page-storage"
-const PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
+const _PROMPT_ASSIST_ENABLED_KEY = "livepage-prompt-assist-enabled"
 
 jest.mock("@/client/components/ui/use-toast", () => {
   const t = jest.fn()

@@ -15,10 +15,10 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 	function DataSourceComponent(props: Props) {
 		const dataSourceSettings = props.component.attributes[dataSourceFieldName]
 		const isPreviewMode = props.pageBuilderMode === "preview"
+		const hasDataSource = Boolean(dataSourceSettings && dataSourceSettings.trim() !== "")
 
-		if (!dataSourceSettings || dataSourceSettings.trim() === "") {
-			return <WrappedComponent {...props} />
-		}
+		const cacheBypassRef = useRef(false)
+		const cachedRef = useRef(false)
 
 		const fetchData = useCallback(async (dataSourceSettingsValue: string) => {
 			const bypassCache = cacheBypassRef.current
@@ -51,15 +51,16 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 			return result
 		}, [])
 
-		const queryKey = ["data-source-data", dataSourceSettings]
-
-		const queryOptions = useMemo(() => ({
-			queryKey,
-			queryFn: () => fetchData(dataSourceSettings!),
-			enabled: !!dataSourceSettings,
-			staleTime: 60 * 60 * 1000,
-			throwOnError: isPreviewMode,
-		}), [queryKey, fetchData, dataSourceSettings, isPreviewMode])
+		const queryOptions = useMemo(
+			() => ({
+				queryKey: ["data-source-data", dataSourceSettings] as const,
+				queryFn: () => fetchData(dataSourceSettings!),
+				enabled: hasDataSource,
+				staleTime: 60 * 60 * 1000,
+				throwOnError: isPreviewMode,
+			}),
+			[fetchData, dataSourceSettings, hasDataSource, isPreviewMode],
+		)
 
 		const queryClient = useQuery(queryOptions)
 		const { data: dataSourceData, isLoading: loading, error, refetch } = queryClient
@@ -67,23 +68,32 @@ export function withDataSource(WrappedComponent: React.ComponentType<Props>) {
 		const retryRef = useRef(refetch)
 		retryRef.current = refetch
 
-		const cacheBypassRef = useRef(false)
-		const cachedRef = useRef(false)
-
 		const handleRetry = useCallback(() => {
 			cacheBypassRef.current = true
 			retryRef.current()
 		}, [])
 
+		if (!hasDataSource) {
+			return <WrappedComponent {...props} />
+		}
+
 		if (loading) return <DataSourceLoading childClassName={props.childClassName} />
-		if (error && !isPreviewMode) return <DataSourceError childClassName={props.childClassName} retry={handleRetry} errorMessage={readableErrorMessage(error)} />
+		if (error && !isPreviewMode) {
+			return (
+				<DataSourceError
+					childClassName={props.childClassName}
+					retry={handleRetry}
+					errorMessage={readableErrorMessage(error)}
+				/>
+			)
+		}
 
 		const renderDataSourceComponent = (data: unknown, key?: React.Key) => {
 			const newComponent = replaceDataSourceComponentProperties(props.component, data)
 			const dataSourceComponent = {
 				...props.component,
 				...newComponent,
-				attributes: { ...props.component.attributes, ...newComponent.attributes }
+				attributes: { ...props.component.attributes, ...newComponent.attributes },
 			}
 			return <WrappedComponent {...props} component={dataSourceComponent} key={key} />
 		}
