@@ -1,0 +1,7 @@
+#!/bin/sh
+# Lint the staged content of every JS/TS file this commit modifies.
+# Reports only; it never rewrites files. See scripts/lint-staged.mjs.
+root=$(git rev-parse --show-toplevel) || exit 1
+. "$root/scripts/git-hooks/_lib.sh"
+require_node
+exec node "$root/scripts/lint-staged.mjs"
