@@ -3,6 +3,17 @@ type Token =
 	| { type: "openTag"; raw: string; tag: string; isSelfClosing: boolean; attributes: Record<string, string> }
 	| { type: "closeTag"; raw: string; tag: string; };
 
+
+function escapeText(text: string): string {
+  return text.replace(/\[/g, "&#91;").replace(/\]/g, "&#93;");
+}
+function escapeAttr(value: string): string {
+  return value.replace(/"/g, "&quot;").replace(/\[/g, "&#91;").replace(/\]/g, "&#93;");
+}
+function unescape(text: string): string {
+  return text.replace(/&#91;/g, "[").replace(/&#93;/g, "]").replace(/&quot;/g, '"');
+}
+
 export type Node = {
 	readonly tag: string;
 	readonly attributes: Record<string, string>;
@@ -58,10 +69,9 @@ function tokenize(shortcode: string): Token[] {
 			let match: RegExpExecArray | null;
 			RegEx.attrNameValuePair.lastIndex = 0;
 			while ((match = RegEx.attrNameValuePair.exec(shortcode.slice(i)))) {
-			const name = match[1];
-			const rawValue = match[5] ?? match[4] ?? match[3] ?? "";
-			const value = rawValue.replace(/&quot;/g, '"');
-			attributes[name] = value;
+				const name = match[1];
+				const value = match[5] ?? match[4] ?? match[3] ?? "";
+				attributes[name] = unescape(value);
 				i += match[0].length;
 			}
 
@@ -178,7 +188,10 @@ export function parse(input: string, acceptedTags?: string[]): (Node | string)[]
 		}
 	}
 
-	return output;
+	function unescapeTree(nodes: (Node | string)[]): (Node | string)[] {
+		return nodes.map((n) => typeof n === "string" ? unescape(n) : { ...n, attributes: Object.fromEntries(Object.entries(n.attributes).map(([k,v]) => [k, unescape(v)])), children: unescapeTree(n.children) });
+	}
+	return unescapeTree(output);
 }
 
 /**
@@ -190,10 +203,10 @@ export function parse(input: string, acceptedTags?: string[]): (Node | string)[]
 export function stringify(elements: (Node | string)[]): string {
 	function serializeElement(element: (Node | string)): string {
 		if (typeof element === 'string') {
-			return element;
+			return escapeText(element);
 		}
 		const attrs = Object.entries(element.attributes)
-			.map(([key, value]) => value !== '' ? `${key}="${value.replace(/"/g, '&quot;')}"` : key)
+			.map(([key, value]) => value !== '' ? `${key}="${escapeAttr(value)}"` : key)
 			.join(' ');
 		const openTag = `[${element.tag}${attrs ? ' ' + attrs : ''}`;
 		const children = ']' + element.children.map(serializeElement).join('');

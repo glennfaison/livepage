@@ -401,7 +401,7 @@ export const parsedShortcodeElementSamples = [
 				],
 			},
 		],
-		stringifiedResult: '[triangle]tlso db[box][circle radius="1" ][/box][/circle][/special-element_one][/triangle]',
+		stringifiedResult: '[triangle]tlso db[box]&#91;circle radius="1" &#93;[/box]&#91;/circle&#93;&#91;/special-element_one&#93;[/triangle]',
 	},
 	{
 		parsedElements: [
@@ -417,6 +417,6 @@ export const parsedShortcodeElementSamples = [
 			},
 			{ tag: "circ", attributes: {}, children: ['[box color="red" ]'], },
 		],
-		stringifiedResult: 'this is text![triangle]tlso db[box][circle radius="1" ][/box][/circle][/special-element_one][/triangle][circ][box color="red" ][/circ]',
+		stringifiedResult: 'this is text![triangle]tlso db[box]&#91;circle radius="1" &#93;[/box]&#91;/circle&#93;&#91;/special-element_one&#93;[/triangle][circ]&#91;box color="red" &#93;[/circ]',
 	},
 ];
