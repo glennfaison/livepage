@@ -110,10 +110,10 @@ function AssistChatSession(props: Readonly<{ dispatch: (action: AppAction) => vo
                 <div className="flex-1">
                   <p className="text-sm font-medium">AI Assistant</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Click to describe a page in plain language. I'll pick a template, draft its content, and tune the design.
+                    Click to describe a page in plain language. I&apos;ll pick a template, draft its content, and tune the design.
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Or press <kbd className="px-1.5 py-0.5 bg-muted rounded">⌘K</kbd> and search "Open AI Assistant"
+                    Or press <kbd className="px-1.5 py-0.5 bg-muted rounded">⌘K</kbd> and search &quot;Open AI Assistant&quot;
                   </p>
                 </div>
                 <button

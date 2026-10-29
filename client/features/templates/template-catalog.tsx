@@ -5,7 +5,7 @@ import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/client/components/ui/tabs"
 import { cn } from "@/client/lib/utils"
-import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X, FileText, Briefcase, Image, Mic, Mail, Utensils, GraduationCap, Newspaper, HeartPulse, Link, Monitor, Calendar, Code, User, Building2, Eye } from "lucide-react"
+import { Clock, ChevronLeft, ChevronRight, Grid, List, Star, X, FileText, Briefcase, Image as ImageIcon, Mic, Mail, Utensils, GraduationCap, Newspaper, HeartPulse, Link, Monitor, Calendar, User, Eye } from "lucide-react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useTemplateCatalog, type CatalogTab, type CatalogViewMode } from "./use-template-catalog"
 import { TemplatePreviewModal } from "./template-preview-modal"
@@ -19,7 +19,7 @@ function getCategoryIcon(category: string): React.ReactNode {
     Podcast: <Mic className="h-4 w-4" />,
     "Contact/About": <Mail className="h-4 w-4" />,
     Business: <Briefcase className="h-4 w-4" />,
-    Portfolio: <Image className="h-4 w-4" />,
+    Portfolio: <ImageIcon className="h-4 w-4" />,
     "Link in Bio": <Link className="h-4 w-4" />,
     Restaurant: <Utensils className="h-4 w-4" />,
     "CV/Resume": <GraduationCap className="h-4 w-4" />,
@@ -362,6 +362,7 @@ function TemplateThumbnail({ template, className }: Readonly<{ template: Templat
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element -- catalog thumbnail
     <img
       src={template.thumbnail}
       alt={`${template.name} preview`}

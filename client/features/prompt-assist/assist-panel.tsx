@@ -57,9 +57,9 @@ export function AssistPanel(props: Readonly<{ chat: PromptAssist; onClose: () =>
             </p>
             <div className="text-xs text-muted-foreground space-y-1 border-l border-muted/50 pl-3">
               <p><strong>Try something like:</strong></p>
-              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">"A landing page for a coffee shop with menu and contact info"</p>
-              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">"A personal portfolio site for a graphic designer"</p>
-              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">"An event page for a tech conference with schedule and speakers"</p>
+              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">&quot;A landing page for a coffee shop with menu and contact info&quot;</p>
+              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">&quot;A personal portfolio site for a graphic designer&quot;</p>
+              <p className="font-mono text-[11px] bg-muted px-2 py-1 rounded">&quot;An event page for a tech conference with schedule and speakers&quot;</p>
             </div>
           </div>
         )}
