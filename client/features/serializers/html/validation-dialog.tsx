@@ -2,7 +2,14 @@
 
 import { AlertCircle, CheckCircle, Info, X } from "lucide-react"
 import type React from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/client/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/client/components/ui/dialog"
 import { Button } from "@/client/components/ui/button"
 import { cn } from "@/client/lib/utils"
 import type { ValidationResult } from "./validation"
@@ -37,12 +44,12 @@ export function ValidationDialog(props: ValidationDialogProps) {
       <DialogContent className="max-w-lg h-auto max-h-[min(80vh,36rem)] w-[min(92vw,32rem)] overflow-hidden p-0">
         <DialogHeader className="border-b px-5 py-4">
           <DialogTitle className="flex items-center gap-2.5 text-base">
-            <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+            <AlertCircle aria-hidden="true" className="h-5 w-5 text-destructive shrink-0" />
             <span>Export Validation</span>
           </DialogTitle>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <DialogDescription className="mt-1.5">
             {summary}. Review before exporting.
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(50vh,24rem)] overflow-y-auto px-5 py-3">
@@ -55,7 +62,7 @@ export function ValidationDialog(props: ValidationDialogProps) {
                   "bg-destructive/10 border-destructive/20",
                 )}
               >
-                <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                <AlertCircle aria-hidden="true" className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-destructive">Error</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">{issue.message}</p>
@@ -76,7 +83,7 @@ export function ValidationDialog(props: ValidationDialogProps) {
                   "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800",
                 )}
               >
-                <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <Info aria-hidden="true" className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Warning</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">{issue.message}</p>
@@ -94,7 +101,7 @@ export function ValidationDialog(props: ValidationDialogProps) {
 
         <div className="flex items-center justify-end gap-2 border-t bg-muted/30 px-5 py-3">
           <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4 mr-1.5" />
+            <X aria-hidden="true" className="h-4 w-4 mr-1.5" />
             Cancel
           </Button>
           <Button
@@ -105,12 +112,12 @@ export function ValidationDialog(props: ValidationDialogProps) {
           >
             {errors.length > 0 ? (
               <>
-                <CheckCircle className="h-4 w-4 mr-1.5" />
+                <CheckCircle aria-hidden="true" className="h-4 w-4 mr-1.5" />
                 Fix errors first
               </>
             ) : (
               <>
-                <CheckCircle className="h-4 w-4 mr-1.5" />
+                <CheckCircle aria-hidden="true" className="h-4 w-4 mr-1.5" />
                 Proceed anyway
               </>
             )}
