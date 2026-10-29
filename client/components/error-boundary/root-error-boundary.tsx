@@ -26,7 +26,7 @@ function renderRecoveryAction(
   onRetry: () => void,
   onReport?: (error: ClassifiedError) => void,
   classifiedError?: ClassifiedError | null,
-  onCopyError?: () => void,
+  _onCopyError?: () => void,
 ): React.ReactNode {
   const handleClick = () => {
     switch (action.action) {

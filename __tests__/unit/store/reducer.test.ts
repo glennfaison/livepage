@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createDesignComponentInstance } from "@/client/features/design-components"
 import { appReducer, initialState } from "@/client/features/app-state"
 import type { AppState, AppAction, PersistedSession } from "@/client/features/app-state"
@@ -265,6 +266,7 @@ describe("App Reducer", () => {
 
 describe("insertComponent", () => {
   it("should insert a component at the root level if no parentId is provided", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { insertComponent } = require("@/client/features/app-state/commands/helpers")
     const state = { ...initialState, componentTree: [] }
     const component = createDesignComponentInstance("header1", generateId())
@@ -275,6 +277,7 @@ describe("insertComponent", () => {
   })
 
   it("should insert a component as a child of a parent component", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { insertComponent } = require("@/client/features/app-state/commands/helpers")
     const parent = createDesignComponentInstance("row", generateId())
     const state = { ...initialState, componentTree: [parent] }

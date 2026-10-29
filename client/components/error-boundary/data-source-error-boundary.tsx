@@ -82,7 +82,7 @@ function renderRecoveryAction(
   onRetry: () => void,
   onReport?: (error: ClassifiedError) => void,
   classifiedError?: ClassifiedError | null,
-  isPreview: boolean = false,
+  _isPreview: boolean = false,
 ): React.ReactNode {
   const handleClick = () => {
     switch (action.action) {

@@ -26,7 +26,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("filters by category", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     const category = categories[0]
@@ -42,7 +42,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("shows an empty state when the search matches nothing", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
@@ -58,7 +58,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("favorites a template, lists it under Favorites, and falls back to All when the last favorite is removed", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     expect(screen.queryByRole("tab", { name: "Favorites" })).not.toBeInTheDocument()
@@ -77,7 +77,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("records applied templates under Recently used, most recent first", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const onApplyTemplate = jest.fn()
     const onClose = jest.fn()
     const { unmount } = render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} onClose={onClose} />)
@@ -98,7 +98,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("switches between grid and list layouts", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute("aria-pressed", "true")
@@ -118,7 +118,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("persists view mode preference across remounts", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const { unmount } = render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute("aria-pressed", "true")
@@ -131,7 +131,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("shows a template count and a clear search button when the search is active", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     expect(screen.getAllByText(`${templates.length} templates`)).toHaveLength(2)
@@ -145,7 +145,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("clears the search when the clear button is clicked", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
@@ -156,7 +156,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("suggests clearing the search in the empty state", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
@@ -164,7 +164,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("previews a template in a modal without applying it", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const onApplyTemplate = jest.fn()
     render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} />)
 
@@ -180,7 +180,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("applies a template from the preview modal", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const onApplyTemplate = jest.fn()
     const onClose = jest.fn()
     render(<TemplateCatalog templates={templates} onApplyTemplate={onApplyTemplate} onClose={onClose} />)
@@ -193,7 +193,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("renders custom template items when renderTemplateItem is provided", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const renderTemplateItem = jest.fn(() => <div data-testid="custom-item">Custom</div>)
     render(<TemplateCatalog templates={templates.slice(0, 2)} onApplyTemplate={jest.fn()} renderTemplateItem={renderTemplateItem} />)
 
@@ -213,7 +213,7 @@ describe("TemplateCatalog", () => {
   })
 
   it("displays template thumbnails in list view", async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 
     await user.click(screen.getByRole("button", { name: "List view" }))

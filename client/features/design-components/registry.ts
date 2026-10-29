@@ -23,7 +23,7 @@ import { componentMetadata as Page } from "./definitions/page-component"
 import { componentMetadata as LineChart } from "./definitions/line-chart"
 import { componentMetadata as MetricCard } from "./definitions/metric-card"
 import { componentMetadata as DataTable } from "./definitions/data-table"
-import { componentMetadataByTag, registerComponent } from "./registry-store"
+import { _componentMetadataByTag, registerComponent } from "./registry-store"
 
 export {
   componentMetadataByTag,
