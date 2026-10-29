@@ -359,6 +359,7 @@ export function useComponentOperations(dispatch: React.Dispatch<AppAction>, stat
         variant: "destructive",
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- findComponentById is pure and derived from tree
   }, [state.componentTree])
 
   // Paste component from system clipboard

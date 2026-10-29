@@ -193,7 +193,6 @@ describe("TemplateCatalog", () => {
   })
 
   it("renders custom template items when renderTemplateItem is provided", async () => {
-    const user = userEvent.setup()
     const renderTemplateItem = jest.fn(() => <div data-testid="custom-item">Custom</div>)
     render(<TemplateCatalog templates={templates.slice(0, 2)} onApplyTemplate={jest.fn()} renderTemplateItem={renderTemplateItem} />)
 
