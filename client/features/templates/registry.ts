@@ -32,6 +32,7 @@ export const pageTemplateRegistry = [
   validateAndMigrateTemplate(neighborhoodCafePageTemplate),
   validateAndMigrateTemplate(realEstatePropertyTemplate),
   validateAndMigrateTemplate(weddingInvitationTemplate),
+  validateAndMigrateTemplate(restaurantMenuTemplate),
 ] as const
 
 /**
