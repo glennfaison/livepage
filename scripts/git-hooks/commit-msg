@@ -1,6 +1,15 @@
 #!/bin/sh
 # Advisory local check. Server-side rules and CI are the enforcement that agents cannot skip.
 root=$(git rev-parse --show-toplevel) || exit 1
+. "$root/scripts/git-hooks/_lib.sh"
+
+# A detached HEAD has no branch name to validate. Git commits there during
+# rebase, cherry-pick, and bisect, and the name check at push time still applies.
+if ! git symbolic-ref -q HEAD >/dev/null; then
+  exit 0
+fi
+
+require_node
 branch=$(git rev-parse --abbrev-ref HEAD)
 node "$root/scripts/check-branch-name.mjs" --branch "$branch" || exit 1
 exit 0

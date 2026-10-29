@@ -58,9 +58,10 @@ function tokenize(shortcode: string): Token[] {
 			let match: RegExpExecArray | null;
 			RegEx.attrNameValuePair.lastIndex = 0;
 			while ((match = RegEx.attrNameValuePair.exec(shortcode.slice(i)))) {
-				const name = match[1];
-				const value = match[5] ?? match[4] ?? match[3] ?? "";
-				attributes[name] = value;
+			const name = match[1];
+			const rawValue = match[5] ?? match[4] ?? match[3] ?? "";
+			const value = rawValue.replace(/&quot;/g, '"');
+			attributes[name] = value;
 				i += match[0].length;
 			}
 
@@ -192,7 +193,7 @@ export function stringify(elements: (Node | string)[]): string {
 			return element;
 		}
 		const attrs = Object.entries(element.attributes)
-			.map(([key, value]) => value !== '' ? `${key}="${value}"` : key)
+			.map(([key, value]) => value !== '' ? `${key}="${value.replace(/"/g, '&quot;')}"` : key)
 			.join(' ');
 		const openTag = `[${element.tag}${attrs ? ' ' + attrs : ''}`;
 		const children = ']' + element.children.map(serializeElement).join('');

@@ -88,11 +88,14 @@ Standalone HTML files cannot use the LinkedIn session cookie.
 | `npm run build:html-runtime` | Rebuild the browser runtime used by HTML exports |
 | `npm run test:html-browser` | Run the standalone HTML artifact regression test in Chromium |
 | `npm run check:branch` | Check that the current branch name follows gitflow |
-| `npm run verify` | Lint + full Jest suite (`--runInBand`) + branch-name check (convenient pre-PR gate) |
+| `npm run lint:staged` | Lint the staged JS/TS files (what the `pre-commit` hook runs) |
+| `npm run setup:hooks` | Enable the git hooks (runs automatically on `npm install` / `npm ci`) |
+| `npm run check:hooks` | Check that the git hooks are enabled and executable |
+| `npm run verify` | Lint + full Jest suite (`--runInBand`) + branch-name check + git-hooks check (convenient pre-PR gate) |
 
 Test categories and the CI job order are described in [`.agents/docs/TESTING.md`](./.agents/docs/TESTING.md).
 
-The dev, build, start, and test commands rebuild the HTML export runtime automatically. It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
+The dev, build, start, and test commands rebuild the HTML export runtime automatically, and `npm install` builds it once (the `postinstall` script). It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
 The standalone HTML browser tests run in headless Chromium against both the live
 `/try?template=<id>&mode=preview` page and the exact exported HTML for every bundled
@@ -103,6 +106,16 @@ run `npx playwright install chromium` once after `npm install`; then run
 `npm run test:html-browser`.
 
 The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, Radix UI, and Zod. Tests use Jest and Testing Library.
+
+### Git hooks
+
+`npm install` and `npm ci` enable the hooks in [`scripts/git-hooks/`](./scripts/git-hooks/) through the `prepare` script, so a fresh clone needs no manual step:
+
+- **`pre-commit`** lints the staged JS/TS files with ESLint. Warnings fail too.
+- **`commit-msg`** checks the branch name (skipped on a detached HEAD).
+- **`pre-push`** checks the branch name and runs the smoke tests (`npm run test:smoke`), not the long suites. The UI smoke tests need Chromium once: `npx playwright install chromium`.
+
+The dev, build, start, and test scripts also re-enable the hooks (`setup:workspace`), so an install that skipped `prepare` repairs itself on first use. `npm run check:hooks` reports why hooks would not run, and `npm run setup:hooks` repairs them. `--no-verify` skips local hooks; CI runs every check regardless.
 
 ### Branch names
 
@@ -119,7 +132,7 @@ Pushes must use a gitflow branch name, or a `dependabot/<dependency>` branch for
 | support | `support/<version-line>` | `support/1.x` |
 | bugfix | `bugfix/<topic>` | `bugfix/null-deref` |
 
-A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. `git config core.hooksPath scripts/git-hooks` enables a local pre-push gate that refuses non-compliant branches. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
+A rejected name lists these patterns. CI runs `node scripts/check-branch-name.mjs` on every push and pull request. The local git hooks refuse non-compliant branches at push time. The server-side GitHub ruleset is the check that cannot be skipped; see [`.agents/docs/BRANCH-NAMES.md`](./.agents/docs/BRANCH-NAMES.md).
 
 ## Project layout
 
