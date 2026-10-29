@@ -120,11 +120,23 @@ export async function matchTemplate(input: MatchRequest): Promise<MatchResponse>
   }
   if (!ranking) return { kind: "unavailable" }
 
+  // No candidates matched the catalog — never fall back to catalog[0] or ask clarifying questions.
+  if (ranking.candidates.length === 0) return { kind: "unavailable" }
+
+  // A judge explicitly abstained (NO_MATCH). Never fabricate a match from the
+  // top candidate or catalog[0]. If a clarifying question can be produced,
+  // return it; otherwise return unavailable.
+  if (ranking.noMatch) {
+    const clarification = await askClarifyingQuestion(request, ranking, catalog)
+    if (clarification) return clarification
+    return { kind: "unavailable" }
+  }
+
   if (isAmbiguous(ranking)) {
     const clarification = await askClarifyingQuestion(request, ranking, catalog)
     if (clarification) return clarification
   }
 
-  const best = ranking.candidates[0] ?? { templateId: catalog[0]?.id ?? "", name: "", probability: 0 }
+  const best = ranking.candidates[0]
   return { kind: "match", templateId: best.templateId, confidence: best.probability, decidedBy: ranking.decidedBy, candidates: ranking.candidates }
 }
