@@ -51,6 +51,7 @@ jobs:
       - run: npm ci
       - run: npm run check:test-categories
       - run: npm run check:hooks
+      - run: npm run lint
       - run: npm run test:smoke:unit
       - uses: actions/cache@v4
         with:

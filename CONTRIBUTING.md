@@ -48,4 +48,4 @@ See [issue #76](https://github.com/glennfaison/livepage/issues/76) for the full 
 
 The smoke UI tests need Chromium once: `npx playwright install chromium`.
 
-If hooks do not seem to run, `npm run check:hooks` says why (config not set, hook not executable, and so on) and `npm run setup:hooks` repairs it. `git push --no-verify` and `git commit --no-verify` skip the hooks; CI still runs every check.
+Installs that skip lifecycle scripts (`npm ci --ignore-scripts`) are covered too: `npm run dev`, `build`, `start`, and every `test*` script re-enable the hooks first (`setup:workspace`). If hooks do not seem to run, `npm run check:hooks` says why (config not set, hook not executable, and so on) and `npm run setup:hooks` repairs it. `git push --no-verify` and `git commit --no-verify` skip the hooks; CI still runs every check.

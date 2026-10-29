@@ -115,7 +115,7 @@ The app is built with Next.js (App Router), React 19, TypeScript, Tailwind CSS, 
 - **`commit-msg`** checks the branch name (skipped on a detached HEAD).
 - **`pre-push`** checks the branch name and runs the smoke tests (`npm run test:smoke`), not the long suites. The UI smoke tests need Chromium once: `npx playwright install chromium`.
 
-`npm run check:hooks` reports why hooks would not run, and `npm run setup:hooks` repairs them. `--no-verify` skips local hooks; CI runs every check regardless.
+The dev, build, start, and test scripts also re-enable the hooks (`setup:workspace`), so an install that skipped `prepare` repairs itself on first use. `npm run check:hooks` reports why hooks would not run, and `npm run setup:hooks` repairs them. `--no-verify` skips local hooks; CI runs every check regardless.
 
 ### Branch names
 

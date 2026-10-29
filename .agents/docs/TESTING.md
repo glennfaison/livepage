@@ -37,6 +37,7 @@ categories. Do not move existing tests into smoke to make them "run earlier".
 - Pull requests, pushes to `develop` and `main`, and the nightly schedule (03:00 UTC) run the full chain.
 - Pushes to other branches run only the branch-name check; the pull request runs the rest.
 - `workflow_dispatch` runs the full chain on demand.
+- The `smoke` job also runs `npm run lint` and `npm run check:hooks`, so lint is enforced even when a contributor's local hooks were skipped.
 - Target: the PR smoke path stays under about 5 minutes. If it grows past that, trim smoke, do not raise the budget.
 
 ## Local gates
