@@ -94,3 +94,4 @@ export function describeTemplateCatalog(): ReadonlyArray<TemplateSummary> {
     tags: metadata.tags,
   }))
 }
+import { restaurantMenuTemplate } from "@/client/features/templates/definitions/restaurant-menu"
