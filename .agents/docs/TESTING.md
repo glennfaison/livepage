@@ -38,3 +38,10 @@ categories. Do not move existing tests into smoke to make them "run earlier".
 - Pushes to other branches run only the branch-name check; the pull request runs the rest.
 - `workflow_dispatch` runs the full chain on demand.
 - Target: the PR smoke path stays under about 5 minutes. If it grows past that, trim smoke, do not raise the budget.
+
+## Local gates
+
+The git hooks (enabled by `npm install`, see [CONTRIBUTING.md](../../CONTRIBUTING.md#git-hooks)) run the cheapest checks locally, in the same order as CI:
+
+- `pre-commit`: ESLint on the staged JS/TS files only.
+- `pre-push`: branch-name check, then `npm run test:smoke`. The push never waits on the unit, component, or Playwright UI suites; CI runs those.

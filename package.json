@@ -4,6 +4,11 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "postinstall": "npm run build:html-runtime",
+    "prepare": "node scripts/setup-git-hooks.mjs",
+    "setup:hooks": "node scripts/setup-git-hooks.mjs",
+    "check:hooks": "node scripts/setup-git-hooks.mjs --self-test && node scripts/lint-staged.mjs --self-test && node scripts/setup-git-hooks.mjs --check",
+    "lint:staged": "node scripts/lint-staged.mjs",
     "build:html-runtime": "node scripts/build-html-runtime.mjs",
     "import:zip-branch": "node scripts/import-zip-branch.mjs",
     "check:branch": "node scripts/check-branch-name.mjs --self-test && node scripts/check-branch-name.mjs",
@@ -28,7 +33,7 @@
     "test:unit": "npm run build:html-runtime && jest __tests__/unit client/",
     "test:component": "npm run build:html-runtime && jest __tests__/components __tests__/integration __tests__/contrast-color.test.ts",
     "test:ui": "npm run test:html-browser",
-    "verify": "npm run lint && npm test -- --runInBand && npm run check:branch",
+    "verify": "npm run lint && npm test -- --runInBand && npm run check:branch && npm run check:hooks",
     "check:test-categories": "node scripts/check-test-categories.mjs"
   },
   "dependencies": {

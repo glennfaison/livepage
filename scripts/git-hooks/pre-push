@@ -1,17 +1,42 @@
 #!/bin/sh
-# Hard gate: refuse to push any branch whose name does not comply with
-# check-branch-name.mjs. Dependabot branches (refs/heads/dependabot/**) are
-# allowed; everything else must match gitflow. Server-side rules and CI are
-# still the backstop for actors that skip this hook.
+# Gate every push of a branch:
+#   1. the remote branch name must follow gitflow (scripts/check-branch-name.mjs);
+#   2. the smoke tests must pass (npm run test:smoke).
+# Smoke is the fast "is the app alive" layer. The long unit, component, and UI
+# suites run in CI, so a push never waits on them. Server-side rules and CI are
+# still the backstop for anyone who skips this hook (git push --no-verify).
 root=$(git rev-parse --show-toplevel) || exit 1
+. "$root/scripts/git-hooks/_lib.sh"
+require_node
+
+pushing_commits=0
 while read -r local_ref local_sha remote_ref remote_sha; do
+  # Tags and other non-branch refs have no gitflow name to check.
+  case "$remote_ref" in
+    refs/heads/*) ;;
+    *) continue ;;
+  esac
+  # An all-zero local sha means the push deletes the remote branch. Deleting a
+  # badly named branch is the cleanup we want, so there is nothing to gate.
+  case "$local_sha" in
+    *[!0]*) ;;
+    *) continue ;;
+  esac
   branch=${remote_ref#refs/heads/}
-  if [ -z "$branch" ] || [ "$branch" = "$remote_ref" ]; then
-    continue
-  fi
   if ! node "$root/scripts/check-branch-name.mjs" --branch "$branch"; then
     echo "Refusing to push branch \"$branch\": see message above." >&2
     exit 1
   fi
+  pushing_commits=1
 done
+
+if [ "$pushing_commits" = 1 ]; then
+  echo "pre-push: running smoke tests (npm run test:smoke)..." >&2
+  cd "$root" || exit 1
+  if ! npm run test:smoke </dev/null >&2; then
+    echo "pre-push: smoke tests failed, push aborted." >&2
+    echo "If the browser is missing, install it once: npx playwright install chromium" >&2
+    exit 1
+  fi
+fi
 exit 0
