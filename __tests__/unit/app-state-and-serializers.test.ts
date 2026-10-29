@@ -42,6 +42,24 @@ describe("app-state selectors and serializers", () => {
     expect(deserializeAppStateFromShortcode(shortcode)).toEqual(appState.componentTree)
   })
 
+  it("round-trips attribute values containing double quotes through shortcode", () => {
+    const treeWithQuotes = [
+      {
+        tag: "page",
+        attributes: { id: "page-1", title: 'He said "hi"', alt: 'She said "bye"' },
+        children: [
+          {
+            tag: "paragraph",
+            attributes: { id: "paragraph-1" },
+            children: ['Text with "quotes" inside'],
+          },
+        ],
+      },
+    ]
+    const shortcode = serializeAppStateAsShortcode(treeWithQuotes as any)
+    expect(deserializeAppStateFromShortcode(shortcode)).toEqual(treeWithQuotes)
+  })
+
   it("rejects invalid shortcode payloads", () => {
     expect(() => deserializeAppStateFromShortcode("[unknown]content[/unknown]")).toThrow("Invalid component tag")
   })
