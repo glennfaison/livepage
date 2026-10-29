@@ -130,7 +130,8 @@ export const restaurantMenuTemplate = {
               "custom-classes": "py-0 text-base leading-7 text-[#5a463c]",
             }),
             node("row", "restaurant-dietary-tags", {
-              "custom-classes": "flex-row flex-wrap items-center justify-center gap-2",
+              "custom-classes": "flex-row items-center justify-center gap-2",
+              "wrap": "wrap",
             }, [
               text("badge", "restaurant-diet-1", "Vegetarian", { variant: "outline", "custom-classes": "rounded-full border-[#d4c4b0] px-3 py-1 text-[#6b5344]" }),
               text("badge", "restaurant-diet-2", "Gluten-Free Options", { variant: "outline", "custom-classes": "rounded-full border-[#d4c4b0] px-3 py-1 text-[#6b5344]" }),
