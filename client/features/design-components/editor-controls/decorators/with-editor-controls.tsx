@@ -4,7 +4,7 @@ import { Button } from "@/client/components/ui/button";
 import { cn } from "@/client/lib/utils";
 import { Copy, Move, Replace, SettingsIcon, Trash2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import type { EditModeProps, Metadata } from "@/client/features/types";
+import type { EditModeProps } from "@/client/features/types";
 import { useComponentOperationsContext } from "../component-operations-context";
 import { getComponentInfo } from "../../registry-store";
 import { editorChromeButtonClassName, editorChromeSurfaceClassName, OPEN_COMPONENT_SETTINGS_EVENT } from "../shared/editor-chrome";

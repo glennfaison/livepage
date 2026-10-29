@@ -10,7 +10,6 @@ import {
   Eye,
   FileJson,
   FileText,
-  LayoutTemplate,
   MonitorPlay,
   Pencil,
   Redo2,
@@ -24,14 +23,13 @@ import {
   Mic,
   Mail,
   Briefcase,
-  Image,
+  Image as ImageIcon,
   Link,
   Utensils,
   GraduationCap,
   Newspaper,
   HeartPulse,
   User,
-  Building2,
   Maximize,
 } from "lucide-react"
 import type React from "react"
@@ -48,7 +46,7 @@ import { formatShortcut, KEYBOARD_SHORTCUTS } from "@/client/features/page-build
 import type { TemplateDisplaySummary } from "@/client/features/templates"
 import type { ComponentCategory } from "@/client/features/types"
 import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
-import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
 type PaletteCommand = Readonly<{
@@ -71,7 +69,7 @@ function getCategoryIcon(category: string): React.ReactNode {
     Podcast: <Mic className="h-4 w-4" />,
     "Contact/About": <Mail className="h-4 w-4" />,
     Business: <Briefcase className="h-4 w-4" />,
-    Portfolio: <Image className="h-4 w-4" />,
+    Portfolio: <ImageIcon className="h-4 w-4" />,
     "Link in Bio": <Link className="h-4 w-4" />,
     Restaurant: <Utensils className="h-4 w-4" />,
     "CV/Resume": <GraduationCap className="h-4 w-4" />,
@@ -91,6 +89,7 @@ function TemplateThumbnailIcon({ template }: Readonly<{ template: TemplateDispla
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element -- dynamic template thumbnail
     <img
       src={template.thumbnail}
       alt=""
@@ -472,6 +471,7 @@ export const CommandPalette: React.FC<
         : []
 
     return [...actionCommands, ...insertCommands, ...templateCommands, ...jumpCommands]
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable command list; callbacks are stable enough for palette rebuild
   }, [
     state.pageBuilderMode,
     state.selectedComponentId,

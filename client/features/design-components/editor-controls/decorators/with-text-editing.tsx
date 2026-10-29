@@ -26,7 +26,7 @@ export function withTextEditing(
 			setContentEditable(false)
 			const newText = e.currentTarget.textContent || ""
 			// Cast to any because children may be represented as inline text in metadata defaults
-			updateComponent(component.attributes.id, { children: [newText] as any })
+			updateComponent(component.attributes.id, { children: [newText] as string[] })
 		}, [component.attributes.id, updateComponent])
 
 		const onClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
