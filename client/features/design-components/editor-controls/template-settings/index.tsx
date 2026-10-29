@@ -39,7 +39,7 @@ function createApplyTemplateActions(
 }
 
 export function useTemplateSettingsEditor({
-  _component,
+  component: _component,
   setIsOpen,
 }: Readonly<{
   component: AppNode
