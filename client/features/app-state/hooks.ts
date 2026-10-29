@@ -136,6 +136,7 @@ function loadPersistedDocument(): PersistedDocument | null {
     const parsed = JSON.parse(stored) as PersistedDocument
     if (!parsed || !parsed.componentTree) return null
     // Lazy require to avoid circular dependency with design-components -> app-state
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- intentional circular-dep break
     const { appNodeTreeSchema } = require("@/client/features/serializers/schema")
     const validation = appNodeTreeSchema.safeParse(parsed.componentTree)
     if (!validation.success) {

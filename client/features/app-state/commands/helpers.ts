@@ -396,7 +396,7 @@ export function pasteComponent({
   }
 
   const parent = findComponentParent({ components, componentId: selectedId })
-  const parentTag = parent?.tag
+  const _parentTag = parent?.tag
   const selectedTag = selected.tag
 
   // Prefer child of selected if selected accepts children of this tag

@@ -2,8 +2,6 @@ import {
   validateAndMigrateTemplate,
   migrateTemplateToCurrent,
   CURRENT_TEMPLATE_VERSION,
-  templateMigrations,
-  pageTemplateDefinitionSchema,
 } from "@/client/features/templates/schema"
 import type { PageTemplateDefinition } from "@/client/features/templates/schema"
 
@@ -65,8 +63,8 @@ describe("template migration", () => {
   describe("migrateTemplateToCurrent", () => {
     it("throws when no migration exists for a version", () => {
       // Temporarily set a higher current version to test migration
-      const originalCurrent = CURRENT_TEMPLATE_VERSION
-      const testCurrentVersion = 3
+      const _originalCurrent = CURRENT_TEMPLATE_VERSION
+      const _testCurrentVersion = 3
       
       // We can't easily test this without modifying the constant, 
       // so we'll test the migration logic directly
