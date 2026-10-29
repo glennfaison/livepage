@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectCurrentPage } from "@/client/features/app-state"
 import { decodeDataSourceSettings, encodeDataSourceSettings } from "@/client/features/data-sources"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, serializeAppStateAsShortcode, serializeAppStateAsSelfContainedHtml, deserializeAppStateFromJson, deserializeAppStateFromShortcode } from "@/client/features/serializers"
@@ -39,6 +40,24 @@ describe("app-state selectors and serializers", () => {
   it("serializes and deserializes shortcode without changing the tree", () => {
     const shortcode = serializeAppStateAsShortcode(appState.componentTree as any)
     expect(deserializeAppStateFromShortcode(shortcode)).toEqual(appState.componentTree)
+  })
+
+  it("round-trips attribute values containing double quotes through shortcode", () => {
+    const treeWithQuotes = [
+      {
+        tag: "page",
+        attributes: { id: "page-1", title: 'He said "hi"', alt: 'She said "bye"' },
+        children: [
+          {
+            tag: "paragraph",
+            attributes: { id: "paragraph-1" },
+            children: ['Text with "quotes" inside'],
+          },
+        ],
+      },
+    ]
+    const shortcode = serializeAppStateAsShortcode(treeWithQuotes as any)
+    expect(deserializeAppStateFromShortcode(shortcode)).toEqual(treeWithQuotes)
   })
 
   it("rejects invalid shortcode payloads", () => {

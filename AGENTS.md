@@ -9,13 +9,13 @@ documentation, which lives under [`.agents/`](./.agents/).
 
 **Before making any commit, read the [evergreen rule](./.agents/docs/AGENT-WORKFLOW.md#Finish): never close an issue labeled `evergreen`.** That label marks an issue that must stay open across releases; raise the conflict to a human instead of closing it.
 
-Run before any commit or push:
+The git hooks in `scripts/git-hooks/` are enabled by `npm install` / `npm ci` (the `prepare` script runs `scripts/setup-git-hooks.mjs`). Do not configure them by hand. Running any `npm run dev|build|start|test*` script re-enables them too, so an install that skipped `prepare` (`npm ci --ignore-scripts`) repairs itself. If `npm run check:hooks` still reports that hooks would not run, run `npm run setup:hooks`.
 
-```bash
-git config core.hooksPath scripts/git-hooks   # branch-name checks at commit and push
-```
+- `pre-commit` lints the staged JS/TS files with ESLint (warnings fail too).
+- `commit-msg` checks the branch name against [BRANCH-NAMES.md](./.agents/docs/BRANCH-NAMES.md).
+- `pre-push` checks the branch name and runs the smoke tests (`npm run test:smoke`), never the long suites.
 
-The hooks validate branch names against that same document.
+Do not bypass them with `--no-verify`. A failing hook is the signal to fix the change.
 
 ## Skills
 

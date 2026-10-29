@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { render, screen, act } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import { FaviconSwitcher } from "@/client/components/favicon-switcher"
 
 jest.mock("next-themes", () => ({
@@ -11,7 +11,7 @@ jest.mock("next-themes", () => ({
 import { useTheme } from "next-themes"
 
 describe("FaviconSwitcher", () => {
-  const originalDocumentQuerySelector = document.querySelector.bind(document)
+  const _originalDocumentQuerySelector = document.querySelector.bind(document)
 
   beforeEach(() => {
     jest.clearAllMocks()

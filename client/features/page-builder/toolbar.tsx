@@ -4,13 +4,6 @@ import { HistoryPopover } from "@/client/features/page-builder/history-popover"
 import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
 import { Button } from "@/client/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/client/components/ui/dialog"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
 import { Bot, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
@@ -25,9 +18,8 @@ import {
   STORAGE_VERSION,
   writeToolbarState,
 } from "./toolbar-persistence"
-import { selectCurrentPage } from "@/client/features/app-state"
 import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut, useToolbarToggleShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
-import { useDiscardConfirmation, useHistoryOperations } from "@/client/features/page-builder/hooks"
+import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -239,6 +231,7 @@ export const Toolbar: React.FC<Readonly<{
       position: positionRef.current,
       layout: toolbarLayout,
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- pageBuilderMode gates effect body; intentional omit to avoid re-dock on mode flip
   }, [toolbarLayout])
 
   // Mark hydration complete after the first paint so the persistence effect

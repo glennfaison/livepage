@@ -22,6 +22,9 @@ export function serializeAppStateAsJson(componentTree: ReadonlyArray<AppNode>): 
  */
 export function deserializeAppStateFromJson(input: string): ReadonlyArray<AppNode> {
   const parsed = appNodeTreeSchema.parse(JSON.parse(input))
+  if (parsed.length === 0 || !parsed.some((node) => node.tag === "page")) {
+    throw new Error("Imported page is empty or invalid (no page component found)")
+  }
   const { duplicateCount, fixedIds } = validateAndFixDuplicateIds(parsed)
 
   if (duplicateCount > 0) {

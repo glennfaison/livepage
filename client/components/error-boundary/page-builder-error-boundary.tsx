@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Button } from "@/client/components/ui/button"
-import { RefreshCw, AlertTriangle, RotateCcw, Bug, ExternalLink } from "lucide-react"
+import { RefreshCw, RotateCcw, Bug, ExternalLink } from "lucide-react"
 import { cn } from "@/client/lib/utils"
 import { logger } from "@/client/lib/logger"
 import { captureException } from "@/client/lib/observability"
