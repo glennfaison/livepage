@@ -34,4 +34,18 @@ See [issue #76](https://github.com/glennfaison/livepage/issues/76) for the full 
 
 - Create your branch on the appropriate base branch (`main` or `develop`) using one of the allowed names above.
 - Fill in the pull request template in [`.github/pull_request_template.md`](./.github/pull_request_template.md).
-- Run `npm run verify` locally before opening the PR (lint + full Jest suite + branch-name check). Prefer the narrowest relevant Jest selector while iterating, then use `verify` as the pre-PR gate.
+- Run `npm run verify` locally before opening the PR (lint + full Jest suite + branch-name check + git-hooks check). Prefer the narrowest relevant Jest selector while iterating, then use `verify` as the pre-PR gate.
+
+## Git hooks
+
+`npm install` (and `npm ci`) enables the tracked hooks in `scripts/git-hooks/` automatically, through the `prepare` script. There is nothing to configure.
+
+| Hook | What it does |
+| --- | --- |
+| `pre-commit` | Runs ESLint on the staged content of modified JS/TS files. Warnings fail too. It reports problems; it never rewrites your files. |
+| `commit-msg` | Checks that the current branch name follows gitflow (skipped on a detached HEAD, for example during a rebase). |
+| `pre-push` | Checks the pushed branch name, then runs the smoke tests (`npm run test:smoke`). The longer unit, component, and UI suites run in CI. Deleting a remote branch and pushing tags are not gated. |
+
+The smoke UI tests need Chromium once: `npx playwright install chromium`.
+
+Installs that skip lifecycle scripts (`npm ci --ignore-scripts`) are covered too: `npm run dev`, `build`, `start`, and every `test*` script re-enable the hooks first (`setup:workspace`). If hooks do not seem to run, `npm run check:hooks` says why (config not set, hook not executable, and so on) and `npm run setup:hooks` repairs it. `git push --no-verify` and `git commit --no-verify` skip the hooks; CI still runs every check.
