@@ -78,4 +78,5 @@ export {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 }
