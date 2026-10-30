@@ -21,6 +21,9 @@ type DraggablePanelProps = Readonly<{
  * a translate offset relative to wherever its container placed it, so it works
  * inside a Radix popover without taking over the popover's positioning. Mount
  * it inside the popover content: closing unmounts it, which resets the offset.
+ * Give that content no chrome of its own and `pointer-events-none`: it stays
+ * where it was placed while this panel moves, and the panel opts back in to
+ * pointer events.
  */
 export const DraggablePanel: React.FC<DraggablePanelProps> = ({ header, dragLabel, viewportMargin, className, children }) => {
   const { panelRef, offset, isDragging, handleProps } = useDraggablePanel(viewportMargin)
@@ -29,7 +32,7 @@ export const DraggablePanel: React.FC<DraggablePanelProps> = ({ header, dragLabe
     <div
       ref={panelRef}
       data-testid="draggable-panel"
-      className={cn("flex flex-col overflow-hidden rounded-lg border bg-background shadow-lg", isDragging && "select-none", className)}
+      className={cn("pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-background shadow-lg", isDragging && "select-none", className)}
       style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }}
     >
       <div className="bg-foreground text-background p-4 rounded-t-lg flex items-center gap-2 shrink-0">

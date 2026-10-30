@@ -97,6 +97,14 @@ test.describe("toolbar settings panel", () => {
     expect(moved.x).toBeLessThan(before.x)
     await expectInsideViewport(page, dragPanel)
 
+    // The popover's own shell must not stay behind as an empty, clickable ghost.
+    await expect(page.getByRole("dialog")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)")
+    const coveredByGhost = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x, y)?.closest('[role="dialog"]') !== null,
+      [before.x + before.width - 8, before.y + 30],
+    )
+    expect(coveredByGhost, "old position is no longer covered by the dialog shell").toBe(false)
+
     // Dragging far past every edge clamps the panel to the viewport.
     await page.mouse.move(startX - 100, startY)
     await page.mouse.down()

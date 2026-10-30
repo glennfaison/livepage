@@ -110,7 +110,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-[28rem] max-w-[calc(100vw-1.5rem)] p-0"
+        // The panel inside draws its own chrome and can be dragged away from this
+        // shell, so the shell must be invisible and click-through to leave no ghost.
+        className="pointer-events-none w-[28rem] max-w-[calc(100vw-1.5rem)] border-0 bg-transparent p-0 shadow-none"
         align="start"
         sideOffset={8}
         collisionPadding={PANEL_VIEWPORT_MARGIN}
