@@ -467,10 +467,21 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "DISCARD_CHANGES": {
       if (state.history.length > 1) {
         const firstEntry = state.history[0]
+        const baselineTree = deepClone(firstEntry.pageState)
+        // Baseline active page is the id of the first page node in the restored tree
+        // (initial state uses "page-1"; template apply replaces the tree and sets a different id).
+        const baselinePageId =
+          baselineTree.find((node) => node.tag === "page")?.attributes.id ?? state.activePage
         return {
           ...state,
-          componentTree: deepClone(firstEntry.pageState),
+          componentTree: baselineTree,
+          activePage: baselinePageId,
+          selectedComponentId: "",
+          selectedComponentAncestors: [],
+          history: [firstEntry],
           currentHistoryIndex: 0,
+          historyPreviewIndex: null,
+          originalHistoryState: null,
         }
       }
       return state
