@@ -320,3 +320,49 @@ describe("App Reducer stale gating", () => {
     expect(cleared.stale).toBe(false)
   })
 })
+
+describe("DISCARD_CHANGES restores full baseline", () => {
+  it("resets activePage, clears selection, truncates history after template-style apply", () => {
+    // Baseline empty page
+    const baseline = appReducer(initialState, {
+      type: "ADD_TO_HISTORY",
+      payload: { action: "Page created", pageState: initialState.componentTree },
+    })
+    expect(baseline.history).toHaveLength(1)
+    expect(baseline.activePage).toBe("page-1")
+
+    // Simulate template apply: replace pages, set active page to template id, add history
+    const templatePage = {
+      tag: "page",
+      attributes: {
+        id: "farm-logistics-template-page",
+        title: "Fieldrun",
+        "custom-classes": "overflow-hidden rounded-none border-0 bg-[#f4f1e8]",
+      },
+      children: [],
+    }
+    let afterApply = appReducer(baseline, { type: "SET_PAGES", payload: [templatePage] })
+    afterApply = appReducer(afterApply, { type: "SET_ACTIVE_PAGE", payload: "farm-logistics-template-page" })
+    afterApply = appReducer(afterApply, { type: "SET_SELECTED_COMPONENT", payload: "some-child" })
+    afterApply = appReducer(afterApply, {
+      type: "ADD_TO_HISTORY",
+      payload: { action: "Applied template", pageState: afterApply.componentTree },
+    })
+
+    expect(afterApply.activePage).toBe("farm-logistics-template-page")
+    expect(afterApply.history.length).toBeGreaterThan(1)
+    expect(afterApply.selectedComponentId).toBe("some-child")
+
+    const discarded = appReducer(afterApply, { type: "DISCARD_CHANGES" })
+
+    expect(discarded.componentTree[0].attributes.id).toBe("page-1")
+    expect(discarded.componentTree[0].attributes["custom-classes"]).toBeUndefined()
+    expect(discarded.activePage).toBe("page-1")
+    expect(discarded.selectedComponentId).toBe("")
+    expect(discarded.selectedComponentAncestors).toEqual([])
+    expect(discarded.history).toHaveLength(1)
+    expect(discarded.currentHistoryIndex).toBe(0)
+    expect(discarded.historyPreviewIndex).toBeNull()
+    expect(discarded.originalHistoryState).toBeNull()
+  })
+})
