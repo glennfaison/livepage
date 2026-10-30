@@ -2,12 +2,12 @@
 
 import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger, POPOVER_PANEL_MAX_HEIGHT_CLASS } from "@/client/components/ui/popover"
-import { cn } from "@/client/lib/utils"
 import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Settings } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
+import { DraggablePanel } from "@/client/features/page-builder/draggable-panel"
 import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
 import { toast } from "@/client/components/ui/use-toast"
 
@@ -110,20 +110,23 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-72 p-0"
+        className="w-[28rem] max-w-[calc(100vw-1.5rem)] p-0"
         align="start"
         sideOffset={8}
         collisionPadding={PANEL_VIEWPORT_MARGIN}
       >
-        <div className={cn("flex flex-col overflow-hidden rounded-lg border bg-background shadow-lg", POPOVER_PANEL_MAX_HEIGHT_CLASS)}>
-          <div className="bg-foreground text-background p-4 rounded-t-lg flex items-center shrink-0">
+        <DraggablePanel
+          className={POPOVER_PANEL_MAX_HEIGHT_CLASS}
+          dragLabel="Drag settings panel"
+          viewportMargin={PANEL_VIEWPORT_MARGIN}
+          header={
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Settings
             </h2>
-          </div>
-
-          <div data-testid="settings-panel-body" className="p-4 space-y-4 overflow-y-auto">
+          }
+        >
+          <div data-testid="settings-panel-body" className="p-4 space-y-4 overflow-y-auto overflow-x-hidden break-words">
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Page</h3>
               <div className="space-y-2">
@@ -309,7 +312,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   <p>2. Describe the page you want in plain language (e.g., &quot;A landing page for a coffee shop with menu and contact info&quot;)</p>
                   <p>3. The assistant picks a template, drafts copy, and tunes the design</p>
                   <p>4. Review the proposal and click &quot;Apply&quot; to add it to your page</p>
-                  <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded">.env.local</code></p>
+                  <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded break-all">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded break-all">.env.local</code></p>
                 </div>
               </div>
             </div>
@@ -336,7 +339,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </DraggablePanel>
       </PopoverContent>
 
       <ValidationDialog

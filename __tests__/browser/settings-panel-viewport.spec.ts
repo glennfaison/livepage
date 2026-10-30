@@ -71,6 +71,47 @@ test.describe("toolbar settings panel", () => {
     await expectInsideViewport(page, panel)
   })
 
+  test("is wide enough that the body never scrolls horizontally", async ({ page }) => {
+    const panel = await openSettingsPanel(page)
+    const body = page.getByTestId("settings-panel-body")
+
+    expect((await panel.boundingBox())!.width).toBeGreaterThanOrEqual(400)
+    const metrics = await body.evaluate((el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }))
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth)
+  })
+
+  test("moves when the grip is dragged, stays inside the viewport, and resets on reopen", async ({ page }) => {
+    await openSettingsPanel(page)
+    const dragPanel = page.getByTestId("draggable-panel")
+    const grip = page.getByTestId("draggable-panel-grip")
+    const before = (await dragPanel.boundingBox())!
+    const gripBox = (await grip.boundingBox())!
+    const startX = gripBox.x + gripBox.width / 2
+    const startY = gripBox.y + gripBox.height / 2
+
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX - 100, startY, { steps: 5 })
+    await page.mouse.up()
+    const moved = (await dragPanel.boundingBox())!
+    expect(moved.x).toBeLessThan(before.x)
+    await expectInsideViewport(page, dragPanel)
+
+    // Dragging far past every edge clamps the panel to the viewport.
+    await page.mouse.move(startX - 100, startY)
+    await page.mouse.down()
+    await page.mouse.move(-2000, -2000, { steps: 5 })
+    await page.mouse.up()
+    await expectInsideViewport(page, dragPanel)
+
+    // Closing and reopening puts the panel back at its anchor.
+    await page.keyboard.press("Escape")
+    await openSettingsPanel(page)
+    const reopened = (await dragPanel.boundingBox())!
+    expect(Math.abs(reopened.x - before.x)).toBeLessThanOrEqual(1)
+    expect(Math.abs(reopened.y - before.y)).toBeLessThanOrEqual(1)
+  })
+
   test("stays inside the viewport after a resize and reopen", async ({ page }) => {
     const panel = await openSettingsPanel(page)
     await expectInsideViewport(page, panel)
