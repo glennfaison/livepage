@@ -59,6 +59,22 @@ export function clampToolbarCenter(
   }
 }
 
+/**
+ * Drag offset relative to the toolbar center (CSS left/top + translate(-50%, -50%)).
+ * Keeps the pointer fixed on the grip for the duration of the drag.
+ */
+export function computeToolbarDragOffset(
+  clientX: number,
+  clientY: number,
+  toolbarCenterX: number,
+  toolbarCenterY: number,
+): { x: number; y: number } {
+  return {
+    x: clientX - toolbarCenterX,
+    y: clientY - toolbarCenterY,
+  }
+}
+
 export const Toolbar: React.FC<Readonly<{
   toolbarMinimized: boolean
   setToolbarMinimized: (minimized: boolean) => void
@@ -241,15 +257,16 @@ export const Toolbar: React.FC<Readonly<{
   }, [])
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    const gripElement = e.currentTarget as HTMLElement
-    const rect = gripElement.getBoundingClientRect()
-    const gripCenterX = rect.left + rect.width / 2
-    const gripCenterY = rect.top + rect.height / 2
+    // Offset is relative to the toolbar center (the CSS position anchor with
+    // translate(-50%, -50%)). Using the grip center caused an immediate jump
+    // because the grip is not at the toolbar center (top for vertical layout,
+    // start for horizontal).
+    const toolbarEl = toolbarRef.current
+    const rect = toolbarEl ? toolbarEl.getBoundingClientRect() : null
+    const centerX = rect ? rect.left + rect.width / 2 : positionRef.current.x
+    const centerY = rect ? rect.top + rect.height / 2 : positionRef.current.y
 
-    const offset = {
-      x: e.clientX - gripCenterX,
-      y: e.clientY - gripCenterY,
-    }
+    const offset = computeToolbarDragOffset(e.clientX, e.clientY, centerX, centerY)
     setDragOffset(offset)
     dragOffsetRef.current = offset
     setIsDragging(true)
