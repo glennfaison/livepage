@@ -100,6 +100,8 @@ export const fitnessStudioTemplate = {
             "padding-right": "2rem",
             "padding-bottom": "3rem",
             "padding-left": "2rem",
+            "margin-left": "auto",
+            "margin-right": "auto",
             "custom-classes": "mx-auto max-w-2xl text-center",
           }, [
             text("header2", "story-heading", "Our Mission", {
