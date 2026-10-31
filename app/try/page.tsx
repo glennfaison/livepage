@@ -35,7 +35,7 @@ import React, { useCallback, useRef, useState, useMemo, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/client/components/ui/select"
 import { Input } from "@/client/components/ui/input"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
-import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
+import { useFieldDraft } from "@/client/features/page-builder/field-draft"
 import { serializeAppStateAsHtml, serializeAppStateAsJson, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
@@ -146,7 +146,7 @@ export default function BuilderPage() {
   )
   // Edit the title locally and only write it on Enter/blur: saving per keystroke
   // pushes a history entry for every character.
-  const pageTitleDraft = usePageTitleDraft(currentPage?.attributes?.title ?? "", commitPageTitle)
+  const pageTitleDraft = useFieldDraft(currentPage?.attributes?.title ?? "", commitPageTitle)
 
   const saveAsJSON = () => {
     savePageAsJsonMutation.mutate(state.componentTree)

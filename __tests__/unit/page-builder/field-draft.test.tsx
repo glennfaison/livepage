@@ -1,13 +1,13 @@
 import { act, renderHook } from "@testing-library/react"
-import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
+import { useFieldDraft } from "@/client/features/page-builder/field-draft"
 
-function setup(committedTitle = "Test Page") {
+function setup(committedValue = "Test Value") {
   const onCommit = jest.fn()
-  const utils = renderHook(() => usePageTitleDraft(committedTitle, onCommit))
+  const utils = renderHook(() => useFieldDraft(committedValue, onCommit))
   return { onCommit, ...utils }
 }
 
-describe("usePageTitleDraft", () => {
+describe("useFieldDraft", () => {
   it("keeps the typed value local and does not commit per keystroke", () => {
     const { result, onCommit } = setup()
 
@@ -17,18 +17,34 @@ describe("usePageTitleDraft", () => {
     expect(result.current.value).toBe("New")
 
     act(() => {
-      result.current.changeDraft("New Title")
+      result.current.changeDraft("New Value")
     })
-    expect(result.current.value).toBe("New Title")
+    expect(result.current.value).toBe("New Value")
     expect(onCommit).not.toHaveBeenCalled()
   })
 
-  it("commits the trimmed title once, on Enter", () => {
+  it("typing N characters yields a single commit on blur", () => {
+    const { result, onCommit } = setup()
+
+    act(() => {
+      result.current.changeDraft("hello world")
+    })
+    expect(onCommit).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.handleBlur()
+    })
+
+    expect(onCommit).toHaveBeenCalledTimes(1)
+    expect(onCommit).toHaveBeenCalledWith("hello world")
+  })
+
+  it("commits the trimmed value once, on Enter", () => {
     const { result, onCommit } = setup()
     const input = document.createElement("input")
 
     act(() => {
-      result.current.changeDraft("  New Title  ")
+      result.current.changeDraft("  New Value  ")
     })
     act(() => {
       result.current.handleKeyDown({
@@ -39,23 +55,21 @@ describe("usePageTitleDraft", () => {
     })
 
     expect(onCommit).toHaveBeenCalledTimes(1)
-    expect(onCommit).toHaveBeenCalledWith("New Title")
-    // The draft falls back to the committed prop again; the typed value only
-    // stays put until the page prop catches up with the commit.
-    expect(result.current.value).toBe("Test Page")
+    expect(onCommit).toHaveBeenCalledWith("New Value")
+    expect(result.current.value).toBe("Test Value")
   })
 
   it("commits the current value on blur", () => {
     const { result, onCommit } = setup()
     act(() => {
-      result.current.changeDraft("Blurred Title")
+      result.current.changeDraft("Blurred Value")
     })
     act(() => {
       result.current.handleBlur()
     })
 
     expect(onCommit).toHaveBeenCalledTimes(1)
-    expect(onCommit).toHaveBeenCalledWith("Blurred Title")
+    expect(onCommit).toHaveBeenCalledWith("Blurred Value")
   })
 
   it("reverts the draft on Escape without committing", () => {
@@ -76,7 +90,7 @@ describe("usePageTitleDraft", () => {
 
     expect(onCommit).not.toHaveBeenCalled()
     expect(blur).toHaveBeenCalled()
-    expect(result.current.value).toBe("Test Page")
+    expect(result.current.value).toBe("Test Value")
   })
 
   it("drops an empty or whitespace-only draft instead of committing it", () => {
@@ -87,14 +101,14 @@ describe("usePageTitleDraft", () => {
     })
 
     expect(onCommit).not.toHaveBeenCalled()
-    expect(result.current.value).toBe("Test Page")
+    expect(result.current.value).toBe("Test Value")
   })
 
-  it("does not commit when the title is unchanged", () => {
+  it("does not commit when the value is unchanged", () => {
     const { result, onCommit } = setup()
 
     act(() => {
-      result.current.commit("Test Page")
+      result.current.commit("Test Value")
     })
 
     expect(onCommit).not.toHaveBeenCalled()
@@ -104,7 +118,7 @@ describe("usePageTitleDraft", () => {
     const { result, onCommit } = setup()
 
     act(() => {
-      result.current.changeDraft("New Title")
+      result.current.changeDraft("New Value")
     })
     act(() => {
       result.current.handleKeyDown({
@@ -113,13 +127,31 @@ describe("usePageTitleDraft", () => {
         currentTarget: { blur: jest.fn() } as unknown as HTMLInputElement,
       } as unknown as React.KeyboardEvent<HTMLInputElement>)
     })
-    // The blur handler is re-created on the next render, but an input blur can
-    // also fire with the pre-commit closure; that repeat must not re-commit.
     act(() => {
       result.current.handleBlur()
     })
 
     expect(onCommit).toHaveBeenCalledTimes(1)
-    expect(onCommit).toHaveBeenCalledWith("New Title")
+    expect(onCommit).toHaveBeenCalledWith("New Value")
+  })
+
+  it("does not commit on Enter for multi-line fields", () => {
+    const onCommit = jest.fn()
+    const { result } = renderHook(() => useFieldDraft("multi", onCommit, { commitOnEnter: false }))
+    const input = document.createElement("textarea")
+
+    act(() => {
+      result.current.changeDraft("line one\nline two")
+    })
+    act(() => {
+      result.current.handleKeyDown({
+        key: "Enter",
+        preventDefault: jest.fn(),
+        currentTarget: input,
+      } as unknown as React.KeyboardEvent<HTMLTextAreaElement>)
+    })
+
+    expect(onCommit).not.toHaveBeenCalled()
+    expect(result.current.value).toBe("line one\nline two")
   })
 })
