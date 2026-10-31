@@ -20,6 +20,7 @@ import {
 } from "./toolbar-persistence"
 import { formatShortcut, useHistoryShortcut, useSaveShortcut, useUndoShortcut, useRedoShortcut, useDuplicatePageShortcut, useToolbarToggleShortcut } from "@/client/features/page-builder/keyboard-shortcuts"
 import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
+import { isPromptAssistEnabled } from "@/shared/features/prompt-assist"
 
 const COMPACT_TOOLBAR_BREAKPOINT = 640
 const TOOLBAR_VIEWPORT_MARGIN = 8
@@ -351,7 +352,7 @@ export const Toolbar: React.FC<Readonly<{
       assertToolbarButtonBalance(0, 0)
     } else {
       const leftButtonCount =
-        (onOpenAIAssistant && promptAssistEnabled ? 1 : 0) +
+        (onOpenAIAssistant && promptAssistEnabled && isPromptAssistEnabled() ? 1 : 0) +
         3 // history, undo, redo
       const rightButtonCount = 4 // save, discard, settings, layout toggle
       assertToolbarButtonBalance(leftButtonCount, rightButtonCount)
@@ -387,7 +388,7 @@ export const Toolbar: React.FC<Readonly<{
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
 
-          {onOpenAIAssistant && promptAssistEnabled ? (
+          {onOpenAIAssistant && promptAssistEnabled && isPromptAssistEnabled() ? (
             <Button
               variant="outline"
               size="sm"

@@ -167,3 +167,26 @@ describe("Toolbar screen reader announcements", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Toolbar restored")
   })
 })
+
+describe("Toolbar AI Assistant gated by deployment flag", () => {
+  const original = process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+
+  afterEach(() => {
+    if (original === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+    else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = original
+  })
+
+  it("hides the AI Assistant toolbar button when the deployment flag is off even if promptAssistEnabled is true", () => {
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "0"
+    render(<Toolbar {...baseProps} promptAssistEnabled={true} onOpenAIAssistant={jest.fn()} />)
+
+    expect(screen.queryByTitle("Open AI Assistant")).not.toBeInTheDocument()
+  })
+
+  it("shows the AI Assistant toolbar button when the deployment flag is on and promptAssistEnabled is true", () => {
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    render(<Toolbar {...baseProps} promptAssistEnabled={true} onOpenAIAssistant={jest.fn()} />)
+
+    expect(screen.getByTitle("Open AI Assistant")).toBeInTheDocument()
+  })
+})
