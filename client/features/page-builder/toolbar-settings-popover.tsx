@@ -10,6 +10,7 @@ import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type Val
 import { DraggablePanel } from "@/client/features/page-builder/draggable-panel"
 import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
 import { toast } from "@/client/components/ui/use-toast"
+import { isPromptAssistEnabled } from "@/shared/features/prompt-assist"
 
 type ToolbarSettingsPopoverProps = Readonly<{
   isOpen: boolean
@@ -292,32 +293,34 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
               </div>
             </div>
 
-            <div className="space-y-3 pt-2 border-t">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Assistant</h3>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={promptAssistEnabled}
-                    onChange={(e) => dispatch({ type: "SET_PROMPT_ASSIST_ENABLED", payload: e.target.checked })}
-                    className="h-4 w-4 rounded border-input bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  />
-                  <span className="text-sm font-medium">Enable AI Assistant</span>
-                </label>
-                <p className="text-xs text-muted-foreground ml-6">
-                  When enabled, the AI Assistant chat bubble appears in the bottom-right corner.
-                  Use it to describe a page and get a template with drafted content and tuned design.
-                </p>
-                <div className="text-xs text-muted-foreground ml-6 space-y-1 border-l border-muted/50 pl-3">
-                  <p><strong>How to use:</strong></p>
-                  <p>1. Click the <Bot className="h-3 w-3 inline-block align-middle mr-1" /> button in the toolbar or press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">⌘K</kbd> and search &quot;Open AI Assistant&quot;</p>
-                  <p>2. Describe the page you want in plain language (e.g., &quot;A landing page for a coffee shop with menu and contact info&quot;)</p>
-                  <p>3. The assistant picks a template, drafts copy, and tunes the design</p>
-                  <p>4. Review the proposal and click &quot;Apply&quot; to add it to your page</p>
-                  <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded break-all">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded break-all">.env.local</code></p>
+            {isPromptAssistEnabled() ? (
+              <div className="space-y-3 pt-2 border-t">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Assistant</h3>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={promptAssistEnabled}
+                      onChange={(e) => dispatch({ type: "SET_PROMPT_ASSIST_ENABLED", payload: e.target.checked })}
+                      className="h-4 w-4 rounded border-input bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                    <span className="text-sm font-medium">Enable AI Assistant</span>
+                  </label>
+                  <p className="text-xs text-muted-foreground ml-6">
+                    When enabled, the AI Assistant chat bubble appears in the bottom-right corner.
+                    Use it to describe a page and get a template with drafted content and tuned design.
+                  </p>
+                  <div className="text-xs text-muted-foreground ml-6 space-y-1 border-l border-muted/50 pl-3">
+                    <p><strong>How to use:</strong></p>
+                    <p>1. Click the <Bot className="h-3 w-3 inline-block align-middle mr-1" /> button in the toolbar or press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">⌘K</kbd> and search &quot;Open AI Assistant&quot;</p>
+                    <p>2. Describe the page you want in plain language (e.g., &quot;A landing page for a coffee shop with menu and contact info&quot;)</p>
+                    <p>3. The assistant picks a template, drafts copy, and tunes the design</p>
+                    <p>4. Review the proposal and click &quot;Apply&quot; to add it to your page</p>
+                    <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded break-all">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded break-all">.env.local</code></p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : null}
 
             <div className="space-y-3 pt-2 border-t">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</h3>
