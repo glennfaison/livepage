@@ -110,6 +110,7 @@ export default function BuilderPage() {
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop")
   const [previewOrientation, setPreviewOrientation] = useState<"portrait" | "landscape">("portrait")
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [templateCatalogOpen, setTemplateCatalogOpen] = useState(false)
 
   // Global shortcut works in both edit and preview mode.
   useCommandPaletteShortcut(setCommandPaletteOpen)
@@ -382,7 +383,7 @@ export default function BuilderPage() {
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
               </Button>
-              <TemplateCatalogPopover templates={templateDisplayCatalog} onApplyTemplate={applyTemplate} />
+              <TemplateCatalogPopover templates={templateDisplayCatalog} onApplyTemplate={applyTemplate} open={templateCatalogOpen} onOpenChange={setTemplateCatalogOpen} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Import page">
@@ -611,6 +612,7 @@ export default function BuilderPage() {
           promptAssistEnabled={state.promptAssistEnabled}
           canUndo={canUndo}
           canRedo={canRedo}
+          onBrowseTemplates={() => setTemplateCatalogOpen(true)}
         />
 
         <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
