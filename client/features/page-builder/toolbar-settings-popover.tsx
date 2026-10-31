@@ -4,7 +4,7 @@ import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger, POPOVER_PANEL_MAX_HEIGHT_CLASS } from "@/client/components/ui/popover"
 import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Settings } from "lucide-react"
 import type React from "react"
-import { useState } from "react"
+import { useId, useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { DraggablePanel } from "@/client/features/page-builder/draggable-panel"
@@ -44,6 +44,16 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
   const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+
+  // Unique ids so labels associate with the popover fields, not the header title input.
+  const pageTitleId = useId()
+  const pageDescriptionId = useId()
+  const pageFaviconId = useId()
+  const pageOgImageId = useId()
+  const pageCanonicalUrlId = useId()
+  const pageCustomHeadId = useId()
+  const pageCustomCssId = useId()
+  const pageCustomJsId = useId()
 
   // Local draft committed on Enter/blur, so a title edit does not dispatch
   // (and add a history entry) for every keystroke.
@@ -132,11 +142,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Page</h3>
               <div className="space-y-2">
-                <label htmlFor="page-title" className="text-sm font-medium">
+                <label htmlFor={pageTitleId} className="text-sm font-medium">
                   Page Title
                 </label>
                 <input
-                  id="page-title"
+                  id={pageTitleId}
                   type="text"
                   value={pageTitleDraft.value}
                   onChange={(e) => pageTitleDraft.changeDraft(e.target.value)}
@@ -147,11 +157,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-description" className="text-sm font-medium">
+                <label htmlFor={pageDescriptionId} className="text-sm font-medium">
                   Description (SEO)
                 </label>
                 <textarea
-                  id="page-description"
+                  id={pageDescriptionId}
                   value={currentPage?.attributes.description ?? ""}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { description: e.target.value } } } })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -160,11 +170,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-favicon" className="text-sm font-medium">
+                <label htmlFor={pageFaviconId} className="text-sm font-medium">
                   Favicon URL
                 </label>
                 <input
-                  id="page-favicon"
+                  id={pageFaviconId}
                   type="url"
                   value={currentPage?.attributes.favicon ?? ""}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { favicon: e.target.value } } } })}
@@ -173,11 +183,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-og-image" className="text-sm font-medium">
+                <label htmlFor={pageOgImageId} className="text-sm font-medium">
                   Open Graph Image
                 </label>
                 <input
-                  id="page-og-image"
+                  id={pageOgImageId}
                   type="url"
                   value={currentPage?.attributes.ogImage ?? ""}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { ogImage: e.target.value } } } })}
@@ -186,11 +196,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-canonical-url" className="text-sm font-medium">
+                <label htmlFor={pageCanonicalUrlId} className="text-sm font-medium">
                   Canonical URL
                 </label>
                 <input
-                  id="page-canonical-url"
+                  id={pageCanonicalUrlId}
                   type="url"
                   value={currentPage?.attributes.canonicalUrl ?? ""}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { canonicalUrl: e.target.value } } } })}
@@ -199,11 +209,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-custom-head" className="text-sm font-medium">
+                <label htmlFor={pageCustomHeadId} className="text-sm font-medium">
                   Custom {"<head>"} HTML
                 </label>
                 <textarea
-                  id="page-custom-head"
+                  id={pageCustomHeadId}
                   value={Array.isArray(currentPage?.attributes.customHead) ? currentPage.attributes.customHead.join("\n") : (currentPage?.attributes.customHead ?? "")}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customHead: e.target.value.split("\n").join("\n") } } } })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
@@ -212,11 +222,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-custom-css" className="text-sm font-medium">
+                <label htmlFor={pageCustomCssId} className="text-sm font-medium">
                   Custom CSS
                 </label>
                 <textarea
-                  id="page-custom-css"
+                  id={pageCustomCssId}
                   value={Array.isArray(currentPage?.attributes.customCss) ? currentPage.attributes.customCss.join("\n") : (currentPage?.attributes.customCss ?? "")}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customCss: e.target.value.split("\n").join("\n") } } } })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
@@ -225,11 +235,11 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="page-custom-js" className="text-sm font-medium">
+                <label htmlFor={pageCustomJsId} className="text-sm font-medium">
                   Custom JavaScript
                 </label>
                 <textarea
-                  id="page-custom-js"
+                  id={pageCustomJsId}
                   value={Array.isArray(currentPage?.attributes.customJs) ? currentPage.attributes.customJs.join("\n") : (currentPage?.attributes.customJs ?? "")}
                   onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customJs: e.target.value.split("\n").join("\n") } } } })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
