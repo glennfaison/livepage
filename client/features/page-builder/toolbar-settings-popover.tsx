@@ -4,11 +4,11 @@ import { Button } from "@/client/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger, POPOVER_PANEL_MAX_HEIGHT_CLASS } from "@/client/components/ui/popover"
 import { Bot, Copy, Download, Eye, GripVertical, Keyboard, LayoutDashboard, Palette, Settings } from "lucide-react"
 import type React from "react"
-import { useId, useState } from "react"
+import { useCallback, useId, useState } from "react"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { serializeAppStateAsHtml, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { DraggablePanel } from "@/client/features/page-builder/draggable-panel"
-import { usePageTitleDraft } from "@/client/features/page-builder/page-title-draft"
+import { useFieldDraft } from "@/client/features/page-builder/field-draft"
 import { toast } from "@/client/components/ui/use-toast"
 import { isPromptAssistEnabled } from "@/shared/features/prompt-assist"
 
@@ -60,11 +60,64 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   const pageCustomCssId = useId()
   const pageCustomJsId = useId()
 
+  const currentPage = pageComponent
+
   // Local draft committed on Enter/blur, so a title edit does not dispatch
   // (and add a history entry) for every keystroke.
-  const pageTitleDraft = usePageTitleDraft(pageTitle, onPageTitleChange)
+  const pageTitleDraft = useFieldDraft(pageTitle, onPageTitleChange)
 
-  const currentPage = pageComponent
+  // Page fields are committed on blur (and Enter for single-line inputs) so a
+  // multi-character edit produces a single history entry instead of one per
+  // keystroke. Multi-line fields (description, custom head/CSS/JS) do not
+  // commit on Enter, since Enter means a newline there.
+  const commitPageField = useCallback(
+    (attribute: string, value: string) => {
+      const componentId = currentPage?.attributes.id ?? ""
+      if (!componentId) return
+      dispatch({ type: "UPDATE_COMPONENT", payload: { componentId, updates: { attributes: { [attribute]: value } } } })
+    },
+    [currentPage, dispatch],
+  )
+
+  const descriptionDraft = useFieldDraft(currentPage?.attributes.description ?? "", (value) => {
+    commitPageField("description", value)
+  }, { commitOnEnter: false })
+
+  const faviconDraft = useFieldDraft(currentPage?.attributes.favicon ?? "", (value) => {
+    commitPageField("favicon", value)
+  })
+
+  const ogImageDraft = useFieldDraft(currentPage?.attributes.ogImage ?? "", (value) => {
+    commitPageField("ogImage", value)
+  })
+
+  const canonicalUrlDraft = useFieldDraft(currentPage?.attributes.canonicalUrl ?? "", (value) => {
+    commitPageField("canonicalUrl", value)
+  })
+
+  const customHeadDraft = useFieldDraft(
+    Array.isArray(currentPage?.attributes.customHead) ? currentPage.attributes.customHead.join("\n") : (currentPage?.attributes.customHead ?? ""),
+    (value) => {
+      commitPageField("customHead", value)
+    },
+    { commitOnEnter: false },
+  )
+
+  const customCssDraft = useFieldDraft(
+    Array.isArray(currentPage?.attributes.customCss) ? currentPage.attributes.customCss.join("\n") : (currentPage?.attributes.customCss ?? ""),
+    (value) => {
+      commitPageField("customCss", value)
+    },
+    { commitOnEnter: false },
+  )
+
+  const customJsDraft = useFieldDraft(
+    Array.isArray(currentPage?.attributes.customJs) ? currentPage.attributes.customJs.join("\n") : (currentPage?.attributes.customJs ?? ""),
+    (value) => {
+      commitPageField("customJs", value)
+    },
+    { commitOnEnter: false },
+  )
 
   const runValidation = (action: "preview" | "copy" | "download") => {
     const validation = validateHtmlExport(componentTree, window.location.origin)
@@ -169,8 +222,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 </label>
                 <textarea
                   id={pageDescriptionId}
-                  value={currentPage?.attributes.description ?? ""}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { description: e.target.value } } } })}
+                  value={descriptionDraft.value}
+                  onChange={(e) => descriptionDraft.changeDraft(e.target.value)}
+                  onBlur={descriptionDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter page description for SEO"
                   rows={3}
@@ -183,8 +237,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 <input
                   id={pageFaviconId}
                   type="url"
-                  value={currentPage?.attributes.favicon ?? ""}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { favicon: e.target.value } } } })}
+                  value={faviconDraft.value}
+                  onChange={(e) => faviconDraft.changeDraft(e.target.value)}
+                  onBlur={faviconDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="https://example.com/favicon.ico"
                 />
@@ -196,8 +251,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 <input
                   id={pageOgImageId}
                   type="url"
-                  value={currentPage?.attributes.ogImage ?? ""}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { ogImage: e.target.value } } } })}
+                  value={ogImageDraft.value}
+                  onChange={(e) => ogImageDraft.changeDraft(e.target.value)}
+                  onBlur={ogImageDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="https://example.com/og-image.png"
                 />
@@ -209,8 +265,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 <input
                   id={pageCanonicalUrlId}
                   type="url"
-                  value={currentPage?.attributes.canonicalUrl ?? ""}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { canonicalUrl: e.target.value } } } })}
+                  value={canonicalUrlDraft.value}
+                  onChange={(e) => canonicalUrlDraft.changeDraft(e.target.value)}
+                  onBlur={canonicalUrlDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="https://example.com/page"
                 />
@@ -221,8 +278,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 </label>
                 <textarea
                   id={pageCustomHeadId}
-                  value={Array.isArray(currentPage?.attributes.customHead) ? currentPage.attributes.customHead.join("\n") : (currentPage?.attributes.customHead ?? "")}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customHead: e.target.value.split("\n").join("\n") } } } })}
+                  value={customHeadDraft.value}
+                  onChange={(e) => customHeadDraft.changeDraft(e.target.value)}
+                  onBlur={customHeadDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
                   placeholder={`<meta name="analytics" content="...">&#10;<link rel="preconnect" href="https://fonts.googleapis.com">`}
                   rows={4}
@@ -234,8 +292,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 </label>
                 <textarea
                   id={pageCustomCssId}
-                  value={Array.isArray(currentPage?.attributes.customCss) ? currentPage.attributes.customCss.join("\n") : (currentPage?.attributes.customCss ?? "")}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customCss: e.target.value.split("\n").join("\n") } } } })}
+                  value={customCssDraft.value}
+                  onChange={(e) => customCssDraft.changeDraft(e.target.value)}
+                  onBlur={customCssDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
                   placeholder={`/* Custom styles injected in export *&#47;&#10;:root { --custom-color: #123; }`}
                   rows={4}
@@ -247,8 +306,9 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                 </label>
                 <textarea
                   id={pageCustomJsId}
-                  value={Array.isArray(currentPage?.attributes.customJs) ? currentPage.attributes.customJs.join("\n") : (currentPage?.attributes.customJs ?? "")}
-                  onChange={(e) => dispatch({ type: "UPDATE_COMPONENT", payload: { componentId: currentPage?.attributes.id ?? "", updates: { attributes: { customJs: e.target.value.split("\n").join("\n") } } } })}
+                  value={customJsDraft.value}
+                  onChange={(e) => customJsDraft.changeDraft(e.target.value)}
+                  onBlur={customJsDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs"
                   placeholder={`// Custom JS injected in export&#10;console.log('Page loaded');`}
                   rows={4}
@@ -310,32 +370,33 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
             </div>
 
             {isPromptAssistEnabled() ? (
-              <div className="space-y-3 pt-2 border-t">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Assistant</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={promptAssistEnabled}
-                      onChange={(e) => dispatch({ type: "SET_PROMPT_ASSIST_ENABLED", payload: e.target.checked })}
-                      className="h-4 w-4 rounded border-input bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    />
-                    <span className="text-sm font-medium">Enable AI Assistant</span>
-                  </label>
-                  <p className="text-xs text-muted-foreground ml-6">
-                    When enabled, the AI Assistant chat bubble appears in the bottom-right corner.
-                    Use it to describe a page and get a template with drafted content and tuned design.
-                  </p>
-                  <div className="text-xs text-muted-foreground ml-6 space-y-1 border-l border-muted/50 pl-3">
-                    <p><strong>How to use:</strong></p>
-                    <p>1. Click the <Bot className="h-3 w-3 inline-block align-middle mr-1" /> button in the toolbar or press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">⌘K</kbd> and search &quot;Open AI Assistant&quot;</p>
-                    <p>2. Describe the page you want in plain language (e.g., &quot;A landing page for a coffee shop with menu and contact info&quot;)</p>
-                    <p>3. The assistant picks a template, drafts copy, and tunes the design</p>
-                    <p>4. Review the proposal and click &quot;Apply&quot; to add it to your page</p>
-                    <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded break-all">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded break-all">.env.local</code></p>
-                  </div>
+            <div className="space-y-3 pt-2 border-t">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Assistant</h3>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={promptAssistEnabled}
+                    onChange={(e) => dispatch({ type: "SET_PROMPT_ASSIST_ENABLED", payload: e.target.checked })}
+                    className="h-4 w-4 rounded border-input bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                  <span className="text-sm font-medium">Enable AI Assistant</span>
+                </label>
+                <p className="text-xs text-muted-foreground ml-6">
+                  When enabled, the AI Assistant chat bubble appears in the bottom-right corner.
+                  Use it to describe a page and get a template with drafted content and tuned design.
+                </p>
+                <div className="text-xs text-muted-foreground ml-6 space-y-1 border-l border-muted/50 pl-3">
+                  <p><strong>How to use:</strong></p>
+                  <p>1. Click the <Bot className="h-3 w-3 inline-block align-middle mr-1" /> button in the toolbar or press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">⌘K</kbd> and search &quot;Open AI Assistant&quot;</p>
+                  <p>2. Describe the page you want in plain language (e.g., &quot;A landing page for a coffee shop with menu and contact info&quot;)</p>
+                  <p>3. The assistant picks a template, drafts copy, and tunes the design</p>
+                  <p>4. Review the proposal and click &quot;Apply&quot; to add it to your page</p>
+                  <p><strong>Requires:</strong> Deployment flag <code className="bg-muted px-1 rounded break-all">NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1</code> and an AI provider (TypeSafe Jev or OpenAI) configured in <code className="bg-muted px-1 rounded break-all">.env.local</code></p>
                 </div>
               </div>
+            </div>
+
             ) : null}
 
             <div className="space-y-3 pt-2 border-t">
