@@ -23,6 +23,7 @@ type ToolbarSettingsPopoverProps = Readonly<{
   componentTree: ReadonlyArray<AppNode>
   dispatch: React.Dispatch<AppAction>
   promptAssistEnabled: boolean
+  onDownloadHtml?: () => void
 }>
 
 /** Space kept between the settings panel and the viewport edge. */
@@ -40,9 +41,10 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   componentTree,
   dispatch,
   promptAssistEnabled,
+  onDownloadHtml,
 }) => {
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
-  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | null>(null)
+  const [pendingExportAction, setPendingExportAction] = useState<"preview" | "copy" | "download" | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
 
   // Local draft committed on Enter/blur, so a title edit does not dispatch
@@ -51,7 +53,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
 
   const currentPage = pageComponent
 
-  const runValidation = (action: "preview" | "copy") => {
+  const runValidation = (action: "preview" | "copy" | "download") => {
     const validation = validateHtmlExport(componentTree, window.location.origin)
     if (!validation.hasErrors && !validation.hasWarnings) {
       handleValidationProceedForAction(action)
@@ -63,7 +65,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     onOpenChange(false)
   }
 
-  const handleValidationProceedForAction = (action: "preview" | "copy") => {
+  const handleValidationProceedForAction = (action: "preview" | "copy" | "download") => {
     if (action === "preview") {
       const html = serializeAppStateAsHtml(componentTree, { assetBaseUrl: window.location.origin })
       const blob = new Blob([html], { type: "text/html" })
@@ -94,6 +96,8 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
           })
         },
       )
+    } else if (action === "download") {
+      onDownloadHtml?.()
     }
   }
 
@@ -334,7 +338,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   <Copy className="h-4 w-4" />
                   Copy HTML to Clipboard
                 </Button>
-                <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => onOpenChange(false)}>
+                <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => runValidation("download")}>
                   <Download className="h-4 w-4" />
                   Download as HTML
                 </Button>
