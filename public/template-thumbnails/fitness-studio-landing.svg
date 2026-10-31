@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <rect width="640" height="400" rx="20" fill="#FAF7F0"/>
+  <rect x="0" y="0" width="640" height="38" rx="20" fill="#67442F"/>
+  <rect y="20" width="640" height="18" fill="#67442F"/>
+  <text x="26" y="25" fill="#FFF9F0" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="2">JUNIPER &amp; GRAIN</text>
+  <text x="28" y="100" fill="#38291F" font-family="Georgia,serif" font-size="36" font-weight="700">A little ritual,</text>
+  <text x="28" y="140" fill="#38291F" font-family="Georgia,serif" font-size="30" font-weight="700">right around the corner.</text>
+  <text x="30" y="174" fill="#746255" font-family="Arial,sans-serif" font-size="12">Good coffee, warm pastries, good neighbors.</text>
+  <rect x="28" y="194" width="133" height="34" rx="17" fill="#9A572F"/>
+  <text x="46" y="215" fill="white" font-family="Arial,sans-serif" font-size="11" font-weight="700">Explore the menu</text>
+  <rect x="359" y="58" width="249" height="191" rx="19" fill="#E9D6B7"/>
+  <circle cx="548" cy="96" r="55" fill="#D6A66F" opacity=".55"/>
+  <path d="M398 195c0-39 22-63 65-63s65 24 65 63l-9 37h-112l-9-37Z" fill="#7B4932"/>
+  <path d="M402 172h122v24c0 28-20 51-46 51h-30c-26 0-46-23-46-51v-24Z" fill="#F7F0E4"/>
+  <path d="M404 174h118c9 0 16 7 16 15s-7 15-16 15H404c-9 0-16-7-16-15s7-15 16-15Z" fill="#FCF9F2"/>
+  <path d="M439 180c1 18 19 27 37 17 15-8 25-5 29 7-6 19-22 30-43 30-25 0-43-18-44-42 6-8 14-11 21-12Z" fill="#B36C3B"/>
+  <rect y="270" width="640" height="130" fill="#F3EAD9"/>
+  <text x="28" y="301" fill="#9A572F" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2">MADE HERE, WITH CARE</text>
+  <text x="28" y="334" fill="#38291F" font-family="Georgia,serif" font-size="24" font-weight="700">This season, at the counter</text>
+  <rect x="28" y="350" width="178" height="38" rx="9" fill="white"/>
+  <rect x="231" y="350" width="178" height="38" rx="9" fill="white"/>
+  <rect x="434" y="350" width="178" height="38" rx="9" fill="white"/>
+  <text x="39" y="373" fill="#67442F" font-family="Arial,sans-serif" font-size="11" font-weight="700">Maple oat latte · $5.50</text>
+  <text x="246" y="373" fill="#67442F" font-family="Arial,sans-serif" font-size="11" font-weight="700">Butter croissant · $4.25</text>
+  <text x="446" y="373" fill="#67442F" font-family="Arial,sans-serif" font-size="11" font-weight="700">Garden toast · $9.00</text>
+</svg>
