@@ -4,7 +4,7 @@ import { heroTemplate } from "@/client/features/templates/definitions/component-
 import { statsTemplate } from "@/client/features/templates/definitions/component-templates/stats"
 import { testimonialTemplate } from "@/client/features/templates/definitions/component-templates/testimonial"
 import { getComponentsAllowedIn } from "@/client/features/design-components/registry-store"
-import { validateAndMigrateComponentTemplate, type ComponentTemplateDefinition } from "@/client/features/templates/component-schema"
+import type { ComponentTemplateDefinition } from "@/client/features/templates/component-schema"
 
 const rawComponentTemplates = [
   callToActionTemplate,
@@ -24,6 +24,11 @@ const resolvedRegistry: ComponentTemplateDefinition[] = []
  */
 export function getComponentTemplateRegistry(): ReadonlyArray<ComponentTemplateDefinition> {
   if (resolvedRegistry.length === 0) {
+    // Lazy require breaks the circular import: component-schema -> serializers/schema
+    // -> design-components barrel -> editor controls -> this module. A static import
+    // of the validator evaluated the cycle before design-components/registry finished
+    // initializing (TDZ on the registry export).
+    const { validateAndMigrateComponentTemplate } = require("@/client/features/templates/component-schema") as typeof import("@/client/features/templates/component-schema")
     resolvedRegistry.push(
       ...rawComponentTemplates.map((template) => validateAndMigrateComponentTemplate(template)),
     )
