@@ -107,6 +107,8 @@ export const Toolbar: React.FC<Readonly<{
   promptAssistEnabled?: boolean
   /** Open the template catalog from settings */
   onBrowseTemplates?: () => void
+  /** Download the page as HTML from settings */
+  onDownloadHtml?: () => void
   /** Pre-computed undo/redo availability from parent to avoid stale closure issues */
   canUndo?: boolean
   canRedo?: boolean
@@ -132,6 +134,7 @@ export const Toolbar: React.FC<Readonly<{
   dispatch,
   promptAssistEnabled,
   onBrowseTemplates,
+  onDownloadHtml,
   canUndo: canUndoProp,
   canRedo: canRedoProp,
 }) => {
@@ -455,6 +458,7 @@ export const Toolbar: React.FC<Readonly<{
             dispatch={dispatch ?? (() => {})}
             promptAssistEnabled={promptAssistEnabled ?? false}
             onBrowseTemplates={onBrowseTemplates}
+            onDownloadHtml={onDownloadHtml}
           >
             <Button variant="outline" size="sm" title="Settings" className="shrink-0" data-testid="toolbar-settings-trigger">
               <Settings className="h-4 w-4" />

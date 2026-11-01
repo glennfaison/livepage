@@ -613,6 +613,7 @@ export default function BuilderPage() {
           canUndo={canUndo}
           canRedo={canRedo}
           onBrowseTemplates={() => setTemplateCatalogOpen(true)}
+          onDownloadHtml={saveAsHTML}
         />
 
         <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
