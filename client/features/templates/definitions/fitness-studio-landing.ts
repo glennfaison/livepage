@@ -57,7 +57,7 @@ export const fitnessStudioTemplate = {
     pages: [
       node("page", "fitness-page", {
         title: "Apex Fitness Studio",
-        "custom-classes": "border-0 bg-slate-950 text-white shadow-none",
+        "custom-classes": "min-h-screen border-0 bg-slate-950 text-white shadow-none",
       }, [
         node("column", "fitness-shell", { gap: "0", "custom-classes": "mx-auto w-full" }, [
           node("row", "fitness-nav", {
