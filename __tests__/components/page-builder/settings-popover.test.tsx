@@ -224,44 +224,13 @@ describe("SettingsPopover", () => {
     // Switch to Templates tab
     await userEvent.click(screen.getByTestId("templates-tab-trigger"))
 
-    // Check that template catalog heading is visible
+    // Check that component templates heading is visible
     await waitFor(() => {
-      expect(screen.getByText("Template catalog")).toBeInTheDocument()
+      expect(screen.getByText("Component templates")).toBeInTheDocument()
     })
 
-    // Check that search input is visible
-    expect(screen.getByPlaceholderText("Search templates by name, tag, or category")).toBeInTheDocument()
-
-    // Check that template cards are rendered (at least one)
-    expect(screen.getByText("Personal CV / Resume")).toBeInTheDocument()
-  })
-
-  it("filters templates when searching", async () => {
-    const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
-    render(
-      <SettingsPopover component={designComponentData}>
-        <Button data-testid="settings-trigger">Settings</Button>
-      </SettingsPopover>,
-    )
-
-    await userEvent.click(screen.getByTestId("settings-trigger"))
-    await userEvent.click(screen.getByTestId("templates-tab-trigger"))
-
-    await waitFor(() => {
-      expect(screen.getByText("Personal CV / Resume")).toBeInTheDocument()
-    })
-
-    // Search for "landing"
-    const searchInput = screen.getByPlaceholderText("Search templates by name, tag, or category")
-    await userEvent.type(searchInput, "landing")
-
-    // Should show landing page templates
-    await waitFor(() => {
-      expect(screen.getByText("Landing Page / SaaS")).toBeInTheDocument()
-    })
-
-    // Should not show CV template
-    expect(screen.queryByText("Personal CV / Resume")).not.toBeInTheDocument()
+    // With no parent slot context in this test, no component templates are offered
+    expect(screen.getByText("No component templates fit inside the selected component’s parent slot.")).toBeInTheDocument()
   })
 
   it("switches between all three tabs", async () => {
@@ -284,7 +253,7 @@ describe("SettingsPopover", () => {
 
     // Switch to Templates tab
     await userEvent.click(screen.getByTestId("templates-tab-trigger"))
-    expect(screen.getByText("Template catalog")).toBeInTheDocument()
+    expect(screen.getByText("Component templates")).toBeInTheDocument()
     // The tab button still exists but the tab content should not show "Data Sources" content
     expect(screen.queryByText("Search data sources")).not.toBeInTheDocument()
 
