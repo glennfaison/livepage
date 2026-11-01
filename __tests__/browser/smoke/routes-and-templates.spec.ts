@@ -29,7 +29,7 @@ test("builder route loads with its toolbar", async ({ page }) => {
 test("a template renders in preview with visible content and no horizontal overflow", async ({ page }) => {
   const errors: string[] = []
   page.on("pageerror", (error) => errors.push(error.message))
-  const response = await page.goto(`/preview/${SMOKE_TEMPLATE_ID}`)
+  const response = await page.goto(`/preview/page-templates/${SMOKE_TEMPLATE_ID}`)
   expect(response?.ok()).toBe(true)
   await page.waitForSelector("main, header", { timeout: 15_000 })
   const metrics = await page.evaluate(() => ({

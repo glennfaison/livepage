@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import React from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
-import TemplatePreviewPage from "@/app/preview/[templateId]/page"
+import TemplatePreviewPage from "@/app/preview/page-templates/[pageTemplateId]/page"
 
 jest.mock("next/link", () => {
   const ReactModule = jest.requireActual<typeof import("react")>("react")
@@ -23,7 +23,7 @@ async function renderPreviewPage(templateId: string) {
   await act(async () => {
     utils = render(
       <QueryClientProvider client={queryClient}>
-        <TemplatePreviewPage params={Promise.resolve({ templateId })} />
+        <TemplatePreviewPage params={Promise.resolve({ pageTemplateId: templateId })} />
       </QueryClientProvider>,
     )
   })
@@ -79,7 +79,7 @@ describe("TemplatePreviewPage", () => {
     await renderPreviewPage(TEMPLATE_ID)
 
     const applyLink = await screen.findByRole("link", { name: /apply template/i })
-    expect(applyLink).toHaveAttribute("href", `/try?template=${TEMPLATE_ID}&mode=edit`)
+    expect(applyLink).toHaveAttribute("href", `/try?page-template=${TEMPLATE_ID}&mode=edit`)
     expect(window.localStorage.getItem(PAGE_STORAGE_KEY)).toBe(persistedState)
   })
 
@@ -89,7 +89,7 @@ describe("TemplatePreviewPage", () => {
 
     await user.click(await screen.findByRole("button", { name: /open in builder/i }))
 
-    expect(window.open).toHaveBeenCalledWith(`/try?template=${TEMPLATE_ID}&mode=edit`, "_blank")
+    expect(window.open).toHaveBeenCalledWith(`/try?page-template=${TEMPLATE_ID}&mode=edit`, "_blank")
   })
 
   it("shows a not-found state for an unknown template id", async () => {
