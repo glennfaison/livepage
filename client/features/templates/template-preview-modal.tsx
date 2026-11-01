@@ -11,7 +11,7 @@ import { X, Maximize, Minimize, ExternalLink } from "lucide-react"
 // Import from ./catalog-data (a leaf module) rather than the templates
 // barrel: the barrel pulls in ./registry -> ./schema -> serializers ->
 // design-components, which is mid-initialization when this module is
-// reached from the design-components subtree (template-settings ->
+// reached from the design-components subtree (formerly template-settings ->
 // template-catalog -> here), causing a circular-import TDZ error.
 function cloneTemplatePages(template: PageTemplateDefinition): ReadonlyArray<AppNode> {
   return JSON.parse(JSON.stringify(template.content.pages))
