@@ -283,6 +283,14 @@ function dispatch(action: AppAction) {
       pageBuilderMode: currentState.pageBuilderMode,
       toolbarMinimized: currentState.toolbarMinimized,
     })
+  } else if (action.type === "SET_PROMPT_ASSIST_ENABLED") {
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(PROMPT_ASSIST_ENABLED_KEY, String(action.payload))
+      }
+    } catch {
+      // Storage can be unavailable (private mode, quota); ignore so the in-memory state still updates.
+    }
   }
   notify()
   if (dirty && !currentState.stale) {
