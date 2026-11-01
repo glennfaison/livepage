@@ -140,13 +140,20 @@ describe("Toolbar without the command palette and duplicate page buttons", () =>
     [true, 4, 4],
     [false, 3, 4],
   ])("has the documented button counts when the page assistant is %s (left %i, right %i)", (promptAssistEnabled, left, right) => {
-    render(<Toolbar {...baseProps} promptAssistEnabled={promptAssistEnabled} />)
+    const originalEnv = process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    try {
+      render(<Toolbar {...baseProps} promptAssistEnabled={promptAssistEnabled} />)
 
-    const titles = renderedTitles()
-    const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
+      const titles = renderedTitles()
+      const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
 
-    expect(pivotIndex).toBe(left)
-    expect(titles.length - pivotIndex - 1).toBe(right)
+      expect(pivotIndex).toBe(left)
+      expect(titles.length - pivotIndex - 1).toBe(right)
+    } finally {
+      if (originalEnv === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+      else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = originalEnv
+    }
   })
 })
 
