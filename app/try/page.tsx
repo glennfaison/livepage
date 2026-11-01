@@ -611,6 +611,7 @@ export default function BuilderPage() {
           promptAssistEnabled={state.promptAssistEnabled}
           canUndo={canUndo}
           canRedo={canRedo}
+          onDownloadHtml={saveAsHTML}
         />
 
         <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
