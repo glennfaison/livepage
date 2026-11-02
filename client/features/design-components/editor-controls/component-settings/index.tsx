@@ -115,7 +115,7 @@ export function ComponentTemplatesTabContent({
 
       {templates.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-          No component templates fit inside the selected component&apos;s parent slot.
+          No component templates fit inside the selected component’s parent slot.
         </p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-3">
