@@ -328,7 +328,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
               <div className="flex flex-col gap-2">
                 <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => onOpenChange(false)}>
                   <Palette className="h-4 w-4" />
-                  Browse Templates
+                  Browse Page Templates
                 </Button>
                 <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => runValidation("preview")}>
                   <Eye className="h-4 w-4" />

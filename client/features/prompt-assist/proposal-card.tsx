@@ -1,7 +1,7 @@
 import { Check, LayoutTemplate, Loader2, Palette, Sparkles } from "lucide-react"
 import { Button } from "@/client/components/ui/button"
 import { Input } from "@/client/components/ui/input"
-import type { TemplateSummary } from "@/client/features/templates"
+import type { PageTemplateSummary } from "@/client/features/page-templates"
 import type { Proposal } from "./chat-state"
 
 const DECIDED_BY_LABEL: Readonly<Record<Proposal["decidedBy"], string>> = {
@@ -15,7 +15,7 @@ const percent = (probability: number) => `${Math.round(probability * 100)}%`
 export function ProposalCard(
   props: Readonly<{
     proposal: Proposal
-    catalog: ReadonlyArray<TemplateSummary>
+    catalog: ReadonlyArray<PageTemplateSummary>
     onPickTemplate: (templateId: string) => void
     onEditCopy: (source: string, value: string) => void
     onApply: () => void

@@ -47,7 +47,7 @@ const templateSummarySchema = z.object({
   description: z.string().min(1).max(600),
   tags: z.array(z.string().min(1).max(60)).max(20),
 }).strict()
-export type TemplateSummary = DeepReadonly<z.infer<typeof templateSummarySchema>>
+export type PageTemplateSummary = DeepReadonly<z.infer<typeof templateSummarySchema>>
 
 const templateCatalogSchema = z.array(templateSummarySchema).min(1).max(30).superRefine((catalog, context) => {
   const ids = new Set<string>()

@@ -8,7 +8,7 @@ LivePage is a visual page builder. You compose a page from design components in 
 
 - **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, callouts, charts, metric cards, and data tables. Includes undo/redo history and a command palette.
 - **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, generated data, or an authorized LinkedIn OIDC profile through placeholders.
-- **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
+- **Page templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
 - **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`. Once enabled, toggle it on in the Settings popover (toolbar) to show the chat bubble (bottom-right) without needing a URL parameter. Includes a command palette action ("Open AI Assistant"), first-visit tooltip, and in-app help; see [Optional: page assistant](#optional-page-assistant).
 - **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
 
@@ -150,13 +150,13 @@ An HTML export is a single file that opens directly in a modern browser, with no
 
 ## Bundled templates
 
-Templates live in [`client/features/templates/definitions/`](./client/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
+Templates live in [`client/features/page-templates/definitions/`](./client/features/page-templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
 
 To add a template:
 
-1. Create a definition in `client/features/templates/definitions/` using only supported design-component tags.
+1. Create a definition in `client/features/page-templates/definitions/` using only supported design-component tags.
 2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
-3. Validate it with `pageTemplateDefinitionSchema` and register it in `client/features/templates/registry.ts`.
+3. Validate it with `pageTemplateDefinitionSchema` and register it in `client/features/page-templates/registry.ts`.
 4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
 
 The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.

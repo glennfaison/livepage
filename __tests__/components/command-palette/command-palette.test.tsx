@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event"
 import "@/client/features/design-components"
 import { CommandPalette } from "@/client/features/command-palette"
 import type { AppState, Operations } from "@/client/features/app-state"
-import { describeTemplateDisplayCatalog } from "@/client/features/templates"
+import { describePageTemplateDisplayCatalog } from "@/client/features/page-templates"
 import { toast } from "@/client/components/ui/use-toast"
 
 jest.mock("@/client/components/ui/use-toast", () => ({
@@ -71,7 +71,7 @@ function renderPalette(stateOverrides: Partial<AppState> = {}) {
       dispatch={dispatch}
       componentOperations={componentOperations}
       templates={[]}
-      onApplyTemplate={jest.fn()}
+      onApplyPageTemplate={jest.fn()}
       onSaveAsJson={jest.fn()}
       onSaveAsShortcode={jest.fn()}
       onSaveAsHtml={jest.fn()}
@@ -151,8 +151,8 @@ describe("CommandPalette", () => {
   })
 
   it("filters and applies a template from display metadata by id", async () => {
-    const onApplyTemplate = jest.fn()
-    const templates = describeTemplateDisplayCatalog()
+    const onApplyPageTemplate = jest.fn()
+    const templates = describePageTemplateDisplayCatalog()
     render(
       <CommandPalette
         open
@@ -161,7 +161,7 @@ describe("CommandPalette", () => {
         dispatch={jest.fn()}
         componentOperations={buildComponentOperations()}
         templates={templates}
-        onApplyTemplate={onApplyTemplate}
+        onApplyPageTemplate={onApplyPageTemplate}
         onSaveAsJson={jest.fn()}
         onSaveAsShortcode={jest.fn()}
         onSaveAsHtml={jest.fn()}
@@ -181,7 +181,7 @@ describe("CommandPalette", () => {
     const command = await screen.findByRole("button", { name: /apply template: personal cv \/ resume/i })
     await userEvent.click(command)
 
-    expect(onApplyTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
+    expect(onApplyPageTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
     expect(toast).toHaveBeenCalledWith({ title: "Template applied", description: "Personal CV / Resume" })
   })
 
@@ -275,7 +275,7 @@ describe("CommandPalette", () => {
         dispatch={dispatch}
         componentOperations={buildComponentOperations()}
         templates={[]}
-        onApplyTemplate={jest.fn()}
+        onApplyPageTemplate={jest.fn()}
         onSaveAsJson={jest.fn()}
         onSaveAsShortcode={jest.fn()}
         onSaveAsHtml={jest.fn()}
@@ -312,7 +312,7 @@ describe("CommandPalette", () => {
         dispatch={dispatch}
         componentOperations={buildComponentOperations()}
         templates={[]}
-        onApplyTemplate={jest.fn()}
+        onApplyPageTemplate={jest.fn()}
         onSaveAsJson={jest.fn()}
         onSaveAsShortcode={jest.fn()}
         onSaveAsHtml={jest.fn()}

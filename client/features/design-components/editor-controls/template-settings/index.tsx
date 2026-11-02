@@ -4,22 +4,22 @@ import { captureEvent } from "@/client/lib/observability"
 
 import React from "react"
 import { useAppState } from "@/client/features/app-state"
-import { describeTemplateDisplayCatalog, getPageTemplateById, type TemplateDisplaySummary, type PageTemplateDefinition } from "@/client/features/templates/catalog-data"
+import { describePageTemplateDisplayCatalog, getPageTemplateById, type PageTemplateDisplaySummary, type PageTemplateDefinition } from "@/client/features/page-templates"
 import type { AppAction, AppNode } from "@/client/features/types"
-import { TemplateCatalog } from "@/client/features/templates/template-catalog"
+import { PageTemplateCatalog } from "@/client/features/page-templates/page-template-catalog"
 
-function cloneTemplatePages(template: PageTemplateDefinition): ReadonlyArray<AppNode> {
+function clonePageTemplatePages(template: PageTemplateDefinition): ReadonlyArray<AppNode> {
   return JSON.parse(JSON.stringify(template.content.pages)) as ReadonlyArray<AppNode>
 }
 
-function createApplyTemplateActions(
+function createApplyPageTemplateActions(
   template: PageTemplateDefinition,
   options: Readonly<{
     customizePages?: (pages: ReadonlyArray<AppNode>) => ReadonlyArray<AppNode>
     historyLabel?: string
   }> = {},
 ): ReadonlyArray<AppAction> {
-  const clonedPages = cloneTemplatePages(template)
+  const clonedPages = clonePageTemplatePages(template)
   const pages = options.customizePages ? options.customizePages(clonedPages) : clonedPages
   const activePageId = pages[0]?.attributes.id ?? ""
 
@@ -31,7 +31,7 @@ function createApplyTemplateActions(
     {
       type: "ADD_TO_HISTORY",
       payload: {
-        action: options.historyLabel ?? `Applied template: ${template.metadata.name}`,
+        action: options.historyLabel ?? `Applied page template: ${template.metadata.name}`,
         pageState: pages,
       },
     },
@@ -47,14 +47,14 @@ export function useTemplateSettingsEditor({
 }>) {
   const { dispatch } = useAppState()
 
-  const templates = React.useMemo(() => describeTemplateDisplayCatalog(), [])
+  const templates = React.useMemo(() => describePageTemplateDisplayCatalog(), [])
 
   const handleApplyTemplate = (templateId: string) => {
     captureEvent("template_applied", { templateId })
     const template = getPageTemplateById(templateId)
     if (!template) return
 
-    for (const action of createApplyTemplateActions(template)) {
+    for (const action of createApplyPageTemplateActions(template)) {
       dispatch(action)
     }
     setIsOpen(false)
@@ -70,13 +70,13 @@ export function TemplateTabContent({
   templates,
   handleApplyTemplate,
 }: Readonly<{
-  templates: ReadonlyArray<TemplateDisplaySummary>
+  templates: ReadonlyArray<PageTemplateDisplaySummary>
   handleApplyTemplate: (templateId: string) => void
 }>) {
   return (
-    <TemplateCatalog
+    <PageTemplateCatalog
       templates={templates}
-      onApplyTemplate={handleApplyTemplate}
+      onApplyPageTemplate={handleApplyTemplate}
       viewMode="list"
     />
   )

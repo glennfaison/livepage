@@ -8,7 +8,7 @@ import {
   type MatchResponse,
   type PageRequest,
   type TemplateCandidate,
-  type TemplateSummary,
+  type PageTemplateSummary,
 } from "@/shared/features/prompt-assist"
 import { logger } from "@/server/lib/logger"
 
@@ -23,7 +23,7 @@ const MIN_LEAD_OVER_RUNNER_UP = 0.2
 type Ranking = Readonly<{ candidates: ReadonlyArray<TemplateCandidate>; noMatch: boolean; decidedBy: "jev" | "openai" }>
 
 /** Jev picks among the client-supplied catalog or abstains with "none". */
-async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<TemplateSummary>): Promise<Ranking> {
+async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<PageTemplateSummary>): Promise<Ranking> {
   const { template } = await askJev({
     state: { request: request.prompt, clarifications: request.clarifications, templates: catalog },
     questions: {
@@ -42,7 +42,7 @@ async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<Template
   return { ...rankingFromJev(template, catalog), decidedBy: "jev" }
 }
 
-function rankingFromJev(answer: JevChoiceAnswer, catalog: ReadonlyArray<TemplateSummary>): Omit<Ranking, "decidedBy"> {
+function rankingFromJev(answer: JevChoiceAnswer, catalog: ReadonlyArray<PageTemplateSummary>): Omit<Ranking, "decidedBy"> {
   const nameById = new Map(catalog.map((entry) => [entry.id, entry.name]))
   const candidates = Object.entries(answer.probabilities)
     .filter(([id]) => nameById.has(id))
@@ -53,7 +53,7 @@ function rankingFromJev(answer: JevChoiceAnswer, catalog: ReadonlyArray<Template
 }
 
 /** Fallback judge when Jev is not configured or unavailable. */
-async function rankWithOpenAi(request: PageRequest, catalog: ReadonlyArray<TemplateSummary>): Promise<Ranking> {
+async function rankWithOpenAi(request: PageRequest, catalog: ReadonlyArray<PageTemplateSummary>): Promise<Ranking> {
   const ids = catalog.map((entry) => entry.id)
   const reply = await completeJson({
     system: "You pick the single best page template for a website request. Reply only with the requested JSON.",
@@ -73,7 +73,7 @@ function isAmbiguous(ranking: Ranking): boolean {
 }
 
 /** Jev cannot write prose, so OpenAI phrases the one question that best separates the leading candidates. */
-async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, catalog: ReadonlyArray<TemplateSummary>): Promise<MatchResponse | null> {
+async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, catalog: ReadonlyArray<PageTemplateSummary>): Promise<MatchResponse | null> {
   if (!isOpenAiConfigured() || request.clarifications.length >= MAX_CLARIFICATIONS) return null
   const leading = ranking.candidates.length > 0 ? ranking.candidates.map((c) => c.templateId) : catalog.map((entry) => entry.id)
   const options = catalog.filter((entry) => leading.includes(entry.id))

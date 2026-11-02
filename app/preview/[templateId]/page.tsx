@@ -4,7 +4,7 @@ import { Button } from "@/client/components/ui/button"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
 import { CanvasRenderer } from "@/client/features/page-builder"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
-import { cloneTemplatePages, getPageTemplateById } from "@/client/features/templates"
+import { clonePageTemplatePages, getPageTemplateById } from "@/client/features/page-templates"
 import { ChevronLeft, ExternalLink, Layers, Pencil } from "lucide-react"
 import Link from "next/link"
 import React from "react"
@@ -48,9 +48,9 @@ function PreviewHeader({
               className="gap-2 px-3"
               asChild
             >
-              <Link href={`/try?template=${templateId}&mode=edit`} aria-label="Apply template">
+              <Link href={`/try?template=${templateId}&mode=edit`} aria-label="Apply page template">
                 <Pencil className="h-4 w-4" />
-                <span className="hidden sm:inline">Apply Template</span>
+                <span className="hidden sm:inline">Apply Page Template</span>
               </Link>
             </Button>
           </div>
@@ -68,7 +68,7 @@ export default function TemplatePreviewPage({
   const { templateId } = React.use(params)
   const template = getPageTemplateById(templateId ?? "")
   const previewPage = React.useMemo(
-    () => (template ? cloneTemplatePages(template)[0] : undefined),
+    () => (template ? clonePageTemplatePages(template)[0] : undefined),
     [template],
   )
 
