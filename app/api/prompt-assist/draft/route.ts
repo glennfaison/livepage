@@ -11,5 +11,5 @@ export const POST = (request: NextRequest) =>
     scope: "draft",
     schema: draftRequestSchema,
     responseSchema: draftResponseSchema,
-    handle: async ({ template, ...pageRequest }) => draftCopy(pageRequest, template),
+    handle: async ({ pageTemplate, ...pageRequest }) => draftCopy(pageRequest, pageTemplate),
   })
