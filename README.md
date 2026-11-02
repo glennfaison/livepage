@@ -8,8 +8,9 @@ LivePage is a visual page builder. You compose a page from design components in 
 
 - **Visual editor.** Add, replace, and configure design components such as headers, rows, columns, images, stats, callouts, charts, metric cards, and data tables. Includes undo/redo history and a command palette.
 - **Data sources.** Bind components to REST APIs, GraphQL, JSON feeds, RSS feeds, CSV, generated data, or an authorized LinkedIn OIDC profile through placeholders.
-- **Templates.** Start from bundled templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
-- **Page assistant (optional).** Describe the page you want in plain language; a chat picks a template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`. Once enabled, toggle it on in the Settings popover (toolbar) to show the chat bubble (bottom-right) without needing a URL parameter. Includes a command palette action ("Open AI Assistant"), first-visit tooltip, and in-app help; see [Optional: page assistant](#optional-page-assistant).
+- **Page templates.** Start from bundled page templates: SaaS landing page, agency homepage, personal portfolio, CV/resume, blog article, event page, link-in-bio, contact/about, and patient health dashboard.
+- **Component templates.** Reusable design-component definitions you can insert into pages.
+- **Page assistant (optional).** Describe the page you want in plain language; a chat picks a page template, drafts its text, and tunes its design settings. Off unless enabled with `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1`. Once enabled, toggle it on in the Settings popover (toolbar) to show the chat bubble (bottom-right) without needing a URL parameter. Includes a command palette action ("Open AI Assistant"), first-visit tooltip, and in-app help; see [Optional: page assistant](#optional-page-assistant).
 - **Import and export.** Save and load pages as JSON or shortcode, or export a standalone HTML page.
 
 ## Getting started
@@ -30,7 +31,7 @@ The feature is off by default. Set `NEXT_PUBLIC_PROMPT_ASSIST_ENABLED=1` and reb
 1. **Per-visit URL parameter:** Open the builder with `?prompt-assist=1` (e.g., `/try?prompt-assist=1`).
 2. **Persistent setting:** Toggle "Enable AI Assistant" in the Settings popover (toolbar gear icon). This persists across visits in localStorage and does not require the URL parameter.
 
-With the deployment flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md#prompt-assist).
+With the deployment flag off, the `/api/prompt-assist` routes answer 404. It uses [TypeSafe's Jev](https://docs.typesafe.ai) and/or OpenAI. Copy [`.env.example`](./.env.example) to `.env.local` and set `TYPESAFE_API_KEY` and/or `OPENAI_API_KEY`; with neither, the chat lets you pick a page template by hand and everything else works as before. Keys stay on the server, and the request text is sent to whichever provider you configure. How it works is described in [`.agents/docs/CONTEXT.md`](./.agents/docs/CONTEXT.md#prompt-assist).
 
 **Discoverability features:**
 - **Toolbar toggle:** Enable/disable the AI Assistant from the Settings popover.
@@ -64,7 +65,7 @@ Available profile values are limited to claims returned by the configured app's
 LinkedIn OIDC scopes: subject, name, given/family names, picture, locale, and the
 optional email and email-verification claim. LinkedIn does not expose headline,
 about/summary, positions, education, or skills through this normal self-serve
-OIDC profile. Those template fields remain empty; access to broader profile
+OIDC profile. Those profile fields remain empty; access to broader profile
 permissions requires LinkedIn approval. LivePage does not scrape LinkedIn.
 Standalone HTML files cannot use the LinkedIn session cookie.
 
@@ -99,7 +100,7 @@ The dev, build, start, and test commands rebuild the HTML export runtime automat
 
 The standalone HTML browser tests run in headless Chromium against both the live
 `/try?template=<id>&mode=preview` page and the exact exported HTML for every bundled
-template at desktop and mobile viewport sizes. They fulfill pinned React imports
+page template at desktop and mobile viewport sizes. They fulfill pinned React imports
 from locally installed React packages and use the preview's local font assets, so
 the comparison does not depend on CDN availability. To install the browser locally,
 run `npx playwright install chromium` once after `npm install`; then run
@@ -148,18 +149,29 @@ An HTML export is a single file that opens directly in a modern browser, with no
 - Image and other asset URLs stay as references in the default export. They are not embedded. Root-relative public image paths are made absolute against the builder's origin so they can load when the exported file is opened locally. Self-contained export embeds fetchable images instead.
 - Template parity covers initial content and layout at desktop and mobile sizes; live data-source runtime states are not guaranteed to remain visually identical.
 
-## Bundled templates
+## Page templates
 
-Templates live in [`client/features/templates/definitions/`](./client/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
+Page templates live in [`client/features/templates/definitions/`](./client/features/templates/definitions/). Each one is versioned (`schema` and `version`), keeps catalog metadata separate from its `content.pages` payload, and stores the page as the same `AppNode` tree the editor uses.
 
-To add a template:
+To add a page template:
 
 1. Create a definition in `client/features/templates/definitions/` using only supported design-component tags.
 2. Keep catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) outside the page payload.
 3. Validate it with `pageTemplateDefinitionSchema` and register it in `client/features/templates/registry.ts`.
-4. If the template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
+4. If the page template is meant for imported profile data, add `dataMapping` entries that point to the target component ids and fields.
 
-The CV/resume templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.
+The CV/resume page templates include LinkedIn-shaped mapping notes in their `dataMapping` blocks.
+
+## Component templates
+
+Component templates live in [`client/features/component-templates/`](./client/features/component-templates/). A component template is a reusable definition of a design component — its tag, default attributes, and child structure — that can be inserted into pages.
+
+To add a component template:
+
+1. Create a definition in `client/features/component-templates/`.
+2. Register it in `client/features/component-templates/registry.ts`.
+3. Validate it with the component-template schema and fill in its metadata (`name`, `description`, `category`, `tags`).
+4. Use only supported design-component tags and settings so the template renders in both edit and preview modes.
 
 ## Documentation
 
