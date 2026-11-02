@@ -14,6 +14,8 @@ import { neighborhoodCafePageTemplate } from "@/client/features/templates/defini
 import { realEstatePropertyTemplate } from "@/client/features/templates/definitions/real-estate-property"
 import { weddingInvitationTemplate } from "@/client/features/templates/definitions/wedding-invitation"
 import { validateAndMigrateTemplate, type PageTemplateDefinition } from "@/client/features/templates/schema"
+import { restaurantMenuTemplate } from "@/client/features/templates/definitions/restaurant-menu"
+import { fitnessStudioTemplate } from "@/client/features/templates/definitions/fitness-studio-landing"
 
 export const pageTemplateRegistry = [
   validateAndMigrateTemplate(cvResumePersonalTemplate),
@@ -33,6 +35,7 @@ export const pageTemplateRegistry = [
   validateAndMigrateTemplate(realEstatePropertyTemplate),
   validateAndMigrateTemplate(weddingInvitationTemplate),
   validateAndMigrateTemplate(restaurantMenuTemplate),
+  validateAndMigrateTemplate(fitnessStudioTemplate),
 ] as const
 
 /**
@@ -95,4 +98,3 @@ export function describeTemplateCatalog(): ReadonlyArray<TemplateSummary> {
     tags: metadata.tags,
   }))
 }
-import { restaurantMenuTemplate } from "@/client/features/templates/definitions/restaurant-menu"
