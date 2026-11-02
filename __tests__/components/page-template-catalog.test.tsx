@@ -13,14 +13,14 @@ describe("PageTemplateCatalog", () => {
   it("scrolls categories horizontally and templates vertically, each in its own container", () => {
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
 
-    expect(screen.getByRole("tablist", { name: "Template categories" })).toHaveClass("overflow-x-auto")
-    expect(screen.getByRole("region", { name: "Available templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden", "min-h-0", "flex-1")
+    expect(screen.getByRole("tablist", { name: "Page template categories" })).toHaveClass("overflow-x-auto")
+    expect(screen.getByRole("region", { name: "Available page templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden", "min-h-0", "flex-1")
   })
 
   it("keeps every category tab at its natural width so the tab list overflows instead of squashing", () => {
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
 
-    const tabs = within(screen.getByRole("tablist", { name: "Template categories" })).getAllByRole("tab")
+    const tabs = within(screen.getByRole("tablist", { name: "Page template categories" })).getAllByRole("tab")
     expect(tabs.map((tab) => tab.textContent)).toEqual(["All", ...categories.slice().sort()])
     for (const tab of tabs) expect(tab).toHaveClass("shrink-0")
   })
@@ -34,7 +34,7 @@ describe("PageTemplateCatalog", () => {
 
     const expected = templates.filter((template) => template.category === category)
     for (const template of templates) {
-      const button = screen.queryByRole("button", { name: `Apply ${template.name} template` })
+      const button = screen.queryByRole("button", { name: `Apply ${template.name} page template` })
       if (template.category === category) expect(button).toBeInTheDocument()
       else expect(button).not.toBeInTheDocument()
     }
@@ -45,7 +45,7 @@ describe("PageTemplateCatalog", () => {
     const user = userEvent.setup()
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
 
-    await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
+    await user.type(screen.getByRole("textbox", { name: "Search page templates" }), "zzzz-no-such-template")
     expect(screen.getByText("No templates match your search.")).toBeInTheDocument()
   })
 
@@ -66,14 +66,14 @@ describe("PageTemplateCatalog", () => {
     await user.click(screen.getAllByRole("button", { name: "Add to favorites" })[0])
     await user.click(screen.getByRole("tab", { name: "Favorites" }))
 
-    expect(screen.getAllByRole("button", { name: /^Apply .* template$/ })).toHaveLength(1)
+    expect(screen.getAllByRole("button", { name: /^Apply .* page template$/ })).toHaveLength(1)
     expect(JSON.parse(window.localStorage.getItem("livepage-favorite-templates") ?? "[]")).toHaveLength(1)
 
     await user.click(screen.getByRole("button", { name: "Remove from favorites" }))
 
     expect(screen.queryByRole("tab", { name: "Favorites" })).not.toBeInTheDocument()
     expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute("aria-selected", "true")
-    expect(screen.getAllByRole("button", { name: /^Apply .* template$/ })).toHaveLength(templates.length)
+    expect(screen.getAllByRole("button", { name: /^Apply .* page template$/ })).toHaveLength(templates.length)
   })
 
   it("records applied templates under Recently used, most recent first", async () => {
@@ -82,8 +82,8 @@ describe("PageTemplateCatalog", () => {
     const onClose = jest.fn()
     const { unmount } = render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={onApplyPageTemplate} onClose={onClose} />)
 
-    await user.click(screen.getByRole("button", { name: `Apply ${templates[0].name} template` }))
-    await user.click(screen.getByRole("button", { name: `Apply ${templates[1].name} template` }))
+    await user.click(screen.getByRole("button", { name: `Apply ${templates[0].name} page template` }))
+    await user.click(screen.getByRole("button", { name: `Apply ${templates[1].name} page template` }))
 
     expect(onApplyPageTemplate).toHaveBeenNthCalledWith(1, templates[0].id)
     expect(onApplyPageTemplate).toHaveBeenNthCalledWith(2, templates[1].id)
@@ -93,8 +93,8 @@ describe("PageTemplateCatalog", () => {
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={onApplyPageTemplate} />)
     await user.click(screen.getByRole("tab", { name: "Recently used" }))
 
-    const names = screen.getAllByRole("button", { name: /^Apply .* template$/ }).map((button) => button.getAttribute("aria-label"))
-    expect(names).toEqual([`Apply ${templates[1].name} template`, `Apply ${templates[0].name} template`])
+    const names = screen.getAllByRole("button", { name: /^Apply .* page template$/ }).map((button) => button.getAttribute("aria-label"))
+    expect(names).toEqual([`Apply ${templates[1].name} page template`, `Apply ${templates[0].name} page template`])
   })
 
   it("switches between grid and list layouts", async () => {
@@ -134,13 +134,13 @@ describe("PageTemplateCatalog", () => {
     const user = userEvent.setup()
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
 
-    expect(screen.getAllByText(`${templates.length} templates`)).toHaveLength(2)
+    expect(screen.getAllByText(`${templates.length} page templates`)).toHaveLength(2)
     expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument()
 
-    const search = screen.getByRole("textbox", { name: "Search templates" })
+    const search = screen.getByRole("textbox", { name: "Search page templates" })
     await user.type(search, "resume")
-    const visibleCount = screen.getAllByText(/\d templates/)[0].textContent
-    expect(visibleCount).not.toBe(`${templates.length} templates`)
+    const visibleCount = screen.getAllByText(/\d page templates/)[0].textContent
+    expect(visibleCount).not.toBe(`${templates.length} page templates`)
     expect(screen.getByRole("button", { name: "Clear search" })).toBeInTheDocument()
   })
 
@@ -148,10 +148,10 @@ describe("PageTemplateCatalog", () => {
     const user = userEvent.setup()
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
 
-    await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
+    await user.type(screen.getByRole("textbox", { name: "Search page templates" }), "zzzz-no-such-template")
     await user.click(screen.getByRole("button", { name: "Clear search" }))
 
-    expect(screen.getByRole("textbox", { name: "Search templates" })).toHaveValue("")
+    expect(screen.getByRole("textbox", { name: "Search page templates" })).toHaveValue("")
     expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument()
   })
 
@@ -159,7 +159,7 @@ describe("PageTemplateCatalog", () => {
     const user = userEvent.setup()
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
 
-    await user.type(screen.getByRole("textbox", { name: "Search templates" }), "zzzz-no-such-template")
+    await user.type(screen.getByRole("textbox", { name: "Search page templates" }), "zzzz-no-such-template")
     expect(screen.getByText("Clear your search")).toBeInTheDocument()
   })
 
@@ -168,7 +168,7 @@ describe("PageTemplateCatalog", () => {
     const onApplyPageTemplate = jest.fn()
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={onApplyPageTemplate} />)
 
-    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} template` }))
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} page template` }))
 
     const dialog = await screen.findByRole("dialog")
     expect(within(dialog).getByText(templates[0].name)).toBeInTheDocument()
@@ -185,7 +185,7 @@ describe("PageTemplateCatalog", () => {
     const onClose = jest.fn()
     render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={onApplyPageTemplate} onClose={onClose} />)
 
-    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} template` }))
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} page template` }))
     await user.click(await screen.findByRole("button", { name: "Apply Template" }))
 
     expect(onApplyPageTemplate).toHaveBeenCalledWith(templates[0].id)

@@ -78,7 +78,7 @@ describe("TemplatePreviewPage", () => {
 
     await renderPreviewPage(TEMPLATE_ID)
 
-    const applyLink = await screen.findByRole("link", { name: /apply template/i })
+    const applyLink = await screen.findByRole("link", { name: /apply page template/i })
     expect(applyLink).toHaveAttribute("href", `/try?template=${TEMPLATE_ID}&mode=edit`)
     expect(window.localStorage.getItem(PAGE_STORAGE_KEY)).toBe(persistedState)
   })
@@ -96,6 +96,6 @@ describe("TemplatePreviewPage", () => {
     await renderPreviewPage("template-does-not-exist")
 
     expect(await screen.findByText(/template not found/i)).toBeInTheDocument()
-    expect(screen.queryByRole("link", { name: /apply template/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: /apply page template/i })).not.toBeInTheDocument()
   })
 })

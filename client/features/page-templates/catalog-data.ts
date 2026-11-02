@@ -13,6 +13,8 @@ import { podcastShowPageTemplate } from "./definitions/podcast-show-page"
 import { neighborhoodCafePageTemplate } from "./definitions/neighborhood-cafe-page"
 import { realEstatePropertyTemplate } from "./definitions/real-estate-property"
 import { weddingInvitationTemplate } from "./definitions/wedding-invitation"
+import { restaurantMenuTemplate } from "./definitions/restaurant-menu"
+import { fitnessStudioTemplate } from "./definitions/fitness-studio-landing"
 
 const rawPageTemplateRegistry = [
   cvResumePersonalTemplate,
@@ -31,6 +33,8 @@ const rawPageTemplateRegistry = [
   neighborhoodCafePageTemplate,
   realEstatePropertyTemplate,
   weddingInvitationTemplate,
+  restaurantMenuTemplate,
+  fitnessStudioTemplate,
 ] as const
 
 export type PageTemplateDisplaySummary = Readonly<{

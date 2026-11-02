@@ -4,7 +4,7 @@ import { captureEvent } from "@/client/lib/observability"
 
 import React from "react"
 import { useAppState } from "@/client/features/app-state"
-import { describePageTemplateDisplayCatalog, getPageTemplateById, type PageTemplateDisplaySummary, type PageTemplateDefinition } from "@/client/features/page-templates"
+import { describePageTemplateDisplayCatalog, getPageTemplateById, type PageTemplateDisplaySummary, type PageTemplateDefinition } from "@/client/features/page-templates/catalog-data"
 import type { AppAction, AppNode } from "@/client/features/types"
 import { PageTemplateCatalog } from "@/client/features/page-templates/page-template-catalog"
 

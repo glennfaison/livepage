@@ -33,6 +33,7 @@ export const pageTemplateRegistry = [
   validateAndMigrateTemplate(realEstatePropertyTemplate),
   validateAndMigrateTemplate(weddingInvitationTemplate),
   validateAndMigrateTemplate(restaurantMenuTemplate),
+  validateAndMigrateTemplate(fitnessStudioTemplate),
 ] as const
 
 /**
@@ -96,3 +97,4 @@ export function describePageTemplateCatalog(): ReadonlyArray<PageTemplateSummary
   }))
 }
 import { restaurantMenuTemplate } from "@/client/features/page-templates/definitions/restaurant-menu"
+import { fitnessStudioTemplate } from "@/client/features/page-templates/definitions/fitness-studio-landing"

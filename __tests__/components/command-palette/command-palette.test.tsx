@@ -182,7 +182,7 @@ describe("CommandPalette", () => {
     await userEvent.click(command)
 
     expect(onApplyPageTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
-    expect(toast).toHaveBeenCalledWith({ title: "Template applied", description: "Personal CV / Resume" })
+    expect(toast).toHaveBeenCalledWith({ title: "Page template applied", description: "Personal CV / Resume" })
   })
 
   it("asks before discarding all changes, and only discards once confirmed", async () => {

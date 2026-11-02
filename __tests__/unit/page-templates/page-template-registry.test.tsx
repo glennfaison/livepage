@@ -124,9 +124,9 @@ describe("page template registry", () => {
     expect(screen.getAllByText("Best for resume")).toHaveLength(3)
     expect(screen.getByAltText("Personal CV / Resume preview")).toHaveAttribute("src", "/template-thumbnails/cv-resume-personal.svg")
     expect(screen.getByRole("dialog")).toHaveClass("max-h-[min(80vh,48rem)]", "overflow-hidden")
-    expect(screen.getByRole("region", { name: "Available templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden")
+    expect(screen.getByRole("region", { name: "Available page templates" })).toHaveClass("overflow-y-auto", "overflow-x-hidden")
 
-    const applyButton = screen.getByRole("button", { name: /apply personal cv \/ resume template/i })
+    const applyButton = screen.getByRole("button", { name: /apply personal cv \/ resume page template/i })
     await user.click(applyButton)
     expect(onApplyPageTemplate).toHaveBeenCalledWith("cv-resume-personal-website")
     expect(screen.queryByText("Template catalog")).not.toBeInTheDocument()
@@ -209,11 +209,11 @@ describe("page template registry", () => {
     render(<PageTemplateCatalogPopover templates={describePageTemplateDisplayCatalog()} onApplyPageTemplate={jest.fn()} />)
 
     await user.click(screen.getByRole("button", { name: /templates/i }))
-    const search = screen.getByRole("textbox", { name: /search templates/i })
+    const search = screen.getByRole("textbox", { name: /search page templates/i })
     await user.type(search, "dark")
 
-    expect(screen.getByRole("button", { name: /apply engineer cv \/ dark template/i })).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: /apply engineer cv \/ light template/i })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /apply engineer cv \/ dark page template/i })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /apply engineer cv \/ light page template/i })).not.toBeInTheDocument()
   })
 
   it("applies the template using existing page actions and can restore the previous page from history", () => {
