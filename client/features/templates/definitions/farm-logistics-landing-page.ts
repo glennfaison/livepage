@@ -119,7 +119,7 @@ const navLink = (id: string, label: string, href: string) =>
   node("link", id, { href, "custom-classes": "text-sm font-semibold text-[#1b1b18] no-underline hover:underline" }, [label])
 
 export const farmLogisticsLandingPageTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "farm-logistics-landing-page",
   metadata: {

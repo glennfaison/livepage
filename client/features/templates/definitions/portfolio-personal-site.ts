@@ -30,7 +30,7 @@ const text = (
 ) => node(tag, id, attributes, [content])
 
 export const portfolioPersonalSiteTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "portfolio-personal-site",
   metadata: {

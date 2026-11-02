@@ -38,7 +38,7 @@ const baseTemplate: Omit<PageTemplateDefinition, "version" | "schema"> = {
 describe("template migration", () => {
   describe("validateAndMigrateTemplate", () => {
     it("accepts current version template without migration", () => {
-      const template = { ...baseTemplate, schema: "livepage-template", version: CURRENT_TEMPLATE_VERSION }
+      const template = { ...baseTemplate, schema: "livepage-page-template", version: CURRENT_TEMPLATE_VERSION }
       const result = validateAndMigrateTemplate(template)
       expect(result.version).toBe(CURRENT_TEMPLATE_VERSION)
       expect(result.id).toBe("test-template")
@@ -50,12 +50,12 @@ describe("template migration", () => {
     })
 
     it("rejects version 0", () => {
-      const template = { ...baseTemplate, schema: "livepage-template", version: 0 }
+      const template = { ...baseTemplate, schema: "livepage-page-template", version: 0 }
       expect(() => validateAndMigrateTemplate(template)).toThrow()
     })
 
     it("rejects version greater than current", () => {
-      const template = { ...baseTemplate, schema: "livepage-template", version: CURRENT_TEMPLATE_VERSION + 1 }
+      const template = { ...baseTemplate, schema: "livepage-page-template", version: CURRENT_TEMPLATE_VERSION + 1 }
       expect(() => validateAndMigrateTemplate(template)).toThrow()
     })
   })
@@ -73,7 +73,7 @@ describe("template migration", () => {
 
     it("applies migrations sequentially when version is less than current", () => {
       // Test with a version less than current
-      const template = { ...baseTemplate, schema: "livepage-template", version: 1 } as PageTemplateDefinition
+      const template = { ...baseTemplate, schema: "livepage-page-template", version: 1 } as PageTemplateDefinition
       
       // Since CURRENT_TEMPLATE_VERSION is 1, no migration should run
       const result = migrateTemplateToCurrent(template)

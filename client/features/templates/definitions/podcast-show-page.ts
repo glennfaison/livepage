@@ -55,7 +55,7 @@ function episodeRow(id: string, episodeTitle: string, description: string, durat
 }
 
 export const podcastShowPageTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "podcast-show-page",
   metadata: {

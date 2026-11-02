@@ -67,7 +67,7 @@ describe("TemplateCatalog", () => {
     await user.click(screen.getByRole("tab", { name: "Favorites" }))
 
     expect(screen.getAllByRole("button", { name: /^Apply .* template$/ })).toHaveLength(1)
-    expect(JSON.parse(window.localStorage.getItem("livepage-favorite-templates") ?? "[]")).toHaveLength(1)
+    expect(JSON.parse(window.localStorage.getItem("livepage-favorite-page-templates") ?? "[]")).toHaveLength(1)
 
     await user.click(screen.getByRole("button", { name: "Remove from favorites" }))
 
@@ -108,8 +108,8 @@ describe("TemplateCatalog", () => {
   })
 
   it("ignores corrupted stored data", () => {
-    window.localStorage.setItem("livepage-favorite-templates", "{not json")
-    window.localStorage.setItem("livepage-recently-used-templates", JSON.stringify({ not: "a list" }))
+    window.localStorage.setItem("livepage-favorite-page-templates", "{not json")
+    window.localStorage.setItem("livepage-recently-used-page-templates", JSON.stringify({ not: "a list" }))
 
     render(<TemplateCatalog templates={templates} onApplyTemplate={jest.fn()} />)
 

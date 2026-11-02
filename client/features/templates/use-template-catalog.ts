@@ -5,10 +5,28 @@ import React from "react"
 import type { TemplateDisplaySummary } from "./registry"
 import { useStoredList } from "./stored-list"
 
-const RECENTLY_USED_KEY = "livepage-recently-used-templates"
-const FAVORITES_KEY = "livepage-favorite-templates"
+const RECENTLY_USED_KEY = "livepage-recently-used-page-templates"
+const FAVORITES_KEY = "livepage-favorite-page-templates"
 const VIEW_MODE_KEY = "livepage-template-view-mode"
 const MAX_RECENT = 5
+
+/** One-time localStorage migration: copy old keys to new keys, then remove the old keys. */
+function migrateTemplateStorageKeys(): void {
+  try {
+    const oldFavorites = window.localStorage.getItem("livepage-favorite-templates")
+    const oldRecentlyUsed = window.localStorage.getItem("livepage-recently-used-templates")
+    const newFavorites = window.localStorage.getItem(FAVORITES_KEY)
+    const newRecentlyUsed = window.localStorage.getItem(RECENTLY_USED_KEY)
+    if (oldFavorites && !newFavorites) window.localStorage.setItem(FAVORITES_KEY, oldFavorites)
+    if (oldRecentlyUsed && !newRecentlyUsed) window.localStorage.setItem(RECENTLY_USED_KEY, oldRecentlyUsed)
+    if (oldFavorites) window.localStorage.removeItem("livepage-favorite-templates")
+    if (oldRecentlyUsed) window.localStorage.removeItem("livepage-recently-used-templates")
+  } catch {
+    // Storage unavailable; migration is best-effort.
+  }
+}
+
+if (typeof window !== "undefined") migrateTemplateStorageKeys()
 
 export type CatalogViewMode = "grid" | "list"
 
