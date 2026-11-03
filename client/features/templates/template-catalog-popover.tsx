@@ -10,11 +10,17 @@ import { TemplateCatalog } from "./template-catalog"
 export function TemplateCatalogPopover({
   templates,
   onApplyTemplate,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: Readonly<{
   templates: ReadonlyArray<TemplateDisplaySummary>
   onApplyTemplate: (templateId: string) => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }>) {
-  const [open, setOpen] = React.useState(false)
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = controlledOnOpenChange ?? setInternalOpen
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
