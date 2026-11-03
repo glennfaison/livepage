@@ -23,6 +23,7 @@ type ToolbarSettingsPopoverProps = Readonly<{
   componentTree: ReadonlyArray<AppNode>
   dispatch: React.Dispatch<AppAction>
   promptAssistEnabled: boolean
+  onBrowseTemplates?: () => void
   onDownloadHtml?: () => void
 }>
 
@@ -41,6 +42,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   componentTree,
   dispatch,
   promptAssistEnabled,
+  onBrowseTemplates,
   onDownloadHtml,
 }) => {
   const [validationDialogOpen, setValidationDialogOpen] = useState(false)
@@ -326,7 +328,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
             <div className="space-y-3 pt-2 border-t">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</h3>
               <div className="flex flex-col gap-2">
-                <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => onOpenChange(false)}>
+                <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => { onOpenChange(false); onBrowseTemplates?.(); }}>
                   <Palette className="h-4 w-4" />
                   Browse Templates
                 </Button>
