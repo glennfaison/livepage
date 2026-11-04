@@ -105,6 +105,8 @@ export const Toolbar: React.FC<Readonly<{
   dispatch?: React.Dispatch<AppAction>
   /** Whether AI Assistant is enabled */
   promptAssistEnabled?: boolean
+  /** Open the template catalog from settings */
+  onBrowseTemplates?: () => void
   /** Download the page as HTML from settings */
   onDownloadHtml?: () => void
   /** Pre-computed undo/redo availability from parent to avoid stale closure issues */
@@ -131,6 +133,7 @@ export const Toolbar: React.FC<Readonly<{
   onDuplicatePage,
   dispatch,
   promptAssistEnabled,
+  onBrowseTemplates,
   onDownloadHtml,
   canUndo: canUndoProp,
   canRedo: canRedoProp,
@@ -454,6 +457,7 @@ export const Toolbar: React.FC<Readonly<{
             componentTree={componentTree}
             dispatch={dispatch ?? (() => {})}
             promptAssistEnabled={promptAssistEnabled ?? false}
+            onBrowseTemplates={onBrowseTemplates}
             onDownloadHtml={onDownloadHtml}
           >
             <Button variant="outline" size="sm" title="Settings" className="shrink-0" data-testid="toolbar-settings-trigger">
