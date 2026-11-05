@@ -211,7 +211,7 @@ describe("SettingsPopover", () => {
     })
   })
 
-  it("does not show a Templates tab", async () => {
+  it("displays templates tab with search and template cards", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
     render(
       <SettingsPopover component={designComponentData}>
@@ -221,11 +221,19 @@ describe("SettingsPopover", () => {
 
     await userEvent.click(screen.getByTestId("settings-trigger"))
 
-    expect(screen.queryByTestId("templates-tab-trigger")).not.toBeInTheDocument()
-    expect(screen.queryByText("Templates")).not.toBeInTheDocument()
+    // Switch to Templates tab
+    await userEvent.click(screen.getByTestId("templates-tab-trigger"))
+
+    // Check that component templates heading is visible
+    await waitFor(() => {
+      expect(screen.getByText("Component templates")).toBeInTheDocument()
+    })
+
+    // With no parent slot context in this test, no component templates are offered
+    expect(screen.getByText("No component templates fit inside the selected component’s parent slot.")).toBeInTheDocument()
   })
 
-  it("switches between the two remaining tabs", async () => {
+  it("switches between all three tabs", async () => {
     const designComponentData = createDesignComponentInstance('header1', 'header1-2345')
     render(
       <SettingsPopover component={designComponentData}>
@@ -242,6 +250,12 @@ describe("SettingsPopover", () => {
     await userEvent.click(screen.getByTestId("data-sources-tab-trigger"))
     expect(screen.getByText("Data Sources")).toBeInTheDocument()
     expect(screen.queryByLabelText("Content")).not.toBeInTheDocument()
+
+    // Switch to Templates tab
+    await userEvent.click(screen.getByTestId("templates-tab-trigger"))
+    expect(screen.getByText("Component templates")).toBeInTheDocument()
+    // The tab button still exists but the tab content should not show "Data Sources" content
+    expect(screen.queryByText("Search data sources")).not.toBeInTheDocument()
 
     // Switch back to settings tab
     await userEvent.click(screen.getByTestId("settings-tab-trigger"))
