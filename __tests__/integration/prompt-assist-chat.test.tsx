@@ -87,7 +87,7 @@ describe("AssistChat", () => {
       match: (body) =>
         (body.clarifications as unknown[]).length === 0
           ? { body: { kind: "clarify", question: "Is this for a job hunt?", options: ["Yes", "No"] } }
-          : { body: { kind: "match", templateId: "cv-resume-engineer-dark", confidence: 0.9, decidedBy: "jev", candidates: [] } },
+          : { body: { kind: "match", pageTemplateId: "cv-resume-engineer-dark", confidence: 0.9, decidedBy: "jev", candidates: [] } },
       draft: () => ({ body: { values: { name: "Priya Shah", headline: "Backend engineer" }, source: "openai" } }),
       refine: (body) => {
         const shell = (body.page as { nodes: Array<{ id: string; settings: Record<string, string> }> }).nodes.find((node) => node.id === "engineer-dark-shell")
@@ -130,7 +130,7 @@ describe("AssistChat", () => {
 
   it("lets the person switch template, which rebuilds the proposal around their pick", async () => {
     const calls = mockApi({
-      match: () => ({ body: { kind: "match", templateId: "cv-resume-engineer-dark", confidence: 0.8, decidedBy: "jev", candidates: [] } }),
+      match: () => ({ body: { kind: "match", pageTemplateId: "cv-resume-engineer-dark", confidence: 0.8, decidedBy: "jev", candidates: [] } }),
       draft: () => ({ body: { values: {}, source: "none" } }),
       refine: () => ({ body: { satisfaction: null, done: true, edits: [] } }),
     })
@@ -140,7 +140,7 @@ describe("AssistChat", () => {
 
     await user.selectOptions(screen.getByLabelText("Template"), "landing-page-saas")
     await waitFor(() =>
-      expect((calls.filter((call) => call.path === "draft").at(-1)?.body.template as { name: string }).name).toBe("Landing Page / SaaS"),
+      expect((calls.filter((call) => call.path === "draft").at(-1)?.body.pageTemplate as { name: string }).name).toBe("Landing Page / SaaS"),
     )
     expect(await screen.findByLabelText("Template")).toHaveValue("landing-page-saas")
   })
@@ -162,7 +162,7 @@ describe("AssistChat", () => {
   it("keeps the template and copy when the design loop fails partway, and says so", async () => {
     jest.spyOn(console, "warn").mockImplementation(() => undefined)
     mockApi({
-      match: () => ({ body: { kind: "match", templateId: "cv-resume-engineer-dark", confidence: 0.9, decidedBy: "jev", candidates: [] } }),
+      match: () => ({ body: { kind: "match", pageTemplateId: "cv-resume-engineer-dark", confidence: 0.9, decidedBy: "jev", candidates: [] } }),
       draft: () => ({ body: { values: { name: "Priya Shah" }, source: "openai" } }),
       refine: () => ({ status: 500, body: { error: "boom" } }),
     })
