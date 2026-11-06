@@ -33,47 +33,47 @@ const pageRequestShape = {
 }
 export type PageRequest = DeepReadonly<{ prompt: string; clarifications: ReadonlyArray<Clarification> }>
 
-const templateCandidateSchema = z.object({
-  templateId: z.string().max(200),
+const pageTemplateCandidateSchema = z.object({
+  pageTemplateId: z.string().max(200),
   name: z.string().max(120),
   probability: z.number().min(0).max(1),
 })
-export type TemplateCandidate = DeepReadonly<z.infer<typeof templateCandidateSchema>>
+export type PageTemplateCandidate = DeepReadonly<z.infer<typeof pageTemplateCandidateSchema>>
 
-const templateSummarySchema = z.object({
+const pageTemplateSummarySchema = z.object({
   id: z.string().min(1).max(200),
   name: z.string().min(1).max(120),
   category: z.string().min(1).max(80),
   description: z.string().min(1).max(600),
   tags: z.array(z.string().min(1).max(60)).max(20),
 }).strict()
-export type TemplateSummary = DeepReadonly<z.infer<typeof templateSummarySchema>>
+export type PageTemplateSummary = DeepReadonly<z.infer<typeof pageTemplateSummarySchema>>
 
-const templateCatalogSchema = z.array(templateSummarySchema).min(1).max(30).superRefine((catalog, context) => {
+const pageTemplateCatalogSchema = z.array(pageTemplateSummarySchema).min(1).max(30).superRefine((catalog, context) => {
   const ids = new Set<string>()
   catalog.forEach((template, index) => {
     if (ids.has(template.id)) {
-      context.addIssue({ code: "custom", path: [index, "id"], message: "Template ids must be unique" })
+      context.addIssue({ code: "custom", path: [index, "id"], message: "Page template ids must be unique" })
     }
     ids.add(template.id)
   })
 })
 
-export const matchRequestSchema = z.object({ ...pageRequestShape, catalog: templateCatalogSchema }).strict()
+export const matchRequestSchema = z.object({ ...pageRequestShape, catalog: pageTemplateCatalogSchema }).strict()
 export type MatchRequest = DeepReadonly<z.infer<typeof matchRequestSchema>>
 
 /**
- * - "match": a template was chosen (`decidedBy` names the provider that judged it)
+ * - "match": a page template was chosen (`decidedBy` names the provider that judged it)
  * - "clarify": the request is too ambiguous; ask the person one question first
  * - "unavailable": no model provider is configured, so the person must pick a template
  */
 export const matchResponseSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("match"),
-    templateId: z.string(),
+    pageTemplateId: z.string(),
     confidence: z.number().min(0).max(1),
     decidedBy: z.enum(["jev", "openai"]),
-    candidates: z.array(templateCandidateSchema),
+    candidates: z.array(pageTemplateCandidateSchema),
   }),
   z.object({
     kind: z.literal("clarify"),
@@ -89,7 +89,7 @@ const draftFieldSchema = z.object({
   description: z.string().min(1).max(300),
 }).strict()
 
-const draftTemplateSchema = z.object({
+const pageTemplateDraftSchema = z.object({
   name: z.string().min(1).max(120),
   description: z.string().min(1).max(600),
   fields: z.array(draftFieldSchema).max(30).superRefine((fields, context) => {
@@ -102,9 +102,9 @@ const draftTemplateSchema = z.object({
     })
   }),
 }).strict()
-export type DraftTemplate = DeepReadonly<z.infer<typeof draftTemplateSchema>>
+export type PageTemplateDraft = DeepReadonly<z.infer<typeof pageTemplateDraftSchema>>
 
-export const draftRequestSchema = z.object({ ...pageRequestShape, template: draftTemplateSchema }).strict()
+export const draftRequestSchema = z.object({ ...pageRequestShape, pageTemplate: pageTemplateDraftSchema }).strict()
 export type DraftRequest = DeepReadonly<z.infer<typeof draftRequestSchema>>
 
 /** `values` is keyed by the template's `dataMapping.fields[].source`. Empty when no model is configured. */

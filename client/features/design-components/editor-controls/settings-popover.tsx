@@ -7,7 +7,7 @@ import { cn } from "@/client/lib/utils"
 import type { AppNode } from "@/client/features/types"
 import { ComponentSettingsTabContent, useComponentSettingsEditor } from "./design-component-settings"
 import { DataSourceListViewTabContent, useDataSourceSettingsEditor } from "./data-source-settings"
-import { TemplateTabContent, useTemplateSettingsEditor } from "./template-settings"
+import { ComponentTemplatesTabContent, useComponentTemplateSettingsEditor } from "./component-settings"
 
 export function SettingsPopover({
   component,
@@ -25,7 +25,7 @@ export function SettingsPopover({
   const setIsOpen = onOpenChange ?? setUncontrolledOpen
   const componentSettingsEditor = useComponentSettingsEditor({ component, setIsOpen })
   const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component })
-  const templateSettingsEditor = useTemplateSettingsEditor({ component, setIsOpen })
+  const componentTemplatesEditor = useComponentTemplateSettingsEditor({ component, setIsOpen })
   const { componentInfo, ...componentSettingsTabContent } = componentSettingsEditor
 
   return (
@@ -64,7 +64,7 @@ export function SettingsPopover({
                 value="templates"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
               >
-                Templates
+                Component Templates
               </TabsTrigger>
             </TabsList>
 
@@ -77,7 +77,7 @@ export function SettingsPopover({
             </TabsContent>
 
             <TabsContent value="templates" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
-              <TemplateTabContent {...templateSettingsEditor} />
+              <ComponentTemplatesTabContent {...componentTemplatesEditor} />
             </TabsContent>
           </Tabs>
         </div>

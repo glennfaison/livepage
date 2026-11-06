@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { completeJson, isOpenAiConfigured, OpenAiUnavailableError } from "@/server/services/openai"
 import { describeRequest } from "./request"
-import type { DraftResponse, DraftTemplate, PageRequest } from "@/shared/features/prompt-assist"
+import type { DraftResponse, PageRequest, PageTemplateDraft } from "@/shared/features/prompt-assist"
 import { logger } from "@/server/lib/logger"
 
 const MAX_VALUE_LENGTH = 600
@@ -11,7 +11,7 @@ const MAX_VALUE_LENGTH = 600
  * template. Without a configured model, or on any model failure, no copy is
  * drafted and the template's own placeholder text stays in place.
  */
-export async function draftCopy(request: PageRequest, template: DraftTemplate): Promise<DraftResponse> {
+export async function draftCopy(request: PageRequest, template: PageTemplateDraft): Promise<DraftResponse> {
   const fields = template.fields
   if (fields.length === 0 || !isOpenAiConfigured()) return { values: {}, source: "none" }
 
