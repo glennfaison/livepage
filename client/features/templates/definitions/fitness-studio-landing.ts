@@ -23,7 +23,7 @@ const text = (
 ) => node(tag, id, attributes, [content])
 
 export const fitnessStudioTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "fitness-studio-landing",
   metadata: {

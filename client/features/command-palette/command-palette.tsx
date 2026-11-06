@@ -441,14 +441,14 @@ export const CommandPalette: React.FC<
     })
 
     const templateCommands: PaletteCommand[] = templates.map((template) => ({
-      id: `template-${template.id}`,
+      id: `page-template-${template.id}`,
       group: "Templates",
       label: `Apply template: ${template.name}`,
       description: template.description,
       keywords: [template.category, ...template.tags, "preview"],
       icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
-        captureEvent("template_applied", { templateId: template.id, source: "command-palette" }); onApplyTemplate(template.id)
+        captureEvent("page_template_applied", { pageTemplateId: template.id, source: "command-palette" }); onApplyTemplate(template.id)
         toast({ title: "Template applied", description: template.name })
       },
     }))
@@ -576,8 +576,8 @@ export const CommandPalette: React.FC<
       if (event.shiftKey) {
         // Shift+Enter: preview template
         const command = filteredCommands[activeIndex]
-        if (command?.id.startsWith("template-")) {
-          const templateId = command.id.replace("template-", "")
+        if (command?.id.startsWith("page-template-")) {
+          const templateId = command.id.replace("page-template-", "")
           setPreviewTemplateId(templateId)
         }
       } else {

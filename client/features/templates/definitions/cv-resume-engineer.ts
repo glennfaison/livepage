@@ -102,7 +102,7 @@ const lightContent = (JSON.parse(
 } : page)
 
 export const cvResumeEngineerDarkTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "cv-resume-engineer-dark",
   metadata: {
@@ -117,7 +117,7 @@ export const cvResumeEngineerDarkTemplate = {
 } as const
 
 export const cvResumeEngineerLightTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "cv-resume-engineer-light",
   metadata: {
