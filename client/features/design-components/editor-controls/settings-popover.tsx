@@ -7,6 +7,7 @@ import { cn } from "@/client/lib/utils"
 import type { AppNode } from "@/client/features/types"
 import { ComponentSettingsTabContent, useComponentSettingsEditor } from "./design-component-settings"
 import { DataSourceListViewTabContent, useDataSourceSettingsEditor } from "./data-source-settings"
+import { ComponentTemplatesTabContent, useComponentTemplateSettingsEditor } from "./component-settings"
 
 export function SettingsPopover({
   component,
@@ -24,6 +25,7 @@ export function SettingsPopover({
   const setIsOpen = onOpenChange ?? setUncontrolledOpen
   const componentSettingsEditor = useComponentSettingsEditor({ component, setIsOpen })
   const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component })
+  const componentTemplatesEditor = useComponentTemplateSettingsEditor({ component, setIsOpen })
   const { componentInfo, ...componentSettingsTabContent } = componentSettingsEditor
 
   return (
@@ -42,7 +44,7 @@ export function SettingsPopover({
           </div>
 
           <Tabs defaultValue="settings" className="w-full flex flex-col flex-1 min-h-1">
-            <TabsList className="grid w-full grid-cols-2 rounded-none bg-transparent border-b h-auto p-0">
+            <TabsList className="grid w-full grid-cols-3 rounded-none bg-transparent border-b h-auto p-0">
               <TabsTrigger
                 data-testid="settings-tab-trigger"
                 value="settings"
@@ -57,7 +59,14 @@ export function SettingsPopover({
               >
                 Data Sources
               </TabsTrigger>
-</TabsList>
+              <TabsTrigger
+                data-testid="templates-tab-trigger"
+                value="templates"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-muted cursor-pointer"
+              >
+                Component Templates
+              </TabsTrigger>
+            </TabsList>
 
             <TabsContent value="settings" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
               <ComponentSettingsTabContent {...componentSettingsTabContent} />
@@ -66,7 +75,11 @@ export function SettingsPopover({
             <TabsContent value="data-sources" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
               <DataSourceListViewTabContent {...dataSourceSettingsEditor} />
             </TabsContent>
-</Tabs>
+
+            <TabsContent value="templates" className="mt-0 flex-1 flex flex-col min-h-1 overflow-clip">
+              <ComponentTemplatesTabContent {...componentTemplatesEditor} />
+            </TabsContent>
+          </Tabs>
         </div>
       </PopoverContent>
     </Popover>

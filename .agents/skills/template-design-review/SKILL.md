@@ -25,7 +25,7 @@ free, and stop any server you started when you finish.
 
 ## Rendering
 
-Open `/try?template=<template-id>&mode=preview`. That applies the template and
+Open `/try?page-template=<template-id>&mode=preview`. That applies the template and
 switches to preview mode deterministically. Wait for hydration before
 measuring; the first load after an edit can fail while the app recompiles, so
 reload once before suspecting a defect.
