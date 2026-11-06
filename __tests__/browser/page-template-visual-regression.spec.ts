@@ -9,7 +9,7 @@ import { pageTemplateRegistry } from "@/client/features/page-templates"
  */
 for (const template of pageTemplateRegistry) {
   test(`preview screenshot: ${template.id}`, async ({ page }) => {
-    await page.goto(`/preview/${template.id}`)
+    await page.goto(`/preview/page-templates/${template.id}`)
 
     // Wait for the canvas / main content to settle.
     await page.waitForSelector("main, [data-testid='page-canvas'], .page-canvas, header", {

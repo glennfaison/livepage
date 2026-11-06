@@ -317,7 +317,7 @@ test("all bundled templates render like standalone HTML at desktop and mobile si
         .catch(() => response.writeHead(404).end())
       return
     }
-    const template = pageTemplateRegistry.find(({ id }) => id === url.searchParams.get("template"))
+    const template = pageTemplateRegistry.find(({ id }) => id === (url.searchParams.get("page-template") ?? url.searchParams.get("template")))
     if (url.pathname !== "/template.html" || !template) {
       response.writeHead(404).end()
       return
@@ -383,7 +383,7 @@ test("all bundled templates render like standalone HTML at desktop and mobile si
     ]) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height })
       for (const template of pageTemplateRegistry) {
-        await page.goto(`${appOrigin}/try?template=${encodeURIComponent(template.id)}&mode=preview`)
+        await page.goto(`${appOrigin}/try?page-template=${encodeURIComponent(template.id)}&mode=preview`)
         await expect(page.locator("#page-title")).toHaveValue(template.content.pages[0].attributes.title)
         await page.evaluate(() => document.fonts.ready)
         await expect(page.locator("main > section")).toBeVisible()
@@ -397,7 +397,7 @@ test("all bundled templates render like standalone HTML at desktop and mobile si
         const exportedHtml = serializeAppStateAsHtml(template.content.pages, {
           assetBaseUrl: exportOrigin,
         })
-        const response = await page.goto(`${exportOrigin}/template.html?template=${encodeURIComponent(template.id)}`)
+        const response = await page.goto(`${exportOrigin}/template.html?page-template=${encodeURIComponent(template.id)}`)
         expect(response?.status(), `${template.id} ${viewport.name} export`).toBe(200)
         expect(await response?.text()).toBe(exportedHtml)
         await page.evaluate(() => document.fonts.ready)

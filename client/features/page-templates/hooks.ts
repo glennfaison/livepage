@@ -13,7 +13,8 @@ export function usePageTemplateDeepLink(dispatch: Dispatch<AppAction>) {
     if (deepLinkApplied.current) return
     deepLinkApplied.current = true
     const params = new URLSearchParams(window.location.search)
-    const template = getPageTemplateById(params.get("template") ?? "")
+    const templateId = params.get("page-template") ?? params.get("template") ?? ""
+    const template = getPageTemplateById(templateId)
     if (template) {
       for (const action of createApplyPageTemplateActions(template)) dispatch(action)
     }
