@@ -131,7 +131,8 @@ export default function BuilderPage() {
     pageBuilderMode === "edit" && hasSelection,
   )
 
-  // Deep link used by template review: /try?template=<id>&mode=preview renders a template deterministically.
+  // Deep link used by template review: /try?page-template=<id>&mode=preview renders a template deterministically.
+  // The legacy ?template=<id> alias is still honored by useTemplateDeepLink.
   useTemplateDeepLink(dispatch)
 
   // Get the current active page
