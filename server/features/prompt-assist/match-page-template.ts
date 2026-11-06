@@ -7,8 +7,8 @@ import {
   type MatchRequest,
   type MatchResponse,
   type PageRequest,
-  type TemplateCandidate,
-  type TemplateSummary,
+  type PageTemplateCandidate,
+  type PageTemplateSummary,
 } from "@/shared/features/prompt-assist"
 import { logger } from "@/server/lib/logger"
 
@@ -20,10 +20,10 @@ const CANDIDATE_LIMIT = 4
 const MIN_TOP_PROBABILITY = 0.55
 const MIN_LEAD_OVER_RUNNER_UP = 0.2
 
-type Ranking = Readonly<{ candidates: ReadonlyArray<TemplateCandidate>; noMatch: boolean; decidedBy: "jev" | "openai" }>
+type Ranking = Readonly<{ candidates: ReadonlyArray<PageTemplateCandidate>; noMatch: boolean; decidedBy: "jev" | "openai" }>
 
 /** Jev picks among the client-supplied catalog or abstains with "none". */
-async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<TemplateSummary>): Promise<Ranking> {
+async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<PageTemplateSummary>): Promise<Ranking> {
   const { template } = await askJev({
     state: { request: request.prompt, clarifications: request.clarifications, templates: catalog },
     questions: {
@@ -42,28 +42,28 @@ async function rankWithJev(request: PageRequest, catalog: ReadonlyArray<Template
   return { ...rankingFromJev(template, catalog), decidedBy: "jev" }
 }
 
-function rankingFromJev(answer: JevChoiceAnswer, catalog: ReadonlyArray<TemplateSummary>): Omit<Ranking, "decidedBy"> {
+function rankingFromJev(answer: JevChoiceAnswer, catalog: ReadonlyArray<PageTemplateSummary>): Omit<Ranking, "decidedBy"> {
   const nameById = new Map(catalog.map((entry) => [entry.id, entry.name]))
   const candidates = Object.entries(answer.probabilities)
     .filter(([id]) => nameById.has(id))
-    .map(([templateId, probability]) => ({ templateId, name: nameById.get(templateId) ?? templateId, probability }))
+    .map(([pageTemplateId, probability]) => ({ pageTemplateId, name: nameById.get(pageTemplateId) ?? pageTemplateId, probability }))
     .sort((a, b) => b.probability - a.probability)
     .slice(0, CANDIDATE_LIMIT)
   return { candidates, noMatch: answer.choice === NO_MATCH }
 }
 
 /** Fallback judge when Jev is not configured or unavailable. */
-async function rankWithOpenAi(request: PageRequest, catalog: ReadonlyArray<TemplateSummary>): Promise<Ranking> {
+async function rankWithOpenAi(request: PageRequest, catalog: ReadonlyArray<PageTemplateSummary>): Promise<Ranking> {
   const ids = catalog.map((entry) => entry.id)
   const reply = await completeJson({
     system: "You pick the single best page template for a website request. Reply only with the requested JSON.",
     user: `Request:\n${describeRequest(request)}\n\nTemplates:\n${JSON.stringify(catalog)}\n\nReturn the id of the best template, or "${NO_MATCH}" if none clearly fits, and your confidence from 0 to 1.`,
-    schemaName: "template_match",
-    schema: z.object({ templateId: z.string(), confidence: z.number().min(0).max(1) }),
+    schemaName: "page_template_match",
+    schema: z.object({ pageTemplateId: z.string(), confidence: z.number().min(0).max(1) }),
   })
-  const chosen = catalog.find((entry) => entry.id === reply.templateId)
-  if (!chosen || !ids.includes(reply.templateId)) return { candidates: [], noMatch: true, decidedBy: "openai" }
-  return { candidates: [{ templateId: chosen.id, name: chosen.name, probability: reply.confidence }], noMatch: false, decidedBy: "openai" }
+  const chosen = catalog.find((entry) => entry.id === reply.pageTemplateId)
+  if (!chosen || !ids.includes(reply.pageTemplateId)) return { candidates: [], noMatch: true, decidedBy: "openai" }
+  return { candidates: [{ pageTemplateId: chosen.id, name: chosen.name, probability: reply.confidence }], noMatch: false, decidedBy: "openai" }
 }
 
 function isAmbiguous(ranking: Ranking): boolean {
@@ -73,9 +73,9 @@ function isAmbiguous(ranking: Ranking): boolean {
 }
 
 /** Jev cannot write prose, so OpenAI phrases the one question that best separates the leading candidates. */
-async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, catalog: ReadonlyArray<TemplateSummary>): Promise<MatchResponse | null> {
+async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, catalog: ReadonlyArray<PageTemplateSummary>): Promise<MatchResponse | null> {
   if (!isOpenAiConfigured() || request.clarifications.length >= MAX_CLARIFICATIONS) return null
-  const leading = ranking.candidates.length > 0 ? ranking.candidates.map((c) => c.templateId) : catalog.map((entry) => entry.id)
+  const leading = ranking.candidates.length > 0 ? ranking.candidates.map((c) => c.pageTemplateId) : catalog.map((entry) => entry.id)
   const options = catalog.filter((entry) => leading.includes(entry.id))
   try {
     const reply = await completeJson({
@@ -98,7 +98,7 @@ async function askClarifyingQuestion(request: PageRequest, ranking: Ranking, cat
  * the judgment is ambiguous, OpenAI asks the person one clarifying question,
  * up to MAX_CLARIFICATIONS times, before settling for the best candidate.
  */
-export async function matchTemplate(input: MatchRequest): Promise<MatchResponse> {
+export async function matchPageTemplate(input: MatchRequest): Promise<MatchResponse> {
   const { catalog, ...request } = input
   let ranking: Ranking | null = null
 
@@ -138,5 +138,5 @@ export async function matchTemplate(input: MatchRequest): Promise<MatchResponse>
   }
 
   const best = ranking.candidates[0]
-  return { kind: "match", templateId: best.templateId, confidence: best.probability, decidedBy: ranking.decidedBy, candidates: ranking.candidates }
+  return { kind: "match", pageTemplateId: best.pageTemplateId, confidence: best.probability, decidedBy: ranking.decidedBy, candidates: ranking.candidates }
 }

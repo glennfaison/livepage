@@ -98,7 +98,7 @@ Test categories and the CI job order are described in [`.agents/docs/TESTING.md`
 The dev, build, start, and test commands rebuild the HTML export runtime automatically, and `npm install` builds it once (the `postinstall` script). It is generated into `client/features/serializers/html/generated/`, which is git-ignored.
 
 The standalone HTML browser tests run in headless Chromium against both the live
-`/try?template=<id>&mode=preview` page and the exact exported HTML for every bundled
+`/try?page-template=<id>&mode=preview` page and the exact exported HTML for every bundled
 template at desktop and mobile viewport sizes. They fulfill pinned React imports
 from locally installed React packages and use the preview's local font assets, so
 the comparison does not depend on CDN availability. To install the browser locally,
