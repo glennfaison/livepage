@@ -22,7 +22,7 @@ export function ProposalCard(
   }>,
 ) {
   const { proposal, catalog, onPickTemplate, onEditCopy, onApply } = props
-  const template = catalog.find((entry) => entry.id === proposal.templateId)
+  const template = catalog.find((entry) => entry.id === proposal.pageTemplateId)
 
   return (
     <div className="w-full rounded-lg border bg-card p-3 text-sm shadow-sm">
@@ -40,7 +40,7 @@ export function ProposalCard(
       <label className="mt-2 block">
         <span className="mb-1 block text-xs text-muted-foreground">Template</span>
         <select
-          value={proposal.templateId}
+          value={proposal.pageTemplateId}
           onChange={(event) => onPickTemplate(event.target.value)}
           className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
         >
