@@ -195,12 +195,12 @@ describe("App Reducer", () => {
 
       const afterManualEntry = appReducer(afterUndo, {
         type: "ADD_TO_HISTORY",
-        payload: { action: "Applied template: Test", pageState: afterUndo.componentTree },
+        payload: { action: "Applied page template: Test", pageState: afterUndo.componentTree },
       })
 
       expect(afterManualEntry.history).toHaveLength(2)
       expect(afterManualEntry.currentHistoryIndex).toBe(1)
-      expect(afterManualEntry.history[1].action).toBe("Applied template: Test")
+      expect(afterManualEntry.history[1].action).toBe("Applied page template: Test")
     })
 
     it("still appends normally when there is no earlier undo", () => {
@@ -346,7 +346,7 @@ describe("DISCARD_CHANGES restores full baseline", () => {
     afterApply = appReducer(afterApply, { type: "SET_SELECTED_COMPONENT", payload: "some-child" })
     afterApply = appReducer(afterApply, {
       type: "ADD_TO_HISTORY",
-      payload: { action: "Applied template", pageState: afterApply.componentTree },
+      payload: { action: "Applied page template", pageState: afterApply.componentTree },
     })
 
     expect(afterApply.activePage).toBe("farm-logistics-template-page")

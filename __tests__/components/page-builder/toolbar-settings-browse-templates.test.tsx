@@ -26,7 +26,7 @@ describe("ToolbarSettingsPopover Browse Templates", () => {
       </ToolbarSettingsPopover>
     )
 
-    const button = screen.getByText("Browse Templates")
+    const button = screen.getByText("Browse Page Templates")
     await userEvent.click(button)
 
     expect(mockOnOpenChange).toHaveBeenCalledWith(false)

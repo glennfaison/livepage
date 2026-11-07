@@ -153,10 +153,10 @@ describe("AssistChat", () => {
     })
     const { user } = await openChat()
     await send(user, "a landing page")
-    const picker = await screen.findByRole("group", { name: /choose a template/i })
+    const picker = await screen.findByRole("group", { name: /choose a page template/i })
     await user.click(within(picker).getByRole("button", { name: /saas/i }))
     expect(await screen.findByLabelText("Template")).toHaveValue("landing-page-saas")
-    expect(screen.queryByRole("group", { name: /choose a template/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole("group", { name: /choose a page template/i })).not.toBeInTheDocument()
   })
 
   it("keeps the template and copy when the design loop fails partway, and says so", async () => {

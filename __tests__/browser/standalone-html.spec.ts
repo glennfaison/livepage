@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test"
 import { build } from "esbuild"
 import { DATA_SOURCE_FIELD_NAME, encodeDataSourceSettings } from "@/client/features/data-sources"
 import { serializeAppStateAsHtml } from "@/client/features/serializers"
-import { pageTemplateRegistry } from "@/client/features/templates"
+import { pageTemplateRegistry } from "@/client/features/page-templates"
 import type { AppNode } from "@/client/features/types"
 
 const require = createRequire(`${process.cwd()}/package.json`)

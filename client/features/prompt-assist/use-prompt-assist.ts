@@ -5,12 +5,12 @@ import { toast } from "@/client/components/ui/use-toast"
 import type { AppAction } from "@/client/features/app-state"
 import {
   applyTemplateFieldValues,
-  createApplyTemplateActions,
-  describeTemplateCatalog,
+  createApplyPageTemplateActions,
+  describePageTemplateCatalog,
   getPageTemplateById,
   listTemplateTextFields,
   type PageTemplateDefinition,
-} from "@/client/features/templates"
+} from "@/client/features/page-templates"
 import { generateId } from "@/client/lib/utils"
 import { promptAssistApi, RateLimitedError } from "./api"
 import { chatReducer, initialChatState, type AssistMessage, type Proposal } from "./chat-state"
@@ -20,7 +20,7 @@ import { refinePage } from "./refine-loop"
 import type { PageRequest } from "@/shared/features/prompt-assist"
 import { logger } from "@/client/lib/logger"
 
-const catalog = describeTemplateCatalog()
+const catalog = describePageTemplateCatalog()
 
 const assistantText = (text: string): AssistMessage => ({ id: generateId(), role: "assistant", kind: "text", text })
 const errorMessage = (error: unknown): AssistMessage => ({
@@ -147,7 +147,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
       toast({ title: "Couldn't apply that template", description: "It may have been removed from the catalog." })
       return
     }
-    for (const action of createApplyTemplateActions(template, {
+    for (const action of createApplyPageTemplateActions(template, {
       customizePages: (pages) => applyDesignEdits(applyTemplateFieldValues(pages, template, proposal.copy), proposal.edits),
       historyLabel: `Applied "${template.metadata.name}" from prompt assist`,
     })) {

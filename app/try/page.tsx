@@ -21,7 +21,7 @@ import {
   usePasteComponentShortcut,
   useDuplicateComponentShortcut,
 } from "@/client/features/page-builder/keyboard-shortcuts"
-import { createApplyTemplateActions, describeTemplateDisplayCatalog, getPageTemplateById, TemplateCatalogPopover, useTemplateDeepLink } from "@/client/features/templates"
+import { createApplyPageTemplateActions, describePageTemplateDisplayCatalog, getPageTemplateById, PageTemplateCatalogPopover, usePageTemplateDeepLink } from "@/client/features/page-templates"
 import { CommandPalette, useCommandPaletteShortcut } from "@/client/features/command-palette"
 import { KeyboardShortcutsDialog } from "@/client/features/page-builder/keyboard-shortcuts-dialog"
 import { useKeyboardShortcutsHelp } from "@/client/features/page-builder/keyboard-shortcuts"
@@ -39,7 +39,7 @@ import { usePageTitleDraft } from "@/client/features/page-builder/page-title-dra
 import { serializeAppStateAsHtml, serializeAppStateAsJson, validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { toast } from "@/client/components/ui/use-toast"
 
-const templateDisplayCatalog = describeTemplateDisplayCatalog()
+const pageTemplateDisplayCatalog = describePageTemplateDisplayCatalog()
 
 function StaleLockBanner({
   onLoadLatest,
@@ -132,8 +132,8 @@ export default function BuilderPage() {
   )
 
   // Deep link used by template review: /try?page-template=<id>&mode=preview renders a template deterministically.
-  // The legacy ?template=<id> alias is still honored by useTemplateDeepLink.
-  useTemplateDeepLink(dispatch)
+  // The legacy ?template=<id> alias is still honored by usePageTemplateDeepLink.
+  usePageTemplateDeepLink(dispatch)
 
   // Get the current active page
   const currentPage = selectCurrentPage(state) ?? state.componentTree[0]
@@ -306,7 +306,7 @@ export default function BuilderPage() {
       return
     }
 
-    for (const action of createApplyTemplateActions(template)) {
+    for (const action of createApplyPageTemplateActions(template)) {
       dispatch(action)
     }
   }
@@ -384,7 +384,7 @@ export default function BuilderPage() {
                 <Command className="h-4 w-4" />
                 <span className="hidden sm:inline">Command</span>
               </Button>
-              <TemplateCatalogPopover templates={templateDisplayCatalog} onApplyTemplate={applyTemplate} open={templateCatalogOpen} onOpenChange={setTemplateCatalogOpen} />
+              <PageTemplateCatalogPopover templates={pageTemplateDisplayCatalog} onApplyPageTemplate={applyTemplate} open={templateCatalogOpen} onOpenChange={setTemplateCatalogOpen} />
               <DropdownMenu open={loadDropdownOpen} onOpenChange={setLoadDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2 px-2 sm:px-3" aria-label="Import page">
@@ -625,8 +625,8 @@ export default function BuilderPage() {
           state={state}
           dispatch={dispatch}
           componentOperations={componentOperations}
-          templates={templateDisplayCatalog}
-          onApplyTemplate={applyTemplate}
+          templates={pageTemplateDisplayCatalog}
+          onApplyPageTemplate={applyTemplate}
           onSaveAsJson={saveAsJSON}
           onSaveAsShortcode={saveAsShortcode}
           onSaveAsHtml={saveAsHTML}
