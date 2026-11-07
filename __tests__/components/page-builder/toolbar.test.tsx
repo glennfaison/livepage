@@ -140,13 +140,20 @@ describe("Toolbar without the command palette and duplicate page buttons", () =>
     [true, 4, 4],
     [false, 3, 4],
   ])("has the documented button counts when the page assistant is %s (left %i, right %i)", (promptAssistEnabled, left, right) => {
-    render(<Toolbar {...baseProps} promptAssistEnabled={promptAssistEnabled} />)
+    const originalEnv = process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    try {
+      render(<Toolbar {...baseProps} promptAssistEnabled={promptAssistEnabled} />)
 
-    const titles = renderedTitles()
-    const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
+      const titles = renderedTitles()
+      const pivotIndex = titles.findIndex((title) => title.startsWith("Minimize"))
 
-    expect(pivotIndex).toBe(left)
-    expect(titles.length - pivotIndex - 1).toBe(right)
+      expect(pivotIndex).toBe(left)
+      expect(titles.length - pivotIndex - 1).toBe(right)
+    } finally {
+      if (originalEnv === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+      else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = originalEnv
+    }
   })
 })
 
@@ -165,5 +172,28 @@ describe("Toolbar screen reader announcements", () => {
     fireEvent.click(screen.getByTitle(/Maximize/))
 
     expect(screen.getByRole("status")).toHaveTextContent("Toolbar restored")
+  })
+})
+
+describe("Toolbar AI Assistant gated by deployment flag", () => {
+  const original = process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+
+  afterEach(() => {
+    if (original === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+    else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = original
+  })
+
+  it("hides the AI Assistant toolbar button when the deployment flag is off even if promptAssistEnabled is true", () => {
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "0"
+    render(<Toolbar {...baseProps} promptAssistEnabled={true} onOpenAIAssistant={jest.fn()} />)
+
+    expect(screen.queryByTitle("Open AI Assistant")).not.toBeInTheDocument()
+  })
+
+  it("shows the AI Assistant toolbar button when the deployment flag is on and promptAssistEnabled is true", () => {
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    render(<Toolbar {...baseProps} promptAssistEnabled={true} onOpenAIAssistant={jest.fn()} />)
+
+    expect(screen.getByTitle("Open AI Assistant")).toBeInTheDocument()
   })
 })
