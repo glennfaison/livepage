@@ -40,7 +40,7 @@ const post = (path: string, ip: string, body: unknown) =>
 describe("prompt-assist feature flag", () => {
   const requests = () => [
     () => matchPost(post("match", "5.5.5.5", { prompt: "a dark resume", catalog })),
-    () => draftPost(post("draft", "5.5.5.5", { prompt: "x", template: draftTemplate })),
+    () => draftPost(post("draft", "5.5.5.5", { prompt: "x", pageTemplate: draftTemplate })),
     () => refinePost(post("refine", "5.5.5.5", { prompt: "x", page: { nodes: [], settings: {} } })),
   ]
 
@@ -96,15 +96,15 @@ describe("prompt-assist routes", () => {
     }
 
     expect((await matchPost(post("match", "1.1.1.5", { prompt: "x", catalog: duplicateCatalog }))).status).toBe(400)
-    expect((await draftPost(post("draft", "1.1.1.6", { prompt: "x", template: duplicateFields }))).status).toBe(400)
+    expect((await draftPost(post("draft", "1.1.1.6", { prompt: "x", pageTemplate: duplicateFields }))).status).toBe(400)
   })
 
   it("draft uses bounded client-supplied field metadata and returns no copy without OpenAI", async () => {
-    const ok = await draftPost(post("draft", "1.1.1.3", { prompt: "x", template: draftTemplate }))
+    const ok = await draftPost(post("draft", "1.1.1.3", { prompt: "x", pageTemplate: draftTemplate }))
     expect(await ok.json()).toEqual({ values: {}, source: "none" })
 
     const oversized = { ...draftTemplate, fields: Array.from({ length: 31 }, (_, index) => ({ source: `f${index}`, description: "field" })) }
-    expect((await draftPost(post("draft", "1.1.1.3", { prompt: "x", template: oversized }))).status).toBe(400)
+    expect((await draftPost(post("draft", "1.1.1.3", { prompt: "x", pageTemplate: oversized }))).status).toBe(400)
   })
 
   it("refine takes a page description and, with no providers, returns done", async () => {
@@ -124,7 +124,7 @@ describe("prompt-assist routes", () => {
     expect(Number(limited.headers.get("retry-after"))).toBeGreaterThan(0)
 
     expect((await send("8.8.8.8")).status).toBe(200)
-    expect((await draftPost(post("draft", "9.9.9.9", { prompt: "x", template: draftTemplate }))).status).toBe(200)
+    expect((await draftPost(post("draft", "9.9.9.9", { prompt: "x", pageTemplate: draftTemplate }))).status).toBe(200)
   })
 
   it("never leaks provider or internal errors to the client", async () => {

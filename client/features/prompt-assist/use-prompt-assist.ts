@@ -65,7 +65,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
       type: "proposal",
       proposal: {
         ...origin,
-        templateId: template.id,
+        pageTemplateId: template.id,
         fields: listTemplateTextFields(template),
         copy: draft.values,
         edits: refinement.edits,
@@ -99,7 +99,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
           return
         }
 
-        const template = getPageTemplateById(match.templateId)
+        const template = getPageTemplateById(match.pageTemplateId)
         if (!template) throw new Error("Matched an unknown template")
         await buildProposal(request, template, { confidence: match.confidence, decidedBy: match.decidedBy, candidates: match.candidates })
       } catch (error) {
@@ -142,7 +142,7 @@ export function usePromptAssist(params: Readonly<{ dispatch: (action: AppAction)
 
   const apply = useCallback(() => {
     const { proposal } = state
-    const template = proposal ? getPageTemplateById(proposal.templateId) : undefined
+    const template = proposal ? getPageTemplateById(proposal.pageTemplateId) : undefined
     if (!proposal || !template) {
       toast({ title: "Couldn't apply that template", description: "It may have been removed from the catalog." })
       return

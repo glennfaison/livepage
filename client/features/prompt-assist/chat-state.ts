@@ -1,4 +1,4 @@
-import type { DesignEdit, PageRequest, TemplateCandidate } from "@/shared/features/prompt-assist"
+import type { DesignEdit, PageRequest, PageTemplateCandidate } from "@/shared/features/prompt-assist"
 import type { TemplateTextField } from "@/client/features/page-templates"
 
 export type AssistMessage =
@@ -14,11 +14,11 @@ export type AssistStatus =
 
 /** A template with drafted copy and design edits, waiting for the person to apply or adjust it. */
 export type Proposal = Readonly<{
-  templateId: string
+  pageTemplateId: string
   /** null when the person picked the template themselves. */
   confidence: number | null
   decidedBy: "jev" | "openai" | "user"
-  candidates: ReadonlyArray<TemplateCandidate>
+  candidates: ReadonlyArray<PageTemplateCandidate>
   fields: ReadonlyArray<TemplateTextField>
   copy: Readonly<Record<string, string>>
   edits: ReadonlyArray<DesignEdit>

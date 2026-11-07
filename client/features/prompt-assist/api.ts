@@ -3,7 +3,7 @@ import {
   draftResponseSchema,
   matchResponseSchema,
   refineResponseSchema,
-  type DraftTemplate,
+  type PageTemplateDraft,
   type MatchRequest,
   type DraftResponse,
   type MatchResponse,
@@ -38,12 +38,12 @@ export const promptAssistApi = {
   match: (request: PageRequest, catalog: MatchRequest["catalog"]): Promise<MatchResponse> =>
     postJson("/api/prompt-assist/match", { ...toBody(request), catalog }, matchResponseSchema),
   draft: (request: PageRequest, template: PageTemplateDefinition): Promise<DraftResponse> => {
-    const templateRequest: DraftTemplate = {
+    const templateRequest: PageTemplateDraft = {
       name: template.metadata.name,
       description: template.metadata.description,
       fields: listTemplateTextFields(template),
     }
-    return postJson("/api/prompt-assist/draft", { ...toBody(request), template: templateRequest }, draftResponseSchema)
+    return postJson("/api/prompt-assist/draft", { ...toBody(request), pageTemplate: templateRequest }, draftResponseSchema)
   },
   refine: (request: PageRequest, pages: ReadonlyArray<AppNode>): Promise<RefineResponse> =>
     postJson("/api/prompt-assist/refine", { ...toBody(request), page: describePage(pages) }, refineResponseSchema),
