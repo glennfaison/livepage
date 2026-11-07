@@ -99,7 +99,7 @@ The dev, build, start, and test commands rebuild the HTML export runtime automat
 
 The standalone HTML browser tests run in headless Chromium against both the live
 `/try?page-template=<id>&mode=preview` page and the exact exported HTML for every bundled
-template at desktop and mobile viewport sizes. They fulfill pinned React imports
+page template at desktop and mobile viewport sizes. They fulfill pinned React imports
 from locally installed React packages and use the preview's local font assets, so
 the comparison does not depend on CDN availability. To install the browser locally,
 run `npx playwright install chromium` once after `npm install`; then run

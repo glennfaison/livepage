@@ -27,11 +27,39 @@ export function SettingsPopover({
   const dataSourceSettingsEditor = useDataSourceSettingsEditor({ component })
   const componentTemplatesEditor = useComponentTemplateSettingsEditor({ component, setIsOpen })
   const { componentInfo, ...componentSettingsTabContent } = componentSettingsEditor
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!isOpen) return
+    const node = contentRef.current
+    let raf = 0
+    const clamp = () => {
+      const el = contentRef.current
+      if (el) {
+        const wrapper = el.parentElement
+        const wRect = wrapper?.getBoundingClientRect()
+        if (wRect) {
+          const vh = window.innerHeight
+          const ph = el.offsetHeight
+          let y = 0
+          if (wRect.top < 12) y = 12 - wRect.top
+          if (wRect.top + y + ph > vh - 12) y = vh - 12 - ph - wRect.top
+          el.style.transform = y ? "translateY(" + y + "px)" : ""
+        }
+      }
+      raf = requestAnimationFrame(clamp)
+    }
+    raf = requestAnimationFrame(clamp)
+    return () => {
+      cancelAnimationFrame(raf)
+      if (node) node.style.transform = ""
+    }
+  }, [isOpen])
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] p-0 z-50" side="bottom" align="end" sideOffset={8} collisionPadding={12}>
+      <PopoverContent ref={contentRef} className="w-[min(24rem,calc(100vw-2rem))] p-0 z-50" side="bottom" align="end" sideOffset={8} collisionPadding={12}>
         <div
           data-testid="component-settings-panel"
           className={cn(
