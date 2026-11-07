@@ -1,5 +1,5 @@
 import type { DesignEdit, PageRequest, PageTemplateCandidate } from "@/shared/features/prompt-assist"
-import type { TemplateTextField } from "@/client/features/templates"
+import type { TemplateTextField } from "@/client/features/page-templates"
 
 export type AssistMessage =
   | Readonly<{ id: string; role: "user" | "assistant"; kind: "text"; text: string }>

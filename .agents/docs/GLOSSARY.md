@@ -17,8 +17,9 @@ A registered page-builder component with metadata, default content, settings fie
 _Avoid_: Widget, block
 
 **Page template**:
-A bundled or custom full-page layout definition, stored as a `PageTemplateDefinition` in `client/features/templates/definitions/<id>.ts` and registered in `client/features/templates/registry.ts`. A page template carries catalog metadata (`name`, `description`, `category`, `tags`, `thumbnail`) separate from its `content.pages` app-node tree.
-_Avoid_: just "template" (ambiguous with component template)
+**Page template**:
+A versioned, whole-page starting point registered in the page-template catalog. It ships catalog metadata, an `AppNode` tree for `content.pages`, and optional data-mapping fields.
+_Avoid_: Template (unqualified), page starter, layout preset
 
 **Component template**:
 A reusable definition of a design component — its tag, default attributes, and child structure — stored in `client/features/component-templates/` and registered so it can be inserted into pages.
@@ -77,15 +78,15 @@ An exported page artifact that can be opened directly in a modern browser withou
 _Avoid_: Static HTML snapshot
 
 **Prompt assist chat**:
-The minimizable chatbox on the builder where a person describes a page in their own words and reviews a Page template match, Copy draft, and Design edits before applying them.
+The minimizable chatbox on the builder where a person describes a page in their own words and reviews a page-template match, Copy draft, and Design edits before applying them.
 _Avoid_: Chatbot, AI assistant
 
-**Page template match**:
-The page template chosen for a request from the page-template catalog, judged by Jev (or OpenAI as fallback) and reported with its probability.
-_Avoid_: Recommendation, suggestion, just "template match"
+**Page-template match**:
+The page template chosen for a request from the template catalog, judged by Jev (or OpenAI as fallback) and reported with its probability.
+_Avoid_: Recommendation, suggestion
 
 **Clarifying question**:
-The single question the chat asks when a request is too ambiguous for a Page template match; its answer is added to the request.
+The single question the chat asks when a request is too ambiguous for a page-template match; its answer is added to the request.
 _Avoid_: Follow-up, prompt
 
 **Copy draft**:
@@ -112,9 +113,9 @@ _Avoid_: Auto-design, agent loop
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
 - A **Standalone HTML export** contains serialized **App nodes** and resolves **Data sources** when opened
-- A **Prompt assist chat** request resolves to a **Page template match**, possibly after one or more **Clarifying questions**
-- A **Page template match** gets a **Copy draft**, then the **Design loop** refines its cloned **App nodes** through **Design edits** computed from a **Page description**
-- Applying the result goes through the **App-state API** like any other page template application, as one history entry
+- A **Prompt assist chat** request resolves to a **page-template match**, possibly after one or more **Clarifying questions**
+- A **page-template match** gets a **Copy draft**, then the **Design loop** refines its cloned **App nodes** through **Design edits** computed from a **Page description**
+- Applying the result goes through the **App-state API** like any other page-template application, as one history entry
 
 ## Example dialogue
 

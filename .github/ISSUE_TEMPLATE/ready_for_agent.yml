@@ -16,7 +16,7 @@ body:
         - Editor / page builder
         - Design components
         - Data sources / placeholders
-        - Templates
+        - Page templates
         - Import / export (JSON, shortcode)
         - Standalone HTML export
         - Command palette / theme
@@ -45,7 +45,7 @@ body:
       label: Acceptance criteria
       description: Checklist of observable outcomes. Agents treat these as the definition of done.
       placeholder: |
-        - [ ] New template definition under shared/features/templates/definitions/
+        - [ ] New template definition under shared/features/page-templates/definitions/
         - [ ] Registered in the template registry and visible in the catalog
         - [ ] Renders correctly in /try?template=<id>&mode=preview at desktop and mobile
         - [ ] npm test -- --runInBand relevant suites pass
@@ -64,8 +64,8 @@ body:
       description: Paths, skills, or docs the agent should read first.
       placeholder: |
         - .agents/docs/CONTEXT.md
-        - .agents/skills/template-authoring/SKILL.md
-        - existing definition files under shared/features/templates/definitions/
+        - .agents/skills/page-template-authoring/SKILL.md
+        - existing definition files under shared/features/page-templates/definitions/
   - type: checkboxes
     id: checks
     attributes:

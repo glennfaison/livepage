@@ -14,8 +14,8 @@ points you to the right instructions.
 - [`/code-review`](../code-review/SKILL.md): Matt Pocock's general standards-and-spec review of current changes, a branch, or a pull request.
 - [`/livepage-code-review`](../livepage-code-review/SKILL.md): LivePage-specific architecture and convention review of current changes.
 - [`/tdd`](../tdd/SKILL.md): build a feature or fix a bug test-first.
-- [`/template-authoring`](../template-authoring/SKILL.md): add, redesign, or fix a LivePage Template.
-- [`/template-design-review`](../template-design-review/SKILL.md): evaluate and improve a Template's preview-mode design in the browser.
+- [`/page-template-authoring`](../page-template-authoring/SKILL.md): add, redesign, or fix a LivePage Template.
+- [`/page-template-design-review`](../page-template-design-review/SKILL.md): evaluate and improve a Template's preview-mode design in the browser.
 - [`/typesafe-ai`](../typesafe-ai/SKILL.md): build AI features using TypeSafe judgments and probabilities.
 - [`/zip-branch-import`](../zip-branch-import/SKILL.md): import a patch and related assets from a zip archive.
 

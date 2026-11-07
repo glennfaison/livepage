@@ -15,7 +15,7 @@ LivePage is a page builder. The document being edited is a single **app state**,
 | [`client/features/serializers/`](../../client/features/serializers/) | JSON, shortcode, and standalone HTML import/export operations |
 | [`client/features/serializers/schema.ts`](../../client/features/serializers/schema.ts) | Runtime validation for serialized app-node trees |
 | [`client/features/shortcode-parser/`](../../client/features/shortcode-parser/) | Parser used by the browser-side shortcode serializer |
-| [`client/features/templates/`](../../client/features/templates/) | Template definitions, catalog, schema, data mapping, and picker UI |
+| [`client/features/page-templates/`](../../client/features/page-templates/) | Page-template definitions, catalog, schema, data mapping, and picker UI |
 | [`client/features/component-templates/`](../../client/features/component-templates/) | Reusable design-component template definitions that can be inserted into pages |
 | [`client/features/command-palette/`](../../client/features/command-palette/) | Command palette for the builder |
 | [`client/features/prompt-assist/`](../../client/features/prompt-assist/) | Browser chat, page description, and design refinement loop |

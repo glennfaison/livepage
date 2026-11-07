@@ -14,7 +14,7 @@ body:
         - Editor / page builder
         - Design components
         - Data sources / placeholders
-        - Templates
+        - Page templates
         - Import / export (JSON, shortcode)
         - Standalone HTML export
         - Command palette / theme
