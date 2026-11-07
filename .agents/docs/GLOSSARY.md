@@ -16,6 +16,10 @@ _Avoid_: Component instance, element
 A registered page-builder component with metadata, default content, settings fields, and separate edit-mode and preview-mode renderers.
 _Avoid_: Widget, block
 
+**Page template**:
+A versioned, whole-page starting point registered in the page-template catalog. It ships catalog metadata, an `AppNode` tree for `content.pages`, and optional data-mapping fields.
+_Avoid_: Template (unqualified), page starter, layout preset
+
 **App-state API**:
 The boundary for reading from and mutating app state through explicit commands and selectors.
 _Avoid_: Facade, helper layer
@@ -69,15 +73,15 @@ An exported page artifact that can be opened directly in a modern browser withou
 _Avoid_: Static HTML snapshot
 
 **Prompt assist chat**:
-The minimizable chatbox on the builder where a person describes a page in their own words and reviews a Template match, Copy draft, and Design edits before applying them.
+The minimizable chatbox on the builder where a person describes a page in their own words and reviews a page-template match, Copy draft, and Design edits before applying them.
 _Avoid_: Chatbot, AI assistant
 
-**Template match**:
-The template chosen for a request from the template catalog, judged by Jev (or OpenAI as fallback) and reported with its probability.
+**Page-template match**:
+The page template chosen for a request from the template catalog, judged by Jev (or OpenAI as fallback) and reported with its probability.
 _Avoid_: Recommendation, suggestion
 
 **Clarifying question**:
-The single question the chat asks when a request is too ambiguous for a Template match; its answer is added to the request.
+The single question the chat asks when a request is too ambiguous for a page-template match; its answer is added to the request.
 _Avoid_: Follow-up, prompt
 
 **Copy draft**:
@@ -104,9 +108,9 @@ _Avoid_: Auto-design, agent loop
 - **Serializers** read from or write to **App state**
 - **Placeholders** are resolved inside component strings before rendering
 - A **Standalone HTML export** contains serialized **App nodes** and resolves **Data sources** when opened
-- A **Prompt assist chat** request resolves to a **Template match**, possibly after one or more **Clarifying questions**
-- A **Template match** gets a **Copy draft**, then the **Design loop** refines its cloned **App nodes** through **Design edits** computed from a **Page description**
-- Applying the result goes through the **App-state API** like any other template application, as one history entry
+- A **Prompt assist chat** request resolves to a **page-template match**, possibly after one or more **Clarifying questions**
+- A **page-template match** gets a **Copy draft**, then the **Design loop** refines its cloned **App nodes** through **Design edits** computed from a **Page description**
+- Applying the result goes through the **App-state API** like any other page-template application, as one history entry
 
 ## Example dialogue
 
