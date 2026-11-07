@@ -4,11 +4,11 @@ import { POST as matchPost } from "@/app/api/prompt-assist/match/route"
 import { POST as draftPost } from "@/app/api/prompt-assist/draft/route"
 import { POST as refinePost } from "@/app/api/prompt-assist/refine/route"
 import { describePage } from "@/client/features/prompt-assist"
-import { cloneTemplatePages, describeTemplateCatalog, getPageTemplateById, listTemplateTextFields } from "@/client/features/templates"
+import { clonePageTemplatePages, describePageTemplateCatalog, getPageTemplateById, listTemplateTextFields } from "@/client/features/page-templates"
 
 const originalEnv = { ...process.env }
 const originalFetch = global.fetch
-const catalog = describeTemplateCatalog()
+const catalog = describePageTemplateCatalog()
 const template = getPageTemplateById("landing-page-saas")!
 const draftTemplate = {
   name: template.metadata.name,
@@ -108,7 +108,7 @@ describe("prompt-assist routes", () => {
   })
 
   it("refine takes a page description and, with no providers, returns done", async () => {
-    const page = describePage(cloneTemplatePages(getPageTemplateById("landing-page-saas")!))
+    const page = describePage(clonePageTemplatePages(getPageTemplateById("landing-page-saas")!))
     const response = await refinePost(post("refine", "1.1.1.4", { prompt: "airy", page }))
     expect(await response.json()).toEqual({ satisfaction: null, done: true, edits: [] })
   })

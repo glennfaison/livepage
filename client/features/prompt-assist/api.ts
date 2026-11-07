@@ -11,7 +11,7 @@ import {
   type RefineResponse,
 } from "@/shared/features/prompt-assist"
 import type { AppNode } from "@/client/features/app-state"
-import { listTemplateTextFields, type PageTemplateDefinition } from "@/client/features/templates"
+import { listTemplateTextFields, type PageTemplateDefinition } from "@/client/features/page-templates"
 import { describePage } from "./page-description"
 
 export class RateLimitedError extends Error {

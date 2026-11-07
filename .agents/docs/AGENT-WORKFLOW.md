@@ -21,7 +21,7 @@ Work through these in order. Skip items that clearly do not apply to the change.
 - [ ] Restart the **dev server** before browser testing so the browser validates the current application state.
 - [ ] For editor controls, decorators, and other positioned UI: check **real geometry after scroll and resize**. Also check client-only and portal rendering for SSR and hydration safety. Passing TypeScript is not enough.
 - [ ] When merging a module's exports into a barrel, run the narrowest relevant Jest selector. Eager circular imports can throw at runtime even when `tsc` reports no errors.
-- [ ] **UI work is not done until you have seen it in a browser.** For Templates, judge the preview-mode render (`/try?template=<id>&mode=preview`), not the code or edit mode. Follow the [template skills](../skills/template-authoring/SKILL.md).
+- [ ] **UI work is not done until you have seen it in a browser.** For Templates, judge the preview-mode render (`/try?template=<id>&mode=preview`), not the code or edit mode. Follow the [template skills](../skills/page-template-authoring/SKILL.md).
 - [ ] Optionally run `npm run verify` (lint + full Jest suite + branch-name check) as a final local gate before opening the PR.
 
 ## Finish
