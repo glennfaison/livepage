@@ -28,6 +28,7 @@ export function getComponentTemplateRegistry(): ReadonlyArray<ComponentTemplateD
     // -> design-components barrel -> editor controls -> this module. A static import
     // of the validator evaluated the cycle before design-components/registry finished
     // initializing (TDZ on the registry export).
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { validateAndMigrateComponentTemplate } = require("@/client/features/templates/component-schema") as typeof import("@/client/features/templates/component-schema")
     resolvedRegistry.push(
       ...rawComponentTemplates.map((template) => validateAndMigrateComponentTemplate(template)),
