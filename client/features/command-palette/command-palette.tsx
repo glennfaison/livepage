@@ -43,9 +43,9 @@ import { getComponentInfo, getComponentsAllowedIn } from "@/client/features/desi
 import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { useDiscardConfirmation } from "@/client/features/page-builder/hooks"
 import { formatShortcut, KEYBOARD_SHORTCUTS } from "@/client/features/page-builder/keyboard-shortcuts"
-import type { TemplateDisplaySummary } from "@/client/features/templates"
+import type { PageTemplateDisplaySummary } from "@/client/features/page-templates"
 import type { ComponentCategory } from "@/client/features/types"
-import { TemplatePreviewModal } from "@/client/features/templates/template-preview-modal"
+import { PageTemplatePreviewModal } from "@/client/features/page-templates/page-template-preview-modal"
 import { validateHtmlExport, ValidationDialog, type ValidationResult } from "@/client/features/serializers"
 import { cn } from "@/client/lib/utils"
 
@@ -80,7 +80,7 @@ function getCategoryIcon(category: string): React.ReactNode {
   return iconMap[category] ?? <FileText className="h-4 w-4" />
 }
 
-function TemplateThumbnailIcon({ template }: Readonly<{ template: TemplateDisplaySummary }>) {
+function TemplateThumbnailIcon({ template }: Readonly<{ template: PageTemplateDisplaySummary }>) {
   const [imageError, setImageError] = useState(false)
   const fallbackIcon = getCategoryIcon(template.category)
 
@@ -126,8 +126,8 @@ export const CommandPalette: React.FC<
     state: AppState
     dispatch: React.Dispatch<AppAction>
     componentOperations: Operations
-    templates: ReadonlyArray<TemplateDisplaySummary>
-    onApplyTemplate: (templateId: string) => void
+    templates: ReadonlyArray<PageTemplateDisplaySummary>
+    onApplyPageTemplate: (templateId: string) => void
     onSaveAsJson: () => void
     onSaveAsShortcode: () => void
     onSaveAsHtml: () => void
@@ -155,7 +155,7 @@ export const CommandPalette: React.FC<
   dispatch,
   componentOperations,
   templates,
-  onApplyTemplate,
+  onApplyPageTemplate,
   onSaveAsJson,
   onSaveAsShortcode,
   onSaveAsHtml,
@@ -440,16 +440,16 @@ export const CommandPalette: React.FC<
       }
     })
 
-    const templateCommands: PaletteCommand[] = templates.map((template) => ({
+    const pageTemplateCommands: PaletteCommand[] = templates.map((template) => ({
       id: `page-template-${template.id}`,
-      group: "Templates",
+      group: "Page Templates",
       label: `Apply template: ${template.name}`,
       description: template.description,
       keywords: [template.category, ...template.tags, "preview"],
       icon: <TemplateThumbnailIcon template={template} />,
       onSelect: () => {
-        captureEvent("page_template_applied", { pageTemplateId: template.id, source: "command-palette" }); onApplyTemplate(template.id)
-        toast({ title: "Template applied", description: template.name })
+        captureEvent("page_template_applied", { pageTemplateId: template.id, source: "command-palette" }); onApplyPageTemplate(template.id)
+        toast({ title: "Page template applied", description: template.name })
       },
     }))
 
@@ -470,7 +470,7 @@ export const CommandPalette: React.FC<
           })
         : []
 
-    return [...actionCommands, ...insertCommands, ...templateCommands, ...jumpCommands]
+    return [...actionCommands, ...insertCommands, ...pageTemplateCommands, ...jumpCommands]
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable command list; callbacks are stable enough for palette rebuild
   }, [
     state.pageBuilderMode,
@@ -484,7 +484,7 @@ export const CommandPalette: React.FC<
     templates,
     dispatch,
     jumpToHistory,
-    onApplyTemplate,
+    onApplyPageTemplate,
     onDiscardChanges,
     onSaveAsHtml,
     onSaveAsSelfContainedHtml,
@@ -674,12 +674,12 @@ export const CommandPalette: React.FC<
         </div>
       </DialogContent>
 
-      <TemplatePreviewModal
+      <PageTemplatePreviewModal
         templateId={previewTemplateId ?? ""}
         isOpen={previewTemplateId !== null}
         onClose={() => setPreviewTemplateId(null)}
-        onApplyTemplate={(templateId) => {
-          onApplyTemplate(templateId)
+        onApplyPageTemplate={(templateId) => {
+          onApplyPageTemplate(templateId)
           onOpenChange(false)
         }}
       />

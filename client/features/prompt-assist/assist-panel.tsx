@@ -101,7 +101,7 @@ export function AssistPanel(props: Readonly<{ chat: PromptAssist; onClose: () =>
         })}
 
         {chat.needsManualPick && !chat.proposal && !chat.busy && (
-          <div className="flex flex-wrap gap-1" role="group" aria-label="Choose a template">
+          <div className="flex flex-wrap gap-1" role="group" aria-label="Choose a page template">
             {chat.catalog.map((entry) => (
               <button
                 key={entry.id}

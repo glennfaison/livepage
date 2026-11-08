@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { cloneTemplatePages, getPageTemplateById, listTemplateTextFields } from "@/client/features/templates"
+import { clonePageTemplatePages, getPageTemplateById, listTemplateTextFields } from "@/client/features/page-templates"
 
 import { mockAskJev, mockCompleteJson, mockIsJevConfigured, mockIsOpenAiConfigured, resetProviderMocks } from "../../utils/ai-provider-mocks"
 
@@ -48,7 +48,7 @@ describe("draftCopy", () => {
 })
 
 describe("refineDesign", () => {
-  const pages = cloneTemplatePages(template)
+  const pages = clonePageTemplatePages(template)
   const page = describePage(pages)
   const settable = () => "engineer-dark-shell"
 
