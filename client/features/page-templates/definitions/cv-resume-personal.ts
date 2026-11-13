@@ -30,7 +30,7 @@ const text = (
 ) => node(tag, id, attributes, [content])
 
 export const cvResumePersonalTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "cv-resume-personal-website",
   metadata: {
