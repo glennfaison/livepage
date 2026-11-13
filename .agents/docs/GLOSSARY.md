@@ -17,8 +17,13 @@ A registered page-builder component with metadata, default content, settings fie
 _Avoid_: Widget, block
 
 **Page template**:
+**Page template**:
 A versioned, whole-page starting point registered in the page-template catalog. It ships catalog metadata, an `AppNode` tree for `content.pages`, and optional data-mapping fields.
 _Avoid_: Template (unqualified), page starter, layout preset
+
+**Component template**:
+A reusable definition of a design component — its tag, default attributes, and child structure — stored in `client/features/component-templates/` and registered so it can be inserted into pages.
+_Avoid_: just "template" (ambiguous with page template), "design component" (the registered renderable component, distinct from its template definition)
 
 **App-state API**:
 The boundary for reading from and mutating app state through explicit commands and selectors.
@@ -85,7 +90,7 @@ The single question the chat asks when a request is too ambiguous for a page-tem
 _Avoid_: Follow-up, prompt
 
 **Copy draft**:
-Text for the free-text slots a template declares in its `dataMapping`, proposed from the request and editable before it is applied.
+Text for the free-text slots a page template declares in its `dataMapping`, proposed from the request and editable before it is applied.
 _Avoid_: Generated content, AI copy
 
 **Page description**:
