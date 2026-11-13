@@ -48,7 +48,7 @@ function menuItem(id: string, name: string, description: string, price: string):
 }
 
 export const neighborhoodCafePageTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "neighborhood-cafe-page",
   metadata: {

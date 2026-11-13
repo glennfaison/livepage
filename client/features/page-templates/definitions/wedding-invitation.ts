@@ -23,7 +23,7 @@ const text = (
 ) => node(tag, id, attributes, [content])
 
 export const weddingInvitationTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "wedding-invitation",
   metadata: {
