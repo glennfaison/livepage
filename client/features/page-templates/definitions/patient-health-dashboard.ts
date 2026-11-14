@@ -72,7 +72,7 @@ function labResultRow(id: string, name: string): TemplateNode {
 }
 
 export const patientHealthDashboardTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "patient-health-dashboard",
   metadata: {

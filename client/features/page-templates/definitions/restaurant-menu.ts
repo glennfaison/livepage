@@ -23,7 +23,7 @@ const text = (
 ) => node(tag, id, attributes, [content])
 
 export const restaurantMenuTemplate = {
-  schema: "livepage-template",
+  schema: "livepage-page-template",
   version: 1,
   id: "restaurant-menu",
   metadata: {

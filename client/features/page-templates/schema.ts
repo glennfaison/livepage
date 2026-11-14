@@ -18,7 +18,7 @@ const templateFieldMappingSchema = z.object({
 export const CURRENT_TEMPLATE_VERSION = 1
 
 export const pageTemplateDefinitionSchema = z.object({
-  schema: z.literal("livepage-template"),
+  schema: z.literal("livepage-page-template"),
   version: z.number().int().positive().max(CURRENT_TEMPLATE_VERSION),
   id: z.string().min(1),
   metadata: z.object({
