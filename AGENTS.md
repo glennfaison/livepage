@@ -97,8 +97,14 @@ with a `key=value` pair on a line of its own; leaving it out keeps the default.
 - `build_cmd`: npm run build
 - `git_hooks_path`: scripts/git-hooks
 - `repo_guidance`: AGENTS.md
-- `trusted_authors`: (none)
+- `trusted_authors`: kilo-code-bot[bot]
 - `max_depth`: 1
+
+`trusted_authors` is a comma-separated list of exact logins, written as the API
+shows them. The agent's GitHub App account is `kilo-code-bot[bot]`, with the
+`[bot]` suffix. `*` is not a wildcard and matches nothing. A scheduler prompt
+that passes its own `trusted_authors` replaces this value, so keep the two in
+step.
 
 The skills need an authenticated `gh` with write access, `jq` and Node.js.
 `gh` 2.72 or newer also reads the issues GitHub links to a PR; an older `gh`
