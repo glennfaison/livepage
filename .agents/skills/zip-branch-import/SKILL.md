@@ -46,8 +46,8 @@ A valid archive often looks like this:
 archive.zip
 ├── files/
 │   ├── farm-logistics-landing-page.patch
-│   ├── public/template-art/farm-logistics-hero.svg
-│   ├── public/template-art/farm-logistics-logo.svg
+│   ├── public/page-template-art/farm-logistics-hero.svg
+│   ├── public/page-template-art/farm-logistics-logo.svg
 │   └── ...
 ```
 

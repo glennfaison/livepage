@@ -31,7 +31,7 @@ export const contactAboutPageTemplate = {
     description: "A friendly about-and-contact page with quick facts, an FAQ, and clear ways to get in touch.",
     category: "Contact/About",
     tags: ["about", "contact", "faq", "personal website", "linkedin import"],
-    thumbnail: "/template-thumbnails/contact-about-page.svg",
+    thumbnail: "/page-template-thumbnails/contact-about-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

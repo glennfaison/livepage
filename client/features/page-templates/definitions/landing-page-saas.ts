@@ -31,7 +31,7 @@ export const landingPageSaasTemplate = {
     description: "A conversion-focused product landing page with a hero, feature highlights, pricing, and a final CTA.",
     category: "Landing Page",
     tags: ["landing page", "saas", "product", "marketing", "linkedin import"],
-    thumbnail: "/template-thumbnails/landing-page-saas.svg",
+    thumbnail: "/page-template-thumbnails/landing-page-saas.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

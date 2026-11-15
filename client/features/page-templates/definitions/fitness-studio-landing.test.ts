@@ -9,7 +9,7 @@ describe("fitness-studio-landing template", () => {
     expect(parsed.metadata.name).toBe("Fitness Studio")
     expect(parsed.metadata.category).toBe("Health & Fitness")
     expect(parsed.metadata.tags).toContain("fitness")
-    expect(parsed.metadata.thumbnail).toBe("/template-thumbnails/fitness-studio-landing.svg")
+    expect(parsed.metadata.thumbnail).toBe("/page-template-thumbnails/fitness-studio-landing.svg")
     expect(parsed.dataMapping.source).toBe("linkedin-profile")
     expect(parsed.dataMapping.fields.length).toBeGreaterThan(0)
     expect(parsed.content.pages.length).toBeGreaterThan(0)

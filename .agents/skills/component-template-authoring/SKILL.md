@@ -109,7 +109,7 @@ the data alone, add a rule to `__tests__/unit/component-templates/template-quali
 - Portraits: `public/avatars/<first-last>.svg`, 200x200 viewBox with a
   background rect, torso, neck, head, hair, eyes, and smile. Vary skin, hair,
   and background per person, and reuse a person's file wherever they reappear.
-- Illustrations and covers: `public/template-art/<template>-<subject>.svg`.
+- Illustrations and covers: `public/component-template-art/<template>-<subject>.svg`.
   Self-contained SVG (no external fonts or images), matching the slot's aspect
   ratio, using the template's accent colour.
 - Set `fallbackSrc` to the asset and leave `src` empty, as siblings do. Write

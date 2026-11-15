@@ -63,7 +63,7 @@ export const podcastShowPageTemplate = {
     description: "A warm, single-column show page with the host, latest episodes, subscribe links, and show stats.",
     category: "Podcast",
     tags: ["podcast", "audio", "episodes", "creator", "linkedin import"],
-    thumbnail: "/template-thumbnails/podcast-show-page.svg",
+    thumbnail: "/page-template-thumbnails/podcast-show-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

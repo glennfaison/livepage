@@ -133,7 +133,7 @@ describe("app-state selectors and serializers", () => {
           tag: "image",
           attributes: {
             src: "/avatars/ada.svg",
-            fallbackSrc: "/template-art/portrait.svg",
+            fallbackSrc: "/page-template-art/portrait.svg",
           },
           children: [],
         }],
@@ -141,7 +141,7 @@ describe("app-state selectors and serializers", () => {
     ] satisfies ReadonlyArray<AppNode>, { assetBaseUrl: "https://livepage.example" })
 
     expect(html).toContain('"src":"https://livepage.example/avatars/ada.svg"')
-    expect(html).toContain('"fallbackSrc":"https://livepage.example/template-art/portrait.svg"')
+    expect(html).toContain('"fallbackSrc":"https://livepage.example/page-template-art/portrait.svg"')
   })
 
   it("exports a browser runtime with the complete serialized tree", () => {

@@ -17,7 +17,7 @@ describe("restaurant-menu template", () => {
     expect(parsed.metadata.category).toBe("Restaurant")
     expect(parsed.metadata.tags).toContain("restaurant")
     expect(parsed.metadata.tags).toContain("menu")
-    expect(parsed.metadata.thumbnail).toBe("/template-thumbnails/restaurant-menu.svg")
+    expect(parsed.metadata.thumbnail).toBe("/page-template-thumbnails/restaurant-menu.svg")
     expect(parsed.dataMapping.source).toBe("linkedin-profile")
     expect(parsed.dataMapping.fields.length).toBeGreaterThan(0)
     expect(parsed.content.pages.length).toBeGreaterThan(0)

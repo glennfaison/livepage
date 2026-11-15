@@ -31,7 +31,7 @@ export const realEstatePropertyTemplate = {
     description: "A property listing page with a hero photo, price and key details, a photo gallery, a listing agent card, and a seller contact section.",
     category: "Real Estate",
     tags: ["real estate", "property", "listing", "home for sale", "linkedin import"],
-    thumbnail: "/template-thumbnails/real-estate-property.svg",
+    thumbnail: "/page-template-thumbnails/real-estate-property.svg",
   },
   dataMapping: {
     source: "linkedin-profile",
@@ -126,7 +126,7 @@ export const realEstatePropertyTemplate = {
             }),
             node("image", "property-hero-art", {
               src: "",
-              fallbackSrc: "/template-art/real-estate-property-hero.svg",
+              fallbackSrc: "/page-template-art/real-estate-property-hero.svg",
               alt: "Exterior of a Craftsman bungalow with a front porch and garden",
               width: "100%", height: "auto", objectFit: "cover", borderRadius: "24px",
               "custom-classes": "min-w-0 flex-1 basis-[22rem] shadow-[0_20px_45px_rgba(15,23,42,0.10)]",
@@ -176,10 +176,10 @@ export const realEstatePropertyTemplate = {
             "margin-left": "auto", "margin-right": "auto",
             "custom-classes": "mx-auto w-full max-w-5xl",
           }, [
-            node("image", "property-gallery-1", { src: "", fallbackSrc: "/template-art/real-estate-property-kitchen.svg", alt: "Renovated kitchen", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
-            node("image", "property-gallery-2", { src: "", fallbackSrc: "/template-art/real-estate-property-living.svg", alt: "Living room", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
-            node("image", "property-gallery-3", { src: "", fallbackSrc: "/template-art/real-estate-property-bedroom.svg", alt: "Primary bedroom", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
-            node("image", "property-gallery-4", { src: "", fallbackSrc: "/template-art/real-estate-property-garden.svg", alt: "Backyard garden", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
+            node("image", "property-gallery-1", { src: "", fallbackSrc: "/page-template-art/real-estate-property-kitchen.svg", alt: "Renovated kitchen", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
+            node("image", "property-gallery-2", { src: "", fallbackSrc: "/page-template-art/real-estate-property-living.svg", alt: "Living room", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
+            node("image", "property-gallery-3", { src: "", fallbackSrc: "/page-template-art/real-estate-property-bedroom.svg", alt: "Primary bedroom", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
+            node("image", "property-gallery-4", { src: "", fallbackSrc: "/page-template-art/real-estate-property-garden.svg", alt: "Backyard garden", width: "100%", height: "auto", objectFit: "cover", borderRadius: "16px", "custom-classes": "min-w-0 flex-1 basis-[16rem] aspect-[4/3]" }),
           ]),
           node("column", "property-agent-section", {
             id: "agent",
@@ -196,7 +196,7 @@ export const realEstatePropertyTemplate = {
               "child-sizing": "natural", "align-items": "start", "gap": "1.5rem",
               "custom-classes": "flex-wrap rounded-3xl border border-slate-200 bg-white shadow-sm",
             }, [
-              node("image", "property-agent-photo", { src: "", fallbackSrc: "/template-art/real-estate-property-agent.svg", alt: "Listing agent portrait", width: "96px", height: "96px", objectFit: "cover", borderRadius: "9999px", "custom-classes": "shrink-0" }),
+              node("image", "property-agent-photo", { src: "", fallbackSrc: "/page-template-art/real-estate-property-agent.svg", alt: "Listing agent portrait", width: "96px", height: "96px", objectFit: "cover", borderRadius: "9999px", "custom-classes": "shrink-0" }),
               node("column", "property-agent-info", { gap: "0.5rem", "padding-top": "0.5rem" }, [
                 text("header3", "property-agent-name", "Jordan Ellis", { "custom-classes": "py-0 text-lg font-semibold text-slate-900" }),
                 text("paragraph", "property-agent-role", "Willow & Vine Realty", { "custom-classes": "py-0 text-sm text-slate-600" }),
