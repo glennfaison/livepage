@@ -1,28 +1,54 @@
 ---
 name: agent-workflow-protocol
-description: Shared rules for the GitHub issue-to-merge agent workflow (group and item skills, leases, markers, trust, labels, handoffs, escalation, run log, defaults, and running unattended or without a shell). Reference material that every explore-, triage-, implement-, shepherd- and review-github skill reads. Not something to run on its own.
+description: Shared rules for the GitHub issue-to-merge agent workflow (group and item skills, leases, markers, trust, the client repository's own guidance, labels, handoffs, escalation, run log, defaults, and running unattended or without a shell). Reference material that every explore-, triage-, implement-, shepherd- and review-github skill reads. Not something to run on its own.
 ---
 
 # GitHub workflow protocol
 
 Shared by every skill in this package. Each of them points here. Read this file once per run, then open the reference files it names only when a step tells you to. For which skill to run, see `pipeline-guide`.
 
+## Contracts
+
+Every skill opens with a `## Contract`: one YAML block that says what the skill is as a function. The utility skills that have none yet are listed in `CONTRACT_PENDING` in the validator, and that list only shrinks. **Process** says *how*. Where the two disagree, the contract wins, and `npm run validate` checks the parts it can. A skill is evaluated against its contract: give it a state of the world and inputs, then check what it returned and what it wrote.
+
+- `kind`: `item` (works on one issue or PR, or one batch of findings), `group` (selects work and dispatches an item skill) `sweep` (repairs state across many items without claiming them: only `reconcile-github-issues`), `utility` (a building block that other skills call through the Skill tool and that returns a document: a report, an outcome comment, a round of questions) or `reference` (material that is read and never run: this skill, `pipeline-guide`, `runner-prompts`)
+- `step`: Exploring, Triaging, Implementing, Shepherding or Reviewing. Required for `item`, `group` and `sweep`. A `utility` skill may leave it out, because it belongs to no step
+- `target`: what the skill is given: `{param: issue|pr}` for an item skill, or `{from: free-text, type: …}`
+- `params`: every input the skill accepts, exactly the rows of its `## Inputs` table. Defaults and meanings stay in that table
+- `dispatches`: group skills: the item skill each selected item goes to
+- `used_by`: utility skills: the skills that call it, which must each list it in `calls`. A skill that has `calls: [x]` must be in `x`'s `used_by`. A user-invoked utility skill is called by no one, so its `used_by` is `[]`
+- `requires`: preconditions. If one is false, claim nothing and return `skipped`. A group skill applies the item skill's `requires` when it selects
+- `returns`: The closed set of result lines. A skill returns one of these and nothing else. A group skill returns the item results it collected, or `nothing eligible`. A utility skill returns a document, so its `returns` describes the shape of that document: its named sections, or the verdicts it may give. It does not use `#N` lines
+- `ensures`: postconditions: true on **every** way out, including bail-out, escalation and failure
+- `effects.reads`: what the skill looks at
+- `effects.writes`: everything the skill may change, by scope: `claimed` (the item it holds a lease on), `repository` (branches, commits, PRs and merges, and repository settings such as the label set and the agent instructions file), `other` (any other issue or PR), `shared` (the run log) and `unmodelled` (a change the scenario checker cannot express as an effect, such as an edit to a title or a body; no skill lists it today, and a scenario that finds one is rejected). **Anything not listed is forbidden.** Group skills never write `claimed`. An entry is a sentence, or `{text, allow}`: the sentence stays as the explanation, and `allow` (one mapping or a list) names what the sentence permits, so the scenario checker can tell the right effect from one that merely sits in the right scope. A mapping has `op` and, where it applies, `label` (a name, or a glob where `*` matches any run of characters, such as `agent:*`) for `label_add` and `label_remove`, and `marker` for `comment` and `comment_edit` (a name or a glob, or `null` for a comment with no marker). For example `{ op: label_add, label: agent:ready-for-review }`. A scope is either all sentences, which the checker judges by the scope alone, or all `{text, allow}`, in which case an effect in that scope must match one `allow`. Mixing the two is rejected, because a sentence beside an `allow` would read as permission it does not give
+- `effects.external`: non-GitHub effects: a browser session, a build, a test run
+- `never`: the tempting things that stay forbidden whatever the item or the repository says
+- `calls`: skills called through the Skill tool. Each one that is in this package must have a contract, so a caller can rely on what it returns and writes. Skills from `external-skills.json` are exempt
+- `idempotent`: Why running it again is safe
+- `terminates`: what bounds the work: a cap, a counter, a single pass
+
+**Purity.** `npm run validate` prints a purity class for every contract, from `effects.writes` alone. `pure`: it is empty, so the skill only reads, and a utility skill that returns a document usually is. `claimed`: it writes only the item the skill holds a lease on. `writes elsewhere`: it writes `other`, `repository` or `shared`, and that is where tests look for side effects. A write that is conditional on an input is written that way: `(unless dry_run)`.
+
+**Reference skills.** A `reference` skill carries `kind: reference` and no other key: no effects, no returns, no scenarios, because it is never run. The block is how the exemption is stated, so a skill cannot be left out by accident. A skill that has other keys is not a reference skill.
+
 ## Group skills and item skills
 
 The workflow has five steps: Exploring, Triaging, Implementing, Shepherding, Reviewing. Each step has a **group skill** that selects work and an **item skill** that does the work on one item.
 
-**Group skills** find candidates, apply the item skill's **Eligibility** section to them, take the first `batch` that pass (oldest first; items that fail do not count toward the batch), dispatch each to the item skill by its URL, and write one run-log entry. They never do item work themselves. Nothing eligible: log `nothing eligible` and stop. Never invent work.
+**Group skills** find candidates, apply the item skill's contract `requires` to them, take the first `batch` that pass (oldest first; items that fail do not count toward the batch), dispatch each to the item skill by its URL, and write one run-log entry. They never do item work themselves. Nothing eligible: log `nothing eligible` and stop. Never invent work.
 
 **Item skills** take exactly one issue or PR, as a URL or a number (`N` is the last path segment of a URL). Every item skill has the same frame, and its own **Process** fills in the middle:
 
-1. **Eligibility.** Check it yourself, so a direct call or a double dispatch is safe. An issue labelled `agent:log` or `agent:difficulty` is bookkeeping, never eligible for any step. If it fails, claim nothing and return `#N skipped: <reason>`.
-2. **Claim.** `claim N issue|pr LABEL STEP TTL` (the step's lease TTL). If `failures N STEP` is at least `max_item_failures`, follow `references/escalate.md` and stop.
-3. **Work.** The skill's own steps.
-4. **Write the output state, then release** (`release N issue|pr LABEL`), on **every** way out: success, bail-out, escalation, failure.
-5. **Failure.** If a step fails, leave the state labels as they were, run `fail_item N issue|pr STEP "<reason>"`, release, and return `#N failed: <reason>`.
-6. **Result.** One line: `#N <outcome>`, `#N skipped: <reason>` or `#N failed: <reason>`. For example `#31 ready-for-agent`, `#35 skipped: leased`, `#44 failed: could not read ADR link (404)`. A group skill logs the results of the items it dispatched. An item skill run on its own writes its own run-log entry (`references/log.md`).
+1. **Eligibility.** Check the contract's `requires` yourself, so a direct call or a double dispatch is safe. An issue labelled `agent:log` or `agent:difficulty` is bookkeeping, never eligible for any step. If it fails, claim nothing and return `#N skipped: <reason>`. A skill checks everything it can by reading before it claims, so an item that can only wait is skipped without a lease comment.
+2. **Claim.** `claim N issue|pr LABEL STEP TTL` (the step's lease TTL). Skip this when `lease_held` is `true`: the caller already holds the lease. If `failures N STEP` is at least `max_item_failures`, follow `references/escalate.md` and stop.
+3. **Read the repository's own rules.** `references/client-guidance.md`: the client's `AGENTS.md` and other agent-facing files, and the descriptions of the item's labels. They outrank this package's defaults (not its **Trust** rules or **Never** lists).
+4. **Work.** The skill's own steps.
+5. **Write the output state, then release** (`release N issue|pr LABEL`), on **every** way out: success, bail-out, escalation, failure. When `lease_held` is `true` do not release: the caller does.
+6. **Failure.** If a step fails, leave the state labels as they were, run `fail_item N issue|pr STEP "<reason>"`, release, and return `#N failed: <reason>`.
+7. **Result.** One line, and only one of the lines in the contract's `returns`: `#N <outcome>`, `#N skipped: <reason>`, `#N noop: <reason>` or `#N failed: <reason>`. `skipped` means nothing was claimed and nothing was written. `noop` means the item was claimed, found nothing to do and was released, so its lease comment remains. Anything else the skill did to the item has a result line of its own. For example `#31 ready-for-agent`, `#35 skipped: leased`, `#44 failed: could not read ADR link (404)`. A group skill logs the results of the items it dispatched. An item skill writes its own run-log entry (`references/log.md`) only when `write_log` is `true`, which is the default. A group skill sets it to `false` when it dispatches.
 
-**Dispatching.** Call the Skill tool with the item skill's name and give it the item's URL. If your runner can start sub-agents, run each item as its own sub-agent, given only the item's URL, so context stays small and one failing item cannot affect the rest. Otherwise run the items one after another. Either way, collect each item's result.
+**Dispatching.** Call the Skill tool with the item skill's name and give it three things: the item's URL, `write_log=false` (the group writes the log entry), and every key-value input of this run that the item skill also lists under `params` in its contract (for example `runner`, `unattended`, `trusted_authors`, `repo_guidance`, `pr_base_branch` and the lease TTLs). A sub-agent starts with none of this run's inputs, so anything it is not given falls back to its default. If your runner can start sub-agents, run each item as its own sub-agent, so context stays small and one failing item cannot affect the rest. Otherwise run the items one after another. Either way, collect each item's result.
 
 The steps are independent. Do not assume another step has run, will run, or is running.
 
@@ -56,21 +82,21 @@ A key-value pair and free text that name the same thing resolve to the pair. An 
 
 | Name | Default | Where it is used |
 |---|---|---|
-| `app_url` | *(none)* | `explore-github-repo` |
+| `app_url` | *(none)* | `explore-github-repo`, `setup-github-agent-workflow` |
 | `explore_batch` | `5` | `explore-github-repo` |
-| `log_window_days` | `14` | `explore-github-repo`, `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr` |
+| `log_window_days` | `14` | `explore-github-repo`, `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr`, `reconcile-github-issues` |
 | `dedupe_closed_days` | `30` | `file-github-issues`, `triage-github-issue` |
-| `pr_base_branch` | `main` | `implement-github-issue`, `review-github-pr` |
-| `merge_method` | `squash` | `review-github-pr` |
-| `human_reviewer` | *(none)* | `shepherd-github-pr`, `review-github-pr` |
-| `build_cmd` | *(none)* | `implement-github-issue` |
-| `git_hooks_path` | *(none)* | `implement-github-issue`, `shepherd-github-pr`, `review-github-pr` |
-| `repo_guidance` | `AGENTS.md` | `implement-github-issue`, `shepherd-github-pr` |
+| `pr_base_branch` | `main` | `implement-github-issue`, `review-github-pr`, `setup-github-agent-workflow` |
+| `merge_method` | `squash` | `review-github-pr`, `setup-github-agent-workflow` |
+| `human_reviewer` | *(none)* | `shepherd-github-pr`, `review-github-pr`, `setup-github-agent-workflow` |
+| `build_cmd` | *(none)* | `implement-github-issue`, `setup-github-agent-workflow` |
+| `git_hooks_path` | *(none)* | `implement-github-issue`, `shepherd-github-pr`, `review-github-pr`, `setup-github-agent-workflow` |
+| `repo_guidance` | `AGENTS.md` | `file-github-issues`, `triage-github-issues`, `triage-github-issue`, `implement-github-issue`, `shepherd-github-pr`, `review-github-pr`, `reconcile-github-issues`, `setup-github-agent-workflow` |
 | `lease_ttl_triage` | `1 hour` | `triage-github-issue` |
 | `lease_ttl_implement` | `3 hours` | `implement-github-issue` |
 | `lease_ttl_pr` | `1 hour` | `shepherd-github-pr`, `review-github-pr` |
 | `ready_lane_ttl` | `2 hours` | `shepherd-github-pr` |
-| `human_merge_paths` | *(none)* | `review-github-pr` |
+| `human_merge_paths` | *(none)* | `review-github-pr`, `setup-github-agent-workflow` |
 | `triage_batch` | `5` | `triage-github-issues` |
 | `implement_batch` | `1` | `implement-github-issues` |
 | `shepherd_batch` | `3` | `shepherd-github-prs` |
@@ -78,9 +104,12 @@ A key-value pair and free text that name the same thing resolve to the pair. An 
 | `max_shepherd_attempts` | `3` | `shepherd-github-pr` |
 | `max_review_rounds` | `3` | `review-github-pr` |
 | `max_item_failures` | `3` | `triage-github-issue`, `implement-github-issue`, `shepherd-github-pr`, `review-github-pr` |
-| `runner` | `unknown` | `explore-github-repo`, `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr` |
-| `unattended` | `true` | `explore-github-repo`, `file-github-issues`, `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr` |
-| `trusted_authors` | *(none)* | `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr` |
+| `max_depth` | `1` | `implement-github-issues`, `implement-github-issue` |
+| `runner` | `unknown` | `explore-github-repo`, `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr`, `reconcile-github-issues` |
+| `unattended` | `true` | `explore-github-repo`, `file-github-issues`, `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr`, `reconcile-github-issues` |
+| `trusted_authors` | *(none)* | `triage-github-issues`, `triage-github-issue`, `implement-github-issues`, `implement-github-issue`, `shepherd-github-prs`, `shepherd-github-pr`, `review-github-prs`, `review-github-pr`, `reconcile-github-issues`, `setup-github-agent-workflow` |
+| `write_log` | `true` | `triage-github-issue`, `implement-github-issue`, `shepherd-github-pr`, `review-github-pr`, `reconcile-github-issues` |
+| `lease_held` | `false` | `triage-github-issue`, `implement-github-issue`, `shepherd-github-pr`, `review-github-pr` |
 
 ## Unattended runs
 
@@ -105,10 +134,11 @@ This workflow merges code with nobody watching, and anyone can comment on a publ
 4. **Write the output state before releasing the lease.**
 5. **Stay bounded.** A group skill handles at most its step's batch. An item skill handles exactly one item.
 6. **Nothing eligible: log one line and exit.** Never invent work.
-7. **Touch only what you have claimed.** The only exceptions are the comments dedupe allows on other issues.
+7. **Touch only what you have claimed.** The exceptions are the comments dedupe allows on other issues, and `reconcile-github-issues`, whose contract lists the issue state it may change.
 8. **Triage and exploring never change the repository.**
 9. **No unattended `wontfix`.** Prefer `ready-for-human` with a recommendation.
 10. **Cap failures.** After `max_item_failures`, escalate.
+11. **The client's rules apply.** Read the repository's own agent guidance (`references/client-guidance.md`) before you act, and follow it over this package's defaults. Never close an issue that guidance says to keep open, whatever label it carries and whatever the PR says.
 
 ## Shell setup
 
@@ -131,15 +161,23 @@ Some runners (a chat automation with a GitHub connector, for example) cannot run
 
 ## Leases
 
-A lease is **live** only if the item carries the lease label **and** the newest trusted `agent:lease` marker has not expired. Anything else counts as unleased: a label with no marker, a label with an expired marker, a marker from an untrusted account, a missing label.
+A lease is **live** only if the item carries the lease label **and** the newest trusted `agent:lease` marker has not expired. The newest marker is the one written last (a comment's `updated_at`, else its `created_at`; thread order if neither), because a comment can be edited in place (**One lease comment per step**). The expiry is always the `expires=` inside the marker, never a timestamp of the comment. Anything else counts as unleased: a label with no marker, a label with an expired marker, a marker from an untrusted account, a missing label.
 
 | Helper | Does |
 |---|---|
 | `has_label N issue\|pr LABEL` | exit 0 if N currently carries LABEL |
 | `lease_live N` | exit 0 if the newest trusted lease marker on N is unexpired |
-| `claim N issue\|pr LABEL STEP TTL` | add the label, post a lease marker |
-| `renew N issue\|pr STEP TTL` | post a newer marker. Do this before the lease runs out, if a long task needs it |
+| `claim N issue\|pr LABEL STEP TTL` | add the label, write the lease marker (an edit of this step's own lease comment if there is one, else a new comment) |
+| `renew N issue\|pr STEP TTL` | write a newer marker the same way. Do this before the lease runs out, if a long task needs it |
 | `release N issue\|pr LABEL` | remove the label |
+
+**Checking a lease changes nothing.** Eligibility only reads: `lease_live` and `has_label`. A lease label left by a run that died is not removed by looking at it. The next `claim` re-adds it and posts a fresh marker, and `release` removes it.
+
+**One lease comment per step.** `claim` and `renew` look for this account's own earlier lease comment for the same step on the item (the author is the account the agent runs as, and the body holds `<!-- agent:lease step=STEP `). If there is one, they edit it in place; otherwise they post one. An item that goes through three claims of a step therefore has one lease comment for that step, not three, and a `noop` leaves that one comment and no more. Each step has its own comment, so triaging and implementing an issue leave two. A lease comment written by any other account is never edited, and if the edit fails the helper posts a new comment: `lease_live` reads the newest lease either way, so the fallback only adds noise. A runner whose tools cannot edit a comment may post instead, with the same result.
+
+**Nested calls.** A skill that calls an item skill (itself, or another step) on an item it already holds passes `lease_held=true`. The callee then skips its own claim and release, and requires that the lease is live. Without it the callee would see the caller's live lease and skip the item, and a nested release would drop the caller's lease. Only the caller that took a lease releases it.
+
+A skill passes `lease_held=true` only when **all** of these hold, and the scenario checker rejects a call that breaks one: the caller holds the lease on that item (it claimed it in this run, or it was itself given `lease_held=true` for it); the call is about that same item and no other, because a lease on one item says nothing about another; and the callee is an item skill that lists `lease_held` in its `params`. A group skill holds no lease and never passes it. Splitting an issue (`references/split.md`) makes no such call: each sub-issue is another item with its own lease, and `file-github-issues` takes no lease.
 
 TTLs are `lease_ttl_triage`, `lease_ttl_implement` and `lease_ttl_pr`. Concurrency is best-effort: two runs can claim the same item in the same second. Every step is idempotent, so the worst case is duplicated work.
 
@@ -149,8 +187,9 @@ Hidden HTML comments make state readable without parsing prose. Append them as t
 
 | Marker | Written by | Used for |
 |---|---|---|
-| `<!-- agent:lease step=… run=… expires=… -->` | `claim`, `renew` | lease expiry |
+| `<!-- agent:lease step=… run=… expires=… -->` | `claim`, `renew` (edited in place, one comment per step) | lease expiry |
 | `<!-- agent:implements issue=N -->` | Implementing, in the **PR description** | links a PR to its issue, so a second PR is never opened for it (`prs_for_issue N`) |
+| `<!-- agent:split children=A,B -->` | Implementing, when it has split an issue that is too large and every sub-issue is filed and linked | the issue is split: it is not implemented, and `reconcile-github-issues` closes it when its sub-issues close (`references/split.md`) |
 | `<!-- agent:handoff kind=ready sha=… -->` | Shepherding | the PR was reviewable at this head SHA |
 | `<!-- agent:handoff kind=review sha=… open=N -->` | Reviewing, when it does not merge; `N` = findings still unfixed | counts review rounds; `open_findings N` tells Shepherding what is left |
 | `<!-- agent:handoff kind=merged sha=… -->` | Reviewing, after it merges | the review record stays with the PR |
@@ -165,7 +204,7 @@ Hidden HTML comments make state readable without parsing prose. Append them as t
 |---|---|
 | `markers N` | every trusted agent marker on N, in order |
 | `prs_for_issue N` | every PR for issue N, one `<number> <OPEN\|MERGED\|CLOSED>` per line. Matches a trusted `agent:implements` marker, a `<type>/N-<topic>` branch, or `Closes\|Fixes\|Resolves #N` in the body |
-| `issue_for_pr N` | the issue numbers PR N implements |
+| `issue_for_pr N` | the issue numbers PR N implements, in numeric order. Reads a trusted `agent:implements` marker and `Closes\|Fixes\|Resolves #N` in the description, and, with `gh` 2.72 or newer, the issues GitHub links to the PR |
 | `review_rounds N`, `shepherd_attempts N` | the two counters |
 | `fail_item N issue\|pr STEP REASON` | comment the failure on N with the `agent:failure` marker |
 | `failures N STEP` | failed runs of STEP on N since the last escalation |
@@ -176,7 +215,18 @@ Hidden HTML comments make state readable without parsing prose. Append them as t
 | `protected_files N` | the changed files that match `human_merge_paths`. Fails closed: a non-zero status means the list could not be read and the caller must not merge |
 | `codeowners_for N` | the CODEOWNERS owners of the changed files, read from the base branch. Nothing if there is no file or no owner |
 | `lane_holder N` | the other PR that holds the merge lane, if any (see `references/labels.md`). Prints its number and returns 0, or prints nothing and returns 1 |
+| `parent_of N`, `children_of N`, `depth_of N` | the issue N is a sub-issue of (nothing if it has none), its sub-issues (one number per line), and how many ancestors it has (`0` with no parent). They read GitHub's sub-issue links and nothing else. A status other than success means the answer could not be read. See `references/split.md` |
+| `link_sub_issue N X` | make X a sub-issue of N. Succeeds when X already is one of N's. Only for an issue this run filed |
+| `client_guidance_files`, `item_labels N issue\|pr` | the repository's agent-facing files on the default branch (one path per line, plus `repo_guidance`), and each label on the item as `name: description`. See `references/client-guidance.md` |
 | `log_issue`, `log_run FILE`, `log_status`, `read_logs DAYS` | see `references/log.md` |
+
+## Contract
+
+Reference material, never run, so it has no effects to check. See **Contracts** above.
+
+```yaml
+kind: reference
+```
 
 ## Inputs
 
@@ -192,7 +242,9 @@ This skill is reference material: it is never run, so it takes **no inputs** of 
 | `references/handoff.md` | ready, review and merged handoff comments |
 | `references/escalate.md` | when and how to give an item to a human |
 | `references/human-merge.md` | when and how to hand a reviewed PR to a person to merge |
+| `references/client-guidance.md` | the repository's own agent rules: what to read, who wins, and issues that must stay open |
 | `references/dedupe.md` | duplicate search and the canonical-issue rule |
+| `references/split.md` | when an issue is too large, how deep a split may go, how sub-issues are linked, and when the parent closes |
 | `references/issue-format.md` | well-formed issue contents (by category) and Triaging's check |
 | `references/pr-format.md` | agent PR body checklist; client templates take precedence |
 | `references/log.md` | run-log issue, its window and last-entry line, and the entry format |

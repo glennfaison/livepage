@@ -9,6 +9,38 @@ Pick the `ready-for-agent` issues that an agent can start now, and give each to 
 
 **References:** call the Skill tool with `agent-workflow-protocol`. In that skill's directory, open `references/labels.md` before you read labels and `references/log.md` when you write the log entry.
 
+## Contract
+
+See **Contracts** in the protocol for what each key means.
+
+```yaml
+kind: group
+step: Implementing
+params: [implement_batch, max_depth, runner, log_window_days, unattended, trusted_authors]
+dispatches: implement-github-issue
+requires:
+  - "None: always runnable."
+returns:
+  - "The Result line of each dispatched issue, in dispatch order."
+  - "nothing eligible"
+ensures:
+  - "At most implement_batch issues were dispatched, oldest first, each one passing implement-github-issue's requires. Issues labelled agent:stuck were not candidates."
+  - "Each dispatched item was given `write_log=false`, and every input of this run that it also lists in `params`."
+  - "One run-log entry exists."
+effects:
+  reads: [open issues labelled ready-for-agent]
+  writes:
+    shared:
+      - text: "One run-log entry."
+        allow: { op: comment, marker: null }
+never:
+  - "Implement an issue itself, or claim one. Only implement-github-issue claims."
+  - "Wait for checks or fix CI. shepherd-github-prs does that."
+calls: []
+idempotent: "Dispatch is idempotent because implement-github-issue is."
+terminates: "One pass, bounded by implement_batch."
+```
+
 ## Inputs
 
 **Free text.** Any prose. This skill needs nothing from it: a repository is the only subject, and it is already checked out and authenticated.
@@ -18,6 +50,7 @@ Pick the `ready-for-agent` issues that an agent can start now, and give each to 
 | Input | Default | What it does |
 |---|---|---|
 | `implement_batch` | `1` | The most issues this run dispatches before it stops |
+| `max_depth` | `1` | How deep a chain of splits may go. Passed to `implement-github-issue`, which splits an issue that is too large into sub-issues only while it has fewer ancestors than this. `0` turns splitting off |
 | `runner` | `unknown` | Name recorded in the run id and the run log |
 | `log_window_days` | `14` | Days one run-log issue is appended to before a new one starts |
 | `unattended` | `true` | `true`: no human is present, so never ask (see **Unattended runs** in the protocol). `false`: a human may be asked |
@@ -36,9 +69,4 @@ Pick the `ready-for-agent` issues that an agent can start now, and give each to 
            | {number, url, title, createdAt, labels: names} ] | sort_by(.createdAt)'
    ```
 
-2. **Select, dispatch and log**, as **Group skills and item skills** in the protocol describes: `implement-github-issue`'s **Eligibility**, the first `$implement_batch` that pass, one dispatch per `url`.
-
-## Never
-
-- Implement an issue yourself, or claim one. Only `implement-github-issue` claims.
-- Wait for checks or fix CI. `shepherd-github-prs` does that.
+2. **Select, dispatch and log**, as **Group skills and item skills** in the protocol describes: `implement-github-issue`'s `requires`, the first `$implement_batch` that pass, one dispatch per `url`.
