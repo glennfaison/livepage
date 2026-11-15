@@ -7,6 +7,50 @@ description: Explore a repository's live app and its codebase, rank what you fin
 
 Explore the live app and the code, rank findings, and file the best as issues through `file-github-issues`.
 
+## Contract
+
+See **Contracts** in the protocol for what each key means.
+
+```yaml
+kind: group
+step: Exploring
+target: { from: free-text, type: repository }
+params: [app_url, explore_batch, log_window_days, dry_run, runner, unattended]
+dispatches: file-github-issues
+requires:
+  - "None: always runnable. A missing browser stack degrades the run (HTTP, route and SSR probes only) instead of stopping it."
+returns:
+  - "<N> filed, <M> commented, <K> dropped"
+ensures:
+  - "No label was applied, removed or changed."
+  - "At most explore_batch issues were filed; only `filed #N` counts toward the cap."
+  - "One run-log entry exists for the run: YAML header, outcome, at most 20 deferred candidates (each with an impact x confidence line), and Problems tagged `degraded:` or `repo-state:` where they apply."
+  - "The choice of live-app, code-only or degraded exploring is recorded in the log."
+  - "Each high-severity regression or data-loss risk found was filed or deferred with a reason."
+  - "With dry_run=true: the ranked list and the log entry exist, nothing was filed."
+effects:
+  reads: [the live app (when app_url is set and the browser stack is present), the code, open issues, recent Exploring log entries]
+  writes:
+    other:
+      - text: "New unlabelled issues, and evidence comments on duplicates, through file-github-issues (unless dry_run)."
+        allow:
+          - { op: create_issue, labels: [] }
+          - { op: comment, marker: null }
+    shared:
+      - text: "One run-log entry."
+        allow: { op: comment, marker: null }
+  external: ["A browser session against app_url, when in scope."]
+never:
+  - "Apply, remove or change any label."
+  - "File more than explore_batch issues."
+  - "Comment on, close or edit an issue other than the evidence comments file-github-issues adds."
+  - "Ask the user questions while unattended is true."
+  - "Hard-fail the whole run solely because the browser stack is missing when cheap probes remain possible."
+calls: []
+idempotent: "A finding that was already filed is found again by file-github-issues' duplicate check, so a second run comments instead of filing."
+terminates: "One pass. Bounded by explore_batch and a deferred list of at most 20."
+```
+
 ## Inputs
 
 **Free text.** Repository URL or `owner/repo`. Optional live app URL if not passed as a key-value pair.
@@ -16,7 +60,7 @@ Explore the live app and the code, rank findings, and file the best as issues th
 | Input | Default | What it does |
 |---|---|---|
 | `app_url` | *(none)* | Live app to browse |
-| `explore_batch` | `5` (or `3` when open backlog is large) | Max new issues to file in one run |
+| `explore_batch` | `5` | Max new issues to file in one run. Passed to `file-github-issues` as `limit` |
 | `log_window_days` | `14` | Days one run-log issue is appended to before a new one starts. Also how far back this step reads the log |
 | `dry_run` | `false` | When true, produce the ranked list + log entry but do not file |
 | `runner` | `unknown` | Name recorded in the run id and the run log |
@@ -39,11 +83,11 @@ Explore the live app and the code, rank findings, and file the best as issues th
    Skills-only or code-only Exploring needs no browser stack.
 
 2. **Read recent Exploring log entries** (`log_window_days`). Note recurring problems and deferred items.
-3. **Sample the backlog.** If open issues are already dense in an area, prefer commenting over near-duplicate filings. Default `explore_batch` to 3 when the open backlog is large.
+3. **Sample the backlog.** If open issues are already dense in an area, prefer commenting over near-duplicate filings.
 4. **Explore the live app** when `app_url` is set and the preflight did not put the run in degraded mode. Must-probe for a page-builder style app: empty state, add component, templates, command palette, mode switch, undo/redo appearance, mobile viewport, dark mode, export. Capture 1–2 annotated screenshots only for top filing candidates. If the live app is slow or flaky, switch to code-only and record that under **Problems**. In degraded mode, limit yourself to HTTP/route/SSR probes and say so in the log.
 5. **Explore the code** for matching rough edges, missing coverage, and debt.
 6. **Rank** by impact × confidence. Cap deferred list at 20 with one-line scores.
-7. **File (or dry-run).** Hand candidates from the top to `file-github-issues` (batch preferred). Count only `filed #N` toward the cap.
+7. **File (or dry-run).** Call `file-github-issues` once with the ranked candidates, best first, and `limit=$explore_batch`. Give it this run's `dry_run`, `unattended` and `run_id` too. Only `filed #N` counts toward the cap, so it stops filing at the limit and returns `deferred: over limit` for the rest. Put those on the deferred list.
 8. **Log.** One comment on the current log issue. Include filed, commented, dropped, and **Deferred candidates** (at most 20, each with a one-line impact × confidence score). Any preflight degradation belongs under **Problems** with a `degraded:` or `repo-state:` tag.
 
 ## Log format (minimum)
@@ -69,20 +113,3 @@ problems_count: <n>
 ```
 
 Difficulties stay in this entry; there is no separate difficulty issue. One log issue covers `log_window_days` (two weeks by default).
-
-## Success criteria
-
-A good run, even with zero filings:
-
-- Clear log entry with YAML header, outcome, and deferred list
-- High-severity regressions or data-loss risks were either filed or explicitly deferred with reason
-- Live-app vs code-only (or degraded) decision is recorded
-- No labels applied, no destructive actions
-
-## Never
-
-- Apply, remove or change any label
-- File more than `$explore_batch` issues
-- Comment on, close or edit an issue other than the evidence comments `file-github-issues` adds
-- Ask the user questions while `unattended` is `true`
-- Hard-fail the whole run solely because the browser stack is missing when cheap probes remain possible

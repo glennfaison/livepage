@@ -12,6 +12,8 @@ Search all of these using two or three distinctive keywords from the title and b
 
 Ignore issues labelled `agent:log` or `agent:difficulty`.
 
+A sub-issue and its parent are never duplicates of each other, and neither are two sub-issues of one parent (`parent_of`, `children_of`; see `references/split.md`). Link them as **Related but different**. Otherwise Triaging would close a slice as a duplicate of the issue it was cut from.
+
 ## Decide
 
 | Finding | Exploring does | Triaging does |
@@ -26,6 +28,7 @@ Ignore issues labelled `agent:log` or `agent:difficulty`.
 
 When two open issues are the same problem, **the lowest issue number is canonical.**
 
+- If your claimed issue is **keep-open** (`references/client-guidance.md`): never close it. Link the two issues in a comment on each and set `ready-for-human`.
 - If your claimed issue is the **higher** number: comment on the canonical issue ("Also reported in #M: <only details that are new>"). Do not edit its description. Then close your issue with `gh issue close M --reason "not planned" --comment "Duplicate of #N"` and finish.
 - If your claimed issue is the **lower** number: only link the other one in a comment. Its own triager will close it.
 

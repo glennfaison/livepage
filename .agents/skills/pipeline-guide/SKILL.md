@@ -19,18 +19,21 @@ Call a skill by its name through the Skill tool (or `/name` where your runner ha
 | `runner-prompts` | user-invoked | You need the exact prompt to give a scheduler or runner. Prints one block per skill, listing every input with its default |
 | `explore-github-repo` | group, Exploring | Finding new work: explore the live app and the code, rank findings, file the best |
 | `file-github-issues` | item, Exploring | Filing one finding or a batch as issues after a duplicate check. Supports `dry_run`. Takes findings, not an existing issue, so it is plural |
-| `triage-github-issues` | group, Triaging | Working through the open backlog: tidy finished issues, dispatch each untriaged one |
+| `triage-github-issues` | group, Triaging | Working through the open backlog: reconcile issue state, then dispatch each untriaged issue |
 | `triage-github-issue` | item, Triaging | One specific issue needs to become `ready-for-agent`, `ready-for-human` or `needs-info` |
+| `reconcile-github-issues` | sweep, Triaging | Issue state has drifted from the PRs: close shipped issues, send abandoned ones to a human, repair labels, clear stale leases |
 | `implement-github-issues` | group, Implementing | Starting work on the `ready-for-agent` issues |
-| `implement-github-issue` | item, Implementing | One specific ready issue should be implemented and opened as a PR |
+| `implement-github-issue` | item, Implementing | One specific ready issue should be implemented and opened as a PR, or split into sub-issues when it is too large for one |
 | `shepherd-github-prs` | group, Shepherding | Getting open agent PRs through CI |
 | `shepherd-github-pr` | item, Shepherding | One specific PR has failing checks or open review findings, or is ready for its handoff |
 | `review-github-prs` | group, Reviewing | Reviewing and merging the PRs that are ready |
 | `review-github-pr` | item, Reviewing | One specific ready PR should be reviewed and, when safe, merged |
-| `unattended-triage` | utility | Deciding an issue's category and state, and writing its outcome comment, with nobody to ask. Called by `triage-github-issue` |
-| `grill-via-github-comments` | utility | Writing every question that is ready to ask as one round, each with a recommended answer. Called by `unattended-triage` |
+| `unattended-triage` | utility | Deciding an issue's category and state, and drafting its outcome comment for the caller to post, with nobody to ask. Called by `triage-github-issue` |
+| `grill-via-github-comments` | utility | Drafting every question that is ready to ask as one round, each with a recommended answer. Called by `unattended-triage` |
 | `merge-safety` | utility | Judging whether a PR is safe for an agent to merge. Called by `review-github-pr` |
 | `retrospective` | utility | Reviewing agent run-log issues and suggesting skill or process improvements |
+
+Every skill opens with a `## Contract`: what it needs before it runs, the results it can return, what it guarantees on every way out, and everything it may write. A utility skill's contract also names the skills that call it, and a reference skill's says only that it is reference material. Read the contract to know what a skill does. Read its Process to know how.
 
 **Group skills** select the work and dispatch it. Run one on a schedule. **Item skills** do the work on one issue or PR. Run one by hand on a number. **Utility skills** are building blocks that know nothing about GitHub plumbing. User-invoked skills can only be run by a person: no other skill can call them.
 
@@ -50,9 +53,17 @@ The steps never call each other. They coordinate through labels, hidden marker c
 |---|---|
 | Exploring | New **unlabelled** issues, or evidence comments. Never touches labels |
 | Triaging | Exactly one of `ready-for-agent`, `ready-for-human`, `needs-info`. Lease: `agent:triage` |
-| Implementing | Opens a PR and sets `agent:pr-open` on the issue and `agent:needs-work` on the PR. Lease: `agent:in-progress` |
+| Implementing | Opens a PR and sets `agent:pr-open` on the issue and `agent:needs-work` on the PR. An issue that is too large is split instead: linked sub-issues and an `agent:split` marker, the issue left as it is. Lease: `agent:in-progress` |
 | Shepherding | Fixes failures, then the ready handoff and `agent:ready-for-review`. Lease: `agent:in-progress` |
 | Reviewing | Merges pinned to the reviewed commit, or the review handoff and back to `agent:needs-work`. Lease: `agent:in-progress` |
+
+## Contract
+
+Reference material, never run, so it has no effects to check. See **Contracts** in the protocol.
+
+```yaml
+kind: reference
+```
 
 ## Inputs
 
