@@ -80,7 +80,7 @@ export const patientHealthDashboardTemplate = {
     description: "A clinician-facing dashboard with a patient list, vitals trend chart, key metric tiles, a diagnostic list, and a patient profile sidebar.",
     category: "Dashboard",
     tags: ["dashboard", "healthcare", "patients", "analytics", "admin", "linkedin import"],
-    thumbnail: "/template-thumbnails/patient-health-dashboard.svg",
+    thumbnail: "/page-template-thumbnails/patient-health-dashboard.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

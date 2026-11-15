@@ -31,7 +31,7 @@ export const restaurantMenuTemplate = {
     description: "A warm, inviting restaurant menu page with a hero, featured dishes, full menu sections, hours, and a reservation call to action.",
     category: "Restaurant",
     tags: ["restaurant", "menu", "food", "dining", "reservation", "linkedin import"],
-    thumbnail: "/template-thumbnails/restaurant-menu.svg",
+    thumbnail: "/page-template-thumbnails/restaurant-menu.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

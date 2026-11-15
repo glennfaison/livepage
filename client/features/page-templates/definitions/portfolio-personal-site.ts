@@ -38,7 +38,7 @@ export const portfolioPersonalSiteTemplate = {
     description: "A visual, project-first personal site for showcasing work, highlights, and a way to get in touch.",
     category: "Portfolio",
     tags: ["portfolio", "personal website", "case studies", "creative", "linkedin import"],
-    thumbnail: "/template-thumbnails/portfolio-personal-site.svg",
+    thumbnail: "/page-template-thumbnails/portfolio-personal-site.svg",
   },
   dataMapping: {
     source: "linkedin-profile",
@@ -237,7 +237,7 @@ export const portfolioPersonalSiteTemplate = {
                 node("image", "portfolio-project-1-image", {
                   alt: "Orbit onboarding case study cover",
                   src: "",
-                  fallbackSrc: "/template-art/portfolio-orbit.svg",
+                  fallbackSrc: "/page-template-art/portfolio-orbit.svg",
                   width: "100%",
                   height: "160px",
                   objectFit: "cover",
@@ -264,7 +264,7 @@ export const portfolioPersonalSiteTemplate = {
                 node("image", "portfolio-project-2-image", {
                   alt: "Fieldnote brand system cover",
                   src: "",
-                  fallbackSrc: "/template-art/portfolio-fieldnote.svg",
+                  fallbackSrc: "/page-template-art/portfolio-fieldnote.svg",
                   width: "100%",
                   height: "160px",
                   objectFit: "cover",
@@ -291,7 +291,7 @@ export const portfolioPersonalSiteTemplate = {
                 node("image", "portfolio-project-3-image", {
                   alt: "Northline dashboard cover",
                   src: "",
-                  fallbackSrc: "/template-art/portfolio-northline.svg",
+                  fallbackSrc: "/page-template-art/portfolio-northline.svg",
                   width: "100%",
                   height: "160px",
                   objectFit: "cover",

@@ -38,7 +38,7 @@ export const linkInBioTemplate = {
     description: "A single-column link hub for sharing your key profiles, projects, and contact details from one URL.",
     category: "Link in Bio",
     tags: ["link in bio", "creator", "social", "personal brand", "linkedin import"],
-    thumbnail: "/template-thumbnails/link-in-bio-page.svg",
+    thumbnail: "/page-template-thumbnails/link-in-bio-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

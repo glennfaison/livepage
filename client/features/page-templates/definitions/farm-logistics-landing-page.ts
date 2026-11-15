@@ -127,7 +127,7 @@ export const farmLogisticsLandingPageTemplate = {
     description: "A dense, confident landing page for a farm-to-market logistics company, with services, how it works, stats, stories, pricing and FAQ.",
     category: "Landing Page",
     tags: ["landing page", "logistics", "agriculture", "farm", "marketplace", "pricing", "linkedin import"],
-    thumbnail: "/template-thumbnails/farm-logistics-landing-page.svg",
+    thumbnail: "/page-template-thumbnails/farm-logistics-landing-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",
@@ -184,7 +184,7 @@ export const farmLogisticsLandingPageTemplate = {
           }, [
             node("row", "farm-nav-brandmark", { "child-sizing": "natural", "align-items": "center", gap: "0.6rem", "custom-classes": "min-h-0 kids:!self-center" }, [
               node("image", "farm-nav-logo", {
-                alt: "Fieldrun logo", src: "", fallbackSrc: "/template-art/farm-logistics-logo.svg",
+                alt: "Fieldrun logo", src: "", fallbackSrc: "/page-template-art/farm-logistics-logo.svg",
                 width: "36px", height: "36px", objectFit: "contain", loading: "lazy", decoding: "async",
                 "custom-classes": "shrink-0",
               }),
@@ -226,7 +226,7 @@ export const farmLogisticsLandingPageTemplate = {
             node("column", "farm-hero-art-col", { "justify-content": "center" }, [
               node("image", "farm-hero-image", {
                 alt: "A refrigerated Fieldrun truck loaded with produce, with crates of tomatoes waiting beside the farm road",
-                src: "", fallbackSrc: "/template-art/farm-logistics-hero.svg",
+                src: "", fallbackSrc: "/page-template-art/farm-logistics-hero.svg",
                 width: "100%", height: "auto", objectFit: "cover", borderRadius: "20px", loading: "eager", decoding: "async",
                 "custom-classes": "w-full overflow-hidden rounded-2xl border-2 border-[#1b1b18] bg-[#fbe3a0] shadow-[6px_6px_0_0_#1b1b18]",
               }),

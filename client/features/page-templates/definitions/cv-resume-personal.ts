@@ -38,7 +38,7 @@ export const cvResumePersonalTemplate = {
     description: "A one-page resume and personal website layout for LinkedIn-shaped profile data.",
     category: "CV/Resume/Personal",
     tags: ["resume", "cv", "personal website", "portfolio", "linkedin import"],
-    thumbnail: "/template-thumbnails/cv-resume-personal.svg",
+    thumbnail: "/page-template-thumbnails/cv-resume-personal.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

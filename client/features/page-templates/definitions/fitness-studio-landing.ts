@@ -31,7 +31,7 @@ export const fitnessStudioTemplate = {
     description: "A modern fitness studio landing page with class schedule highlights, trainer intro, and membership CTA.",
     category: "Health & Fitness",
     tags: ["fitness", "gym", "studio", "classes", "health", "landing page"],
-    thumbnail: "/template-thumbnails/fitness-studio-landing.svg",
+    thumbnail: "/page-template-thumbnails/fitness-studio-landing.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

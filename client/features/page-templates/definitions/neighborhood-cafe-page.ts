@@ -56,7 +56,7 @@ export const neighborhoodCafePageTemplate = {
     description: "A welcoming café website with a signature coffee hero, seasonal menu, owner story, and clear hours and location.",
     category: "Restaurant",
     tags: ["cafe", "coffee shop", "restaurant", "menu", "local business", "linkedin import"],
-    thumbnail: "/template-thumbnails/neighborhood-cafe-page.svg",
+    thumbnail: "/page-template-thumbnails/neighborhood-cafe-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",
@@ -159,7 +159,7 @@ export const neighborhoodCafePageTemplate = {
             ]),
             node("image", "cafe-hero-art", {
               src: "",
-              fallbackSrc: "/template-art/neighborhood-cafe-hero.svg",
+              fallbackSrc: "/page-template-art/neighborhood-cafe-hero.svg",
               alt: "Illustration of a cappuccino, fresh pastry, and a leafy café plant",
               width: "100%",
               height: "auto",

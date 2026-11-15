@@ -31,7 +31,7 @@ export const blogArticlePageTemplate = {
     description: "A readable long-form article layout with a byline, pull quote, and an author bio card at the end.",
     category: "Blog",
     tags: ["blog", "article", "writing", "newsletter", "linkedin import"],
-    thumbnail: "/template-thumbnails/blog-article-page.svg",
+    thumbnail: "/page-template-thumbnails/blog-article-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",
@@ -125,7 +125,7 @@ export const blogArticlePageTemplate = {
           node("image", "blog-hero-image", {
             alt: "Illustration of notifications converging on a single focused point",
             src: "",
-            fallbackSrc: "/template-art/blog-focus-cover.svg",
+            fallbackSrc: "/page-template-art/blog-focus-cover.svg",
             width: "100%",
             height: "320px",
             objectFit: "cover",

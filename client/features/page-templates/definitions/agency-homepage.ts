@@ -31,7 +31,7 @@ export const agencyHomepageTemplate = {
     description: "A homepage for a studio or agency, covering services, process, case studies, and a project inquiry CTA.",
     category: "Business",
     tags: ["agency", "business", "studio", "services", "linkedin import"],
-    thumbnail: "/template-thumbnails/agency-homepage.svg",
+    thumbnail: "/page-template-thumbnails/agency-homepage.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

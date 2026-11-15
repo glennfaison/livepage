@@ -17,7 +17,7 @@ describe("real-estate-property template", () => {
     expect(parsed.metadata.category).toBe("Real Estate")
     expect(parsed.metadata.tags).toContain("real estate")
     expect(parsed.metadata.tags).toContain("property")
-    expect(parsed.metadata.thumbnail).toBe("/template-thumbnails/real-estate-property.svg")
+    expect(parsed.metadata.thumbnail).toBe("/page-template-thumbnails/real-estate-property.svg")
     expect(parsed.dataMapping.source).toBe("linkedin-profile")
     expect(parsed.dataMapping.fields.length).toBeGreaterThan(0)
     expect(parsed.content.pages.length).toBeGreaterThan(0)

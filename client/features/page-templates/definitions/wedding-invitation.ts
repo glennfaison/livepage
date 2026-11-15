@@ -31,7 +31,7 @@ export const weddingInvitationTemplate = {
     description: "An elegant wedding invitation page with couple names, date and venue, ceremony details, and an RSVP call to action.",
     category: "Event",
     tags: ["wedding", "invitation", "event", "rsvp", "celebration", "linkedin import"],
-    thumbnail: "/template-thumbnails/wedding-invitation.svg",
+    thumbnail: "/page-template-thumbnails/wedding-invitation.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

@@ -31,7 +31,7 @@ export const eventConferencePageTemplate = {
     description: "A one-page event site with a hero, speaker lineup, schedule, and ticket tiers.",
     category: "Event",
     tags: ["event", "conference", "meetup", "tickets", "linkedin import"],
-    thumbnail: "/template-thumbnails/event-conference-page.svg",
+    thumbnail: "/page-template-thumbnails/event-conference-page.svg",
   },
   dataMapping: {
     source: "linkedin-profile",

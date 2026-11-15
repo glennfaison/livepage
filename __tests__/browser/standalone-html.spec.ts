@@ -309,7 +309,7 @@ test("all bundled templates render like standalone HTML at desktop and mobile si
         .catch(() => response.writeHead(404).end())
       return
     }
-    if (url.pathname.startsWith("/avatars/") || url.pathname.startsWith("/template-art/")) {
+    if (url.pathname.startsWith("/avatars/") || url.pathname.startsWith("/page-template-art/")) {
       const assetPath = resolve(process.cwd(), "public", `.${url.pathname}`)
       const contentType = extname(assetPath) === ".svg" ? "image/svg+xml" : "application/octet-stream"
       void readFile(assetPath)
