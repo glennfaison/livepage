@@ -9,12 +9,14 @@
 # export them first. Whatever the run does not set falls back to the default below, exactly as
 # ../SKILL.md's Defaults table describes.
 #
-# Helpers: has_label lease_live claim renew release clear_stale_lease   leases
+# Helpers: has_label lease_live claim renew release clear_stale_lease   leases (one comment per step)
 #          lane_holder ready_at                                  the merge lane
 #          changed_files protected_files codeowners_for          paths and owners
 #          markers review_rounds shepherd_attempts failures    reading markers
 #          open_findings ready_sha fail_item                   handoffs and failures
 #          prs_for_issue issue_for_pr                          issue <-> PR links
+#          parent_of children_of depth_of link_sub_issue       sub-issue links (splitting an issue)
+#          client_guidance_files item_labels                   the repository's own agent rules
 #          log_issue log_run log_status read_logs              run log
 # Every marker is read through trusted_jq / _trusted_logins: a marker written by an account that is
 # not trusted (see "Trust" in ../SKILL.md) is ignored.
@@ -46,9 +48,12 @@ AGENT_ROOT="$(git rev-parse --show-toplevel)"
 : "${max_shepherd_attempts:=3}"
 : "${max_review_rounds:=3}"
 : "${max_item_failures:=3}"
+: "${max_depth:=1}"
 : "${runner:=unknown}"
 : "${unattended:=true}"
 : "${trusted_authors:=}"
+: "${write_log:=true}"
+: "${lease_held:=false}"
 
 if [ -n "${AGENT_OVERRIDES:-}" ] && [ -f "${AGENT_OVERRIDES}" ]; then
   # shellcheck disable=SC1090
@@ -78,9 +83,12 @@ review_batch:REVIEW_BATCH
 max_shepherd_attempts:MAX_SHEPHERD_ATTEMPTS
 max_review_rounds:MAX_REVIEW_ROUNDS
 max_item_failures:MAX_ITEM_FAILURES
+max_depth:MAX_DEPTH
 runner:RUNNER
 unattended:UNATTENDED
 trusted_authors:TRUSTED_AUTHORS
+write_log:WRITE_LOG
+lease_held:LEASE_HELD
 "
 while IFS=: read -r _lower _upper; do
   [ -n "$_lower" ] || continue
@@ -120,42 +128,62 @@ trusted_jq() {
   printf '((.author_association | IN("OWNER","MEMBER","COLLABORATOR")) or (.user.login | IN(%s)))' "$(_trusted_logins)"
 }
 
-# Same predicate over one `gh ... --json author,authorAssociation` object.
-_trusted_json_jq() {
-  printf '((.authorAssociation | IN("OWNER","MEMBER","COLLABORATOR")) or (.author.login | IN(%s)))' "$(_trusted_logins)"
-}
-
 # ---- Leases ----------------------------------------------------------------------
 
 has_label() { gh "$2" view "$1" --json labels --jq '.labels[].name' | grep -qx -- "$3"; }
 
+# The newest trusted lease is the one written last (updated_at, else created_at; see leaseState in
+# helpers.mjs), because claim and renew edit a step's lease comment in place. `sort -s` keeps thread
+# order for equal times. The expiry is the one in the marker, never the comment's own timestamp.
 lease_live() {
   local exp now
   exp=$(gh api "repos/{owner}/{repo}/issues/$1/comments" --paginate \
-        --jq ".[] | select($(trusted_jq)) | .body | capture(\"<!-- agent:lease [^>]*expires=(?<e>[0-9TZ:-]+)\") | .e" \
-        | tail -n1)
+        --jq ".[] | select($(trusted_jq)) | (.updated_at // .created_at // \"0\") as \$t | .body | capture(\"<!-- agent:lease [^>]*expires=(?<e>[0-9TZ:-]+)\") | \"\\(\$t) \\(.e)\"" \
+        | sort -s -k1,1 | tail -n1 | cut -d' ' -f2)
   now=$(date -u +%s)
   [ -n "$exp" ] && [ "$now" -lt "$(utc_epoch "$exp")" ]
 }
 
+# Write the lease comment for STEP on item N: edit this account's own lease comment for the step if
+# the item has one, otherwise post one. An item that goes through several claims and renewals keeps
+# one lease comment per step instead of one per claim. If the edit fails, post: lease_live reads the
+# newest lease either way, so the fallback is only noisier.
+_write_lease() {
+  local n=$1 kind=$2 step=$3 exp=$4 how=$5 body id
+  body="$(node "$AGENT_HELPERS" lease-body "$step" "$RUN_ID" "$exp" "$how")"
+  id=$(gh api "repos/{owner}/{repo}/issues/$n/comments" --paginate \
+         --jq '.[] | {id, body, login: .user.login} | @json' 2>/dev/null \
+       | node "$AGENT_HELPERS" own-lease "$step" "$(_agent_self)") || id=
+  if [ -n "$id" ] && gh api -X PATCH "repos/{owner}/{repo}/issues/comments/$id" -f body="$body" >/dev/null 2>&1; then
+    return 0
+  fi
+  gh "$kind" comment "$n" --body "$body" >/dev/null
+}
+
+# claim and release do nothing when $lease_held is true: the caller holds the lease (a nested call).
 claim() {
+  [ "$lease_held" = true ] && return 0
   local n=$1 kind=$2 label=$3 step=$4 ttl=$5 exp
   exp=$(utc_plus "$ttl")
   gh "$kind" edit "$n" --add-label "$label" >/dev/null
-  gh "$kind" comment "$n" --body "$(node "$AGENT_HELPERS" lease-body "$step" "$RUN_ID" "$exp")" >/dev/null
+  _write_lease "$n" "$kind" "$step" "$exp" claim
 }
 
 renew() {
   local n=$1 kind=$2 step=$3 ttl=$4 exp
   exp=$(utc_plus "$ttl")
-  gh "$kind" comment "$n" --body "$(node "$AGENT_HELPERS" lease-body "$step" "$RUN_ID" "$exp" renew)" >/dev/null
+  _write_lease "$n" "$kind" "$step" "$exp" renew
 }
 
-release() { gh "$2" edit "$1" --remove-label "$3" >/dev/null; }
+release() {
+  [ "$lease_held" = true ] && return 0
+  gh "$2" edit "$1" --remove-label "$3" >/dev/null
+}
 
-# Remove lease labels whose marker has expired or is missing. Call during eligibility /
-# selection so a dead runner or an expired TTL does not leave agent:triage / agent:in-progress
-# on the board. Selection is unchanged: an item with only a stale label remains unleased.
+# Remove lease labels whose marker has expired or is missing, so a dead runner or an expired TTL
+# does not leave agent:triage / agent:in-progress on the board. This writes, so it is never part of
+# an eligibility check: reconcile-github-issues calls it. An item with only a stale label is already
+# unleased (lease_live decides), and the next claim replaces the label.
 clear_stale_lease() {
   local n=$1 kind=$2
   lease_live "$n" && return 0
@@ -269,22 +297,99 @@ ready_sha() {
 # Implementing must not push a branch that fails this pattern.
 
 prs_for_issue() {
-  gh pr list --state all --limit 200 --json number,state,title,body,headRefName,author,authorAssociation \
-  | jq -r --arg n "$1" "
-      .[] | $(_trusted_json_jq) as \$ok
+  local prs page
+  # The REST pull request has `author_association` and `user.login`, which `trusted_jq` reads. `gh pr list --json` has no
+  # author association, and asking it for one is an error. The 200 newest PRs, as before.
+  prs=$(for page in 1 2; do gh api "repos/{owner}/{repo}/pulls?state=all&per_page=100&page=$page" || exit 1; done) || return 1
+  printf '%s\n' "$prs" | jq -r --arg n "$1" "
+      .[] | $(trusted_jq) as \$ok
       | select( ((\$ok) and ((.body // \"\") | contains(\"<!-- agent:implements issue=\" + \$n + \" -->\")))
-             or (.headRefName | test(\"^[a-z]+/\" + \$n + \"-\"))
+             or ((.head.ref // \"\") | test(\"^[a-z]+/\" + \$n + \"-\"))
              or ((.body // \"\") | test(\"(?i)(closes|fixes|resolves)\\\\s+#\" + \$n + \"\\\\b\"))
              or ((.title // \"\") | test(\"(?i)(closes|fixes|resolves|implements)\\\\s+(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#\" + \$n + \"\\\\b\")) )
-      | \"\\(.number) \\(.state)\""
+      | \"\\(.number) \\(if .merged_at then \"MERGED\" elif .state == \"open\" then \"OPEN\" else \"CLOSED\" end)\""
 }
 
 issue_for_pr() {
-  gh pr view "$1" --json body,closingIssuesReferences,author,authorAssociation --jq "
-    $(_trusted_json_jq) as \$ok
-    | ([ (.body // \"\") | scan(\"agent:implements issue=([0-9]+)\") | .[0] | select(\$ok) ]
-       + [ (.body // \"\") | scan(\"(?i)(?:closes|fixes|resolves)\\\\s+#([0-9]+)\") | .[0] ]
-       + [ .closingIssuesReferences[].number | tostring ]) | unique | .[]"
+  local n=$1 pr refs
+  pr=$(gh api "repos/{owner}/{repo}/pulls/$n") || return 1
+  # GitHub's own links (closing keywords, the Development sidebar). `gh` has this field from 2.72. With an older `gh` it is
+  # skipped, and the body is still read for `Closes #N` and for a trusted marker.
+  if ! refs=$(gh pr view "$n" --json closingIssuesReferences --jq '.closingIssuesReferences[].number' 2>&1); then
+    case $refs in *"Unknown JSON field"*) refs="" ;; *) printf '%s\n' "$refs" >&2; return 1 ;; esac
+  fi
+  { printf '%s\n' "$pr" | jq -r "
+      $(trusted_jq) as \$ok
+      | ([ (.body // \"\") | scan(\"agent:implements issue=([0-9]+)\") | .[0] | select(\$ok) ]
+         + [ (.body // \"\") | scan(\"(?i)(?:closes|fixes|resolves)\\\\s+#([0-9]+)\") | .[0] ]) | .[]"
+    printf '%s\n' "$refs"
+  } | sed '/^$/d' | sort -un
+}
+
+# ---- Sub-issue links ---------------------------------------------------------------------
+# A split (../references/split.md) uses GitHub's own sub-issue links and nothing else: text in an issue body
+# is not a link, because anyone can write it. These read and write the links. A status other than success
+# means the answer could not be read, which is not the same as "none": parent_of prints nothing and succeeds
+# for an issue with no parent (a 404), and fails for any other error. So depth_of never mistakes an
+# unreadable parent for the top of the tree. Whether an issue may split is decided by helpers.mjs (canSplit).
+
+# The issue that N is a sub-issue of, or nothing when it has none.
+parent_of() {
+  local out
+  if out="$(gh api "repos/{owner}/{repo}/issues/$1/parent" --jq .number 2>&1)"; then
+    printf '%s\n' "$out"
+  elif printf '%s' "$out" | grep -q 'HTTP 404'; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# The sub-issues of N, one number per line.
+children_of() { gh api "repos/{owner}/{repo}/issues/$1/sub_issues" --paginate --jq '.[].number'; }
+
+# How many ancestors N has: 0 with no parent. Fails when a parent cannot be read, or on a cycle.
+depth_of() {
+  local start=$1 n=$1 p map="" i=0
+  while :; do
+    p="$(parent_of "$n")" || return 1
+    if [ -z "$p" ]; then map+="$n -"$'\n'; break; fi
+    map+="$n $p"$'\n'
+    n=$p; i=$((i+1))
+    [ "$i" -le 20 ] || return 1
+  done
+  printf '%s' "$map" | node "$AGENT_HELPERS" depth "$start"
+}
+
+# Make X a sub-issue of N. Succeeds when it already is one. Use it only for an issue this run filed.
+link_sub_issue() {
+  local id
+  [ "$(parent_of "$2")" = "$1" ] && return 0
+  id="$(gh api "repos/{owner}/{repo}/issues/$2" --jq .id)" || return 1
+  gh api -X POST "repos/{owner}/{repo}/issues/$1/sub_issues" -F "sub_issue_id=$id" >/dev/null
+}
+
+# ---- Client guidance -----------------------------------------------------------------
+# The repository's own agent-facing rules (see ../references/client-guidance.md). Always the DEFAULT
+# branch: a PR can edit AGENTS.md, so its copy is data, not guidance. The path filter lives in
+# helpers.mjs (isGuidancePath) so a runner with no shell applies the same one.
+
+# One path per line: every guidance file on the default branch, plus the `repo_guidance` files.
+client_guidance_files() {
+  gh api "repos/{owner}/{repo}/git/trees/HEAD?recursive=1" --jq '.tree[] | select(.type == "blob") | .path' \
+    | node "$AGENT_HELPERS" guidance-files "$repo_guidance"
+}
+
+# `<label>: <description>` for each label on an issue or PR. A label's description is how a repository
+# says what the label means ("stays open indefinitely"), so read it before closing or merging.
+item_labels() {
+  local all name
+  all="$(gh label list --limit 300 --json name,description 2>/dev/null || true)"
+  [ -n "$all" ] || all='[]'
+  gh "$2" view "$1" --json labels --jq '.labels[].name' | while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    printf '%s: %s\n' "$name" "$(printf '%s' "$all" | jq -r --arg n "$name" '.[] | select(.name == $n) | .description // ""')"
+  done
 }
 
 # ---- Run log -------------------------------------------------------------------------

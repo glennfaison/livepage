@@ -55,6 +55,22 @@ when to use it. Each step has a group skill (picks the work) and an item skill
 4. Shepherding: `shepherd-github-prs` (group), `shepherd-github-pr` (item)
 5. Reviewing: `review-github-prs` (group), `review-github-pr` (item)
 
+`reconcile-github-issues` is a sixth skill that belongs to no step of its own:
+a sweeper that brings issue state in line with the PRs. It closes issues whose
+PR merged, sends issues whose PRs were all closed unmerged to `ready-for-human`,
+repairs conflicting state labels, and clears stale lease labels. It is the only
+skill that changes an issue it has not claimed. `triage-github-issues` calls it
+before it selects work (that housekeeping used to live in `triage-github-issues`
+itself), and it can also be scheduled or run by hand on its own. It never closes
+an issue the repository says to keep open, such as one labeled `evergreen`.
+
+`implement-github-issue` opens a PR for a `ready-for-agent` issue. An issue that
+is too large for one PR is instead split into linked GitHub sub-issues, marked
+with an `agent:split` comment, and left open for Triaging to pick up the
+sub-issues. `max_depth` (see Settings) bounds how deep a chain of splits may go.
+`reconcile-github-issues` closes the parent once every sub-issue is closed, or
+sends it to a person if a sub-issue was closed as not planned.
+
 Reviewing has a third outcome besides merging and sending a PR back: a PR that
 runs out of review rounds, or that changes a path matched by `human_merge_paths`,
 is handed to a person. It gets the `agent:human-merge` label and a comment that
@@ -82,6 +98,11 @@ with a `key=value` pair on a line of its own; leaving it out keeps the default.
 - `git_hooks_path`: scripts/git-hooks
 - `repo_guidance`: AGENTS.md
 - `trusted_authors`: (none)
+- `max_depth`: 1
+
+The skills need an authenticated `gh` with write access, `jq` and Node.js.
+`gh` 2.72 or newer also reads the issues GitHub links to a PR; an older `gh`
+reads only the PR description.
 
 ## Repository guidance
 

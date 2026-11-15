@@ -27,8 +27,12 @@ One candidate as key-value pairs: fill in each empty `title` to `evidence` line.
 ```
 Run /file-github-issues
 dry_run=false
+parent=
+limit=
+repo_guidance=AGENTS.md
 dedupe_closed_days=30
 run_id=
+unattended=true
 title=
 category=
 area=
@@ -37,7 +41,6 @@ confidence=
 evidence=
 related=
 screenshots=
-unattended=true
 ```
 
 ## Triaging
@@ -47,6 +50,7 @@ unattended=true
 ```
 Run /triage-github-issues on github.com/OWNER/REPO
 triage_batch=5
+repo_guidance=AGENTS.md
 runner=NAME
 log_window_days=14
 unattended=true
@@ -57,6 +61,7 @@ trusted_authors=
 
 ```
 Run /triage-github-issue 123
+repo_guidance=AGENTS.md
 lease_ttl_triage=1 hour
 max_item_failures=3
 dedupe_closed_days=30
@@ -64,6 +69,21 @@ runner=NAME
 log_window_days=14
 unattended=true
 trusted_authors=
+write_log=true
+lease_held=false
+```
+
+### Sweeper skill, run on a schedule or by hand: `reconcile-github-issues`
+
+```
+Run /reconcile-github-issues on github.com/OWNER/REPO
+dry_run=false
+repo_guidance=AGENTS.md
+runner=NAME
+log_window_days=14
+unattended=true
+trusted_authors=
+write_log=true
 ```
 
 ## Implementing
@@ -73,6 +93,7 @@ trusted_authors=
 ```
 Run /implement-github-issues on github.com/OWNER/REPO
 implement_batch=1
+max_depth=1
 runner=NAME
 log_window_days=14
 unattended=true
@@ -89,10 +110,13 @@ git_hooks_path=
 repo_guidance=AGENTS.md
 lease_ttl_implement=3 hours
 max_item_failures=3
+max_depth=1
 runner=NAME
 log_window_days=14
 unattended=true
 trusted_authors=
+write_log=true
+lease_held=false
 ```
 
 ## Shepherding
@@ -123,6 +147,8 @@ runner=NAME
 log_window_days=14
 unattended=true
 trusted_authors=
+write_log=true
+lease_held=false
 ```
 
 ## Reviewing
@@ -142,6 +168,7 @@ trusted_authors=
 
 ```
 Run /review-github-pr 124
+repo_guidance=AGENTS.md
 lease_ttl_pr=1 hour
 max_review_rounds=3
 max_item_failures=3
@@ -154,4 +181,6 @@ runner=NAME
 log_window_days=14
 unattended=true
 trusted_authors=
+write_log=true
+lease_held=false
 ```

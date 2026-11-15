@@ -14,6 +14,7 @@
  *   utc-plus DURATION [FROM]              FROM (default: now) plus a duration, as UTC ISO-8601 (Z)
  *   utc-epoch TIMESTAMP                   Unix seconds
  *   lease-body STEP RUN EXPIRES [renew]   the lease comment
+ *   own-lease STEP SELF (JSON lines on stdin)  id of SELF's own lease comment for STEP, or nothing
  *   failure-body STEP RUN REASON          the failure comment
  *   log-window DAYS                       DAYS as a whole number of days, or 14 if it is not one
  *   log-title                             title for a new run-log issue
@@ -116,7 +117,10 @@ export function utcEpoch(iso) {
 
 // ---- comment shapes -----------------------------------------------------------------------
 
-/** The lease comment. `kind` is "claim" or "renew". */
+/**
+ * The lease comment. `kind` is "claim" or "renew". A step keeps one lease comment per item: a later
+ * claim or renewal edits it (see ownLeaseComment) instead of posting another.
+ */
 export function leaseComment(step, runId, expiresIso, kind = 'claim') {
   const marker = `<!-- agent:lease step=${step} run=${runId} expires=${expiresIso} -->`;
   const verb = kind === 'renew' ? 'Lease renewed by' : 'Claimed by';
@@ -333,6 +337,64 @@ export function isTrusted(c, { selfLogin = '', trustedAuthors = [] } = {}) {
   return login !== '' && [selfLogin, ...trustedAuthors].filter(Boolean).includes(login);
 }
 
+// ---- splitting an issue that is too large (references/split.md) ---------------------------
+
+/** How many ancestors an issue may have before `depthOf` gives up. GitHub itself stops well below this. */
+export const MAX_ANCESTORS = 20;
+
+/**
+ * The comment that records a split. `children` are the sub-issue numbers. The marker is the last line,
+ * and it is the point at which the split is complete.
+ */
+export function splitComment(children) {
+  const list = children.map((n) => `#${n}`).join(', ');
+  const marker = `<!-- agent:split children=${children.join(',')} -->`;
+  return { body: `Split into ${list} because this issue is too large for one PR. Each is triaged on its own, and this issue closes when they do.\n${marker}`, marker };
+}
+
+/**
+ * The sub-issue numbers the newest `agent:split` marker names, or null when the issue is not split. `markers`
+ * is what `markersOf` returns, so a marker from an untrusted account is never in it.
+ */
+export function splitChildren(markers) {
+  const m = markers.filter((x) => x.includes('agent:split ')).pop();
+  if (m === undefined) return null;
+  return (m.match(/children=([0-9,]*)/)?.[1] ?? '').split(',').filter(Boolean).map(Number);
+}
+
+/**
+ * How many ancestors issue `n` has, given what was read: `parents` maps an issue number to its parent's number,
+ * or to null when it has none. A number that was not read (no key) is an error, because an unread parent would
+ * look like no parent and let an issue split below the limit. So is a cycle, or more than MAX_ANCESTORS.
+ */
+export function depthOf(n, parents) {
+  const has = (k) => Object.prototype.hasOwnProperty.call(parents, k);
+  const seen = new Set([Number(n)]);
+  let cur = Number(n);
+  let depth = 0;
+  for (;;) {
+    if (!has(cur)) throw new Error(`the parent of #${cur} was not read`);
+    const p = parents[cur];
+    if (p === null || p === undefined) return depth;
+    if (seen.has(Number(p))) throw new Error(`#${p} is its own ancestor`);
+    seen.add(Number(p));
+    cur = Number(p);
+    depth += 1;
+    if (depth > MAX_ANCESTORS) throw new Error(`more than ${MAX_ANCESTORS} ancestors`);
+  }
+}
+
+/**
+ * True when an issue at `depth` may be split under `maxDepth`: it must have fewer ancestors than the limit, so a
+ * sub-issue is one level deeper than its parent and the recursion ends at the limit. `maxDepth` 0 turns splitting off.
+ * A depth that could not be read (anything but a whole number) never splits.
+ */
+export function canSplit(depth, maxDepth) {
+  const d = typeof depth === 'string' && depth.trim() !== '' ? Number(depth) : depth;
+  const m = typeof maxDepth === 'string' && maxDepth.trim() !== '' ? Number(maxDepth) : maxDepth;
+  return Number.isInteger(d) && Number.isInteger(m) && d >= 0 && m >= 0 && d < m;
+}
+
 // ---- reading markers ----------------------------------------------------------------------
 
 /** Every agent marker from trusted comments, in order, as the exact `<!-- agent:... -->` text. */
@@ -345,16 +407,44 @@ export function markersOf(comments, trust) {
   return out;
 }
 
-/** The newest trusted lease on an item: its expiry and whether it is still live. Null if none. */
+/**
+ * The newest trusted lease on an item: its expiry and whether it is still live. Null if none.
+ *
+ * "Newest" is the lease written last. A step edits its own lease comment in place when it claims or
+ * renews again, so the position of a comment in the thread no longer says which lease is newest:
+ * its last write (`updated_at`, else `created_at`) does. Comments with neither, such as the shared
+ * fixtures, fall back to thread order. The edit time only orders leases. The expiry is always the
+ * `expires=` in the marker, never a timestamp of the comment.
+ */
 export function leaseState(comments, trust, now = new Date()) {
   let last = null;
+  let lastAt = '';
   for (const c of comments) {
     if (!isTrusted(c, trust)) continue;
     const m = String(c.body ?? '').match(/<!-- agent:lease [^>]*expires=([0-9TZ:-]+)/);
-    if (m) last = m[1];
+    if (!m) continue;
+    const at = String(c.updated_at ?? c.created_at ?? '');
+    if (at >= lastAt) { last = m[1]; lastAt = at; }
   }
   if (!last) return null;
   return { expires: last, live: Math.floor(now.getTime() / 1000) < utcEpoch(last) };
+}
+
+/**
+ * The id of the lease comment that `selfLogin` itself wrote for `step` on an item, or null. `claim`
+ * and `renew` edit it instead of posting another. Only the agent's own login counts: a comment from
+ * anyone else, trusted or not, cannot be edited and is never touched. If several exist (older runs
+ * posted one per claim), the last one is edited. Each entry is `{id, body, login}`.
+ */
+export function ownLeaseComment(comments, selfLogin, step) {
+  if (!selfLogin) return null;
+  const needle = `<!-- agent:lease step=${step} `;
+  let id = null;
+  for (const c of comments) {
+    if ((c?.login ?? c?.user?.login) !== selfLogin) continue;
+    if (String(c.body ?? '').includes(needle)) id = c.id ?? id;
+  }
+  return id;
 }
 
 /** Review handoffs since the last hand-off to a human. A person who takes a PR over starts it afresh. */
@@ -533,6 +623,37 @@ export function isCompliantBranchName(name, issueNumber) {
 }
 
 /**
+ * Client guidance: the files in a repository that tell agents how to behave there. The workflow reads
+ * them from the default branch, never from a PR branch (see references/client-guidance.md).
+ * `extra` is the `repo_guidance` input: space-separated paths that are always included.
+ */
+const GUIDANCE_PATTERNS = [
+  /^(?:.+\/)?(?:AGENTS|CLAUDE|GEMINI)\.md$/i,
+  /^(?:\.github\/|docs\/)?CONTRIBUTING(?:\.md|\.rst|\.txt)?$/i,
+  /^\.github\/copilot-instructions\.md$/,
+  /^\.github\/instructions\/.+\.md$/,
+  /^\.github\/(?:agents|prompts)\/.+\.md$/,
+  /^\.cursor\/rules\/.+/,
+  /^\.(?:cursorrules|windsurfrules|clinerules)$/,
+  /^\.claude\/rules\/.+\.md$/,
+  /^\.agents\/.+\.md$/,
+  /^(?:\.github\/|docs\/)?PULL_REQUEST_TEMPLATE(?:\.md|\/.+)$/i,
+  /^\.github\/ISSUE_TEMPLATE\/.+/,
+];
+
+export function isGuidancePath(path, extra = '') {
+  const p = String(path ?? '');
+  if (!p || /(^|\/)(?:node_modules|vendor)\//.test(p)) return false;
+  const extras = String(extra ?? '').split(/\s+/).filter(Boolean);
+  return extras.includes(p) || GUIDANCE_PATTERNS.some((re) => re.test(p));
+}
+
+/** The guidance files among `paths` (one repository path per entry), sorted and unique. */
+export function guidanceFiles(paths, extra = '') {
+  return [...new Set((paths ?? []).filter((p) => isGuidancePath(p, extra)))].sort();
+}
+
+/**
  * No-shell checklist: what each lib.sh helper does, in terms of GitHub tools. Every comment you read
  * goes through isTrusted first.
  */
@@ -541,16 +662,22 @@ export const NO_SHELL_OPS = {
   log_issue: 'list_issues (not search_issues: search is a slow, approximate index and will not show an issue made a minute ago) with labels ["agent:log"], state OPEN, orderBy CREATED_AT, direction ASC. currentLogIssue picks the one to append to. None: issue_write create with logIssueTitle, label agent:log and logIssueBody. Then list again: if a lower-numbered one now exists, close yours as not_planned (duplicate_of it) and use that.',
   log_run: 'issue_read get_comments on the log issue and stop if hasLogEntry says this run and step are already there. Otherwise add_issue_comment with stampLogEntry(formatLogComment(...)), then issue_write update on the log issue with touchLogIssueBody as the new body. Real line breaks, never the two characters backslash-n. There is no separate difficulty issue.',
   read_logs: 'list_issues for agent:log (state all, newest first), read each one\'s comments newer than the lookback, skip readableLogEntries-idle ones (nothing eligible, Problems none).',
-  claim: 'Add the lease label, then add_issue_comment with leaseComment(..., "claim").',
-  renew: 'add_issue_comment with leaseComment(..., "renew").',
-  release: 'Remove the lease label.',
-  clear_stale_lease: 'If leaseState is not live, remove agent:triage and agent:in-progress labels (call during eligibility/selection).',
+  claim: 'Add the lease label, then write leaseComment(..., "claim"): if ownLeaseComment finds this account\'s lease comment for the step on the item, edit it in place, otherwise (or if your tools cannot edit a comment, or the edit fails) add_issue_comment. Do nothing when lease_held is true.',
+  renew: 'Same as claim, with leaseComment(..., "renew"): edit this account\'s lease comment for the step if there is one, else add_issue_comment.',
+  release: 'Remove the lease label. Do nothing when lease_held is true.',
+  client_guidance_files: 'get_file_contents on the repository root and on .github, docs, .cursor/rules, .claude/rules, .agents and .github/ISSUE_TEMPLATE, on the DEFAULT branch (no ref, never a PR branch). Keep what guidanceFiles accepts, then read each one in full.',
+  item_labels: 'issue_read get on the item for its label names, then get_label for each: its description is guidance too (references/client-guidance.md).',
+  clear_stale_lease: 'If leaseState is not live, remove agent:triage and agent:in-progress labels. This writes: reconcile-github-issues calls it, and eligibility checks never do.',
   lease_live: 'leaseState on the issue comments; skip the item if live.',
   fail_item: 'add_issue_comment with failureComment.',
   markers: 'markersOf on the comments.',
   changed_files: 'list_pull_request_files for the PR, paginated: each filename, and the previous_filename of a renamed file.',
   protected_files: 'changed_files, then protectedFiles(human_merge_paths, files). Empty when human_merge_paths is empty. If the file list cannot be read, or a pattern is unsupported, it is an error: fail_item and never merge.',
   codeowners_for: 'Read CODEOWNERS from the PR base branch (.github/CODEOWNERS, then CODEOWNERS, then docs/CODEOWNERS; never the PR head), then codeownersFor(text, changed_files). No file means no owners.',
+  parent_of: 'The parent field of issue_read get on the issue, when your tools return it. A 404 or no parent means none. If your tools cannot read the parent, the depth cannot be read, and the issue is not split.',
+  children_of: 'issue_read get_sub_issues for the issue, paginated: each number. It lists the sub-issues from GitHub\'s own links and never from text in a body.',
+  depth_of: 'parent_of on the issue, then on each parent in turn, until one has none. depthOf(n, parents) counts them and throws on an unread parent or a cycle. A failure means the depth cannot be read, and canSplit(depth, max_depth) is false for it.',
+  link_sub_issue: 'sub_issue_write method add on the parent with the sub-issue\'s id (its numeric id, not its number). If X is already a sub-issue of N that is success. If the call fails the split is not recorded.',
   lane_holder: 'list_pull_requests (state open) filtered to the label agent:ready-for-review, no draft, no agent:stuck or agent:human-merge. For each, the created_at of its newest trusted comment holding a kind=ready handoff. laneHolder(candidates, N, ready_lane_ttl) gives the other PR that holds the merge lane, or null.',
 };
 
@@ -564,6 +691,7 @@ function cli(argv) {
     case 'run-id': return makeRunId(a[0] || 'unknown');
     case 'utc-plus': return utcPlus(a[0] ?? '', a[1] ? new Date(a[1]) : undefined);
     case 'utc-epoch': return String(utcEpoch(a[0] ?? ''));
+    case 'guidance-files': return guidanceFiles(stdin().split('\n').map((l) => l.trim()), a[0] ?? '').join('\n');
     case 'lane-holder': return String(laneHolder(JSON.parse(stdin() || '[]'), a[0], a[1] ?? '2 hours') ?? '');
     case 'protected-files': return protectedFiles(a[0] ?? '', JSON.parse(stdin() || '[]')).join('\n');
     case 'codeowners': {
@@ -571,6 +699,10 @@ function cli(argv) {
       return codeownersFor(j.text, j.files ?? []).join('\n');
     }
     case 'lease-body': return leaseComment(a[0], a[1], a[2], a[3] === 'renew' ? 'renew' : 'claim').body;
+    case 'own-lease': {
+      const comments = stdin().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+      return String(ownLeaseComment(comments, a[1] ?? '', a[0] ?? '') ?? '');
+    }
     case 'failure-body': return failureComment(a[0], a[1], a[2] ?? '').body;
     case 'log-window': return String(logWindowDays(a[0]));
     case 'log-title': return logIssueTitle();
@@ -593,6 +725,20 @@ function cli(argv) {
         `last_entry=${meta.lastEntry ?? ''}`,
       ].join('\n');
     }
+    case 'split-body': return splitComment(String(a[0] ?? '').split(',').filter(Boolean).map(Number)).body;
+    case 'split-children': {
+      const found = splitChildren(stdin().split('\n').filter(Boolean));
+      return found === null ? '' : found.join('\n');
+    }
+    case 'depth': { // stdin: one `child parent` pair per line, `-` for no parent
+      const parents = {};
+      for (const line of stdin().split('\n').map((l) => l.trim()).filter(Boolean)) {
+        const [child, parent] = line.split(/\s+/);
+        parents[Number(child)] = parent === '-' || parent === undefined ? null : Number(parent);
+      }
+      return String(depthOf(a[0], parents));
+    }
+    case 'can-split': return canSplit(a[0], a[1]) ? 'yes' : 'no';
     case 'log-read': return readableLogEntries(JSON.parse(stdin() || '{}').comments, a[0]).join('\n---\n');
     default:
       throw new Error(`unknown command: ${cmd}`);
