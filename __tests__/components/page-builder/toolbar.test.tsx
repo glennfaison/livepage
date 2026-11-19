@@ -197,3 +197,12 @@ describe("Toolbar AI Assistant gated by deployment flag", () => {
     expect(screen.getByTitle("Open AI Assistant")).toBeInTheDocument()
   })
 })
+
+describe("Toolbar in preview mode", () => {
+  it("renders nothing when pageBuilderMode is preview", () => {
+    const { container } = render(
+      <Toolbar {...baseProps} pageBuilderMode={"preview" as PageBuilderMode} />,
+    )
+    expect(container.firstChild).toBeNull()
+  })
+})
