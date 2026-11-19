@@ -366,3 +366,101 @@ describe("DISCARD_CHANGES restores full baseline", () => {
     expect(discarded.originalHistoryState).toBeNull()
   })
 })
+
+
+describe("REPLACE_COMPONENT with component templates", () => {
+  it("records the template history description and selects the new root", () => {
+    const targetId = "target-comp"
+    const page = {
+      tag: "page",
+      attributes: { id: "page-1" },
+      children: [
+        {
+          tag: "column",
+          attributes: { id: targetId },
+          children: [],
+        },
+      ],
+    } as any
+    let state = appReducer(initialState, { type: "SET_PAGES", payload: [page] })
+    state = appReducer(state, { type: "SET_ACTIVE_PAGE", payload: "page-1" })
+
+    const newRoot = {
+      tag: "column",
+      attributes: { id: "cta-root-copy" },
+      children: [],
+    }
+    const action: AppAction = {
+      type: "REPLACE_COMPONENT",
+      payload: {
+        oldComponentId: targetId,
+        newComponent: newRoot,
+        historyDescription: "Replaced target-comp with component template: Call to Action",
+      },
+    }
+    const result = appReducer(state, action)
+
+    expect(result.selectedComponentId).toBe("cta-root-copy")
+    expect(result.history[result.history.length - 1].action).toBe(
+      "Replaced target-comp with component template: Call to Action",
+    )
+    const pageAfter = result.componentTree[0] as any
+    expect(pageAfter.children[0].attributes.id).toBe("cta-root-copy")
+  })
+
+  it("leaves state unchanged when the target is missing", () => {
+    const action: AppAction = {
+      type: "REPLACE_COMPONENT",
+      payload: {
+        oldComponentId: "missing",
+        newComponent: { tag: "div", attributes: { id: "new" }, children: [] },
+      },
+    }
+    const result = appReducer(initialState, action)
+    expect(result).toEqual(initialState)
+  })
+
+  it("undo restores the original tree after a template replace", () => {
+    const targetId = "target-comp"
+    const page = {
+      tag: "page",
+      attributes: { id: "page-1" },
+      children: [
+        {
+          tag: "column",
+          attributes: { id: targetId, "data-source": "old" },
+          children: [{ tag: "text", attributes: { id: "child" }, children: [] }],
+        },
+      ],
+    } as any
+    let state = appReducer(initialState, { type: "SET_PAGES", payload: [page] })
+    state = appReducer(state, { type: "SET_ACTIVE_PAGE", payload: "page-1" })
+    state = appReducer(state, {
+      type: "ADD_TO_HISTORY",
+      payload: { action: "Baseline", pageState: state.componentTree },
+    })
+    const before = state.componentTree
+    const beforeIndex = state.currentHistoryIndex
+
+    const newRoot = {
+      tag: "column",
+      attributes: { id: "new-root" },
+      children: [],
+    }
+    state = appReducer(state, {
+      type: "REPLACE_COMPONENT",
+      payload: {
+        oldComponentId: targetId,
+        newComponent: newRoot,
+        historyDescription: "Replaced with template",
+      },
+    })
+    expect((state.componentTree[0] as any).children[0].attributes.id).toBe("new-root")
+
+    const undone = appReducer(state, {
+      type: "RESTORE_FROM_HISTORY",
+      payload: { historyIndex: beforeIndex },
+    })
+    expect(undone.componentTree).toEqual(before)
+  })
+})

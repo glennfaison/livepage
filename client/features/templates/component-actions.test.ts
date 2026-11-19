@@ -51,4 +51,27 @@ describe("createApplyComponentTemplateActions", () => {
     const newComponent = asReplaceComponent(actions[0]).payload.newComponent!
     expect(newComponent.attributes.id).toBe("cta-root-copy")
   })
+
+  it("includes a history description naming the template", () => {
+    const actions = createApplyComponentTemplateActions(callToActionTemplate, { componentId: "target-id" })
+    expect(asReplaceComponent(actions[0]).payload.historyDescription).toBe(
+      "Replaced target-id with component template: Call to Action",
+    )
+  })
+
+  it("returns no actions when the template root is not allowed in the parent slot", () => {
+    const actions = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "target-id",
+      parentTag: "text",
+    })
+    expect(actions).toEqual([])
+  })
+
+  it("returns the action when the template root is allowed in the parent slot", () => {
+    const actions = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "target-id",
+      parentTag: "section",
+    })
+    expect(actions.length).toBe(1)
+  })
 })
