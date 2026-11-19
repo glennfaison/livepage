@@ -30,8 +30,8 @@ export function createApplyComponentTemplateActions(
     }
   }
 
-  const clonedRoot = cloneNodeWithNewIds(template.content.root, options.idSuffix ?? \`-copy\`) as AppNode
-  const historyDescription = \`Replaced \${options.componentId} with component template: \${template.metadata.name}\`
+  const clonedRoot = cloneNodeWithNewIds(template.content.root, options.idSuffix ?? `-copy`) as AppNode
+  const historyDescription = `Replaced ${options.componentId} with component template: ${template.metadata.name}`
   return [
     {
       type: "REPLACE_COMPONENT",
