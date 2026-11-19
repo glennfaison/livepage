@@ -75,3 +75,19 @@ describe("createApplyComponentTemplateActions", () => {
     expect(actions.length).toBe(1)
   })
 })
+
+  it("produces unique ids when the same template is applied twice with different suffixes", () => {
+    const first = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "a",
+      idSuffix: "-copy1",
+    })
+    const second = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "b",
+      idSuffix: "-copy2",
+    })
+    const ids1 = new Set<string>()
+    const ids2 = new Set<string>()
+    collectIds(asReplaceComponent(first[0]).payload.newComponent!, ids1)
+    collectIds(asReplaceComponent(second[0]).payload.newComponent!, ids2)
+    for (const id of ids1) expect(ids2.has(id)).toBe(false)
+  })
