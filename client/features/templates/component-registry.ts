@@ -70,9 +70,17 @@ export function describeComponentTemplateDisplayCatalog(): ReadonlyArray<Compone
 
 /**
  * Returns the component templates whose root tag is allowed as a child of the
- * given parent tag, using the registry's allowedChildTags / allowedParentTags
- * constraints. When `parentTag` is undefined no templates are offered (a
- * component template always replaces a component inside a parent slot).
+ * given parent tag, using the same `allowedChildTags` / `allowedParentTags`
+ * rules as `getComponentsAllowedIn` and the paste check in the reducer.
+ *
+ * Behavior for open cases (documented for callers and tests):
+ * - A component directly under the page: pass the page's tag (`"page"`) as
+ *   `parentTag`. Templates whose root is allowed under page are returned.
+ * - When `parentTag` is undefined (or the parent does not accept children):
+ *   returns an empty list. Callers that need to hide the Templates entry for
+ *   the page root itself should do so before calling this (the page root is
+ *   never replaceable).
+ * - Returns an empty list (never throws) when nothing is compatible.
  */
 export function getComponentTemplatesAllowedIn(parentTag?: string): ReadonlyArray<ComponentTemplateDefinition> {
   const allowed = getComponentsAllowedIn(parentTag)
