@@ -137,7 +137,7 @@ export const CommandPalette: React.FC<
     onImportJson: () => void
     onImportShortcode: () => void
     onDiscardChanges: () => void
-    onOpenAIAssistant: () => void
+    onOpenAIAssistant?: () => void
     onDuplicatePage: () => void
     onToggleToolbar?: () => void
     onOpenKeyboardShortcuts?: () => void
@@ -379,14 +379,18 @@ export const CommandPalette: React.FC<
         onSelect: onImportShortcode,
         disabled: isLoadingShortcode,
       },
-      {
-        id: "action-open-ai-assistant",
-        group: "Actions",
-        label: "Open AI Assistant",
-        keywords: ["ai", "assistant", "prompt", "chat"],
-        icon: <Bot className="h-4 w-4" />,
-        onSelect: onOpenAIAssistant,
-      },
+      ...(onOpenAIAssistant
+        ? [
+            {
+              id: "action-open-ai-assistant",
+              group: "Actions",
+              label: "Open AI Assistant",
+              keywords: ["ai", "assistant", "prompt", "chat"],
+              icon: <Bot className="h-4 w-4" />,
+              onSelect: onOpenAIAssistant,
+            },
+          ]
+        : []),
       {
         id: "action-duplicate-page",
         group: "Actions",
