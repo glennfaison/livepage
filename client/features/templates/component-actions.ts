@@ -1,5 +1,6 @@
 import type { AppAction, AppNode } from "@/client/features/types"
 import { cloneNodeWithNewIds } from "@/client/features/app-state/commands/helpers"
+import "@/client/features/design-components/registry"
 import type { ComponentTemplateDefinition } from "@/client/features/templates/component-schema"
 import { getComponentsAllowedIn } from "@/client/features/design-components/registry-store"
 
@@ -22,7 +23,7 @@ export function createApplyComponentTemplateActions(
     parentTag?: string
   }>,
 ): ReadonlyArray<AppAction> {
-  if (options.parentTag !== undefined) {
+  if (options.parentTag !== undefined && options.parentTag !== "section") {
     const allowed = getComponentsAllowedIn(options.parentTag)
     const allowedTags = new Set(allowed.map((metadata) => metadata.tag))
     if (!allowedTags.has(template.content.root.tag)) {
