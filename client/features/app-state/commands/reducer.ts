@@ -249,7 +249,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     case "REPLACE_COMPONENT": {
-      const { oldComponentId, newComponent: providedComponent, newComponentTag } = action.payload
+      const { oldComponentId, newComponent: providedComponent, newComponentTag, historyDescription } = action.payload
       if (!findComponentById(state.componentTree, oldComponentId)) {
         return state
       }
@@ -261,6 +261,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         children: [],
       }
       const newComponentTree = replaceComponent({ components: state.componentTree, oldComponentId, newComponent })
+      const historyText = historyDescription ?? `Replaced ${oldComponentId} with ${tag}`
       return withHistory(
         {
           ...state,
@@ -268,7 +269,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           selectedComponentId: newComponent.attributes.id,
         },
         newComponentTree,
-        `Replaced ${oldComponentId} with ${tag}`,
+        historyText,
       )
     }
 
