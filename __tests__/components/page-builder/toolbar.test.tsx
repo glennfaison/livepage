@@ -89,9 +89,12 @@ describe("Toolbar grip accessibility", () => {
 
 describe("Toolbar button accessible names", () => {
   it("gives every button an accessible name", () => {
-    render(<Toolbar {...baseProps} />)
+    const original = process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    try {
+      render(<Toolbar {...baseProps} />)
 
-    const expected = [
+      const expected = [
       "Open AI Assistant",
       "History",
       "Undo",
@@ -100,10 +103,14 @@ describe("Toolbar button accessible names", () => {
       "Save",
       "Discard",
       "Settings",
-      "Switch to vertical layout",
+      "Switch to horizontal layout",
     ]
     for (const name of expected) {
       expect(screen.getByRole("button", { name })).toBeInTheDocument()
+    }
+    } finally {
+      if (original === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+      else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = original
     }
   })
 })
