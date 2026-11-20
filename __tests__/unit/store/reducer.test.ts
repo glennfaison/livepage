@@ -366,3 +366,42 @@ describe("DISCARD_CHANGES restores full baseline", () => {
     expect(discarded.originalHistoryState).toBeNull()
   })
 })
+
+describe("MOVE_COMPONENT history", () => {
+  const node = (id: string, children: any[] = []): any =>
+    ({ tag: "row", attributes: { id }, children })
+
+  it("records history when the component moves", () => {
+    const tree = [node("page", [node("A"), node("B"), node("C")])]
+    const state: AppState = { ...initialState, componentTree: tree, history: [], currentHistoryIndex: -1 }
+
+    const result = appReducer(state, {
+      type: "MOVE_COMPONENT",
+      payload: { componentId: "A", newParentId: "page", index: 2 },
+    })
+
+    expect(result.componentTree[0].children.map((c: any) => c.attributes.id)).toEqual(["B", "A", "C"])
+    expect(result.history).toHaveLength(1)
+    expect(result.history[0].action).toBe("Moved A")
+  })
+
+  it("records no history for a no-op drop onto the component's own position", () => {
+    const tree = [node("page", [node("A"), node("B"), node("C")])]
+    const state: AppState = { ...initialState, componentTree: tree, history: [], currentHistoryIndex: -1 }
+
+    // Dropping B onto the divider before itself (index 1) or after itself (index 2) is a no-op.
+    const before = appReducer(state, {
+      type: "MOVE_COMPONENT",
+      payload: { componentId: "B", newParentId: "page", index: 1 },
+    })
+    const after = appReducer(state, {
+      type: "MOVE_COMPONENT",
+      payload: { componentId: "B", newParentId: "page", index: 2 },
+    })
+
+    expect(before.history).toHaveLength(0)
+    expect(after.history).toHaveLength(0)
+    expect(before.componentTree).toEqual(tree)
+    expect(after.componentTree).toEqual(tree)
+  })
+})
