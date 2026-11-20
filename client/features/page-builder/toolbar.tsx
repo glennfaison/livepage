@@ -240,7 +240,26 @@ export const Toolbar: React.FC<Readonly<{
       dockPosition()
     }
     window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    window.addEventListener("orientationchange", handleResize)
+
+    // Re-clamp when the toolbar's own size changes (e.g. buttons wrap onto
+    // extra rows, making it taller). Without this, a wrap after a drag can
+    // leave part of the toolbar outside the viewport until the next window
+    // resize.
+    const el = toolbarRef.current
+    let resizeObserver: ResizeObserver | undefined
+    if (el && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        dockPosition()
+      })
+      resizeObserver.observe(el)
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      window.removeEventListener("orientationchange", handleResize)
+      resizeObserver?.disconnect()
+    }
   }, [dockPosition, setToolbarMinimized, pageBuilderMode])
 
   // Persist layout changes (and the latest position) to localStorage. Layout
@@ -349,7 +368,12 @@ export const Toolbar: React.FC<Readonly<{
         }}
       >
       {!toolbarMinimized ? (
-        <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
+        <div
+          className={cn(
+            "flex items-center gap-1 flex-wrap",
+            toolbarLayout === "vertical" ? "flex-col" : "flex-row",
+          )}
+        >
           <div
             aria-hidden="true"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
