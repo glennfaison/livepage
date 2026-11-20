@@ -197,3 +197,13 @@ describe("Toolbar AI Assistant gated by deployment flag", () => {
     expect(screen.getByTitle("Open AI Assistant")).toBeInTheDocument()
   })
 })
+
+describe("Toolbar mobile wrap and clamp", () => {
+  it("uses flex-wrap on the expanded button row so controls can wrap on narrow viewports", () => {
+    const { container } = render(<Toolbar {...baseProps} />)
+    const row = container.querySelector(".flex.flex-wrap, .flex-wrap")
+    // The expanded layout row must allow wrapping (horizontal or vertical).
+    expect(row).not.toBeNull()
+    expect(row?.className).toMatch(/flex-wrap/)
+  })
+})
