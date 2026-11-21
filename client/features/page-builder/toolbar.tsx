@@ -299,39 +299,6 @@ export const Toolbar: React.FC<Readonly<{
     isDraggingRef.current = true
   }
 
-  const handleGripKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault()
-        setIsDragging(true)
-        isDraggingRef.current = true
-        return
-      }
-      if (!isDraggingRef.current) return
-      if (e.key === "Escape") {
-        e.preventDefault()
-        setIsDragging(false)
-        isDraggingRef.current = false
-        return
-      }
-      let dx = 0
-      let dy = 0
-      if (e.key === "ArrowRight") dx = 10
-      else if (e.key === "ArrowLeft") dx = -10
-      else if (e.key === "ArrowDown") dy = 10
-      else if (e.key === "ArrowUp") dy = -10
-      else return
-      e.preventDefault()
-      setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }))
-      writeToolbarState({
-        version: STORAGE_VERSION,
-        position: { x: positionRef.current.x + dx, y: positionRef.current.y + dy },
-        layout: layoutRef.current,
-      })
-    },
-    [],
-  )
-
   useEffect(() => {
     if (pageBuilderMode === "preview") return
 
@@ -408,12 +375,9 @@ export const Toolbar: React.FC<Readonly<{
           )}
         >
           <div
-            tabIndex={0}
-            role="button"
-            aria-label="Drag toolbar"
+            aria-hidden="true"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
-            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -424,6 +388,7 @@ export const Toolbar: React.FC<Readonly<{
               size="sm"
               onClick={onOpenAIAssistant}
               title="Open AI Assistant"
+              aria-label="Open AI Assistant"
               className="shrink-0"
             >
               <Bot className="h-4 w-4" />
@@ -439,7 +404,7 @@ export const Toolbar: React.FC<Readonly<{
             onDiscard={onDiscardHistory}
             previewIndex={historyPreviewIndex}
           >
-            <Button variant="outline" size="sm" title={`History (${formatShortcut("H")})`} className="shrink-0">
+            <Button variant="outline" size="sm" title={`History (${formatShortcut("H")})`} aria-label="History" className="shrink-0">
               <History className="h-4 w-4" />
             </Button>
           </HistoryPopover>
@@ -459,15 +424,16 @@ export const Toolbar: React.FC<Readonly<{
               setAnnouncement("Toolbar minimized")
             }}
             title={`Minimize / toggle toolbar (${formatShortcut("\`")})`}
+            aria-label="Minimize"
             className="shrink-0"
           >
             <Minimize className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" size="sm" onClick={savePage} title={`Save (${formatShortcut("S")})`} className="shrink-0">
+          <Button variant="outline" size="sm" onClick={savePage} title={`Save (${formatShortcut("S")})`} aria-label="Save" className="shrink-0">
             <Save className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDiscardWithConfirmation} title="Discard" className="shrink-0">
+          <Button variant="outline" size="sm" onClick={handleDiscardWithConfirmation} title="Discard" aria-label="Discard" className="shrink-0">
             <X className="h-4 w-4" />
           </Button>
 
@@ -485,7 +451,7 @@ export const Toolbar: React.FC<Readonly<{
             onBrowseTemplates={onBrowseTemplates}
             onDownloadHtml={onDownloadHtml}
           >
-            <Button variant="outline" size="sm" title="Settings" className="shrink-0" data-testid="toolbar-settings-trigger">
+            <Button variant="outline" size="sm" title="Settings" aria-label="Settings" className="shrink-0" data-testid="toolbar-settings-trigger">
               <Settings className="h-4 w-4" />
             </Button>
           </ToolbarSettingsPopover>
@@ -495,18 +461,16 @@ export const Toolbar: React.FC<Readonly<{
             size="sm"
             onClick={() => setToolbarLayout(toolbarLayout === "horizontal" ? "vertical" : "horizontal")}
             title={`Switch to ${toolbarLayout === "horizontal" ? "vertical" : "horizontal"} layout`}
+            aria-label={`Switch to ${toolbarLayout === "horizontal" ? "vertical" : "horizontal"} layout`}
             className="shrink-0"
           >
             <RotateCw className="h-4 w-4" />
           </Button>
 
           <div
-            tabIndex={0}
-            role="button"
-            aria-label="Drag toolbar"
+            aria-hidden="true"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
-            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -514,12 +478,9 @@ export const Toolbar: React.FC<Readonly<{
       ) : (
         <div className={cn("flex items-center gap-1", toolbarLayout === "vertical" ? "flex-col" : "flex-row")}>
           <div
-            tabIndex={0}
-            role="button"
-            aria-label="Drag toolbar"
+            aria-hidden="true"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
-            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
@@ -533,17 +494,15 @@ export const Toolbar: React.FC<Readonly<{
             }}
             className="flex items-center gap-2"
             title="Maximize"
+            aria-label="Maximize"
           >
             <Maximize className="h-4 w-4" />
           </Button>
 
           <div
-            tabIndex={0}
-            role="button"
-            aria-label="Drag toolbar"
+            aria-hidden="true"
             className="flex items-center justify-center h-full cursor-grab active:cursor-grabbing px-1"
             onMouseDown={handleMouseDown}
-            onKeyDown={handleGripKeyDown}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
