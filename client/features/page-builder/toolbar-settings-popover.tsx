@@ -52,6 +52,7 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
 
   // Unique ids so labels associate with the popover fields, not the header title input.
   const pageTitleId = useId()
+  const pagePathId = useId()
   const pageDescriptionId = useId()
   const pageFaviconId = useId()
   const pageOgImageId = useId()
@@ -65,6 +66,10 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   // Local draft committed on Enter/blur, so a title edit does not dispatch
   // (and add a history entry) for every keystroke.
   const pageTitleDraft = useFieldDraft(pageTitle, onPageTitleChange)
+
+  const pathDraft = useFieldDraft(currentPage?.attributes.path ?? "", (value) => {
+    commitPageField("path", value)
+  })
 
   // Page fields are committed on blur (and Enter for single-line inputs) so a
   // multi-character edit produces a single history entry instead of one per
@@ -214,6 +219,22 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
                   onBlur={pageTitleDraft.handleBlur}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 bg-transparent text-sm font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter page title"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor={pagePathId} className="text-sm font-medium">
+                  Path
+                </label>
+                <input
+                  id={pagePathId}
+                  type="text"
+                  value={pathDraft.value}
+                  onChange={(e) => pathDraft.changeDraft(e.target.value)}
+                  onKeyDown={pathDraft.handleKeyDown}
+                  onBlur={pathDraft.handleBlur}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="/about"
+                  data-testid="page-path-input"
                 />
               </div>
               <div className="space-y-2">

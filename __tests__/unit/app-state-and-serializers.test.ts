@@ -199,3 +199,26 @@ describe("app-state selectors and serializers", () => {
     expect(html).toContain("<style>")
   })
 })
+
+describe("page path attribute", () => {
+  it("round-trips a path attribute through JSON and shortcode, and accepts a page without one", () => {
+    const withPath: AppNode[] = [
+      { tag: "page", attributes: { id: "page-1", title: "About", path: "/about" }, children: [] },
+    ]
+    const withoutPath: AppNode[] = [
+      { tag: "page", attributes: { id: "page-1", title: "Home" }, children: [] },
+    ]
+
+    const jsonRound = deserializeAppStateFromJson(serializeAppStateAsJson(withPath))
+    expect(jsonRound[0].attributes.path).toBe("/about")
+
+    const shortcodeRound = deserializeAppStateFromShortcode(serializeAppStateAsShortcode(withPath))
+    expect(shortcodeRound[0].attributes.path).toBe("/about")
+
+    const noPathJson = deserializeAppStateFromJson(serializeAppStateAsJson(withoutPath))
+    expect(noPathJson[0].attributes.path).toBeUndefined()
+
+    const noPathShortcode = deserializeAppStateFromShortcode(serializeAppStateAsShortcode(withoutPath))
+    expect(noPathShortcode[0].attributes.path).toBeUndefined()
+  })
+})

@@ -4,6 +4,7 @@ import { HistoryPopover } from "@/client/features/page-builder/history-popover"
 import { DiscardConfirmationDialog } from "@/client/features/page-builder/discard-confirmation-dialog"
 import { ToolbarSettingsPopover } from "@/client/features/page-builder/toolbar-settings-popover"
 import { Button } from "@/client/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/client/components/ui/select"
 import type { PageBuilderMode } from "@/client/features/app-state"
 import { cn } from "@/client/lib/utils"
 import { Bot, GripVertical, History, Maximize, Minimize, Redo, RotateCw, Save, Settings, Undo, X } from "lucide-react"
@@ -381,6 +382,33 @@ export const Toolbar: React.FC<Readonly<{
           >
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
+
+          {componentTree.length > 0 && (
+            <Select
+              value={pageComponent?.attributes?.id ?? componentTree[0]?.attributes?.id ?? ""}
+              onValueChange={(pageId) => {
+                dispatch?.({ type: "SET_ACTIVE_PAGE", payload: pageId })
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="w-[140px] shrink-0"
+                aria-label="Switch page"
+                data-testid="page-switcher"
+              >
+                <SelectValue placeholder="Select page" />
+              </SelectTrigger>
+              <SelectContent>
+                {componentTree
+                  .filter((node) => node.tag === "page")
+                  .map((page) => (
+                    <SelectItem key={page.attributes.id} value={page.attributes.id}>
+                      {page.attributes.title || page.attributes.id}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          )}
 
           {onOpenAIAssistant && promptAssistEnabled && isPromptAssistEnabled() ? (
             <Button
