@@ -336,3 +336,37 @@ describe("CommandPalette", () => {
     expect(screen.getByText("Import page from Shortcode").closest("button")).toBeDisabled()
   })
 })
+
+describe("CommandPalette page builder mode", () => {
+  it("offers Switch to preview mode and dispatches SET_PAGE_BUILDER_MODE", async () => {
+    const user = userEvent.setup()
+    const { dispatch } = renderPalette({ pageBuilderMode: "edit" })
+
+    await waitFor(() => {
+      expect(screen.getByText("Switch to preview mode")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Switch to preview mode"))
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "SET_PAGE_BUILDER_MODE",
+      payload: "preview",
+    })
+  })
+
+  it("offers Switch to edit mode when already in preview", async () => {
+    const user = userEvent.setup()
+    const { dispatch } = renderPalette({ pageBuilderMode: "preview" })
+
+    await waitFor(() => {
+      expect(screen.getByText("Switch to edit mode")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Switch to edit mode"))
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: "SET_PAGE_BUILDER_MODE",
+      payload: "edit",
+    })
+  })
+})
