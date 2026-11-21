@@ -138,3 +138,59 @@ describe("useAppState shared store", () => {
     setItemSpy.mockRestore()
   })
 })
+
+describe("useAppState pageBuilderMode", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("switches mode without changing the document or history", async () => {
+    const { result } = renderHook(() => useAppState())
+
+    await waitFor(() => expect(result.current.state.history).toHaveLength(1))
+
+    const beforeTree = result.current.state.componentTree
+    const beforeHistoryLen = result.current.state.history.length
+    const beforeIndex = result.current.state.currentHistoryIndex
+
+    act(() => {
+      result.current.dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: "preview" })
+    })
+
+    expect(result.current.state.pageBuilderMode).toBe("preview")
+    expect(result.current.state.componentTree).toBe(beforeTree)
+    expect(result.current.state.history).toHaveLength(beforeHistoryLen)
+    expect(result.current.state.currentHistoryIndex).toBe(beforeIndex)
+
+    act(() => {
+      result.current.dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: "edit" })
+    })
+
+    expect(result.current.state.pageBuilderMode).toBe("edit")
+    expect(result.current.state.componentTree).toBe(beforeTree)
+    expect(result.current.state.history).toHaveLength(beforeHistoryLen)
+  })
+
+  it("persists pageBuilderMode to UI storage and restores it on reload", async () => {
+    const first = renderHook(() => useAppState())
+
+    await waitFor(() => expect(first.result.current.state.history).toHaveLength(1))
+
+    act(() => {
+      first.result.current.dispatch({ type: "SET_PAGE_BUILDER_MODE", payload: "preview" })
+    })
+
+    expect(first.result.current.state.pageBuilderMode).toBe("preview")
+
+    const storedUi = JSON.parse(window.localStorage.getItem(PAGE_UI_STATE_KEY) || "{}")
+    expect(storedUi.pageBuilderMode).toBe("preview")
+
+    // Unmount all callers so the next mount re-hydrates from storage.
+    first.unmount()
+
+    const second = renderHook(() => useAppState())
+
+    await waitFor(() => expect(second.result.current.state.pageBuilderMode).toBe("preview"))
+    expect(second.result.current.state.pageBuilderMode).toBe("preview")
+  })
+})

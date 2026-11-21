@@ -198,6 +198,15 @@ describe("Toolbar AI Assistant gated by deployment flag", () => {
   })
 })
 
+describe("Toolbar in preview mode", () => {
+  it("renders nothing when pageBuilderMode is preview", () => {
+    const { container } = render(
+      <Toolbar {...baseProps} pageBuilderMode={"preview" as PageBuilderMode} />,
+    )
+    expect(container.firstChild).toBeNull()
+  })
+})
+
 describe("Toolbar mobile wrap and clamp", () => {
   it("uses flex-wrap on the expanded button row so controls can wrap on narrow viewports", () => {
     const { container } = render(<Toolbar {...baseProps} />)
