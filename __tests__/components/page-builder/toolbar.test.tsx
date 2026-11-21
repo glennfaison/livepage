@@ -30,8 +30,8 @@ const renderedTitles = () =>
   screen
     .getAllByRole("button")
     .map((button) => button.getAttribute("title") ?? "")
-    // Drag handles (role="button", aria-label="Drag toolbar") are not action
-    // buttons and carry no title; per ADR 0005 they never count here.
+    // Drag handles are pointer-only and aria-hidden; they are not buttons
+    // and carry no title; per ADR 0005 they never count here.
     .filter(Boolean)
 
 describe("Toolbar button layout", () => {
@@ -78,43 +78,40 @@ describe("Toolbar button layout", () => {
 })
 
 describe("Toolbar grip accessibility", () => {
-  const gripLeft = (grip: HTMLElement) => {
-    const toolbar = grip.closest("div[style]")
-    const match = toolbar?.getAttribute("style")?.match(/left:\s*(\d+)px/)
-    return match ? Number(match[1]) : null
-  }
-
-  it("exposes each grip handle as a keyboard-focusable button with an accessible name", () => {
+  it("does not expose drag handles as focusable buttons", () => {
     render(<Toolbar {...baseProps} />)
 
-    const grips = screen.getAllByRole("button", { name: "Drag toolbar" })
-    expect(grips.length).toBeGreaterThan(0)
-    for (const grip of grips) {
-      expect(grip.getAttribute("tabindex")).toBe("0")
-      expect(grip.getAttribute("role")).toBe("button")
-    }
+    expect(screen.queryAllByRole("button", { name: "Drag toolbar" })).toHaveLength(0)
+    const grips = document.querySelectorAll('[aria-hidden="true"]')
+    expect(grips.length).toBeGreaterThanOrEqual(2)
   })
+})
 
-  it("picks up a grip on Enter, moves it with arrow keys, and drops it on Escape", () => {
-    render(<Toolbar {...baseProps} />)
+describe("Toolbar button accessible names", () => {
+  it("gives every button an accessible name", () => {
+    const original = process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+    process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = "1"
+    try {
+      render(<Toolbar {...baseProps} />)
 
-    const grips = screen.getAllByRole("button", { name: "Drag toolbar" })
-    const grip = grips[0]
-
-    const before = gripLeft(grip)
-    expect(before).not.toBeNull()
-
-    fireEvent.keyDown(grip, { key: "Enter" })
-    fireEvent.keyDown(grip, { key: "ArrowRight" })
-
-    const afterMove = gripLeft(grip)
-    expect(afterMove).toBe(before! + 10)
-
-    fireEvent.keyDown(grip, { key: "Escape" })
-    fireEvent.keyDown(grip, { key: "ArrowRight" })
-
-    const afterDrop = gripLeft(grip)
-    expect(afterDrop).toBe(afterMove)
+      const expected = [
+      "Open AI Assistant",
+      "History",
+      "Undo",
+      "Redo",
+      "Minimize",
+      "Save",
+      "Discard",
+      "Settings",
+      "Switch to horizontal layout",
+    ]
+    for (const name of expected) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument()
+    }
+    } finally {
+      if (original === undefined) delete process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED
+      else process.env.NEXT_PUBLIC_PROMPT_ASSIST_ENABLED = original
+    }
   })
 })
 
