@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@/client/components/ui/button"
 import { PageBuilderErrorBoundary } from "@/client/components/error-boundary"
 import { CanvasRenderer } from "@/client/features/page-builder"
 import { DragDropProvider } from "@/client/features/design-components/editor-controls"
