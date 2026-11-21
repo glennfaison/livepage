@@ -46,15 +46,19 @@ export function useComponentTemplateSettingsEditor({
     (templateId: string) => {
       const template = templateById.get(templateId)
       if (!template) return
-      captureEvent("component_template_applied", { templateId })
+      captureEvent("component_template_applied", {
+        componentTemplateId: templateId,
+        targetTag: component.tag,
+      })
       for (const action of createApplyComponentTemplateActions(template, {
         componentId: component.attributes.id,
+        parentTag,
       })) {
         dispatch(action)
       }
       setIsOpen(false)
     },
-    [component.attributes.id, dispatch, setIsOpen, templateById],
+    [component.attributes.id, component.tag, dispatch, setIsOpen, templateById, parentTag],
   )
 
   return { templates, handleApplyTemplate }

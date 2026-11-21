@@ -59,7 +59,7 @@ export type AppAction =
     }>
   | Readonly<{ type: "UPDATE_COMPONENT"; payload: Readonly<{ componentId: string; updates: Partial<AppNode> }> }>
   | Readonly<{ type: "REMOVE_COMPONENT"; payload: Readonly<{ componentId: string }> }>
-  | Readonly<{ type: "REPLACE_COMPONENT"; payload: Readonly<{ oldComponentId: string; newComponent?: AppNode; newComponentTag?: AppNodeTag }> }>
+  | Readonly<{ type: "REPLACE_COMPONENT"; payload: Readonly<{ oldComponentId: string; newComponent?: AppNode; newComponentTag?: AppNodeTag; historyDescription?: string }> }>
   | Readonly<{ type: "DUPLICATE_COMPONENT"; payload: Readonly<{ componentId: string; parentId?: string }> }>
   | Readonly<{ type: "PASTE_COMPONENT"; payload: Readonly<{ copied: AppNode; selectedId: string }> }>
   | Readonly<{ type: "MOVE_COMPONENT"; payload: Readonly<{ componentId: string; newParentId: string; index?: number }> }>
