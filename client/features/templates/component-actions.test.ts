@@ -51,4 +51,43 @@ describe("createApplyComponentTemplateActions", () => {
     const newComponent = asReplaceComponent(actions[0]).payload.newComponent!
     expect(newComponent.attributes.id).toBe("cta-root-copy")
   })
+
+  it("includes a history description naming the template", () => {
+    const actions = createApplyComponentTemplateActions(callToActionTemplate, { componentId: "target-id" })
+    expect(asReplaceComponent(actions[0]).payload.historyDescription).toBe(
+      "Replaced target-id with component template: Call to Action",
+    )
+  })
+
+  it("returns no actions when the template root is not allowed in the parent slot", () => {
+    const actions = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "target-id",
+      parentTag: "text",
+    })
+    expect(actions).toEqual([])
+  })
+
+  it("returns the action when the template root is allowed in the parent slot", () => {
+    const actions = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "target-id",
+      parentTag: "section",
+    })
+    expect(actions.length).toBe(1)
+  })
+
+  it("produces unique ids when the same template is applied twice with different suffixes", () => {
+    const first = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "a",
+      idSuffix: "-copy1",
+    })
+    const second = createApplyComponentTemplateActions(callToActionTemplate, {
+      componentId: "b",
+      idSuffix: "-copy2",
+    })
+    const ids1 = new Set<string>()
+    const ids2 = new Set<string>()
+    collectIds(asReplaceComponent(first[0]).payload.newComponent!, ids1)
+    collectIds(asReplaceComponent(second[0]).payload.newComponent!, ids2)
+    for (const id of ids1) expect(ids2.has(id)).toBe(false)
+  })
 })
