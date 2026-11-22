@@ -67,10 +67,6 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
   // (and add a history entry) for every keystroke.
   const pageTitleDraft = useFieldDraft(pageTitle, onPageTitleChange)
 
-  const pathDraft = useFieldDraft(currentPage?.attributes.path ?? "", (value) => {
-    commitPageField("path", value)
-  })
-
   // Page fields are committed on blur (and Enter for single-line inputs) so a
   // multi-character edit produces a single history entry instead of one per
   // keystroke. Multi-line fields (description, custom head/CSS/JS) do not
@@ -83,6 +79,10 @@ export const ToolbarSettingsPopover: React.FC<ToolbarSettingsPopoverProps> = ({
     },
     [currentPage, dispatch],
   )
+
+  const pathDraft = useFieldDraft(currentPage?.attributes.path ?? "", (value) => {
+    commitPageField("path", value)
+  })
 
   const descriptionDraft = useFieldDraft(currentPage?.attributes.description ?? "", (value) => {
     commitPageField("description", value)

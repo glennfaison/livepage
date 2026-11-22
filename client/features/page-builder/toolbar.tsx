@@ -383,9 +383,9 @@ export const Toolbar: React.FC<Readonly<{
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
 
-          {componentTree.length > 0 && (
+          {componentTree.some((node) => node.tag === "page") && (
             <Select
-              value={pageComponent?.attributes?.id ?? componentTree[0]?.attributes?.id ?? ""}
+              value={pageComponent?.attributes?.id ?? componentTree.find((node) => node.tag === "page")?.attributes?.id ?? ""}
               onValueChange={(pageId) => {
                 dispatch?.({ type: "SET_ACTIVE_PAGE", payload: pageId })
               }}
