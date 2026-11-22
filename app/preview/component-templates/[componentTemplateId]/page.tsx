@@ -35,7 +35,7 @@ export default function ComponentTemplatePreviewPage() {
       </header>
       <main className="container mx-auto p-4">
         <PageBuilderErrorBoundary>
-          <DragDropProvider>
+          <DragDropProvider moveComponent={() => {}}>
             <CanvasRenderer node={root} />
           </DragDropProvider>
         </PageBuilderErrorBoundary>
