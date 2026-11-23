@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { PageTemplateCatalog, describePageTemplateDisplayCatalog } from "@/client/features/page-templates"
+import { PageTemplateCatalog, PageTemplateCatalogPopover, describePageTemplateDisplayCatalog } from "@/client/features/page-templates"
 
 const templates = describePageTemplateDisplayCatalog()
 const categories = Array.from(new Set(templates.map((template) => template.category)))
@@ -223,5 +223,51 @@ describe("PageTemplateCatalog", () => {
       expect(img).toHaveAttribute("src")
       expect(img.getAttribute("src")?.length).toBeGreaterThan(0)
     }
+  })
+})
+
+  it("shows every registered page template in the catalog", () => {
+    render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
+
+    for (const template of templates) {
+      expect(screen.getByRole("button", { name: `Apply ${template.name} page template` })).toBeInTheDocument()
+    }
+  })
+
+  it("opens the preview modal without applying the template", async () => {
+    const user = userEvent.setup()
+    const onApplyPageTemplate = jest.fn()
+    render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={onApplyPageTemplate} />)
+
+    await user.click(screen.getByRole("button", { name: `Preview ${templates[0].name} page template` }))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText(templates[0].name)).toBeInTheDocument()
+    expect(onApplyPageTemplate).not.toHaveBeenCalled()
+  })
+
+  it("uses the expected grid rule in grid view", async () => {
+    const user = userEvent.setup()
+    render(<PageTemplateCatalog templates={templates} onApplyPageTemplate={jest.fn()} />)
+
+    const gridBtn = screen.queryByRole("button", { name: "Grid view" })
+    if (gridBtn && gridBtn.getAttribute("aria-pressed") !== "true") {
+      await user.click(gridBtn)
+    }
+
+    const region = screen.getByRole("region", { name: "Available page templates" })
+    const grid = region.querySelector("div.grid")
+    expect(grid).toHaveClass("grid-cols-[repeat(auto-fill,minmax(15rem,1fr))]")
+  })
+
+describe("PageTemplateCatalogPopover", () => {
+  it("keeps the popover width within min(52rem, 100vw - 2rem)", async () => {
+    const user = userEvent.setup()
+    render(<PageTemplateCatalogPopover templates={templates} onApplyPageTemplate={jest.fn()} />)
+
+    await user.click(screen.getByRole("button", { name: "Page Templates" }))
+
+    const popover = document.querySelector("[class*=\"w-[min(52rem,calc(100vw-2rem))]\"]")
+    expect(popover).toBeInTheDocument()
   })
 })
