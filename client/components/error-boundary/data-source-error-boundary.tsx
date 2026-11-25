@@ -5,6 +5,7 @@ import { Button } from "@/client/components/ui/button"
 import { RefreshCw, AlertTriangle, WifiOff, ShieldAlert, Clock, Lock, Bug, ExternalLink } from "lucide-react"
 import { cn } from "@/client/lib/utils"
 import { classifyError, isDevelopmentMode, type ClassifiedError, type RecoveryAction } from "./error-classification"
+import { logger } from "@/client/lib/logger"
 
 interface DataSourceErrorBoundaryState {
   hasError: boolean
@@ -136,7 +137,7 @@ export class DataSourceErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error("[DataSourceErrorBoundary] Caught error:", error, errorInfo)
+    logger.error("[DataSourceErrorBoundary] Caught error:", { error, errorInfo })
   }
 
   handleRetry = (): void => {
