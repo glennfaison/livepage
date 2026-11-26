@@ -2,6 +2,7 @@ import type { AppNode } from "@/client/features/types"
 import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 import { validateAndFixDuplicateIds } from "@/client/features/serializers/id-validation"
 import { toast } from "@/client/components/ui/use-toast"
+import { logger } from "@/client/lib/logger"
 
 /**
  * Serializes the app state (component tree) as a pretty-printed JSON string.
@@ -33,9 +34,8 @@ export function deserializeAppStateFromJson(input: string): ReadonlyArray<AppNod
       description: `${duplicateCount} duplicate component ID${duplicateCount > 1 ? "s" : ""} were automatically regenerated.`,
       variant: "default",
     })
-    console.warn(
-      `[LivePage Import] Fixed ${duplicateCount} duplicate component ID(s):`,
-      fixedIds.map(({ oldId, newId }) => `${oldId} → ${newId}`).join(", ")
+    logger.warn(
+      `[LivePage Import] Fixed ${duplicateCount} duplicate component ID(s): ${fixedIds.map(({ oldId, newId }) => `${oldId} → ${newId}`).join(", ")}`
     )
   }
 

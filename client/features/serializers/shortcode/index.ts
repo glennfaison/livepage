@@ -3,6 +3,7 @@ import { parse, stringify, type Node as ShortcodeNode } from "@/client/features/
 import { appNodeTreeSchema } from "@/client/features/serializers/schema"
 import { validateAndFixDuplicateIds } from "@/client/features/serializers/id-validation"
 import { toast } from "@/client/components/ui/use-toast"
+import { logger } from "@/client/lib/logger"
 
 export function serializeAppStateAsShortcode(componentTree: ReadonlyArray<AppNode>): string {
   return stringify([...componentTree] as ShortcodeNode[])
@@ -18,9 +19,8 @@ export function deserializeAppStateFromShortcode(input: string): ReadonlyArray<A
       description: `${duplicateCount} duplicate component ID${duplicateCount > 1 ? "s" : ""} were automatically regenerated.`,
       variant: "default",
     })
-    console.warn(
-      `[LivePage Import] Fixed ${duplicateCount} duplicate component ID(s):`,
-      fixedIds.map(({ oldId, newId }) => `${oldId} → ${newId}`).join(", ")
+    logger.warn(
+      `[LivePage Import] Fixed ${duplicateCount} duplicate component ID(s): ${fixedIds.map(({ oldId, newId }) => `${oldId} → ${newId}`).join(", ")}`
     )
   }
 
