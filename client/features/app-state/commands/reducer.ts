@@ -292,6 +292,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         newParentId,
         index,
       })
+      // A drop onto the component's own current position (or any no-op) must not record history.
+      if (JSON.stringify(newComponentTree) === JSON.stringify(state.componentTree)) {
+        return state
+      }
       return withHistory(
         {
           ...state,
