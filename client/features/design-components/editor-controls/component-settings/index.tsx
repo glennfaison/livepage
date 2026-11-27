@@ -86,9 +86,16 @@ function ComponentTemplateCard({
           </span>
         ))}
       </div>
-      <Button onClick={() => onApply(template.id)} className="w-full mt-auto">
-        Apply {template.name}
-      </Button>
+      <div className="flex gap-2 mt-auto">
+        <Button variant="outline" asChild className="flex-1">
+          <a href={`/preview/component-templates/${template.id}`} target="_blank" rel="noreferrer">
+            Preview
+          </a>
+        </Button>
+        <Button onClick={() => onApply(template.id)} className="flex-1">
+          Apply
+        </Button>
+      </div>
     </div>
   )
 }
