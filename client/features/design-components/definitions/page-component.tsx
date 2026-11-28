@@ -21,6 +21,12 @@ const attributes: SettingsField[] = [
 		defaultValue: "Page Title 1",
 	}),
 	createTextAttribute({
+		id: "path",
+		label: "Path",
+		placeholder: "/about",
+		defaultValue: "",
+	}),
+	createTextAttribute({
 		id: "description",
 		label: "Description",
 		placeholder: "Enter page description for SEO",
